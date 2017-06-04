@@ -49,7 +49,7 @@ University of Wisconsin</small><br>
 <li> 実際の使用例
 <li> "Demand"解析について
 <li> CFL-Reachability + α を使った解析
-<li> 関連研究の紹介
+<li> 関連研究
 </ol>
 </div>
 
@@ -222,7 +222,7 @@ while (true) {
 <h1>4.1. 関数をまたぐデータフロー解析</h1>
 <ul>
   <li> 一般的な解き方: Meet-over-all-paths (MOP)<br>
-    グラフ: <em>G</em>、データフロー値: <em>V</em>、Meet、関数: <em>V → V</em><br>
+    グラフ: <em>G</em>、データフロー値: <em>V</em>、&prod;、関数: <em>V → V</em><br>
     (すべての実行されうる経路を考慮)
   <li> 関数をまたぐ (interprocedural) 場合:<Br>
     <u>Meet-over-all-realizable-paths</u> (MRP)<br>
@@ -865,22 +865,47 @@ f = *e;
 </div>
 
 <div class=page>
-<h1>"Demand"解析を使う</h1>
+<h1>"Demand"解析としてのグラフ解析</h1>
+<ul>
+<li> "Exhaustive"解析 &hArr; "Demand"解析
+<li> 必要な時に必要な部分だけを解析する。
+<li> プログラムが若干変化したときに全部
+  再計算しなくてよくなる。
+<li> CFL-Reachability 問題は、
+  Demand解析に拡張するのが容易。
 </div>
 
 <div class=page>
 <h1>CFL-Reachability + α 解析</h1>
+<ul>
+<li> CFL-Reachability が扱えるのは基本的に IFDS (yes/no) 問題だけ。
+<li> これに対して、各ノードごとに複雑な値を求めさせる
+  IDE (<sub>Interprocedural Distributive Environment</sub>) 問題もある。
+<ul>
+<li> 例: y = -2*x+5 のような線型制約伝播。
+</ul>
+</ul>
+<center><img width="80%" src="graph11.png"></center>
 </div>
 
 <div class=page>
-<h1>まとめ・感想</h1>
+<h1>まとめ</h1>
 <ul>
 <li> 本論文では、プログラム解析のいくつかの問題が
   CFL-Reachability 問題として定式化できることを示した。
-<li> 感想: 論文は読みやすいが、手法そのものは微妙。<br>
-  (とくに 4.4. の Points-To とか、かなり苦しい)
-<li> 感想: サーベイがよくできている。個人的には
-  PDG を使うつもりなので、関連論文が沢山参照されているのは
-  よかった。
+<li> Datalogプログラムの一部はグラフの「チェイン問題」に
+  帰着し、つまり CFL-Reachability によって表現できる。
+<li> いくつかのプログラム解析における使用例を紹介した。
+</div>
+
+<div class=page>
+<h1>感想</h1>
+<ul>
+<li> 論文は読みやすいが、手法そのものは微妙。<br>
+  (とくに 4.4. の Points-To とか、かなり無理がある)
+<li> データフローグラフにはいろいろあることがわかった。
+<li> サーベイ論文としてはよくできている。
+  個人的には PDG を使うつもりなので、
+  関連論文が沢山参照されているのはよかった。
 </div>
 
