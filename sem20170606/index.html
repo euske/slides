@@ -1,0 +1,886 @@
+﻿<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>Program Analysis via Graph Reachability</title>
+<style><!--
+.small { font-size: 90%; }
+.gray { color: gray; }
+.box { border: solid 2px black; padding: 0.2em; }
+.m td { padding: 0.2em; border: solid 4px black; }
+.cell { border: solid 2px black; padding: 0.1em; }
+.o { border-top: solid 4px blue; color: blue; }
+u.caution { font-weight: bold; color: red; }
+--></style>
+</head>
+<body>
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>
+Program Analysis<br>
+via Graph Reachability
+<p>
+<small>Thomas Reps<br>
+University of Wisconsin</small><br>
+</td></tr>
+</table>
+<div align=right class=bottomright>
+  新山 祐介 2017/06/06 輪講資料
+</div>
+</div>
+
+<div class=page>
+<h1>本論文の要旨</h1>
+<ul>
+<li> これまでデータフロー方程式を使っていた
+  プログラム解析のいくつかは、
+  "CFL-Reachability" という
+  グラフ解析問題としても定式化できる。
+<li> スゴイでしょ!
+</ul>
+</div>
+
+<div class=page>
+<h1>本論文の構成</h1>
+<ol>
+<li> はじめに
+<li> CFL-Reachability とは何か?
+<li> CFL-Reachability のアルゴリズム解説
+<li> 実際の使用例
+<li> "Demand"解析について
+<li> CFL-Reachability + α を使った解析
+<li> 関連研究の紹介
+</ol>
+</div>
+
+<div class=page>
+<h1>1. はじめに</h1>
+<ul>
+<li> プログラム解析 (Program Analysis) ≒<br>
+  静的解析 (Static Analysis)
+<li> 「解析エンジン」を用意しておき、
+  異なるアルゴリズムを「プラグイン」として挿入するのが一般的。<br>
+  (データフロー方程式、Meet Op.)
+<li> 本論文では代わりにグラフを使う方法を提案。
+</ul>
+</div>
+
+<div class=page>
+<h2>なぜグラフ解析?</h2>
+<ul>
+<li> アルゴリズムが確立・よく研究されている。<br>
+  前もって計算コストの見積りもできる。
+<li> 計算量が <em>O</em>(<em>n</em><sup>3</sup>) -bound.
+<li> 多くのプログラム解析では、プログラム全体を解析する必要はない。
+  このような場合にグラフを使って "Demand Analysis" が可能。
+<li> 並列化できるかも?
+</ul>
+</div>
+
+<div class=page>
+<h2>本論文で扱う例</h2>
+<ol type=a>
+  <li> 関数をまたぐデータフロー解析
+  <li> 関数をまたぐスライス解析
+  <li> シェイプ解析 (Shape Analysis)
+  <li> 実行順序を考慮しない Points-To解析
+</ol>
+</div>
+
+<div class=page>
+<h1>2. CFL-Reachability って何?</h1>
+<ul>
+  <li class=small> あるノードからあるノードまでの経路 (path) をさがす。
+    ただし各エッジは指定された順序でしかたどれない。<br>
+    <img width="50%" src="graph01.png">
+  <li class=small> 順序は<u>文脈自由言語</u> (CFL) で表現される。<br>
+    = 文脈自由文法 (CFG) で生成される文字列の集合。
+  <li> ある言語 <em>L</em> を満たすような経路を <em>L</em>-path とよぶ。
+</ul>
+</div>
+
+<div class=page>
+<h2>演習</h2>
+<ul>
+  <li class=small> 以下の文法 L で <code>[(e[])eee[e]]</code> を解析し、構文木を書け。
+<pre class="box">
+L: <em>matched</em> → <em>matched</em> <em>matched</em>
+           | ( <em>matched</em> )
+           | [ <em>matched</em> ]
+           | e
+           | ε (空列)</pre>
+  <li class=small> 以下のグラフで、実際に L を満たす s → t の経路を示せ。<br>
+    <img width="50%" src="graph01.png">
+</ul>
+</div>
+
+<div class=page>
+<h2>アルゴリズム</h2>
+<ul>
+<li> 動的計画法を使う。
+<pre class="box">
+while (true) {
+    for <em>e2</em>,<em>e2</em> in 隣りあったエッジ {
+        if (規則 <em>A</em> → <em>e2</em> <em>e3</em> がある) {
+            新しいエッジ A を追加。
+        }
+    }
+    if (これ以上追加できない) { break; }
+}
+</pre>
+</ul>
+<center><img src="graph03.png"></center>
+</div>
+
+<div class=page>
+<h2>アルゴリズム</h2>
+<ul>
+<li> 一般的には <em>O</em>(<em>n</em><sup>3</sup>)
+  <br>
+  (<em>O</em>(<em>n</em><sup>3</sup>) 以下の方法もあるが
+  汎用的ではない)
+<li> 単一開始点の問題なら、深さ優先探索により<br>
+  <em>O</em>(|<em>V</em>|+|<em>E</em>|) でできる。  
+  <em>(?? ホントに?)</em>
+<li> 文法を無視すれば Dijkstra と同じ。<br>
+  グラフを無視すれば Chart parsing と同じ。
+<li> 一部の (全部ではない) Datalog プログラムを<br>
+  CFL-Reachability 問題として解くことが可能。
+</div>
+
+<div class=page>
+<h2>CFL-Reachability 問題の種類</h2>
+<ol type=a>
+  <li> すべてのノード → すべてのノード
+    <br>に対する経路を発見。(all-pairs L-path)
+  <li> 単一の開始点 → すべてのノード
+    <br>に到達する経路を発見。(single-source L-path)
+  <li> すべてのノード → 単一の終点
+    <br>に到達する経路を発見。(single-target L-path)
+  <li> 特定のノード → ノード
+    <br>に経路が存在するか判定。
+    (single-source/single-target L-path)
+</ol>
+</div>
+
+<div class=page>
+<h1>4. 実際の例</h1>
+<center><img height="80%" src="graph02.png"></center>
+</div>
+
+<div class=page>
+<h2>CFL を使った制約</h2>
+<ul>
+<li> 関数を呼び出したら帰ってこなければならない。
+  <br>→ この制約を CFL で表現する。
+<li> 呼び出し箇所 (Call site) <em>i</em> でのコールとリターン =<br>
+  <em>(<sub>i</sub></em> および <em>)<sub>i</sub></em> で表現。
+  <em>realizable</em> = 実現可能な経路。
+<pre class="box">
+<em>matched</em> → <em>matched</em> <em>matched</em>
+        | (<sub>i</sub> <em>matched</em> )<sub>i</sub>
+        | e
+        | ε
+<em>realizable</em> → <em>matched</em> <em>realizable</em>
+        | (<sub>i</sub> <em>realizable</em>
+        | ε
+</pre>
+</div>
+
+<div class=page>
+<h2>演習</h2>
+<img class=bottomright height="80%" src="graph12.png">
+<div class=caption style="height: 80%;"> 
+以下の言語を満たす<br>
+経路を求めよ。
+<ol>
+  <li> <code>e e (<sub>1</sub> e</code>
+  <li> <code>e e (<sub>1</sub> e e )<sub>1</sub></code>
+  <li> <code>e e (<sub>1</sub> e e )<sub>2</sub></code>
+</ol>
+</div>
+</div>
+
+<div class=page>
+<h2>答え</h2>
+<img class=bottomright height="80%" src="graph12.png">
+<div style="height: 80%;"> 
+以下の言語を満たす<Br>
+経路を求めよ。
+<ol>
+  <li> <code>e e (<sub>1</sub> e</code>
+    <br> (realizable &amp;&amp !matched)
+  <li> <code>e e (<sub>1</sub> e e )<sub>1</sub></code>
+    <br> (matched &amp;&amp realizable)
+  <li> <code>e e (<sub>1</sub> e e )<sub>2</sub></code>
+    <br> (!matched &amp;&amp !realizable)
+</ol>
+</div>
+</div>
+
+<div class=page>
+<h1>4.1. 関数をまたぐデータフロー解析</h1>
+<ul>
+  <li> 一般的な解き方: Meet-over-all-paths (MOP)<br>
+    グラフ: <em>G</em>、データフロー値: <em>V</em>、Meet、関数: <em>V → V</em><br>
+    (すべての実行されうる経路を考慮)
+  <li> 関数をまたぐ (interprocedural) 場合:<Br>
+    <u>Meet-over-all-realizable-paths</u> (MRP)<br>
+    (<code>main</code> から実際に呼ばれうる経路のみを考慮)
+  <li> このための制約を <em>L(realizable)</em> で表現する。
+  <li> IFDS 問題 
+    <sub>(Interprocedural, Finite, Distributive, Subset)</sub> と呼ばれる
+    一連の問題を扱うことが可能。
+</ul>
+</div>
+
+<div class=page>
+<h2>IFDS 問題とは?</h2>
+<ul>
+<li> IFDS 問題 = Meet演算子によって、<br>
+  &cap; : 「〜のはずだ (must-be-X)」問題<br>
+  &cup; : 「〜ないかも (may-not-be-X)」問題
+<li> 今回の例: 変数 <em>x</em> が「定義されて<u>ないかも</u>」問題。
+<ol type=a>
+  <li> 最初は全部「ないかも」。
+  <li> いずれかの可能性が「ないかも」 → 「ないかも」。
+  <li> 「ないかも」をグラフの経路として表現。
+  <li> すべての変数に対してグラフを複製 ("exploded")。
+</ol>
+</ul>
+</div>
+
+<div class=page>
+<h2>実際のグラフ</h2>
+<center><img height="80%" src="graph05.png"></center>
+</div>
+
+<div class=page>
+<h2>計算方法</h2>
+<ul>
+<li> 各変数ごとのノード + &Lambda; を用意。
+<li> gen/kill の推論規則を、ノード間のエッジとして表現する。
+<li> L(realizable) な経路のみを考慮する。
+<li> 始点からの経路が存在 → 「定義されてないかも」
+</ul>
+<center><img height="30%" src="graph04.png"></center>
+</div>
+
+<div class=page>
+<h2>演習</h2>
+<img class=bottomright height="80%" src="graph05.png">
+<div style="height: 80%;"> 
+始点から終点-<em>g</em>までの <br>
+L(realizable) な<br>
+経路を求めよ。
+</div>
+</div>
+
+<div class=page>
+<h1>4.2. 関数をまたぐスライス解析</h1>
+<div style="width: 55%;"> 
+<ul>
+  <li class=small> スライス = プログラム中で、ある特定の部分だけに
+    影響を与える部分を切り出す。
+    <ul>
+      <li class=small> Backward slice = <br>
+	ある部分「に」影響を与える部分
+      <li class=small> Forward slice = <br>
+	ある部分「が」影響を与える部分
+    </ul>
+  <li class=small> 通常は PDG (Program Dependence Graph) を
+    構築して解析する。
+</ul>
+</div>
+<img class=bottomright src="graph13.png">
+</div>
+
+<div class=page>
+<h2>実際のグラフ</h2>
+<div>影響を与えるノードが → で示されている。</div>
+<center><img width="90%" src="graph06.png"></center>
+</div>
+
+<div class=page>
+<h2>計算方法</h2>
+<ul>
+<li> すべてのノード → 単一の終点 (single-target L-path) 経路問題を解く。
+<li> 今回は「(そこに)到達可能」ではなく「(そこから)到達可能」なノードが
+  対象なので、文法をすこし変える。
+<pre class="box">
+<em>unbalanced-right</em> → <em>unbalanced-right</em> <em>matched</em>
+                 | <em>unbalanced-right</em> )<sub>i</sub>
+                 | ε
+<em>slice</em> → <em>unbalanced-right</em> <em>realizable</em>
+</pre>
+</ul>
+</div>
+
+<div class=page>
+<h2>演習</h2>
+<img class=bottomright height="80%" src="graph14.png">
+<div style="height: 80%;"> 
+<code>printf i</code> に到達する<br>
+L(slice) な経路を<br>
+すべて求めよ。
+</div>
+</div>
+
+<div class=page>
+<h1>4.3. シェイプ解析</h1>
+<ul>
+<li> メモリ上のデータ構造の「形状 (shape)」を前もって予測する。
+<li> 例: プログラム中のある点で、あるポインタの指すデータ構造が
+  どのような形をしているか示せ。
+</ul>
+<div align=right>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="200">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="2">
+      <rect x="70" y="0" width="80" height="60" />
+      <rect x="0" y="110" width="60" height="80" />
+      <rect x="130" y="100" width="80" height="60" />
+    </g>
+    <g fill="none" stroke="black" stroke-width="4"
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <path d="M100,30 Q50,30,30,100" />
+      <path d="M130,40 L150,90" />
+      <path d="M190,120 C200,70,230,100,240,60" />
+    </g>
+  </g>
+</svg>
+</div>
+</div>
+
+<div class=page>
+<h2>本論文での例</h2>
+<ul>
+<li> cons と atom からなるデータ構造を扱う。
+<center style="margin:0.5em;">
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="220">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="2">
+      <rect x="80" y="0" width="40" height="40" />
+      <rect x="120" y="0" width="40" height="40" />
+      <rect x="10" y="100" width="40" height="40" />
+      <rect x="50" y="100" width="40" height="40" />
+      <rect x="140" y="80" width="40" height="40" />
+      <rect x="180" y="80" width="40" height="40" />
+    </g>
+    <g fill="none" stroke="black" stroke-width="4"
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <line x1="100" y1="20" x2="54" y2="96" />
+      <line x1="140" y1="20" x2="176" y2="76" />
+      <line x1="30" y1="120" x2="20" y2="170" />
+      <line x1="70" y1="120" x2="80" y2="160" />
+      <line x1="160" y1="100" x2="160" y2="150" />
+      <line x1="24" y1="20" x2="76" y2="20" marker-start="none" />
+    </g>
+    <g text-anchor="middle">
+      <text text-anchor="start" x="0" y="0" dy="0.8em">p</text>
+      <text x="20" y="170" dy="0.8em">a</text>
+      <text x="80" y="160" dy="0.8em">b</text>
+      <text x="160" y="150" dy="0.8em">x</text>
+    </g>
+    <text text-anchor="middle" style="font-size: 50%;" 
+          x="200" y="100" dy="0.5em">nil</text>
+  </g>
+</svg>
+</center>
+<li> ただし、各セルの中身を破壊的に変更することはできない。
+<li> 復習:<br>
+  car(cons(a, b)) = ?<br>
+  car(cdr(cons(c, cons(x, y)))) = ?<br>
+</ul>
+</div>
+
+<div class=page>
+<h2>実際のグラフ</h2>
+<center><img height="80%" src="graph07.png"></center>
+</div>
+
+<div class=page>
+<h2>計算方法</h2>
+<ul>
+<li class=small> 制御フローの各操作に従って、以下のようにグラフを構築。
+</ul>
+<table align=center border class=m><tr>
+<td align=center><svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="25" height="160">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="4" 
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <line x1="10" y1="30" x2="10" y2="110" />
+      <circle cx="10" cy="120" r="5" fill="white" stroke-width="2" />
+    </g>
+    <g text-anchor="middle">
+      <text x="10" y="0" dy="0.5em">x</text>
+      <text x="10" y="130" dy="0.5em">x</text>
+    </g>
+  </g>
+</svg></td>
+<td align=center><svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="25" height="160">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="4" 
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <circle cx="10" cy="30" r="5" fill="white" stroke-width="2" />
+      <circle cx="10" cy="120" r="5" fill="white" stroke-width="2" />
+    </g>
+    <g text-anchor="middle">
+      <text x="10" y="0" dy="0.5em">x</text>
+      <text x="10" y="130" dy="0.5em">x</text>
+    </g>
+  </g>
+</svg></td>
+<td align=center><svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="90" height="160">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="4" 
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <line x1="10" y1="30" x2="35" y2="105" />
+      <line x1="70" y1="30" x2="45" y2="105" />
+      <circle cx="40" cy="120" r="5" fill="white" stroke-width="2" />
+    </g>
+    <g text-anchor="middle">
+      <text x="10" y="0" dy="0.5em">x</text>
+      <text x="70" y="0" dy="0.5em">y</text>
+      <text x="40" y="130" dy="0.5em">z</text>
+      <text style="font-size:50%;" x="10" y="80" dy="0.5em">hd</text>
+      <text style="font-size:50%;" x="70" y="80" dy="0.5em">tl</text>
+    </g>
+  </g>
+</svg></td>
+<td align=center><svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="25" height="160">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="4" 
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <line x1="10" y1="30" x2="10" y2="110" />
+      <circle cx="10" cy="120" r="5" fill="white" stroke-width="2" />
+    </g>
+    <g text-anchor="middle">
+      <text x="10" y="0" dy="0.5em">y</text>
+      <text x="10" y="130" dy="0.5em">x</text>
+    </g>
+  </g>
+</svg></td>
+<td align=center><svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="50" height="160">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="4" 
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <line x1="10" y1="30" x2="10" y2="110" />
+      <circle cx="10" cy="120" r="5" fill="white" stroke-width="2" />
+    </g>
+    <g text-anchor="middle">
+      <text x="10" y="0" dy="0.5em">y</text>
+      <text x="10" y="130" dy="0.5em">x</text>
+      <text style="font-size:50%;" x="25" y="80" dy="0.5em">hd</text>
+      <text style="font-size:40%;" text-anchor="end" x="50" y="65" dy="0.5em">-1</text>
+    </g>
+  </g>
+</svg></td>
+<td align=center><svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="50" height="160">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="4" 
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <line x1="10" y1="30" x2="10" y2="110" />
+      <circle cx="10" cy="120" r="5" fill="white" stroke-width="2" />
+    </g>
+    <g text-anchor="middle">
+      <text x="10" y="0" dy="0.5em">y</text>
+      <text x="10" y="130" dy="0.5em">x</text>
+      <text style="font-size:50%;" x="25" y="80" dy="0.5em">tl</text>
+      <text style="font-size:40%;" text-anchor="end" x="50" y="65" dy="0.5em">-1</text>
+    </g>
+  </g>
+</svg></td>
+</tr><tr>
+<td>(nop)</td>
+<td>x=nil;</td>
+<td>z=cons(x,y);</td>
+<td>x=y;</td>
+<td>x=car(y);</td>
+<td>x=cdr(y);</td>
+</tr></table>
+<ul>
+<li class=small> エッジに hd または tl がある → 
+  ポインタの先に cons がある。
+<li class=small> エッジが hd<sup>-1</sup> または tl<sup>-1</sup> である →
+  hd/tl の効果を「打ち消す」。
+</ul>
+</div>
+
+<div class=page>
+<h2>制約条件</h2>
+<ul>
+<li> 3種類の規則を用いる。
+<li> バランスが取れた状態:
+<pre class="box">
+<em>id_path</em> → <em>id_path</em> <em>id_path</em>
+        | hd <em>id_path</em> hd<sup>-1</sup>
+        | tl <em>id_path</em> tl<sup>-1</sup>
+        | id
+        | ε
+</pre>
+<li> carまたはcdrでたどれる状態:
+<pre class="box">
+<em>hd_path</em> → <em>id_path</em> hd <em>id_path</em>
+<em>tl_path</em> → <em>id_path</em> tl <em>id_path</em>
+</pre>
+</ul>
+</div>
+
+<div class=page>
+<h2>演習</h2>
+<img class=bottomright height="80%" src="graph15.png">
+<div style="height: 80%;"> 
+右のグラフ中の<br>
+<span class=cell>n12, y</span> に対して<br>
+L(id_path),<br>
+L(hd_path),<br>
+L(tl_path)<br>
+を満たす経路を<br>
+それぞれ求めよ。
+</div>
+</div>
+
+<div class=page>
+<h2>結果の解釈</h2>
+<ul>
+<li> 3種類の経路をすべて合成する:
+<ul>
+<li class=small> <span class=cell>n12, y</span> → 
+<span class=cell>n12, y</span> | <span class=cell>n8, y</span> | 
+<span class=cell>n11, y</span> | <code>empty</code>
+<li class=small> <span class=cell>n12, y</span> → 
+cons(<span class=cell>n10, temp</span> | <span class=cell>n5, z</span> | 
+<span class=cell>n4, z</span> | <code>atom</code>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span class=cell>n10, y</span> | <span class=cell>n9, y</span> | 
+<span class=cell>n8, y</span> | <code>empty</code>)
+</ul>
+<li> つまり位置 n12 における変数 y の内容 <span class=cell>n12, y</span> は
+  再帰的に定義できることになる。
+</ul>
+</div>
+
+<div class=page>
+<h1>4.4. 実行順序なし Points-To解析</h1>
+<ul>
+<li> C で、以下の4種類の操作を考える:<br>
+  <code> &nbsp; p=&amp;q; &nbsp; p=q;  &nbsp; p=*q;  &nbsp; *p=q;</code>
+<li> 各ポインタ変数が指しうる内容を列挙する。
+<li> <code>malloc()</code> はつねに同じアドレスを返すとする。
+<pre class=box>
+    p = malloc();
+  → p = &amp;malloc_s;
+</pre>
+</ul>
+</div>
+
+<div class=page>
+<h2>問題定義</h2>
+<ul>
+<li> まず各操作を Datalog (≒ Prolog) の述語として定義する:
+</ul>
+<table align=center border class=m>
+<tr><td><code>p = &amp;q;</code></td>
+<td>assignAddr(<em>p</em>, <em>q</em>).</td></tr>
+<tr><td><code>p = q;</code></td>
+<td>assign(<em>p</em>, <em>q</em>).</td></tr>
+<tr><td><code>p = *q;</code></td>
+<td>assignStar(<em>p</em>, <em>q</em>).</td></tr>
+<tr><td><code>*p = q;</code></td>
+<td>starAssign(<em>p</em>, <em>q</em>).</td></tr>
+</table>
+<ul>
+<li> これらの事実から pointsTo(<em>p</em>, <em>q</em>) 「p が q を指しうる」を
+  推論させる。
+</ul>
+</div>
+
+<div class=page>
+<h2>推論規則</h2>
+<center><img height="80%" src="graph08.png"></center>
+</div>
+
+<div class=page>
+<h2>演習</h2>
+<img class=bottomright height="80%" src="graph16.png">
+<div style="height: 80%;"> 
+右の推論規則を使って<br>
+以下の操作を実行したときの<br>
+グラフを作成せよ:
+<pre style="width: 40%;" class=box>
+a = &amp;b;
+d = &amp;c;
+d = a;
+e = &amp;a;
+*e = d;
+f = *e;
+</pre>
+</div>
+</div>
+
+<div class=page>
+<h2>回答</h2>
+<ul>
+<li> 実際には、これらはあらゆる順序で実行されうる。
+<li> <u class=caution>注意: これはフローを表したグラフではない。</u>
+</ul> 
+<center><img width="90%" src="graph09.png"></center>
+</div>
+
+<div class=page>
+<h2>グラフ解析を使って解くには</h2>
+<ul>
+<li> 推論規則のうち、最初の3つは CFL を使って定義できる
+  (= グラフを使って解ける)。
+<ul>
+  <li class=small> pointsTo(<em>P</em>, <em>Q</em>) → assignAddr(<em>P</em>, <em>Q</em>).
+  <li class=small> pointsTo(<em>P</em>, <em>R</em>) → assign(<em>P</em>, <em>Q</em>), pointsTo(<em>Q</em>, <em>R</em>).
+  <li class=small> pointsTo(<em>P</em>, <em>S</em>) → <br>
+    assignStar(<em>P</em>, <em>Q</em>), pointsTo(<em>Q</em>, <em>R</em>), pointsTo(<em>R</em>, <em>S</em>).
+</ul>
+<li> 問題は最後の規則である:
+<ul>
+  <li class=small> pointsTo(<em>R</em>, <em>S</em>) → <br>
+    starAssign(<em>P</em>, <em>Q</em>), pointsTo(<em>P</em>, <em>R</em>), pointsTo(<em>Q</em>, <em>S</em>).
+</ul>
+</ul>
+</div>
+
+<div class=page>
+<h2>小手先のトリック</h2>
+<table align=center><tr>
+<td><svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="210">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="4"
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <line x1="30" y1="100" x2="120" y2="20" />
+      <line x1="30" y1="100" x2="120" y2="175" />
+      <line x1="130" y1="180" x2="230" y2="180" />
+    </g>
+    <g text-anchor="middle">
+      <text x="10" y="100" dy="0.5em">P</text>
+      <text x="150" y="20" dy="0.5em">R</text>
+      <text x="140" y="150" dy="0.5em">Q</text>
+      <text x="250" y="150" dy="0.5em">S</text>
+    </g>
+    <g text-anchor="middle" style="font-size: 50%;">
+      <text x="40" y="40" dy="0.5em">pointsTo</text>
+      <text x="40" y="150" dy="0.5em">starAssn</text>
+      <text x="180" y="190" dy="0.5em">pointsTo</text>
+    </g>
+  </g>
+</svg></td>
+<td style="padding:1em;" valign=center>→</td>
+<td><svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="210">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="4"
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <line x1="30" y1="100" x2="120" y2="20" />
+      <line x1="30" y1="100" x2="120" y2="175" />
+      <line x1="130" y1="180" x2="230" y2="180" />
+      <line x1="125" y1="20" x2="230" y2="170" stroke="red" stroke-dasharray="4 4" />
+    </g>
+    <g text-anchor="middle">
+      <text x="10" y="100" dy="0.5em">P</text>
+      <text x="150" y="20" dy="0.5em">R</text>
+      <text x="140" y="150" dy="0.5em">Q</text>
+      <text x="250" y="150" dy="0.5em">S</text>
+    </g>
+    <g text-anchor="middle" style="font-size: 50%;">
+      <text x="40" y="40" dy="0.5em">pointsTo</text>
+      <text x="40" y="150" dy="0.5em">starAssn</text>
+      <text x="180" y="190" dy="0.5em">pointsTo</text>
+      <text fill="red" x="220" y="70" dy="0.5em">pointsTo</text>
+    </g>
+  </g>
+</svg></td>
+</tr></table>
+<ul>
+<li class=small> 上のような関係は CFL では表せない! どーすんの?
+<li class=small> 向きを逆にした「<span class=o>pointsTo</span>(R, P)」という
+  関係を考える。
+</ul>
+<div align=center>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="210">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="start" viewBox="-5 -5 10 10" orient="auto">
+    <circle cx="0" cy="0" r="4" fill="white" stroke="black" stroke-width="2" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="4"
+       marker-start="url(#start)" marker-end="url(#arrow)">
+      <line x1="120" y1="20" x2="35" y2="95" stroke="blue" />
+      <line x1="30" y1="100" x2="120" y2="175" />
+      <line x1="130" y1="180" x2="230" y2="180" />
+    </g>
+    <line x1="0" y1="30" x2="80" y2="30" 
+	  fill="none" stroke="blue" stroke-width="2" />
+    <g text-anchor="middle">
+      <text x="10" y="100" dy="0.5em">P</text>
+      <text x="150" y="20" dy="0.5em">R</text>
+      <text x="140" y="150" dy="0.5em">Q</text>
+      <text x="250" y="150" dy="0.5em">S</text>
+    </g>
+    <g text-anchor="middle" style="font-size: 50%;">
+      <text fill=blue x="40" y="40" dy="0.5em">pointsTo</text>
+      <text x="40" y="150" dy="0.5em">starAssn</text>
+      <text x="180" y="190" dy="0.5em">pointsTo</text>
+    </g>
+  </g>
+</svg></div>
+</div>
+
+<div class=page>
+<h2>計算方法</h2>
+<ul>
+<li> 各操作に対して、2つの事実が同時に生成されるとみなす:
+</ul>
+<table align=center border class=m>
+<tr><td><code>p = &amp;q;</code></td>
+<td class=small>assignAddr(<em>p</em>, <em>q</em>).</td>
+<td class=small><span class=o>assignAddr</span>(<em>q</em>, <em>p</em>).</td></tr>
+<tr><td><code>p = q;</code></td>
+<td class=small>assign(<em>p</em>, <em>q</em>).</td>
+<td class=small><span class=o>assign</span>(<em>q</em>, <em>p</em>).</td></tr>
+<tr><td><code>p = *q;</code></td>
+<td class=small>assignStar(<em>p</em>, <em>q</em>).</td>
+<td class=small><span class=o>assignStar</span>(<em>q</em>, <em>p</em>).</td></tr>
+<tr><td><code>*p = q;</code></td>
+<td class=small>starAssign(<em>p</em>, <em>q</em>).</td>
+<td class=small><span class=o>starAssign</span>(<em>q</em>, <em>p</em>).</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h2>推論規則その2</h2>
+<ul>
+<li> 同様に、推論規則も二重化する:
+</ul>
+<table align=center border class=m>
+<tr><td class=small>pointsTo → assignAddr</td></tr>
+<tr><td class=small><span class=o>pointsTo</span> → <span class=o>assignAddr</span></td></tr>
+<tr><td class=small>pointsTo → assign pointsTo</td></tr>
+<tr><td class=small><span class=o>pointsTo</span> → <span class=o>pointsTo</span> <span class=o>assign</span></td></tr>
+<tr><td class=small>pointsTo → assignStar pointsTo pointsTo</td></tr>
+<tr><td class=small><span class=o>pointsTo</span> → <span class=o>pointsTo</span> <span class=o>pointsTo</span> <span class=o>assignStar</span></td></tr>
+<tr><td class=small>pointsTo → <span class=o>pointsTo</span> starAssign pointsTo</td></tr>
+<tr><td class=small><span class=o>pointsTo</span> → <span class=o>pointsTo</span> <span class=o>starAssign</span> pointsTo</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h2>演習</h2>
+<div>
+以下の処理を実行したとき、<code>f</code> が <code>b</code> および <code>c</code> を
+指しうることを示せ。
+</div>
+<center><img width="50%" src="graph10.png"></center>
+</div>
+
+<div class=page>
+<h1>"Demand"解析を使う</h1>
+</div>
+
+<div class=page>
+<h1>CFL-Reachability + α 解析</h1>
+</div>
+
+<div class=page>
+<h1>まとめ・感想</h1>
+<ul>
+<li> 本論文では、プログラム解析のいくつかの問題が
+  CFL-Reachability 問題として定式化できることを示した。
+<li> 感想: 論文は読みやすいが、手法そのものは微妙。<br>
+  (とくに 4.4. の Points-To とか、かなり苦しい)
+<li> 感想: サーベイがよくできている。個人的には
+  PDG を使うつもりなので、関連論文が沢山参照されているのは
+  よかった。
+</div>
+
