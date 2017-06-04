@@ -91,8 +91,8 @@ University of Wisconsin</small><br>
 <h1>2. CFL-Reachability って何?</h1>
 <ul>
   <li class=small> あるノードからあるノードまでの経路 (path) をさがす。
-    ただし各エッジは指定された順序でしかたどれない。<br>
-    <img width="50%" src="graph01.png">
+    ただし各エッジは指定された順序でしかたどれない。
+    <center style="margin:0.5em;"><img width="50%" src="graph01.png"></center>
   <li class=small> 順序は<u>文脈自由言語</u> (CFL) で表現される。<br>
     = 文脈自由文法 (CFG) で生成される文字列の集合。
   <li> ある言語 <em>L</em> を満たすような経路を <em>L</em>-path とよぶ。
@@ -109,8 +109,8 @@ L: <em>matched</em> → <em>matched</em> <em>matched</em>
            | [ <em>matched</em> ]
            | e
            | ε (空列)</pre>
-  <li class=small> 以下のグラフで、実際に L を満たす s → t の経路を示せ。<br>
-    <img width="50%" src="graph01.png">
+  <li class=small> 以下のグラフで、実際に L を満たす s → t の経路を示せ。
+    <center style="margin:0.5em;"><img width="50%" src="graph01.png"></center>
 </ul>
 </div>
 
@@ -403,10 +403,11 @@ L(slice) な経路を<br>
   </g>
 </svg>
 </center>
-<li> ただし、各セルの中身を破壊的に変更することはできない。
-<li> 復習:<br>
-  car(cons(a, b)) = ?<br>
-  car(cdr(cons(c, cons(x, y)))) = ?<br>
+<li> 各セルの中身を破壊的に変更することはできない。
+  <ul> 
+    <li> car(cons(a, b)) = ?
+    <li> car(cdr(cons(c, cons(x, y)))) = ?
+  </ul>
 </ul>
 </div>
 
