@@ -565,9 +565,9 @@ L(slice) な経路を<br>
 <td>x=cdr(y);</td>
 </tr></table>
 <ul>
-<li class=small> エッジに hd または tl がある → 
+<li class=small> エッジに hd または tl がある → <br>
   ポインタの先に cons がある。
-<li class=small> エッジが hd<sup>-1</sup> または tl<sup>-1</sup> である →
+<li class=small> エッジが hd<sup>-1</sup> または tl<sup>-1</sup> である →<br>
   hd/tl の効果を「打ち消す」。
 </ul>
 </div>
@@ -910,3 +910,118 @@ f = *e;
   関連論文が沢山参照されているのはよかった。
 </div>
 
+
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>
+新山の<br>
+研究テーマについて
+</td></tr>
+</table>
+<div align=right class=bottomright>
+  新山 祐介 2017/06/06 輪講資料
+</div>
+</div>
+
+<div class=page>
+<h1>研究テーマ</h1>
+<ul>
+<li> 「ソースコードからの高水準な意味の自動抽出 (仮称)」
+<li> プログラム理解 (Program comprehension)
+<li> 究極の目標 (夢物語) :<br>
+  バイナリを入れると、どんな動きをするか解説してくれる。
+<li> 個人的には「プログラムの意味」に興味がある。
+</ul>
+</div>
+
+<div class=page>
+<h1>研究の背景</h1>
+<ul>
+<li> プログラムの動きを理解することは、ほとんどの
+  ソフトウェア開発業務の中で不可欠の作業である。
+  <ul>
+    <li> 他人が書いたコードを読む。
+    <li> 自分が過去に書いたコードを拡張する。
+    <li> コードの不具合を修正する。
+  </ul>
+<li> 設計文書だけでは十分でない!
+  あらゆる追加情報が望まれる。
+</ul>
+</div>
+
+<div class=page>
+<h2>これは何をするコード?</h2>
+<div><pre class="box">
+f(X) {
+    y ← +∞
+    for each x in X {
+        if x &lt; y {
+            y ← x
+        }
+    }
+    return y
+}
+</pre></div>
+<ul>
+<li> 人間は、文書がなくても動きを理解できる。
+<li> このとき頭の中で起きている処理は何か?
+</ul>
+</div>
+
+<div class=page>
+<h1>研究の方針</h1>
+<ul>
+<li> とりあえず、ひとつの文、あるいは
+  ひとつの変数に自然言語で意味づけをすることを考える。
+<li> ソースコードから PDG (のようなもの) を抽出し、
+  それに対して解析をおこなう。
+</ul>
+</div>
+
+<div class=page>
+<h2>現在できている例</h2>
+<div style="width:50%;"><pre class="box">
+int pow(int x, int y) {
+    int z = 1;
+    while (0 < y) {
+        z *= x;
+        y -= 1;
+    }
+    return z;
+}
+</pre>
+<div class=bottomright><a href="dfaaa.svg"><img height="500" src="dfaaa.svg"></a></div>
+</div>
+</div>
+
+<div class=page>
+<h2>アイデア</h2>
+<ul>
+<li> 大村さんの論文 [大村, 2015] ではあらかじめ手で作成した
+  Datalog の規則を使ってプログラムの意味を与えていた。
+<li> こうした規則を、GitHub などから自動的にマイニングすることは
+  できないか?
+  <ol>
+    <li class=small> 大量のコードを集め、PDG を生成し蓄積しておく。
+    <li class=small> ソースコード中の変数名・コメントを PDG と
+      対応づける規則を学習。
+    <li class=small> 解析対象のプログラムとパターンマッチさせ
+      意味を付与する。
+  </ol>
+</ul>
+</div>
+
+<div class=page>
+<h1>今後の計画</h1>
+<ul>
+<li> PDG抽出およびマイニング。(〜7月)
+<li> ソースコードのコメントからの意味学習。
+<li> 変数名の意味づけ (今年じゅう)。
+<li> 手続きに対する意味づけ (2年次)。
+<li> 最終的な目標は、なるべく人間の言葉に近い
+  説明を生成することである。
+  このために意味の抽象化について詳しく
+  考察する必要がある。
+</ul>
+</div>
