@@ -1,0 +1,634 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>Virtual Machines, Chap. 4.0 - 4.3, 新山</title>
+<style>
+u { color: red; }
+.n { text-align: right; }
+.bl { color: transparent; }
+.qu { background: #ffff88; padding: 0.1em; border: 1px solid black; margin: 0.2em; }
+.bgg { background: #88ff88; }
+.figure { margin: 1em; text-align: center; }
+.def { border: 1px solid black; padding: 0.2em; }
+pre { border: 1px solid black; padding: 0.5em; }
+</style>
+</head>
+<body>
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>"Virtual Machines" 第4章<br>
+"Dynamic Binary Optimization"<br>
+4.0 - 4.3 </td></tr>
+</table>
+<div class=bottomright>新山 祐介</div>
+</div>
+
+<div class=page>
+<h1>第4章の概要</h1>
+<ul>
+<li> 「互換性ができたら、つぎは最適化の番」
+<li> 4.1. 最適化が努力に見合うわけ
+<li> 4.2. プロファイリングの各種方法
+<li> 4.3. 実際の最適化
+  <ul>
+    <li> Superblock の構築
+  </ul>
+</ul>
+<div> <u>注意: ここでいう「最適化」とは、
+  ネイティブに変換されたバイナリの最適化である。</u></div>
+</div>
+
+<div class=page>
+<h2>たとえば...</h2>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="480" height="408">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="2">
+      <rect x="0" y="0" width="200" height="160" />
+      <rect x="0" y="220" width="200" height="84" />
+      <rect x="0" y="320" width="200" height="84" />
+      <line x1="220" y1="200" x2="260" y2="140" />
+      <g marker-end="url(#arrow)">
+	<path d="M100,160 L100,210" />
+	<path d="M194,140 C240,220,220,300,200,330" stroke-width="10" />
+      </g>
+    </g>
+    <g style="font-size: 18pt; font-family: monospace;">
+      <text x="4" y="4" dy="0.7em">Block A</text>
+      <text x="4" y="30" dy="0.7em">&nbsp;...</text>
+      <text x="4" y="55" dy="0.7em">&nbsp;R3 = ...</text>
+      <text x="4" y="80" dy="0.7em">&nbsp;R1 = R2 + R3</text>
+      <text x="4" y="105" dy="0.7em">&nbsp;if (R3==0)</text>
+      <text x="4" y="130" dy="0.7em">&nbsp;&nbsp;&nbsp;&nbsp; goto L1</text>
+
+      <text x="4" y="224" dy="0.7em">Block B</text>
+      <text x="4" y="255" dy="0.7em">&nbsp;R6 = R1 + R6</text>
+      <text x="4" y="280" dy="0.7em">&nbsp;...</text>
+
+      <text x="4" y="324" dy="0.7em">Block C</text>
+      <text x="4" y="355" dy="0.7em">L1: R1 = 0</text>
+      <text x="4" y="380" dy="0.7em">&nbsp;...</text>
+    </g>
+    <g>
+      <text x="270" y="100" dy="0.7em">この分岐が</text>
+      <text x="270" y="100" dy="1.7em">99%</text>
+    </g>
+  </g>
+</svg>
+</div>
+<div class=qu> 問. ムダな部分はどこ?</div>
+</div>
+
+<div class=page>
+<h2>そうすると...</h2>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="540" height="408">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g transform="translate(12,2)">
+    <g fill="none" stroke="black" stroke-width="2">
+      <rect x="0" y="0" width="200" height="160" />
+      <rect x="0" y="220" width="200" height="84" />
+      <rect x="0" y="320" width="200" height="84" />
+      <rect x="-5" y="78" width="210" height="25" stroke="red" stroke-width="4" />
+      <path d="M210,90 L290,160" stroke-width="4" stroke-dasharray="4,4" stroke="red" />
+      <g marker-end="url(#arrow)">
+	<path d="M100,160 l0,50" />
+	<path d="M194,140 C240,220,220,300,200,330" stroke-width="10" />
+      </g>
+    </g>
+    <g style="font-size: 18pt; font-family: monospace;">
+      <text x="4" y="4" dy="0.7em">Block A</text>
+      <text x="4" y="30" dy="0.7em">&nbsp;...</text>
+      <text x="4" y="55" dy="0.7em">&nbsp;R3 = ...</text>
+      <text x="4" y="80" dy="0.7em">&nbsp;R1 = R2 + R3</text>
+      <text x="4" y="105" dy="0.7em">&nbsp;if (R3==0)</text>
+      <text x="4" y="130" dy="0.7em">&nbsp;&nbsp;&nbsp;&nbsp; goto L1</text>
+
+      <text x="4" y="224" dy="0.7em">Block B</text>
+      <text x="4" y="255" dy="0.7em">&nbsp;R6 = R1 + R6</text>
+      <text x="4" y="280" dy="0.7em">&nbsp;...</text>
+
+      <text x="4" y="324" dy="0.7em">Block C</text>
+      <text x="4" y="355" dy="0.7em">L1: R1 = 0</text>
+      <text x="4" y="380" dy="0.7em">&nbsp;...</text>
+    </g>
+  </g>
+  <g transform="translate(300,2)">
+    <g fill="none" stroke="black" stroke-width="2">
+      <rect x="0" y="0" width="200" height="135" />
+      <rect x="0" y="150" width="200" height="55" fill="#88ff88" />
+      <rect x="0" y="220" width="200" height="84" />
+      <rect x="0" y="320" width="200" height="84" />
+      <g marker-end="url(#arrow)">
+	<path d="M100,135 l0,10" />
+	<path d="M100,205 l0,10" />
+	<path d="M194,120 C240,180,220,300,200,330" stroke-width="10" />
+      </g>
+    </g>
+    <g style="font-size: 18pt; font-family: monospace;">
+      <text x="4" y="4" dy="0.7em">Block A</text>
+      <text x="4" y="30" dy="0.7em">&nbsp;...</text>
+      <text x="4" y="55" dy="0.7em">&nbsp;R3 = ...</text>
+      <text x="4" y="80" dy="0.7em">&nbsp;if (R3==0)</text>
+      <text x="4" y="105" dy="0.7em">&nbsp;&nbsp;&nbsp;&nbsp; goto L1</text>
+
+      <text x="4" y="154" dy="0.7em">Compensation</text>
+      <text x="4" y="175" dy="0.7em">&nbsp;R1 = R2 + R3</text>
+
+      <text x="4" y="224" dy="0.7em">Block B</text>
+      <text x="4" y="255" dy="0.7em">&nbsp;R6 = R1 + R6</text>
+      <text x="4" y="280" dy="0.7em">&nbsp;...</text>
+
+      <text x="4" y="324" dy="0.7em">Block C</text>
+      <text x="4" y="355" dy="0.7em">L1: R1 = 0</text>
+      <text x="4" y="380" dy="0.7em">&nbsp;...</text>
+    </g>
+  </g>
+</svg>
+</div>
+<div> → 99% の確率で 1命令トクする。これが<u>最適化</u>。</div>
+</div>
+
+<div class=page>
+<h2>最適化までの流れ</h2>
+<ol>
+  <li> まずインタプリタで実行、あるいはネイティブに変換して実行。
+  <li> プロファイル情報を収集。
+  <li> 最適化する。
+  <li> 2. へ戻る。
+</ol>
+<div class=figure>
+<img height="40%" src="fig01.png">
+</div>
+</div>
+
+
+<div class=page>
+<h1>4.1. 最適化が努力に見合うわけ</h1>
+<ul>
+<li style="font-size:95%;"> プログラムの多くの部分は、実はかなり予測可能な動きをしている。
+<pre>// 例: 値 "-1" を検索するコード
+      R3 = 100;
+loop: R1 = *R2;
+<div class=bgg>      if (R1 == -1) goto found;  // A
+</div>      R2 = R2 + 4;
+      R3 = R3 - 1;
+<div class=bgg>      if (R3 != 0) goto loop;    // B
+</div>      ...
+found:</pre>
+<ul>
+  <li class=qu> 問. レジスタ R1, R2, R3 の役割を説明せよ。
+  <li class=qu> 問. 値 "<code>-1</code>" がほとんど現れない場合と仮定すると、
+    A と B はそれぞれ「分岐する」「しない」どちらの可能性が高いか?
+</ul>
+</ul>
+</div>
+
+<div class=page>
+<h2>分岐の偏り・1</h2>
+<ul>
+<li> 多くの分岐は「する」「しない」のどちらかに偏っている。
+</ul>
+<div class=figure>
+<img width="80%" src="fig02.png">
+</div>
+</div>
+
+<div class=page>
+<h2>分岐の偏り・2</h2>
+<ul>
+<li> 多くの分岐は、前回の動作と同じ動作をしている。
+</ul>
+<div class=figure>
+<img width="80%" src="fig03.png">
+</div>
+</div>
+
+<div class=page>
+<h2>分岐の偏り・3</h2>
+<ul>
+<li> 多くの間接分岐は、ほとんど同じ場所に着地している。
+</ul>
+<div class=figure>
+<img width="80%" src="fig04.png">
+</div>
+<div class=qu>問. 間接分岐とは何か、説明せよ。</div>
+</div>
+
+<div class=page>
+<h2>演算結果の偏り</h2>
+<ul>
+<li> 多くの演算は、毎回同じ結果になっている。
+  (定数ってこと??)
+</ul>
+<div class=figure>
+<img width="80%" src="fig05.png">
+</div>
+</div>
+
+<div class=page>
+<h2>4.1. まとめ</h2>
+<ul>
+<li> プログラムの多くの部分はかなり予測可能である。
+  <ol>
+    <li> 分岐「する」「しない」の偏り。
+    <li> 前回と同じ分岐結果が多い。
+    <li> 間接分岐は、分岐先がいつも同じ。
+    <li> 演算の結果もわりと同じ。
+  </ol>
+<li class=qu> 問. プログラムの分岐が完全に予想できたとして、
+  どうやって実際に速くできるのか?</li>
+    <ul class=bl>
+      <li> 単純に分岐命令の実行時間が省ける。
+      <li> パイプライン実行でき効率が上がる。
+      <li> 実行結果をキャッシュしておける?
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>4.2. プロファイリングの各種方法</h1>
+<div>
+<ul style="margin-bottom:4em;">
+<li> プロファイリングとは?
+  <ul>
+    <li> プログラムの中の適切な場所に「検知器」を入れる。
+    <li> それがどのように実行されたかを記録し解析する。
+  </ul>
+<li> プログラムのふるまいを予測するために使われる。
+<li> コンパイラなどで使われるプロファイリングとは違う。
+</ul>
+<div class=bottomright><img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Flag_of_the_United_States_Federal_Bureau_of_Investigation.svg"></div>
+</div>
+</div>
+
+<div class=page>
+<h2>コンパイラの場合...</h2>
+<ul>
+  <li> プログラムの全体像は前もってわかっている。
+  <li> 十分なデータを集めた後、それを使って本格的に最適化する。
+</ul>
+<div class=figure>
+<img height="50%" src="fig06.png">
+</div>
+</div>
+
+<div class=page>
+<h2>VM の場合...</h2>
+<ul>
+  <li> プログラムの全体像は前もってわからない。
+  <li> プロファイリングは走るのと同時にやる。
+  <li> 早く結果がわかればわかるほど有利。
+</ul>
+<div class=figure>
+  <img height="40%" src="fig07.png">
+</div>
+</div>
+
+<div class=page>
+<h2>VMプロファイラの種類</h2>
+<ul>
+  <li> いくつもの方式が存在するが、主なものは2つ:
+    <ol>
+      <li> どの部分がどれだけ実行されたかを測定する。<br>
+	(ノード・プロファイル)
+      <li> 各分岐でどっちをより多く選択したかを測定する。<br>
+	(エッジ・プロファイル)
+    </ol>
+  <li> 他にも特殊な状況を監視するためのプロファイラが存在する。<br>
+    (例: 変数がつねに同じ値を保持するかどうか、など)
+</ul>
+</div>
+
+<div class=page>
+<h2>ノード・プロファイル</h2>
+<ul>
+<li> 「各部分が何回実行されたか」を記録する。
+</ul>
+<div class=figure>
+  <img height="50%" src="fig08a.png">
+</div>
+</div>
+
+<div class=page>
+<h2>エッジ・プロファイル</h2>
+<div style="position:relative;">
+<ul class=topleft>
+<li> 「各分岐を何回通ったか」を記録する。
+<li> ノード・プロファイルより手間がかかるが、
+  これがあればノード情報もわかる。
+</ul>
+<div class=figure style="padding-top:3em;">
+  <img height="50%;" src="fig08b.png">
+</div>
+</div>
+<div class=qu> 問. 上の図で、ブロック D は何回実行されるか。</div>
+</div>
+
+<div class=page>
+<h2>どうやって実行を記録するか</h2>
+<ol type=a>
+<li> Instrumentation: 特定の箇所に「カウンタを仕掛ける」<br>
+  <ul>
+    <li> ソフトウェアの一部を書き換えて実行する。遅いが正確。
+  </ul>
+<li> Sampling: とにかく一定時間 / 命令数ごとに測定<br>
+  <ul>
+    <li> ハードウェアを使えば速いが、正確さに欠ける。
+  </ul>
+</ul>
+<div class=figure>
+  <img height="30%" src="fig09.png">
+</div>
+</div>
+
+<div class=page>
+<h2>インタプリタにおける測定</h2>
+<ul>
+  <li> インタプリタなので、のぞき放題。
+  <li> 分岐命令の直後に仕掛けることが多い = 「ブロックの開始」
+    <ul>
+      <li> ハッシュテーブルを使い、各分岐命令ごとに回数を記録。
+    </ul>
+<div class=figure>
+    <table border style="margin:0.5em;">
+      <tr><th>分岐点</th><th>した</th><th>しない</th></tr>
+      <tr><td><code>0x0040f8be</code></td><td class=n>5</td><td class=n>38</td></tr>
+      <tr><td><code>0x00419c58</code></td><td class=n>122</td><td class=n>1</td></tr>
+      <tr><td><code>0xdeadbeef</code></td><td class=n>65535</td><td class=n>65537</td></tr>
+      <tr><td>...</td><td class=n>...</td><td class=n>...</td></tr>
+    </table>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h2>ネイティブ変換後の測定</h2>
+<ul>
+  <li> 変換時に測定用コードを注入できるので、
+    ハッシュテーブルを使わなくてよい。
+  <li> あとで除去しやすいように、
+    測定用コードは一箇所にまとめることが多い。
+</ul>
+<div class=figure>
+  <img height="30%" src="fig10.png">
+</div>
+</div>
+
+<div class=page>
+<h2>プロファイリングの問題</h2>
+<ul>
+  <li> インタプリタでは全体の 10〜20% 速度低下。
+  <li> 最適化後のバイナリでも同様の比率。<br>
+    (なぜなら、それ以外のコードも速くなるから)
+  <li> 測定用カウンタがオーバーフローする問題。<br>
+    → "減衰 (decaying) カウンタ" という考え。
+    <pre>n = n + 1;
+if (一定時間後) n = n / 2;</pre>
+</ul>
+</div>
+
+<div class=page>
+<h2>4.2. まとめ</h2>
+<ul>
+<li> プロファイリングではおもに 2種類の情報を取得:
+<ol type=a>
+  <li> エッジ プロファイル
+  <li> ノード プロファイル (推測可)
+</ol>
+<li> プロファイリングにはおもに 2種類の方法がある:
+<ol type=a>
+  <li> 一定時間ごとの測定
+  <li> カウンタを仕掛けて測定
+</ol>
+</ul>
+</div>
+
+<div class=page>
+<h1>4.3. 最適化する</h1>
+<ul>
+<li> 最適化 = C.S.E + <u>局所性を高める</u>こと。
+  <ul>
+    <li> 空間的局所性 (spatial locality)<br>
+      = 実行されるコードが互いに近くにある。
+    <li> 時間的局所性 (temporal locality)<br>
+      = ループの時間が短い。
+  </ul>
+<li> コードを実行される順にまとめることで、
+  2つの局所性を同時に高めることができる。
+</ul>
+</div>
+
+<div class=page>
+<h2>フェッチの効率を上げる</h2>
+<ul>
+<li> 以下のコードで、E と F は隣り合わせに並んでいる。
+</ul>
+<center>
+  <table><tr>
+  <td style="padding:0.5em;"><img width="274" src="fig11.png"></td>
+  <td style="padding:0.5em;">
+    <table style="margin: 1em; font-size:200%;" border>
+      <caption>命令キャッシュ</caption>
+    <tr><td>E: goto uncond;</td></tr>
+    <tr><td>F: ...</td></tr>
+    <tr><td>F: ...</td></tr>
+    <tr><td>F: ...</td></tr>
+  </table></td>
+  </tr></table>
+</center>
+</div>
+
+<div class=page>
+<h2>フェッチの効率を上げる</h2>
+<ul>
+<li> しかし実際には E → F は絶対に実行されない。
+</ul>
+<center>
+  <table><tr>
+  <td style="padding:0.5em;"><img width="326" src="fig12.png"></td>
+  <td style="padding:0.5em;">
+    <table style="margin: 1em; font-size:200%;" border>
+      <caption>命令キャッシュ</caption>
+    <tr><td>E: goto uncond;</td></tr>
+    <tr><td>F: <u>ムダ</u></td></tr>
+    <tr><td>F: <u>ムダ</u></td></tr>
+    <tr><td>F: <u>ムダ</u></td></tr>
+  </table></td>
+  </tr></table>
+</center>
+</div>
+
+<div class=page>
+<h2>方法1. レイアウトの変更</h2>
+<ul>
+<li> ブロックの順序を変更することで、局所性 (=効率) を改善できる。
+</ul>
+<center>
+  <table><tr>
+  <td><img width="200" src="fig11.png"></td>
+  <td style="padding: 2em; font-size:200%;">→</td>
+  <td><img width="180" src="fig13.png"></td>
+  </tr></table>
+</center>
+<div style="margin:0;" class="qu">問. 分岐条件が変わっているのはどこか?</div>
+</div>
+
+<div class=page>
+<h2>方法2. インライン化</h2>
+<ul>
+<li> よく実行される手続きを複製して埋め込むことで、局所性を改善できる。
+</ul>
+<center>
+  <table><tr>
+  <td><img width="250" src="fig14.png"></td>
+  <td style="padding: 1em; font-size:200%;">→</td>
+  <td><img width="100" src="fig15.png"></td>
+  <td style="padding: 1em; font-size:200%;">→</td>
+  <td style="font-size:150%;" align=center><img width="100" src="fig16.png"><br>
+    (部分インライン化)</td>
+  </tr></table>
+</center>
+<div class=qu>問. インライン化の問題点をあげよ。</div>
+</div>
+
+<div class=page>
+<h2>"Trace" を使う方法</h2>
+<ul>
+<li> よく実行される手続きを複製して埋め込むことで、局所性を改善できる。
+  <ol>
+    <li> もっともよく実行されるブロックから始める。
+    <li> 次によく実行されるブロックをつなげる。...
+    <li> 出口に到達するか、なくなるまで繰り返す。
+  </ol>
+</ul>
+<div class=figure>
+  <img height="30%" src="fig12.png">
+</div>
+<div class=qu>問. 上のアルゴリズムに従って、trace を作成せよ。</div>
+</div>
+
+<div class=page>
+<h2>"Trace" を使う方法</h2>
+<ul>
+<li> A → D → E → G
+<li> B → C
+<li> F
+</ul>
+<div class=figure>
+  <img height="40%" src="fig17.png">
+</div>
+</div>
+
+<div class=page>
+<h2>"Superblock" を使う方法</h2>
+<ul>
+<li> Trace と違って、ブロックを複製してよい。
+<li> 動的に構築できる。
+<li> 現在、もっともメジャーな方法。
+</ul>
+<div class=figure>
+  <img height="30%" src="fig19.png">
+</div>
+</div>
+
+<div class=page>
+<h1>Superblock の構築方法</h1>
+<ul>
+<li> 以下のステップに分けられる:
+  <ol>
+    <li> 最初のブロックを見つける。
+    <li> 続きのブロックを見つける。
+    <li> どこかで止める。
+  </ol>
+</ul>
+</div>
+
+<div class=page>
+<h2>Step 1. 最初のブロックを見つける</h2>
+<ul>
+  <li> 開始しきい値 (Start threshold) という概念を使う。
+  <li> これを超えたら Superblock の構築を始める。
+</ul>
+<div class=figure>
+  <img height="40%" src="fig12.png">
+</div>
+<div class=qu>問. Start threshold = 100 のとき、該当するブロックはどれ?</div>
+</div>
+
+<div class=page>
+<h2>Step 2. 続きのブロックを見つける</h2>
+<ul>
+  <li> Most Frequently Used: 
+    <ol>
+      <li> 継続しきい値 (Continuation threshold) を使う。
+      <li> しきい値を超えたブロックを Continuation Set とする。
+      <li> 制御フローに従って Superblock を拡張していく。
+      <li> 全ブロックをプロファイリングする必要がある。
+    </ol>
+  <li> Most Recently Used:
+    <ol>
+      <li> 「たまたま通った道を標準だと信じる」方法。
+      <li> 最初だけ決めたら、あとは進んだ順に Superblock とする。
+      <li> プロファイリングが少なくてすむが、精度は低下。
+    </ol>
+</ul>
+</div>
+
+<div class=page>
+<h2>Step 3. どこかで止める</h2>
+<ul>
+  <li> いくつかの基準が存在する:
+  <ol>
+    <li> フローが最初の superblock に到達した。
+    <li> フローが別の superblock に到達した。
+    <li> Superblock の長さが (あらかじめ決めた) 最大値になった。
+    <li> ブロックの候補がなくなった。
+    <li> 間接分岐または手続き呼び出しに遭遇した。
+  </ol>
+</ul>
+</div>
+
+<div class=page>
+<h2>練習問題</h2>
+<ul>
+  <li> 以下のブロックから superblock を MFU で構築する:
+</ul>
+<div class=figure>
+  <img height="40%" src="fig12.png">
+</div>
+<div class=qu>問. Cont. threshold = 50 のとき、Continuation Set を求めよ。</div>
+<div class=qu>問. フローに従って、Superblock を構築せよ。</div>
+</div>
+
+<div class=page>
+<h2>Superblock の完成形</h2>
+<center>
+  <table><tr>
+  <td><img width="280" src="fig19.png"></td>
+  <td style="padding: 1em; font-size:200%;">→</td>
+  <td><img width="180" src="fig20.png"></td>
+  </tr></table>
+</center>
+</div>
+
+<div class=page>
+<h2>Tree Groups</h2>
+<ul>
+  <li> Trace / superblock = 分岐がほとんど予測可能であるときに有効。
+  <li> Tree group = 分岐が五分五分のときに有効。(?)
+</ul>
+<div class=figure>
+  <img height="40%" src="fig21.png">
+</div>
+</div>
