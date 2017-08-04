@@ -1,0 +1,433 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>Researches</title>
+<style><!--
+.fail { background: #ffcc00; }
+.gray { color: gray; }
+.figure { text-align: center; padding: 0.5em; position: relative; }
+.spacy li { padding-top: 0.5em; font-size: 120%; }
+.caption { font-size: 9pt; padding: 0; margin: 0; }
+--></style>
+</head>
+<body>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center>Extraction of<br>
+High-level Semantics<br>
+from Software Code</td></tr>
+</table>
+<div class=bottomright>Yusuke Shinyama<br>
+Tokyo Tech, Japan</div>
+</div>
+
+<div class=page>
+<h1>Introduction</h1>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="640" height="380">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="rarrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="red" stroke="none" />
+  </marker>
+  <defs>
+    <g id="computer" fill="white" stroke="black" stroke-width="1">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    <g id="user" fill="none" stroke="black" stroke-width="1">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+  </defs>
+  <g fill="none" stroke="black" stroke-width="12">
+    <line x1="240" y1="160" x2="360" y2="100" marker-end="url(#arrow)"/>
+    <line x1="240" y1="200" x2="360" y2="260" stroke="red" 
+          marker-end="url(#rarrow)"/>
+  </g>
+  <use xlink:href="#computer" transform="translate(400,0),scale(4)" />
+  <use xlink:href="#user" transform="translate(420,200),scale(3)" />
+  <image x="470" y="48" width="64" height="64"
+    xlink:href="http://i3.kym-cdn.com/photos/images/original/000/114/779/0002.gif" />
+  <g text-anchor="middle" style="font-size:50%;">
+    <text x="500" y="30">010110011110010...</text>
+    <text x="500" y="370">"Shows a picture of kitty."</text>
+  </g>
+</svg>
+<pre style="position: absolute; left: 100px; top: 50px; width: 8.4em; height: 11em; border: 2px solid black; font-size: 24px; padding: 0.2em;">
+public int add
+  ArrayList&lt;St
+  int nWidth =
+  while (st &lt;
+    int height
+    if (st * r
+      img.chec
+    } else if 
+...
+</pre>
+</div>
+</div>
+
+<div class=page>
+<h1>Contents</h1>
+<div align=center>
+<div style="text-align:left; width:80%;">
+<ol>
+<li> Backgrounds
+<li> Problem Description
+<li> Methodology
+<li> Conclusion
+</ol>
+</div>
+</div>
+<p>
+Disclaimer: Not much has been done.
+</div>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center>Backgrounds</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h1>Why is Software So Important?</h1>
+<p>
+Software controls...
+<div align=center>
+<div style="text-align:left; width:80%;">
+<ul>
+<li> Your phone
+<li> Your payroll
+<li> Cars, trains and airplanes
+<li> Electricity and nuclear plants
+<li> Everything!
+</ul>
+</div>
+</div>
+<p>
+How many had software glitch in the past month?
+</div>
+
+<div class=page>
+<h2>Software = Too much $$$</h2>
+<div align=center><img height="60%" src="loc.svg"></div>
+<ul>
+  <li> Software costs &gt;50% of the car R&amp;D today.
+</ul>
+</div>
+
+<div class=page>
+<h2>Software = Life or Death</h2>
+<ul>
+<li> Toyota "Unintended Acceleration" circa 2010.
+<ul>
+ <li> Class action: $1.2B.
+ <li> Faulty software on ETCS?
+ <li> <u>2,272</u> global variables.
+ <li> <u>80,000</u> violations of MISRA C.
+ <li> Over <u>67</u> functions "<u>spaghetti</u>".
+</ul>
+<li> Huge U.S. Blackout in 2003.
+<li> WannaCry attacked a UK hospital.
+<li> Therac-25 (killed 3 people).
+<div style="position: absolute; top: 7em; right: 1em; text-align: right; line-height: 100%;"><img width="50%" src="car.jpg"><div class=caption><a href="https://pixnio.com/transportation-vehicles/cars-automobile/car-driver-technology-navigation-dashboard">pixnio.com</a></div></div>
+</div>
+
+<div class=page>
+<h2>Software = So Subtle</h2>
+<p> Apple's "<a href="https://en.wikipedia.org/wiki/Unreachable_code#Examples">GotoFail</a>" (2014)
+<div>
+<pre style="font-size:60%;">
+static OSStatus
+SSLVerifySignedServerKeyExchange(...)
+{
+    OSStatus        err;
+    ...
+    if ((err = SSLHashSHA1.update(&amp;hashCtx, &amp;serverRandom)) != 0)
+        goto fail;
+    if ((err = SSLHashSHA1.update(&amp;hashCtx, &amp;signedParams)) != 0)
+        goto fail;
+<div class=fail>        goto fail;
+</div>    if ((err = SSLHashSHA1.final(&amp;hashCtx, &amp;hashOut)) != 0)
+        goto fail;
+    ...
+ 
+fail:
+    SSLFreeBuffer(&amp;signedHashes);
+    SSLFreeBuffer(&amp;hashCtx);
+    return err;
+}
+</pre></div>
+</div>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center>Problem Description</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h1>Problems</h1>
+<ul>
+  <li> Software maintenance : 60 ~ 80% of cost.
+    <ul>
+      <li> "Suppose that you're asked to<br>
+	rewrite <em>Halmet</em> in which<br>
+	the main character is female."
+    </ul>
+  <li> Code understanding : 50% ~ of time.
+    <ul>
+      <li> Need all the details!
+      <li> Error prone.
+    </ul>
+</ul>
+<div class=bottomright><img src="shakespeare.jpg"></div>
+</div>
+
+<div class=page>
+<h2>Attacking the Monster</h2>
+<ul>
+<li> No "Silver Bullet".
+<li> Multi-faceted solutions.
+  <ul>
+    <li> Make better tools.
+    <li> Establish better practices.
+    <li> ...
+    <li> <mark>Help reducing cognitive burden.</mark>
+  </ul>
+</ul>
+<div class="bottomright">
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="300">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g fill="none" stroke="black">
+    <rect x="100" y="100" width="100" height="100" stroke-width="16" />
+    <g marker-end="url(#arrow)" stroke-width="12">
+      <path d="M10,10 L70,70" />
+      <path d="M4,220 L70,200" />
+      <path d="M200,296 L180,230" />
+      <path d="M290,150 L230,140" />
+      <path d="M240,4 L210,70" />
+    </g>
+  </g>
+</svg>
+</div>
+</div>
+
+<div class=page>
+<h2>Research Question</h2>
+<div style="position: relative;">
+<ul style="width:70%;">
+<li> Focus on program variables:
+  <ol>
+    <li> Gives programmers a hint on what a code is about.
+    <li> Telegraphs its caveats.
+    <li> "Grounding" the meaning of a word.
+  </ol>
+</ul>
+<pre style="position: absolute; right: 0; top: 0; width: 6em; height: 11em; border: 2px solid black; font-size: 28px; padding: 0.2em;">
+a = 100;
+b = 2;
+c = a + b;
+d = a * c;
+...
+</pre>
+</div>
+</div>
+
+<div class=page>
+<h2>Example 1</h2>
+<div style="position: relative;">
+<pre style="border: 2px solid black; font-size: 32px; padding: 0.2em; ">
+if (c == 1) {
+    <mark>b</mark> = <mark>b</mark> - 100;
+    a1 = a1 + 1;
+} else if (c == 2) {
+    <mark>b</mark> = <mark>b</mark> - 300;
+    a2 = a2 + 1;
+} else
+...
+</pre>
+</div>
+<ul>
+  <li> Q. What's the role of variable <code>b</code>?
+</ul>
+</div>
+
+<div class=page>
+<h2>Example 1</h2>
+<div style="position: relative;">
+<pre style="border: 2px solid black; font-size: 32px; padding: 0.2em; ">
+if (choice == 1) {
+    <mark>money</mark> = <mark>money</mark> - 100;
+    item1 = item1 + 1;
+} else if (choice == 2) {
+    <mark>money</mark> = <mark>money</mark> - 300;
+    item2 = item2 + 1;
+} else
+...
+</pre>
+</div>
+<ul>
+  <li> <code>money</code> : Quantity you can exchange with any item.
+</ul>
+</div>
+
+<div class=page>
+<h2>Example 2</h2>
+<div style="position: relative;">
+<pre style="border: 2px solid black; font-size: 32px; padding: 0.2em; ">
+if (x) {
+    <mark>y</mark> = <mark>y</mark> - 1;
+}
+if (y == 0) {
+    g();
+}
+...
+</pre>
+</div>
+<ul>
+  <li> Q. What's the role of variable <code>y</code>?
+</ul>
+</div>
+
+<div class=page>
+<h2>Example 2</h2>
+<div style="position: relative;">
+<pre style="border: 2px solid black; font-size: 32px; padding: 0.2em; ">
+if (hit) {
+    <mark>life</mark> = <mark>life</mark> - 1;
+}
+if (life == 0) {
+    gameover();
+}
+...
+</pre>
+<div style="position: absolute; top: 0; right: 0; text-align: right; line-height: 100%;"><img src="https://vignette4.wikia.nocookie.net/mkwikia/images/9/9a/Fatality2.png"><div class=caption><a href="http://mortalkombat.wikia.com/wiki/Fatality">Motral Kombat Wiki</a></div></div>
+</div>
+<ul>
+  <li> <code>life</code> : Quantiy that decreases when you're hit. <br>
+    When it reaches zero, Game Over.
+</ul>
+</div>
+
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center>Methodology</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h2>Basic Idea</h2>
+<ul>
+<li> Convert a source code to<br>
+  a "Dataflow graph".
+<pre style="width: 50%; border: 2px solid black; padding: 0.2em;">
+pow(x, y) {
+    z = 1;
+    while (0 < y) {
+        z *= x;
+        y -= 1;
+    }
+    return z;
+}
+</pre>
+</ul>
+<div class="bottomright">
+  <img height="500" src="dfaaa.svg">
+</div>
+</div>
+
+<div class=page>
+<h2>Pattern Matching</h2>
+<ul>
+<li> Learn mappings from a large corpus.
+<div class=figure>
+<pre style="position: absolute; right: 0; bottom: 0; width: 8.4em; height: 8em; border: 2px solid black; font-size: 20px; padding: 0.2em;">
+if (c == 1) {
+    b = b - 10
+    a1 = a1 + 
+} else if (c =
+    ...
+</pre>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="700" height="300">
+  <marker id="rarrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="red" stroke="none" />
+  </marker>
+  <defs>
+    <g id="graph" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,0 L60,70 M120,10 L60,70 L100,140" stroke-width="4" />
+      <ellipse cx="0" cy="0" rx="40" ry="20" fill="white" />
+      <ellipse cx="120" cy="10" rx="40" ry="20" fill="white" />
+      <ellipse cx="60" cy="70" rx="40" ry="20" fill="white" />
+      <ellipse cx="100" cy="140" rx="40" ry="20" fill="white" />
+    </g>
+  </defs>
+  <g fill="none" stroke="black" stroke-width="4">
+    <ellipse cx="84" cy="260" rx="80" ry="20" />
+    <rect x="4" y="60" width="160" height="200" stroke="none" fill="white" />
+    <line x1="4" x2="4" y1="60" y2="260" />
+    <line x1="164" x2="164" y1="60" y2="260" />
+    <ellipse cx="84" cy="60" rx="80" ry="20" fill="white" />
+  </g>
+  <line y1="150" y2="150" x1="300" x2="400" stroke="red" fill="none"
+        stroke-width="12" marker-end="url(#rarrow)" />
+  <use xlink:href="#graph" transform="translate(130,40)" />
+  <use xlink:href="#graph" transform="translate(450,50)" />
+  <g text-anchor="middle">
+    <text x="84" y="180">GitHub</text>
+  </g>
+</svg>
+</div>
+Apply patterns to the target code.
+</ul>
+</div>
+
+<div class=page>
+<h2>Current Progress</h2>
+<ol>
+<li> Download top 1,000 GitHub repos.<br>
+  (11GB zipped text)
+<li> Parse .java codes. [Eclipse JDT]<br>
+  (480,627 files. 74,088,883 loc.)
+<li> Store dataflow graphs.<br>
+  (4,199,301 functions, 42,133,919 nodes)
+<li class=gray> Implement pattern matching.
+</ol>
+</div>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center>Wrap-up</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h1>Conclusions</h1>
+<ul class=spacy>
+  <li> Help programmers to understand code.
+  <li> Obtain patterns from existing code.
+  <li> Assign meaning to program variables.
+</ul>
+</div>
+
+<div class=page>
+<h1>References</h1>
+<ol>
+  <li> <a href="http://spectrum.ieee.org/transportation/systems/this-car-runs-on-code">This Car Runs on Code</a>, IEEE Specrum, 2009
+  <li> Koopman, <a href="https://users.ece.cmu.edu/~koopman/pubs/koopman14_toyota_ua_slides.pdf">"A Case Study of Toyota
+    Unintended Acceleration and Software Safety"</a>, 2014
+  <li> Glass, <a href="https://www.amazon.com/exec/obidos/ASIN/0321117425/">Facts and Fallacies of Software Engineering</a>, Addison-Wesley, 2002
+  <li> <a href="https://www.eclipse.org/jdt/">Eclipse Java development tools (JDT)</a>
+</ol>
+</div>
