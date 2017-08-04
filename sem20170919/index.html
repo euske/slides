@@ -1,0 +1,492 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>Rust人門 / 権藤研2017夏ゼミ</title>
+<style><!--
+.box { border: 1px solid black; }
+.comment { color: #008800; }
+.error { color: red; }
+s { color: gray; }
+--></style>
+</head>
+<body>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center>Rust 人門</td></tr>
+</table>
+<div class=bottomright>新山 祐介<br>
+権藤研2017夏ゼミ資料</div>
+</div>
+
+
+<div class=page>
+<h1>1. はじめに</h1>
+<p>
+ここではRustの新奇性のみにしぼって解説する。
+実際的なこと(インストール方法とか)は説明しない。
+<div class=box align=center>
+Rust = ポインタに関する諸問題を解決した C/C++
+</div>
+<ul>
+<li> NULL参照
+<li> Double free
+<li> Dangling pointer
+</ul>
+</div>
+
+<div class=page>
+<h2>背景</h2>
+<ul>
+<li> 2006年〜 (2009年よりMozilla公式)
+<li> LLVM経由で C ABI を生成
+<li> <a href="https://www.rust-lang.org/">www.rust-lang.org</a>
+</ul>
+</div>
+
+<div class=page>
+<h1>2. 最初のプログラム</h1>
+<blockquote><pre>
+fn main() {
+  let x = 2;  <span class=comment>// これは</span>
+  let y = 3;  <span class=comment>// コメント</span>
+  println!("x+y={}", x+y);
+}
+</pre></blockquote>
+<ul>
+<li> 変数の型は推論される。
+<li> <code>!</code> がつくものはマクロ (hygienic) である。
+</ul>
+</div>
+
+<div class=page>
+<h1>3. 構造体</h1>
+<blockquote><pre>
+struct Point {
+  x: i32,
+  y: i32,
+}
+
+fn main() {
+  let p = Point { x:2, y:3 };
+  println!("p={},{}", p.x, p.y);
+}
+</pre></blockquote>
+<ul>
+<li> 構造体はサイズを知る必要があるので、型を指定する。
+<li> <code>i32</code> = int
+<li> <code>p</code> はスタック上に存在。
+</ul>
+</div>
+
+<div class=page>
+<h1>4. ヒープを使う</h1>
+<blockquote><pre>
+fn main() {
+  let q = Box::new(Point { x:2, y:3 });
+  println!("q={},{}", (*q).x, (*q).y);
+  println!("q={},{}", q.x, q.y);  <span class=comment>// OK</span>
+}
+</pre></blockquote>
+<ul>
+<li> <code>Box::new()</code> = 基本的に malloc。
+<li> 参照は <code>*</code> で解決する。
+<li> 自明な参照は自動的に解決される。
+</ul>
+</div>
+
+<div class=page>
+<h1>5. C++ における RAII</h1>
+<blockquote><pre>
+main() {
+  file f("hello.txt");  <span class=comment>// ファイルが開かれる。</span>
+  string s(f.read());   <span class=comment>// 文字列が初期化される。</span>
+  cout &lt;&lt; s &lt;&lt; endl;
+  <span class=comment>// f, s が自動的に解放される。</span>
+}
+</pre></blockquote>
+<ul>
+<li> RAII (Resource Acquisition Is Initialization)
+<ul> 
+<li> 変数ができたのと同時に初期化されている。
+<li> 変数がスコープから外れるのと同時に解放される。
+</ul>
+<li> 厳密なRAIIでは、ポインタがNULLになることはない。
+</ul>
+</div>
+
+<div class=page>
+<h1>5. RustにおけるRAII</h1>
+<blockquote><pre>
+fn main() {
+  {
+    let q = Box::new(Point { x:2, y:3 });
+    println!("q={},{}", q.x, q.y);
+    <span class=comment>// q は勝手に解放される。</span>
+  }
+  println!("q={},{}", q.x, q.y); <span class=error>// ERROR</span>
+}
+</pre></blockquote>
+<ul>
+<li> Rustでは、厳密なRAIIを使っている。
+<li> よってNULLポインタが存在しない。
+<li> GCは使っていない。
+</ul>
+</div>
+
+<div class=page>
+<h1>6. 余談: Option型</h1>
+<blockquote><pre>
+fn main()
+{
+  let s = Some(Point { x:2, y:3 });
+  <span class=comment>// または s = None;</span>
+  match s {
+    Some(p) =&gt; println!("p={},{}", p.x, p.y),
+    None    =&gt; println!("p=null"),
+  }
+}
+</pre></blockquote>
+<ul>
+<li> NULLを使うのではなく、「値があるとき」と「値がないとき」で別処理にすべき。
+</ul>
+</div>
+
+<div class=page>
+<h2>Swiftの場合</h2>
+<ul>
+<li> Swiftのoptional型はやや限定されている。「<code>nil</code>かどうか」しか判定できない。
+<blockquote><pre>
+let s: Point?
+if let p = s {
+   print("p=\(p.x),\(p.y)")
+} else {
+   print("p=null")
+}
+</pre></blockquote>
+</ul>
+</div>
+
+<div class=page>
+<h1>7. ここまでの復習</h1>
+<ul>
+<li> <s>NULL参照</s> (RAII, Option型)
+<li> Double free
+<li> Dangling pointer
+</ul>
+</div>
+
+<div class=page>
+<h1>8. C++では…</h1>
+<blockquote><pre>
+show(Point* p) {
+  printf("p=%d,%d\n", p-&gt;x, p-&gt;y);
+  delete p;
+}
+
+main() {
+  Point* p = new Point(2, 3);
+  show(p);
+  delete p;  <span class=error>// Double free</span>
+}
+</pre></blockquote>
+</div>
+
+<div class=page>
+<h1>9. Rustでは…</h1>
+<blockquote><pre>
+fn show(p: Box&lt;Point&gt;) {
+  println!("p={},{}", p.x, p.y);
+  <span class=comment>// RAIIにより勝手に解放される。</span>
+}
+
+fn main() {
+  let p = Box::new(Point { x:2, y:3 });
+  show(p);  <span class=comment>// pの所有権がshowに移る。</span>
+}
+</pre></blockquote>
+<ul>
+<li> Rust では、すべての値に<mark>所有権</mark>という概念が存在する。
+</ul>
+</div>
+
+<div class=page>
+<h1>10. Rustでは…</h1>
+<blockquote><pre>
+fn show(p: Box&lt;Point&gt;) {
+  println!("p={},{}", p.x, p.y);
+}
+
+fn main() {
+  let p = Box::new(Point { x:2, y:3 });
+  show(p);
+  <span class=comment>// この時点で、pはすでにmainのものではない。</span>
+  println!("area={}", p.x * p.y); <span class=error>// ERROR</span>
+}
+</pre></blockquote>
+<ul>
+<li> 所有権を渡したらもうアクセスできない。
+<li> 所有権の移動はコンパイル時に静的に決定される。
+     (GCは使わない)
+</ul>
+</div>
+
+<div class=page>
+<h1>11. 所有権つづき</h1>
+<blockquote><pre>
+fn alloc() -&gt; Box&lt;Point&gt; {
+  let p = Box::new(Point { x:2, y:3 });
+  <span class=comment>// 所有権を返す。</span>
+  return p;
+}
+
+fn main() {
+  let p = alloc();  <span class=comment>// 所有権を得る。</span>
+  println!("p={},{}", p.x, p.y);
+  <span class=comment>// RAIIにより解放。</span>
+}
+</pre></blockquote>
+<ul>
+<li> 所有権は呼び出し先 → 呼び出し元に移動することもある。
+</ul>
+</div>
+
+<div class=page>
+<h1>12. データの共有</h1>
+<blockquote><pre>
+fn show(p: &amp;Box&lt;Point&gt;) {  <span class=comment>// pは借り物。</span>
+  println!("p={},{}", p.x, p.y);
+}
+
+fn main() {
+  let p = Box::new(Point { x:2, y:3 });
+  show(p);
+  println!("area={}", p.x * p.y);
+  <span class=comment>// RAIIにより解放。</span>
+}
+</pre></blockquote>
+<ul>
+<li> <code>&amp;</code> がついた型は「借り物 (borrow)」であることを表す。
+<li> 借り物は勝手に解放しない。
+<li> 所有者 (解放する責任者) はつねに1人だけ。
+</ul>
+</div>
+
+<div class=page>
+<h1>13. また貸し</h1>
+<blockquote><pre>
+fn area(p: Box&lt;Point&gt;) -&gt; i32 { <span class=comment>// 本物</span>
+  return p.x * p.y;
+}
+fn show(p: &amp;Box&lt;Point&gt;) { <span class=comment>// 借り物</span>
+  println!("p={},{}", p.x, p.y);
+  println!("area={}", area(p)); <span class=error>// ERROR</span>
+}
+
+fn main() {
+  let p = Box::new(Point { x:2, y:3 });
+  show(p);
+  <span class=comment>// 所有者はまだ俺。</span>
+}
+</pre></blockquote>
+<ul>
+<li> 「借り物」の所有権を渡すことはできない。
+</ul>
+</div>
+
+<div class=page>
+<h1>14. ちなみに…</h1>
+<blockquote><pre>
+fn main() {
+  let p = Point { x:2, y :3 };
+  println!("p={},{}", p.x, p.y);
+  let q = p;
+  println!("area={}", p.x * p.y); <span class=error>// ERROR</span>
+}  
+</pre></blockquote>
+<ul>
+<li> たんに参照を代入しただけでも所有権は移動する。
+<li> 参照型でない値 (=intなど) はコピーされる。
+</ul>
+</div>
+
+<div class=page>
+<h1>15. ここまでの復習</h1>
+<ul>
+<li> <s>NULL参照</s> (RAII, Option型)
+<li> <s>Double free</s> (所有権)
+<li> Dangling pointer
+</ul>
+</div>
+
+<div class=page>
+<h1>16. C/C++ では…</h1>
+<blockquote><pre>
+class Foo {
+  Point* p;
+public:
+  Foo(Point* p) {
+    this-&gt;p = p;
+  }
+};
+
+main() {
+  Point* p = new Point(2,3);
+  Foo* foo = new Foo(p);
+  delete p;
+  <span class=error>// foo-&gt;p は Dangling</span>
+}
+</pre></blockquote>
+</div>
+
+<div class=page>
+<h1>17. Rustでは…</h1>
+<blockquote><pre>
+struct Foo {
+  pt: Box&lt;Point&gt;,  <span class=comment>// 所有権をもつ。</span>
+}
+
+fn main() {
+  let p = Box::new(Point { x:2, y:3 });
+  <span class=comment>// pの所有権は foo内に移動する。</span>
+  let foo = Foo { pt:p };
+  println!("p={},{}", p.x, p.y); <span class=error>// ERROR</span>
+  <span class=comment>// fooが解放されると p も解放される。</span>
+}
+</pre></blockquote>
+<ul>
+<li> 所有権を移動する場合は簡単。
+</ul>
+</div>
+
+<div class=page>
+<h1>18. どーなんの?</h1>
+<blockquote><pre>
+struct Foo {
+  pt: &amp;Box&lt;Point&gt;,  <span class=comment>// 借り物</span>
+}
+fn alloc(&amp;Box&lt;Point&gt;) -&gt; Foo {
+  return Foo { pt:p };  <span class=comment>// 借り物が入った本物</span>
+}
+
+fn main() {
+  let p = Box::new(Point { x:2, y:3 });
+  let foo = alloc(&amp;p);
+  println!("p={},{}", p.x, p.y); <span class=comment>// OKのはず</span>
+}
+</pre></blockquote>
+<ul>
+<li> もし <code>foo</code> が <code>p</code> よりも長生きしたら…?
+<li> (この例はコンパイル不可。)
+</ul>
+</div>
+
+<div class=page>
+<h1>19. 生存期間という考え</h1>
+<blockquote><pre>
+struct Foo {
+  pt: &amp;Box&lt;Point&gt;,  <span class=comment>// 借り物</span>
+}
+</pre></blockquote>
+<ul>
+<li> 「借り物」が入った <code>Foo</code> は、借り物が有効な間しか有効ではない。
+<li> つまり <code>Foo</code> は、一生有効な型ではなく、
+     「限られた期間だけ」有効な型と考えられる。
+<li> この「限られた期間」は、借り物の有効期間に依存する。
+     つまり <code>Foo</code> はパラメータ化された型なのである。
+<li> このパラメータのことを「<mark>生存期間</mark> (lifetime)」と呼ぶ。
+</ul>
+</div>
+
+<div class=page>
+<h1>20. 生存期間識別子</h1>
+<blockquote><pre>
+struct Foo&lt;'a&gt; {
+  <span class=comment>// pt は、少なくとも Foo本体と期間は生きる。</span>
+  pt: &amp;'a Box&lt;Point&gt;,
+}
+
+<span class=comment>// 「与えられた p と同じ期間は生きる Foo」を返す。</span>
+fn alloc&lt;'a&gt;(p: &amp;'a Box&lt;Point&gt;) -&gt; Foo&lt;'a&gt; {
+  return Foo { pt:p };
+}
+</pre></blockquote>
+<ul>
+<li> 生存期間識別子は <code>'a</code>, <code>'b</code> のように表す。
+<li> 生存期間は型をさらに限定するという意味で
+  <code>&lt;</code>...<code>&gt;</code> が使われている。
+<li> ただし、これは呼び出し時に明示的に指定する必要はない。
+     (コンパイラが勝手に推測する)
+<li> 生存期間が必要なのは「借り物」に対してのみ。
+</ul>
+</div>
+
+<div class=page>
+<h1>21. 生存期間識別子の省略</h1>
+<blockquote><pre>
+struct Foo&lt;'a&gt; {
+  pt: &amp;'a Box&lt;Point&gt;,
+}
+<span class=comment>// 簡略版。</span>
+fn alloc(p: &amp;Box&lt;Point&gt;) -&gt; Foo {
+  return Foo { pt:p };
+}
+</pre></blockquote>
+<ul>
+<li> 生存期間がすべて同じ場合は、引数の識別子は省略できる。
+(ただし <code>Foo</code> 構造体の定義では省略不可)
+</ul>
+</div>
+
+<div class=page>
+<h1>22.複数の生存期間</h1>
+<blockquote><pre>
+<span class=comment>// 「与えられた p と同じ期間は生きる Foo」を返す。</span>
+<span class=comment>// でも q は関係ないので別の生存期間。</span>
+fn alloc&lt;'a&gt;(p: &amp;'a Box&lt;Point&gt;, 
+             q: &amp;'b Box&lt;Point&gt;) -&gt; Foo&lt;'a&gt; {
+  println!("q={},{}", q.x, q.y);
+  return Foo { pt:p };
+}
+</pre></blockquote>
+</div>
+
+<div class=page>
+<h1>23. まとめ</h1>
+<ul>
+<li> <s>NULL参照</s> (RAII, Option型)
+<li> <s>Double free</s> (所有権)
+<li> <s>Dangling pointer</s> (生存期間)
+</ul>
+<ul>
+<li> Rustは、いままでC/C++プログラマが
+無意識に使っていた概念を型システムとして
+定式化させたといえる。
+<li> 機械的にチェックできるのでミスは減るが、学習はめんどう。
+<li> Mozilla はこれでFirefoxを安全に書き直そうとしている。
+</ul>
+</div>
+
+<div class=page>
+<h1>24. 余談: 並列化への応用</h1>
+<ul>
+<li> Java/Erlangと違って、Rustはネイティブのthreadを使っている。
+<li> スレッドに関する問題にも所有権を使って対応している:
+  <ul>
+    <li> <code>channel</code> … メッセージ送受信に使う。
+      一旦メッセージを送ったら、そのデータの所有権は移動する。
+    <li> <code>ARC</code> … 借り物を共有するときに使われる
+      排他制御 + 参照カウンタつきスマートポインタ。
+    <li> <code>RC</code> … 所有権を移動するときに使われる
+      参照カウンタつきスマートポインタ。
+  </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>25. 余談: ほかのCライブラリとの共存</h1>
+<ul>
+<li> システムプログラミング言語なので、既存のライブラリと ABI が同じ。
+<li> 逃げ道: <code>unsafe { ... }</code> で囲んだ部分は、所有権・生存期間の規則を無視できる。
+</ul>
+</div>
