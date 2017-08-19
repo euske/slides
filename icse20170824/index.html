@@ -1,0 +1,360 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>Hierarchical Program Paths - ICSE Reading 2017</title>
+<style><!--
+.s { font-size: 75%; }
+.t td,th { padding: 0.2em; border: 2px solid; }
+.h { font-size: 75%; }
+.hh { font-size: 50%; font-weight: bold; }
+td.n { text-align: right; }
+.figure { text-align: center; }
+.blpt { background: #cccccc; }
+.hpptree { background: #ff8800; }
+.hppdag { background: #00ff00; }
+--></style>
+</head>
+<body>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center>Hierarchical Program Paths<br>
+<div class=s>Chunbai Yang,<br>Shangru Wi and<br>W. K. Chan</div>
+<div class=s style="margin-top:1em; line-height: 120%; border: 2px solid; padding: 0.2em; background: #ff88ff;">
+概要: 実行された命令の<u>完全な</u><br>
+トレースを効率よく保存する。
+</div>
+</td></tr>
+</table>
+<div class=bottomright style="line-height:100%;">発表者: 新山 (東工大, 権藤研)<br>
+<a href="https://github.com/euske/">github.com/euske</a>
+</div>
+</div>
+
+<div class=page>
+<h1>やったこと</h1>
+<ul>
+<li> 実行された命令の<u>完全な</u>トレースを効率よく保存する。
+  <ul>
+    <li> <span style="font-size:80%;">0, 1, 2, 3, 4, 7, 945, 946, 950, 952, 8, 9, ...</span>
+  </ul>
+<li> 従来手法の問題: 
+  <ul>
+    <li> 完全な記録をとるとデータ量が膨大:<br>
+      4バイト × 1G命令/s × 2スレッド = 8GB/s<br>
+      <div class=s style="line-height:150%;">(参考: フルHD動画 60fps 無圧縮 = 373MB/s,<br>
+	&nbsp;&nbsp; SATA 理論値: 2GB/s, USB3 理論値: 625MB/s)</div>
+    <li> 数値の羅列として圧縮すると、解析がめんどう。
+  </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>基本的なアイデア</h1>
+<p>
+ほとんどのプログラムでは同じ部分が何度も実行される。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="700" height="360">
+  <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="4" markerHeight="4" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g fill="none" stroke="black" stroke-width="2" 
+     transform="translate(352.5,42.5)">
+    <circle cx="-310" cy="280" r="30" fill="#ffff22" />
+    <circle cx="-240" cy="280" r="30" fill="#ffff22" />
+    <circle cx="-160" cy="280" r="30" fill="#ffff22" />
+    <circle cx="-90" cy="280" r="30" fill="#ffff22" />
+    <circle cx="-20" cy="280" r="30" fill="#ffff22" />
+    <path d="M70,310 l-30,-60 l60,0 l-30,60" fill="#00ffff" />
+    <path d="M140,310 l-30,-60 l60,0 l-30,60" fill="#00ffff" />
+    <circle cx="240" cy="280" r="30" fill="#ffff22" />
+    <circle cx="310" cy="280" r="30" fill="#ffff22" />
+    <g marker-end="url(#arrow)" stroke-width="4">
+      <line x1="0" y1="0" x2="-210" y2="96" />
+      <line x1="0" y1="0" x2="-70" y2="96" />
+      <line x1="0" y1="0" x2="90" y2="96" />
+      <line x1="0" y1="0" x2="230" y2="96" />
+      <line x1="-260" y1="140" x2="-300" y2="250" />
+      <line x1="-260" y1="140" x2="-240" y2="250" />
+      <line x1="-80" y1="140" x2="-140" y2="250" />
+      <line x1="-80" y1="140" x2="-90" y2="250" />
+      <line x1="-80" y1="140" x2="-30" y2="250" />
+      <line x1="100" y1="140" x2="70" y2="250" />
+      <line x1="100" y1="140" x2="140" y2="250" />
+      <line x1="280" y1="140" x2="250" y2="250" />
+      <line x1="280" y1="140" x2="310" y2="250" />
+    </g>
+    <ellipse cx="0" cy="0" rx="60" ry="40" fill="#ff8800" />
+    <rect x="-300" y="100" width="80" height="80" fill="#00ff00" />
+    <rect x="-120" y="100" width="80" height="80" fill="#00ff00" />
+    <path d="M100,100 l-40,80 l80,0 l-40,-80" fill="#4444ff" />
+    <rect x="240" y="100" width="80" height="80" fill="#00ff00" />
+  </g>
+  <g text-anchor="middle" style="font-size:50%;">
+    <text x="200" y="100">1</text>
+    <text x="300" y="100">2</text>
+    <text x="420" y="100">3</text>
+    <text x="500" y="100">4</text>
+    <text x="50" y="260">1</text>
+    <text x="120" y="260">2</text>
+    <text x="220" y="260">1</text>
+    <text x="280" y="260">2</text>
+    <text x="320" y="260">3</text>
+    <text x="420" y="260">1</text>
+    <text x="490" y="260">2</text>
+    <text x="600" y="260">1</text>
+    <text x="670" y="260">2</text>
+  </g>
+</svg>
+</div>
+</div>
+
+<div class=page>
+<h1>基本的なアイデア</h1>
+<p>
+共通する部分を DAG としてまとめる。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="700" height="360">
+  <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="4" markerHeight="4" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g fill="none" stroke="black" stroke-width="2" 
+     transform="translate(352.5,42.5)">
+    <circle cx="-140" cy="280" r="30" fill="#ffff22" />
+    <path d="M140,310 l-30,-60 l60,0 l-30,60" fill="#00ffff" />
+    <g marker-end="url(#arrow)" stroke-width="4">
+      <line x1="0" y1="0" x2="-150" y2="96" />
+      <line x1="0" y1="0" x2="-20" y2="96" />
+      <line x1="0" y1="0" x2="110" y2="96" />
+      <path d="M0,0 Q400,40,-140,100" />
+      <path d="M-200,160 Q-150,180,-150,250" />
+      <path d="M-200,140 Q-240,250,-170,260" />
+      <path d="M-20,140 Q-120,160,-130,250" />
+      <path d="M-20,140 Q-60,220,-110,260" />
+      <path d="M0,140 Q-20,250,-110,280" />
+      <path d="M120,140 Q80,200,120,250" />
+      <path d="M120,140 Q160,200,150,250" />
+    </g>
+    <ellipse cx="0" cy="0" rx="60" ry="40" fill="#ff8800" />
+    <rect x="-240" y="100" width="80" height="80" fill="#00ff00" />
+    <rect x="-60" y="100" width="80" height="80" fill="#00ff00" />
+    <path d="M120,100 l-40,80 l80,0 l-40,-80" fill="#4444ff" />
+  </g>
+  <g text-anchor="middle" style="font-size:50%;">
+    <text x="240" y="100">1</text>
+    <text x="330" y="100">2</text>
+    <text x="420" y="90">3</text>
+    <text x="460" y="50">4</text>
+    <text x="125" y="260">1</text>
+    <text x="180" y="260">2</text>
+    <text x="245" y="260">1</text>
+    <text x="300" y="270">2</text>
+    <text x="330" y="280">3</text>
+    <text x="440" y="260">1</text>
+    <text x="520" y="260">2</text>
+  </g>
+</svg>
+</div>
+<p>
+<u>階層構造</u>を反映 = "<u>Hierarchical</u> Program Paths"
+</div>
+
+<div class=page>
+<h1>処理の流れ</h1>
+<ol>
+<li> プログラムを、呼び出しを含まない
+  直列な部分 (BL path) に分割し、実行時にそのIDを記録する。
+<li> 呼び出しを子ノードとして記録する (<span style="background:#ff8800">HPPTree</span>)。
+<li> 木構造をまとめて DAG にする (<Span style="background:#00ff00">HPPDAG</span>)。<br>
+  [2. と 3. は同時に実行可能。]
+</ol>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="730" height="200">
+  <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="4" markerHeight="4" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g transform="translate(12,2)">
+  <g fill="none" stroke="black" stroke-width="3">
+    <ellipse cx="200" cy="30" rx="60" ry="30" fill="#cccccc" />
+    <ellipse cx="50" cy="150" rx="60" ry="30" fill="#cccccc" />
+    <rect x="150" y="110" width="100" height="80" fill="#00ffff" />
+    <ellipse cx="350" cy="150" rx="60" ry="30" fill="#ff8800" />
+    <rect x="450" y="110" width="100" height="80" fill="#00ffff" />
+    <ellipse cx="650" cy="150" rx="60" ry="30" fill="#00ff00" />
+    <g marker-end="url(#arrow)" stroke-width="5">
+      <path d="M115,150 l20,0" />
+      <path d="M255,150 l20,0" />
+      <path d="M415,150 l20,0" />
+      <path d="M555,150 l20,0" />
+      <path d="M200,65 l0,30" />
+    </g>
+  </g>
+   <g text-anchor="middle" style="font-size:60%;">
+    <text x="200" y="30" dy="0.5em">Program</text>
+    <text x="50" y="150" dy="0.5em">Test Case</text>
+    <text x="350" y="150" dy="0.5em">HPPTree</text>
+    <text x="650" y="150" dy="0.5em">HPPDAG</text>
+   </g>
+  </g>
+</svg>
+</div>
+</div>
+
+<div class=page>
+<h2>BL Path の例</h2>
+<div style="position:relative; height:510px;">
+<div style="position:absolute; right: 0.5em;">
+<div style="font-size: 75%; line-height: 120%; margin-bottom:0.5em; ">
+"1,2,3,4,1,2,3,5,<br>
+&nbsp;&nbsp;2,6,7,5,2,6,7,9,8,…"
+</div>
+<table border class=t style="font-size:100%; font-family: monospace;">
+<tr><th colspan="2">BL path</th></tr>
+<tr><td>id<sub>1</sub></td><td>"1,2,3,4,5"</td></tr>
+<tr><td>id<sub>2</sub></td><td>"2,6,7,8"</td></tr>
+<tr><td>id<sub>3</sub></td><td>"1,2,3,5"</td></tr>
+<tr><td>id<sub>4</sub></td><td>"2,6,8"</td></tr>
+<tr><td>id<sub>5</sub></td><td>"9"</td></tr>
+<tr><td>...</td><td>...</td></tr>
+</table>
+</div>
+<div style="position:absolute; left: 0.5em;">
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="504">
+  <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="4" markerHeight="4" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <marker id="arrow2" viewBox="-3 -3 6 6" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M-2,-2 L2,0 L-2,2" stroke="black" fill="none" stroke-width="1" />
+  </marker>
+  <g transform="translate(20.5,70.5)">
+   <g fill="none" stroke="black" stroke-width="2">
+    <g fill="#ffff22">
+     <rect x="100" y="0" width="50" height="50" />
+     <rect x="100" y="80" width="50" height="50" />
+     <rect x="100" y="160" width="50" height="50" />
+     <rect x="40" y="230" width="50" height="50" fill="#00ff00" />
+     <rect x="100" y="320" width="50" height="50" />
+     <rect x="240" y="160" width="50" height="50" />
+     <rect x="300" y="230" width="50" height="50" fill="#00ff00" />
+     <rect x="240" y="320" width="50" height="50" />
+     <rect x="420" y="40" width="50" height="50" />
+    </g>
+    <g marker-end="url(#arrow)" stroke-width="3">
+      <path d="M125,-30 l0,24" />
+      <path d="M125,50 l0,24" />
+      <path d="M125,130 l0,24" />
+      <path d="M125,210 l0,104" />
+      <path d="M100,185 l-35,0 l0,38" />
+      <path d="M65,280 l0,20 l50,0" />
+      <path d="M125,370 l0,20 l-110,0 l0,-285 l78,0" />
+      <path d="M150,105 l115,0 l0,48" />
+      <path d="M265,210 l0,104" />
+      <path d="M290,185 l35,0 l0,38" />
+      <path d="M325,280 l0,20 l-50,0" />
+      <path d="M265,370 l0,24" />
+      <path d="M445,10 l0,24" />
+      <path d="M445,90 l0,24" />
+    </g>
+    <g marker-end="url(#arrow2)" stroke-width="2" stroke-dasharray="4,4">
+      <path d="M40,245 l-50,0 l0,-295 l110,0" />
+      <path d="M220,420 l-230,0 l0,-155 l44,0" />
+      <path d="M350,245 l30,0 l0,-255 l40,0" />
+      <path d="M445,160 l0,105 l-91,0" />
+    </g>
+   </g>
+   <g text-anchor="middle" style="font-size:75%;">
+    <text x="125" y="-40">A</text>
+    <text x="265" y="430">EXIT</text>
+    <text x="445" y="0">B</text>
+    <text x="445" y="150">EXIT</text>
+   </g>
+   <g text-anchor="middle" style="font-size:50%;">
+    <text x="125" y="25" dy="0.5em">1</text>
+    <text x="125" y="105" dy="0.5em">2</text>
+    <text x="125" y="185" dy="0.5em">3</text>
+    <text x="65" y="255" dy="0.5em">4</text>
+    <text x="125" y="345" dy="0.5em">5</text>
+    <text x="265" y="185" dy="0.5em">6</text>
+    <text x="325" y="255" dy="0.5em">7</text>
+    <text x="265" y="345" dy="0.5em">8</text>
+    <text x="445" y="65" dy="0.5em">9</text>
+   </g>
+   <g text-anchor="middle" style="font-size:40%;">
+    <text x="190" y="425" dy="0.5em">return</text>
+    <text x="40" y="-64" dy="0.5em">call</text>
+    <text x="420" y="270" dy="0.5em">return</text>
+    <text x="400" y="-25" dy="0.5em">call</text>
+   </g>
+  </g>
+</svg>
+</div>
+</div>
+</div>
+
+<!--
+<div class=page>
+<h2>エッジケースの処理</h2>
+<ul>
+<li> 異常終了: 定期的にチェックポイントを挿入することで対処。
+<li> ライブラリ (非トレース) からのコールバック:<br>
+  特別なノードを作成して対処。
+<li> 未サポート: <code>setjmp()</code>, <code>longjmp()</code>, <code>fork()</code>
+</ul>
+</div>
+-->
+
+<div class=page>
+<h1>評価</h1>
+<ul>
+<li> 既存手法 (BLPT) と速度およびサイズを比較。
+<li> 速度はほぼ同じ、HPPDAG は高圧縮。
+</ul>
+<div class=figure>
+<table border align=center class=t style="font-size:80%;">
+<tr><th rowspan="2">名前</th><th rowspan="2">コード量</th><th colspan="3">実行時間 (秒)</th><th colspan="3">トレース量 (GB)</th></tr>
+<tr><th class=h>ネイティブ</th><th class="h blpt">BLPT</th><th class="h hpptree">HPPTree</th>
+<th class="h blpt">BLPT</th><th class="h hpptree">HPPTree</th><th class="h hppdag">HPPDAG</th></tr>
+<tr><td class=hh>- SPLASH2 -</td><td></td><td></td><td class=blpt></td><td class=hpptree></td><td class=blpt></td><td class=hpptree></td><td class=hppdag></td></tr>
+<tr><td>ocean-ncp</td><td class=n>733</td>
+<td class=n>12.6</td><td class="n blpt">110.6</td><td class="n hpptree">87.7</td>
+<td class="n blpt">5.5</td><td class="n hpptree">4.0</td><td class="n hppdag">0.02</td><tr>
+<tr><td>raytrace</td><td class=n>1,133</td>
+<td class=n>12.8</td><td class="n blpt">311.6</td><td class="n hpptree">305.7</td>
+<td class="n blpt">16.1</td><td class="n hpptree">13.7</td><td class="n hppdag">0.10</td><tr>
+<tr><td class=hh>- SPECint 2006 -</td><td></td><td></td><td class=blpt></td><td class=hpptree></td><td class=blpt></td><td class=hpptree></td><td class=hppdag></td></tr>
+<tr><td>400.perlbench</td><td class=n>17,058</td>
+<td class=n>5.7</td><td class="n blpt">62.2</td><td class="n hpptree">55.2</td>
+<td class="n blpt">4.7</td><td class="n hpptree">3.9</td><td class="n hppdag">0.04</td><tr>
+<tr><td>403.gcc</td><td class=n>164,315</td>
+<td class=n>3.2</td><td class="n blpt">51.2</td><td class="n hpptree">44.7</td>
+<td class="n blpt">3.7</td><td class="n hpptree">2.9</td><td class="n hppdag">0.30</td><tr>
+<tr><td>445.gobmk</td><td class=n>27,726</td>
+<td class=n>8.3</td><td class="n blpt">92.6</td><td class="n hpptree">82.5</td>
+<td class="n blpt">6.9</td><td class="n hpptree">5.9</td><td class="n hppdag">1.45</td><tr>
+<tr><td>464.h264ref</td><td class=n>9,109</td>
+<td class=n>34.1</td><td class="n blpt">435.3</td><td class="n hpptree">407.3</td>
+<td class="n blpt">32.4</td><td class="n hpptree">28.7</td><td class="n hppdag">2.29</td><tr>
+</table>
+</div>
+</div>
+
+<div class=page>
+<h1>まとめ</h1>
+<ul>
+<li> 実行時の<u>完全な</u>トレースを効率よく保存する手法を開発。
+<li> 評価および応用例を示した。
+</ul>
+<h2>個人的な感想</h2>
+<ul>
+<li> 「完全なトレースの保存」がそんな重要問題とは知らなかった。
+<li> 手法・実験はよく書けている。
+</ul>
+</div>
