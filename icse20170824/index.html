@@ -3,7 +3,8 @@
 <link rel="stylesheet" type="text/css" href="./slides.css">
 <title>Hierarchical Program Paths - ICSE Reading 2017</title>
 <style><!--
-.s { font-size: 75%; }
+.s { font-size: 95%; }
+.summary { font-size: 75%; margin: 1.0em; line-height: 120%; border: 2px solid; padding: 0.2em; background: #ff88ff; text-align: center;}
 .t td,th { padding: 0.2em; border: 2px solid; }
 .h { font-size: 75%; }
 .hh { font-size: 50%; font-weight: bold; }
@@ -18,31 +19,33 @@ td.n { text-align: right; }
 
 <div class=page>
 <table align=center class=fill>
-<tr><td align=center valign=center>Hierarchical Program Paths<br>
-<div class=s>Chunbai Yang,<br>Shangru Wi and<br>W. K. Chan</div>
-<div class=s style="margin-top:1em; line-height: 120%; border: 2px solid; padding: 0.2em; background: #ff88ff;">
-概要: 実行された命令の<u>完全な</u><br>
+<tr><td valign=center>
+<div style="margin-left: 1em;">
+<div style="margin-bottom:0.5em;">Hierarchical Program Paths</div>
+<div style="font-size: 75%;">Chunbai Yang,<br>Shangru Wi and<br>W. K. Chan</div>
+</div>
+<div class=summary>
+概要: 実行された命令の完全な<br>
 トレースを効率よく保存する。
 </div>
 </td></tr>
 </table>
-<div class=bottomright style="line-height:100%;">発表者: 新山 (東工大, 権藤研)<br>
-<a href="https://github.com/euske/">github.com/euske</a>
+<div class=bottomright style="line-height:100%;">紹介者: 新山 祐介 (東工大, 権藤研)
 </div>
 </div>
 
 <div class=page>
 <h1>やったこと</h1>
 <ul>
-<li> 実行された命令の<u>完全な</u>トレースを効率よく保存する。
+<li> <span class=s>実行された命令の完全なトレースを効率よく保存する。</span>
   <ul>
-    <li> <span style="font-size:80%;">0, 1, 2, 3, 4, 7, 945, 946, 950, 952, 8, 9, ...</span>
+    <li> <span style="font-size:75%;"><code>0x00400024, 0x004000028, 0x00422ef8, 0x8fda9ace, ...</code></span>
   </ul>
 <li> 従来手法の問題: 
   <ul>
     <li> 完全な記録をとるとデータ量が膨大:<br>
-      4バイト × 1G命令/s × 2スレッド = 8GB/s<br>
-      <div class=s style="line-height:150%;">(参考: フルHD動画 60fps 無圧縮 = 373MB/s,<br>
+      例: 4バイト × 1G命令/s × 2スレッド = 8GB/s<br>
+      <div style="font-size:75%; line-height:120%;">(参考: フルHD動画 60fps 無圧縮 = 373MB/s,<br>
 	&nbsp;&nbsp; SATA 理論値: 2GB/s, USB3 理論値: 625MB/s)</div>
     <li> 数値の羅列として圧縮すると、解析がめんどう。
   </ul>
@@ -51,8 +54,7 @@ td.n { text-align: right; }
 
 <div class=page>
 <h1>基本的なアイデア</h1>
-<p>
-ほとんどのプログラムでは同じ部分が何度も実行される。
+<p><span class=s>ほとんどのプログラムでは同じ部分が何度も実行される。</span>
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg" 
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -166,11 +168,10 @@ td.n { text-align: right; }
 <div class=page>
 <h1>処理の流れ</h1>
 <ol>
-<li> プログラムを、呼び出しを含まない
-  直列な部分 (BL path) に分割し、実行時にそのIDを記録する。
+<li> プログラムを、呼び出しを含まない直列な部分<br>
+  (BL path) に分割し、実行時にそのIDを記録する。
 <li> 呼び出しを子ノードとして記録する (<span style="background:#ff8800">HPPTree</span>)。
 <li> 木構造をまとめて DAG にする (<Span style="background:#00ff00">HPPDAG</span>)。<br>
-  [2. と 3. は同時に実行可能。]
 </ol>
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg" 
@@ -200,6 +201,8 @@ td.n { text-align: right; }
     <text x="50" y="150" dy="0.5em">Test Case</text>
     <text x="350" y="150" dy="0.5em">HPPTree</text>
     <text x="650" y="150" dy="0.5em">HPPDAG</text>
+    <text x="200" y="150" dy="0.5em">Phase 1</text>
+    <text x="500" y="150" dy="0.5em">Phase 2</text>
    </g>
   </g>
 </svg>
@@ -212,7 +215,7 @@ td.n { text-align: right; }
 <div style="position:absolute; right: 0.5em;">
 <div style="font-size: 75%; line-height: 120%; margin-bottom:0.5em; ">
 "1,2,3,4,1,2,3,5,<br>
-&nbsp;&nbsp;2,6,7,5,2,6,7,9,8,…"
+&nbsp;&nbsp;2,6,8,5,2,6,7,9,8,…"
 </div>
 <table border class=t style="font-size:100%; font-family: monospace;">
 <tr><th colspan="2">BL path</th></tr>
@@ -299,7 +302,64 @@ td.n { text-align: right; }
 </div>
 </div>
 
-<!--
+<div class=nop>
+<div class=page>
+<h2>HPPTree の例</h2>
+<ul>
+<li> <code>"1,2,3,4,1,2,3,5,2,6,8,5,2,6,7,9,8,…"</code><br>
+  → <code>(1 2 3 4 (1 2 3 5) (2 6 8) 5) (2 6 7 (9) 8)</code>
+<li> 各呼び出しの直後に子の内容を挿入する。
+</ul>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="700" height="400">
+  <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="4" markerHeight="4" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g transform="translate(1,51)">
+   <g fill="none" stroke="black" stroke-width="2">
+    <g marker-end="url(#arrow)" stroke-width="3">
+      <path d="M400,0 l-100,70" />
+      <path d="M400,0 l+100,70" />
+      <path d="M250,100 l-25,50" />
+      <path d="M550,100 l+25,50" />
+      <path d="M200,200 l-50,70" />
+      <path d="M200,200 l+50,70" />
+      <path d="M600,200 l0,70" />
+    </g>
+    <g fill="#ffff22">
+     <ellipse cx="400" cy="0" rx="80" ry="40" fill="#00ff00" />
+     <rect x="150" y="75" width="200" height="50" />
+     <ellipse cx="200" cy="200" rx="80" ry="40" fill="#00ff00" />
+     <rect x="020" y="275" width="160" height="50" />
+     <rect x="220" y="275" width="160" height="50" />
+     <rect x="450" y="75" width="200" height="50" />
+     <ellipse cx="600" cy="200" rx="80" ry="40" fill="#00ff00" />
+     <rect x="550" y="275" width="100" height="50" />
+    </g>
+   </g>
+   <g text-anchor="middle" style="font-size:75%;">
+    <text x="400" y="0" dy="0.5em">call A</text>
+    <text x="250" y="100" dy="0.5em" style="font-family:monospace;">"1,2,3,4,5"</text>
+    <text x="200" y="200" dy="0.5em">call A</text>
+    <text x="550" y="100" dy="0.5em" style="font-family:monospace;">"2,6,7,8"</text>
+    <text x="600" y="200" dy="0.5em">call B</text>
+    <text x="100" y="300" dy="0.5em" style="font-family:monospace;">"1,2,3,5"</text>
+    <text x="300" y="300" dy="0.5em" style="font-family:monospace;">"2,6,8"</text>
+    <text x="600" y="300" dy="0.5em" style="font-family:monospace;">"9"</text>
+   </g>
+   <g fill="none" stroke="red" stroke-width="4">
+     <rect x="270" y="80" width="30" height="40" />
+     <rect x="550" y="80" width="30" height="40" />
+   </g>
+  </g>
+</svg>
+</div>
+</div>
+</div>
+
+<div class=nop>
 <div class=page>
 <h2>エッジケースの処理</h2>
 <ul>
@@ -309,7 +369,7 @@ td.n { text-align: right; }
 <li> 未サポート: <code>setjmp()</code>, <code>longjmp()</code>, <code>fork()</code>
 </ul>
 </div>
--->
+</div>
 
 <div class=page>
 <h1>評価</h1>
@@ -349,12 +409,16 @@ td.n { text-align: right; }
 <div class=page>
 <h1>まとめ</h1>
 <ul>
-<li> 実行時の<u>完全な</u>トレースを効率よく保存する手法を開発。
+<li> 実行時のトレースを効率よく保存する手法を開発。
 <li> 評価および応用例を示した。
+  <ul>
+    <li class=s> HPPDAG応用例: 「よく通る上位100 path を求めよ」
+  </ul>
 </ul>
 <h2>個人的な感想</h2>
 <ul>
-<li> 「完全なトレースの保存」がそんな重要問題とは知らなかった。
+<li> 「完全なトレースの保存」が<br>
+  それほど重要な問題とは知らなかった。
 <li> 手法・実験はよく書けている。
 </ul>
 </div>

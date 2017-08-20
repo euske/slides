@@ -3,6 +3,7 @@ body { margin: 0; }
 @media print {
     .page { height: 100%; margin: 0; padding: 0; }
     .fill { width: 100%; height: 80%; }
+    .nop { display: none; }
 }
 @media screen {
     .page { margin: 1em; padding: 2em; border: 1px solid gray; }
