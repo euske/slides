@@ -9,7 +9,7 @@ body { margin: 0; }
     .page { margin: 1em; padding: 2em; border: 1px solid gray; }
     .fill { }
 }
-.page { position: relative; }
+.page { position: relative; page-break-inside: avoid; }
 .fill td { font-size: 150%; }
 .bottomright { position: absolute; bottom: 0em; right: 0em; text-align: right; }
 .topleft { position: absolute; top: 1em; left: 1em; }

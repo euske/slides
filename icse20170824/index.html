@@ -3,7 +3,8 @@
 <link rel="stylesheet" type="text/css" href="./slides.css">
 <title>Hierarchical Program Paths - ICSE Reading 2017</title>
 <style><!--
-.s { font-size: 95%; }
+.s { font-size: 90%; }
+.ss { font-size: 80%; }
 .summary { font-size: 75%; margin: 1.0em; line-height: 120%; border: 2px solid; padding: 0.2em; background: #ff88ff; text-align: center;}
 .t td,th { padding: 0.2em; border: 2px solid; }
 .h { font-size: 75%; }
@@ -13,11 +14,14 @@ td.n { text-align: right; }
 .blpt { background: #cccccc; }
 .hpptree { background: #ff8800; }
 .hppdag { background: #00ff00; }
+.pid { position: absolute; top:0; right:0; padding: 4px; margin: 4px; background: red; color: white; font-size: 32px; }
+.cite { position: absolute; bottom:0; left:1em; padding: 0; margin: 8px; font-size: 18px; font-weight: bold; }
 --></style>
 </head>
 <body>
 
 <div class=page>
+<section class=pid>JF 9-4</section>
 <table align=center class=fill>
 <tr><td valign=center>
 <div style="margin-left: 1em;">
@@ -30,11 +34,13 @@ td.n { text-align: right; }
 </div>
 </td></tr>
 </table>
-<div class=bottomright style="line-height:100%;">紹介者: 新山 祐介 (東工大, 権藤研)
+<div class=bottomright style="line-height:120%;">ICSE勉強会 &nbsp; 2017年8月28日<br>
+紹介者: 新山 祐介 (東工大, 権藤研)
 </div>
 </div>
 
 <div class=page>
+<section class=pid>JF 9-4</section>
 <h1>やったこと</h1>
 <ul>
 <li> <span class=s>実行された命令の完全なトレースを効率よく保存する。</span>
@@ -53,6 +59,7 @@ td.n { text-align: right; }
 </div>
 
 <div class=page>
+<section class=pid>JF 9-4</section>
 <h1>基本的なアイデア</h1>
 <p><span class=s>ほとんどのプログラムでは同じ部分が何度も実行される。</span>
 <div class=figure>
@@ -114,9 +121,10 @@ td.n { text-align: right; }
 </div>
 
 <div class=page>
+<section class=pid>JF 9-4</section>
 <h1>基本的なアイデア</h1>
 <p>
-共通する部分を DAG としてまとめる。
+共通する部分を DAG としてまとめる → 高圧縮。
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg" 
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -166,6 +174,7 @@ td.n { text-align: right; }
 </div>
 
 <div class=page>
+<section class=pid>JF 9-4</section>
 <h1>処理の流れ</h1>
 <ol>
 <li> プログラムを、呼び出しを含まない直列な部分<br>
@@ -207,9 +216,11 @@ td.n { text-align: right; }
   </g>
 </svg>
 </div>
+<section class=cite>Source: 本文 Fig. 1 (pp. 27:3)</section>
 </div>
 
 <div class=page>
+<section class=pid>JF 9-4</section>
 <h2>BL Path の例</h2>
 <div style="position:relative; height:510px;">
 <div style="position:absolute; right: 0.5em;">
@@ -300,15 +311,16 @@ td.n { text-align: right; }
 </svg>
 </div>
 </div>
+<section class=cite>Source: 本文 Fig. 2 (pp. 27:6)</section>
 </div>
 
-<div class=nop>
 <div class=page>
+<section class=pid>JF 9-4</section>
 <h2>HPPTree の例</h2>
 <ul>
 <li> <code>"1,2,3,4,1,2,3,5,2,6,8,5,2,6,7,9,8,…"</code><br>
-  → <code>(1 2 3 4 (1 2 3 5) (2 6 8) 5) (2 6 7 (9) 8)</code>
-<li> 各呼び出しの直後に子の内容を挿入する。
+  → <code class=s>(1 2 3 4 (1 2 3 5) (2 6 8) 5) (2 6 7 (9) 8)</code>
+<!-- <li> 各呼び出しの直後に子の内容を挿入する。 -->
 </ul>
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg" 
@@ -356,11 +368,12 @@ td.n { text-align: right; }
   </g>
 </svg>
 </div>
-</div>
+<section class=cite>Source: 本文 Fig. 3 (pp. 27:7) を改変</section>
 </div>
 
 <div class=nop>
 <div class=page>
+<section class=pid>JF 9-4</section>
 <h2>エッジケースの処理</h2>
 <ul>
 <li> 異常終了: 定期的にチェックポイントを挿入することで対処。
@@ -372,14 +385,15 @@ td.n { text-align: right; }
 </div>
 
 <div class=page>
+<section class=pid>JF 9-4</section>
 <h1>評価</h1>
 <ul>
-<li> 既存手法 (BLPT) と速度およびサイズを比較。
-<li> 速度はほぼ同じ、HPPDAG は高圧縮。
+<li class=s> 既存手法 (BLPT) と速度およびサイズを比較。
+<li class=ss> 速度はほぼ同じ、HPPDAG は高圧縮 → オンメモリで解析可。
 </ul>
 <div class=figure>
 <table border align=center class=t style="font-size:80%;">
-<tr><th rowspan="2">名前</th><th rowspan="2">コード量</th><th colspan="3">実行時間 (秒)</th><th colspan="3">トレース量 (GB)</th></tr>
+<tr><th rowspan="2">名前</th><th class=s rowspan="2">コード量</th><th colspan="3">実行時間 (秒)</th><th colspan="3">トレース量 (GB)</th></tr>
 <tr><th class=h>ネイティブ</th><th class="h blpt">BLPT</th><th class="h hpptree">HPPTree</th>
 <th class="h blpt">BLPT</th><th class="h hpptree">HPPTree</th><th class="h hppdag">HPPDAG</th></tr>
 <tr><td class=hh>- SPLASH2 -</td><td></td><td></td><td class=blpt></td><td class=hpptree></td><td class=blpt></td><td class=hpptree></td><td class=hppdag></td></tr>
@@ -404,9 +418,11 @@ td.n { text-align: right; }
 <td class="n blpt">32.4</td><td class="n hpptree">28.7</td><td class="n hppdag">2.29</td><tr>
 </table>
 </div>
+<section class=cite>Source: 本文 Table I, III および IV (pp. 27:24-) を統合</section>
 </div>
 
 <div class=page>
+<section class=pid>JF 9-4</section>
 <h1>まとめ</h1>
 <ul>
 <li> 実行時のトレースを効率よく保存する手法を開発。
@@ -419,6 +435,7 @@ td.n { text-align: right; }
 <ul>
 <li> 「完全なトレースの保存」が<br>
   それほど重要な問題とは知らなかった。
-<li> 手法・実験はよく書けている。
+<li> 基本的なアイデアはわかりやすい。
+<li> 手法・実験は詳細に書いてある。
 </ul>
 </div>
