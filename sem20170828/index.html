@@ -1,0 +1,543 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>Meeting 2017/08/28</title>
+<style><!--
+--></style>
+</head>
+<body>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center>
+「パターンマッチングのための<br>
+データフローグラフ抽出器の実装」
+</td></tr>
+</table>
+<div class=bottomright>新山 祐介<br>2017/08/28 ミーティング資料</div>
+</div>
+
+<div class=page>
+<h1>研究の背景</h1>
+<ul>
+<li> 「ソースコードからの高水準な意味の自動抽出」
+<li> プログラム理解 (Program comprehension)
+<li> 究極の目標 (夢物語) :<br>
+  バイナリを入れると、どんな動きをするか解説してくれる。
+<li> 個人的には「プログラムの意味」に興味がある。<br>
+  「アルゴリズムが先か、データが先か?」
+</ul>
+</div>
+
+<div class=page>
+<h2>Research Question</h2>
+<div style="position: relative;">
+<ul style="width:70%;">
+<li> プログラムの変数に着目する:
+  <ol>
+    <li> 何を格納するものかを記述する。
+    <li> 使われ方 (生存時間、更新のタイミングなど) を説明する。
+    <li> 意味の「グラウンディング」として。
+  </ol>
+</ul>
+<pre style="position: absolute; right: 0; top: 0; width: 6em; height: 11em; border: 2px solid black; font-size: 28px; padding: 0.2em;">
+a = 100;
+b = 2;
+c = a + b;
+d = a * c;
+...
+</pre>
+</div>
+</div>
+
+<div class=page>
+<h2>例. 1</h2>
+<div style="position: relative;">
+<pre style="border: 2px solid black; font-size: 32px; padding: 0.2em; ">
+if (c == 1) {
+    <mark>b</mark> = <mark>b</mark> - 100;
+    a1 = a1 + 1;
+} else if (c == 2) {
+    <mark>b</mark> = <mark>b</mark> - 300;
+    a2 = a2 + 1;
+} else
+...
+</pre>
+</div>
+<ul>
+  <li> Q. 変数 <code>b</code> の役割は何か?
+</ul>
+</div>
+
+<div class=page>
+<h2>例. 1</h2>
+<div style="position: relative;">
+<pre style="border: 2px solid black; font-size: 32px; padding: 0.2em; ">
+if (choice == 1) {
+    <mark>money</mark> = <mark>money</mark> - 100;
+    item1 = item1 + 1;
+} else if (choice == 2) {
+    <mark>money</mark> = <mark>money</mark> - 300;
+    item2 = item2 + 1;
+} else
+...
+</pre>
+</div>
+<ul>
+  <li> <code>money</code> : あらゆる商品と交換が可能。
+</ul>
+</div>
+
+<div class=page>
+<h2>例. 2</h2>
+<div style="position: relative;">
+<pre style="border: 2px solid black; font-size: 32px; padding: 0.2em; ">
+if (x) {
+    <mark>y</mark> = <mark>y</mark> - 1;
+}
+if (y == 0) {
+    g();
+}
+...
+</pre>
+</div>
+<ul>
+  <li> Q. 変数 <code>y</code> の役割は何か?
+</ul>
+</div>
+
+<div class=page>
+<h2>例. 2</h2>
+<div style="position: relative;">
+<pre style="border: 2px solid black; font-size: 32px; padding: 0.2em; ">
+if (hit) {
+    <mark>life</mark> = <mark>life</mark> - 1;
+}
+if (life == 0) {
+    gameover();
+}
+...
+</pre>
+<div style="position: absolute; top: 0; right: 0; text-align: right; line-height: 100%;"><img src="https://vignette4.wikia.nocookie.net/mkwikia/images/9/9a/Fatality2.png"><div class=caption><a href="http://mortalkombat.wikia.com/wiki/Fatality">Motral Kombat Wiki</a></div></div>
+</div>
+<ul>
+  <li> <code>life</code> : 攻撃を受けるたびに減る。<br>
+    ゼロになるとゲームオーバー。
+</ul>
+</div>
+
+
+<div class=page>
+<h1>基本的なアイデア</h1>
+<ul>
+  <li> ソースコードを<br>
+    データフローグラフに変換する。
+<pre style="width: 50%; border: 2px solid black; padding: 0.2em;">
+pow(x, y) {
+    z = 1;
+    while (0 < y) {
+        z *= x;
+        y -= 1;
+    }
+    return z;
+}
+</pre>
+</ul>
+<div class="bottomright">
+  <img height="500" src="dfaaa.svg">
+</div>
+</div>
+
+<div class=page>
+<h2>パターンマッチング</h2>
+<ul>
+<li> 大規模コーパスから対応関係を学習する。
+<div style="position:relative;" class=figure>
+<pre style="position: absolute; left:600px; top:50px; width: 8.4em; height: 8em; border: 2px solid black; font-size: 20px; padding: 0.2em;">
+if (c == 1) {
+    b = b - 10
+    a1 = a1 + 
+} else if (c =
+    ...
+</pre>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="700" height="300">
+  <marker id="rarrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="red" stroke="none" />
+  </marker>
+  <defs>
+    <g id="graph" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,0 L60,70 M120,10 L60,70 L100,140" stroke-width="4" />
+      <ellipse cx="0" cy="0" rx="40" ry="20" fill="white" />
+      <ellipse cx="120" cy="10" rx="40" ry="20" fill="white" />
+      <ellipse cx="60" cy="70" rx="40" ry="20" fill="white" />
+      <ellipse cx="100" cy="140" rx="40" ry="20" fill="white" />
+    </g>
+  </defs>
+  <g fill="none" stroke="black" stroke-width="4">
+    <ellipse cx="84" cy="260" rx="80" ry="20" />
+    <rect x="4" y="60" width="160" height="200" stroke="none" fill="white" />
+    <line x1="4" x2="4" y1="60" y2="260" />
+    <line x1="164" x2="164" y1="60" y2="260" />
+    <ellipse cx="84" cy="60" rx="80" ry="20" fill="white" />
+  </g>
+  <line y1="150" y2="150" x1="300" x2="400" stroke="red" fill="none"
+        stroke-width="12" marker-end="url(#rarrow)" />
+  <use xlink:href="#graph" transform="translate(130,40)" />
+  <use xlink:href="#graph" transform="translate(450,50)" />
+  <g text-anchor="middle">
+    <text x="84" y="180">GitHub</text>
+  </g>
+</svg>
+</div>
+得られたパターンを対象コードに適用する。
+</ul>
+</div>
+
+<div class=page>
+<h2>現在までの進捗</h2>
+<ol>
+<li> トップ 1000 (★) の Java プロジェクトを取得。<br>
+  (11GB zipped text)
+<li> JDT で構文解析。<br>
+  (480,627 files. 74,088,883 loc.)
+<li> データフローグラフを蓄積。<br>
+  (4,199,301 functions, 42,133,919 nodes)
+<li> パターンマッチングを実装。
+</ol>
+</div>
+
+<div class=page>
+<h1>データフローグラフの実装</h1>
+<ul>
+<li> コード生成に使う必要はない。
+<li> もとのソースコードの情報をなるべく保存する。
+<li> 考えられる用途:
+  <ul>
+    <li> マッチング。
+    <li> クローン検出。
+    <li> taint解析。
+  </ul>
+<li> 実行時間: JDT+グラフ構築: 1.5hr (74Mloc)
+</div>
+
+<div class=page>
+<h2>純粋な関数の場合</h2>
+<ul>
+<li> 単一の出力をもつ。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="400">
+  <g fill="none" stroke="black" stroke-width="2">
+    <path d="M150,50 L300,350 M250,50 L200,150 M350,50 L250,250 M450,50 L300,350 M250,50 L350,250" stroke-width="4" />
+    <g fill="white">
+    <circle cx="150" cy="50" r="10" />
+    <circle cx="250" cy="50" r="10" />
+    <circle cx="350" cy="50" r="10" />
+    <circle cx="450" cy="50" r="10" />
+    <circle cx="200" cy="150" r="10" />
+    <circle cx="250" cy="250" r="10" />
+    <circle cx="350" cy="250" r="10" />
+    <circle cx="300" cy="350" r="10" />
+    </g>
+  </g>
+  <g text-anchor="end">
+    <text x="120" y="50" dy="0.5em">input</text>
+    <text x="250" y="350" dy="0.5em">output</text>
+  </g>
+</svg>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h2>副作用がある関数の場合</h2>
+<ul>
+<li> 複数の並列する出力をもつ (アミダくじ的?)。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="400">
+  <g fill="none" stroke="black" stroke-width="2">
+    <path d="M150,50 L200,350 M250,50 L300,150 L400,350 M350,50 L300,150 M450,50 L300,350 M165,150 L325,300" stroke-width="4" />
+    <g fill="white">
+    <circle cx="150" cy="50" r="10" />
+    <circle cx="250" cy="50" r="10" />
+    <circle cx="350" cy="50" r="10" />
+    <circle cx="450" cy="50" r="10" />
+    <circle cx="165" cy="150" r="10" />
+    <circle cx="325" cy="300" r="10" />
+    <circle cx="300" cy="150" r="10" />
+    <circle cx="200" cy="350" r="10" />
+    <circle cx="300" cy="350" r="10" />
+    <circle cx="400" cy="350" r="10" />
+    </g>
+  </g>
+  <g text-anchor="end">
+    <text x="120" y="50" dy="0.5em">input</text>
+    <text x="170" y="350" dy="0.5em">output</text>
+  </g>
+</svg>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h2>グラフの構築方法</h2>
+<ul>
+<li> 各文を component として逐次的に構築。
+<div style="border: 1px solid;"><pre>
+int a, b;
+a = 2;
+b = a + 3;
+...
+</pre></div>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="300">
+  <g fill="none" stroke="black" stroke-width="2">
+    <path d="M200,50 L200,250 L400,50 L400,250 L200,50" stroke-width="4" />
+    <g fill="white">
+    <circle cx="200" cy="50" r="10" />
+    <circle cx="400" cy="50" r="10" />
+    <circle cx="200" cy="250" r="10" />
+    <circle cx="400" cy="250" r="10" />
+    <rect x="150" y="75" width="300" height="50" />
+    <rect x="150" y="175" width="300" height="50" />
+    </g>
+  </g>
+  <g text-anchor="end">
+    <text x="150" y="50" dy="0.5em">a</text>
+    <text x="350" y="50" dy="0.5em">b</text>
+    <text x="150" y="250" dy="0.5em">a</text>
+    <text x="350" y="250" dy="0.5em">b</text>
+  </g>
+  <g text-anchor="middle" style="font-family: monospace;">
+    <text x="300" y="100" dy="0.5em">a = 2;</text>
+    <text x="300" y="200" dy="0.5em">b = a + 3;</text>
+  </g>
+</svg>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h2>条件分岐の表現</h2>
+<ul>
+<li> 真・偽両方のグラフを join でまとめる。
+<div style="border: 1px solid;"><pre>
+if (x) { A; } else { B; }
+</pre></div>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="300">
+  <g fill="none" stroke="black" stroke-width="2">
+    <path d="M200,50 L200,100 L300,250 M400,50 L400,100 L300,250 L300,300" stroke-width="4" />
+    <path d="M100,50 Q100,250,300,250" stroke-dasharray="4,4" />
+    <g fill="white">
+    <circle cx="100" cy="50" r="10" />
+    <rect x="150" y="75" width="100" height="50" />
+    <rect x="350" y="75" width="100" height="50" />
+    <ellipse cx="300" cy="250" rx="80" ry="30" />
+    </g>
+  </g>
+  <g text-anchor="end">
+    <text x="50" y="50" dy="0.5em">x</text>
+  </g>
+  <g text-anchor="middle">
+    <text x="200" y="100" dy="0.5em">A</text>
+    <text x="400" y="100" dy="0.5em">B</text>
+    <text x="300" y="250" dy="0.5em">join</text>
+    <g style="font-size: 75%;">
+      <text x="200" y="175" dy="0.5em">true</text>
+      <text x="400" y="175" dy="0.5em">false</text>
+    </g>
+  </g>
+</svg>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h2>ループの表現</h2>
+<ul>
+<li> ループの終了判定を branch とする。
+<div style="border: 1px solid;"><pre>
+while (x) { P; }
+</pre></div>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="320">
+  <g fill="none" stroke="black" stroke-width="2">
+    <path d="M300,50 L300,300 M300,250 Q450,250,450,175 Q450,100,300,100" stroke-width="4" />
+    <path d="M100,50 Q100,250,300,250" stroke-dasharray="4,4" />
+    <g fill="white">
+    <circle cx="100" cy="50" r="10" />
+    <ellipse cx="300" cy="100" rx="80" ry="30" />
+    <rect x="250" y="150" width="100" height="50" />
+    <ellipse cx="300" cy="250" rx="80" ry="30" />
+    </g>
+  </g>
+  <g text-anchor="end">
+    <text x="50" y="50" dy="0.5em">x</text>
+  </g>
+  <g text-anchor="middle">
+    <text x="300" y="100" dy="0.5em">loop</text>
+    <text x="300" y="175" dy="0.5em">P</text>
+    <text x="300" y="250" dy="0.5em">branch</text>
+  </g>
+  <g text-anchor="start" style="font-size: 75%;">
+    <text x="320" y="300" dy="0.5em">false</text>
+    <text x="380" y="200" dy="0.5em">true</text>
+  </g>
+</svg>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h2><code>try ... catch</code> の表現 (未完)</h2>
+<ul>
+  <li> <code>try ... catch</code>: Monad として実現。
+<div style="border: 1px solid;"><pre>
+try { P; } catch (e) { Q; }
+</pre></div>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="320">
+  <g fill="none" stroke="black" stroke-width="2">
+    <path d="M300,50 L300,300 M300,100 L100,125 L100,225 L300,250" stroke-width="4" />
+    <g fill="white">
+    <rect x="250" y="75" width="100" height="50" />
+    <ellipse cx="100" cy="125" rx="80" ry="30" />
+    <rect x="50" y="200" width="100" height="50" />
+    <ellipse cx="300" cy="250" rx="80" ry="30" />
+    </g>
+  </g>
+  <g text-anchor="middle">
+    <text x="300" y="100" dy="0.5em">P</text>
+    <text x="100" y="225" dy="0.5em">Q</text>
+    <text x="100" y="125" dy="0.5em">catch</text>
+    <text x="300" y="250" dy="0.5em">join</text>
+  </g>
+</svg>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h1>パターンマッチングの実装</h1>
+<ul>
+  <li> 抽出したグラフをデータベースに蓄積する。<br>
+    (グラフ+インデックス SQLite 20GB, 3hr)
+  <li> 対象となる部分木を検索する。<br>
+    (変数名は消されているため、事実上これは
+    T3 のクローン検出に近い)
+    <ol>
+      <li> まず trie を使って絞り込む。<br>
+	(約42Mの部分木に対して 〜1秒)
+      <li> 真面目なマッチング。
+    </ol>
+</ul>
+</div>
+
+<div class=page>
+<h2>部分木のインデックス構築</h2>
+<ul>
+  <li> ノードではなくエッジをインデックスし、trie を構築する。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="700" height="300">
+  <polygon points="250,150 250,120 320,120 320,90 365,135 320,180 320,150" fill="red" />
+  <g fill="none" stroke="black" stroke-width="2">
+    <path d="M50,100 L120,50 L200,20 M120,50 L200,80 M50,100 L150,150 M50,250 L120,220 M50,250 L120,280 L200,280" stroke-width="4" />
+    <path d="M500,150 L580,100 L680,60 M580,100 L680,120 M500,150 L620,180 M500,150 L580,240 L680,240" stroke-width="4" />
+    <path d="M400,200 L500,150 M400,200 Q420,50,580,100 M400,200 Q450,300,580,240" stroke-width="2" stroke-dasharray="4,4" />
+    <g fill="white">
+      <circle cx="50" cy="100" r="15" />
+      <circle cx="120" cy="50" r="15" />
+      <circle cx="200" cy="20" r="15" />
+      <circle cx="200" cy="80" r="15" />
+      <circle cx="150" cy="150" r="15" />
+      <circle cx="50" cy="250" r="15" />
+      <circle cx="120" cy="220" r="15" />
+      <circle cx="120" cy="280" r="15" />
+      <circle cx="200" cy="280" r="15" />
+
+      <ellipse cx="500" cy="150" rx="30" ry="15" />
+      <ellipse cx="580" cy="100" rx="30" ry="15" />
+      <circle cx="680" cy="60" r="15" />
+      <circle cx="680" cy="120" r="15" />
+      <circle cx="620" cy="180" r="15" />
+      <circle cx="580" cy="240" r="15" />
+      <circle cx="680" cy="240" r="15" />
+      <circle cx="400" cy="200" r="15" />
+    </g>
+  </g>
+  <g text-anchor="middle" style="font-size:75%;">
+    <text x="50" y="100" dy="0.5em">1</text>
+    <text x="120" y="50" dy="0.5em">2</text>
+    <text x="200" y="20" dy="0.5em">3</text>
+    <text x="200" y="80" dy="0.5em">4</text>
+    <text x="150" y="150" dy="0.5em">5</text>
+    <text x="50" y="250" dy="0.5em">6</text>
+    <text x="120" y="220" dy="0.5em">7</text>
+    <text x="120" y="280" dy="0.5em">8</text>
+    <text x="200" y="280" dy="0.5em">9</text>
+    <text x="80" y="70" dy="0.0em">A</text>
+    <text x="160" y="20" dy="0.0em">B</text>
+    <text x="160" y="100" dy="0.0em">C</text>
+    <text x="90" y="150" dy="0.0em">D</text>
+    <text x="80" y="230" dy="0.0em">A</text>
+    <text x="80" y="290" dy="0.0em">C</text>
+    <text x="160" y="270" dy="0.0em">E</text>
+
+    <text x="500" y="150" dy="0.5em">1,6</text>
+    <text x="580" y="100" dy="0.5em">2,7</text>
+    <text x="680" y="60" dy="0.5em">3</text>
+    <text x="680" y="120" dy="0.5em">4</text>
+    <text x="620" y="180" dy="0.5em">5</text>
+    <text x="580" y="240" dy="0.5em">8</text>
+    <text x="680" y="240" dy="0.5em">9</text>
+    <text x="530" y="120" dy="0.0em">A</text>
+    <text x="630" y="70" dy="0.0em">B</text>
+    <text x="630" y="140" dy="0.0em">C</text>
+    <text x="570" y="160" dy="0.0em">D</text>
+    <text x="565" y="210" dy="0.0em">C</text>
+    <text x="630" y="235" dy="0.0em">E</text>
+  </g>
+</svg>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h2>クローン検出としての使用例</h2>
+
+</div>
+
+<div class=page>
+<h1>関連研究</h1>
+<ul>
+<li> Reychev, et al. 
+<em>Predicting Program Properties from “Big Code”</em>,
+POPL 2015.
+  <ul>
+    <li> 本研究とまさに同じようなことを obfuscated された
+      Javascript コードに対してやっている。
+    <li> 推論には CRF を使用。
+  </ul>
+<li> 本研究における違い:
+  <ul>
+    <li> より細かい関係、多くの情報を使っている。
+    <li> 単なる名詞以上の抽出をめざしている。
+  </ul>
+</ul>
+</div>
