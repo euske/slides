@@ -3,6 +3,7 @@
 <link rel="stylesheet" type="text/css" href="./slides.css">
 <title>Meeting 2017/08/28</title>
 <style><!--
+td.n { text-align: right; }
 --></style>
 </head>
 <body>
@@ -435,7 +436,7 @@ try { P; } catch (e) { Q; }
 <h1>パターンマッチングの実装</h1>
 <ul>
   <li> 抽出したグラフをデータベースに蓄積する。<br>
-    (グラフ+インデックス SQLite 20GB, 3hr)
+    (グラフ+インデックス SQLite 20GB, 3時間)
   <li> 対象となる部分木を検索する。<br>
     (変数名は消されているため、事実上これは
     T3 のクローン検出に近い)
@@ -520,7 +521,34 @@ try { P; } catch (e) { Q; }
 
 <div class=page>
 <h2>クローン検出としての使用例</h2>
+<p>
+10000グラフ × 4117786グラフに対してマッチング:
+<div class=figure>
+<table align=center style="font-size:75%;" border>
+<tr><th>一致ノード数</th><th>見つかったペアの数</th></tr>
+<tr><td>100個以上〜</td><td class=n>65</td></tr>
+<tr><td>50個以上〜</td><td class=n>100</td></tr>
+<tr><td>40個以上〜</td><td class=n>437</td></tr>
+<tr><td>30個以上〜</td><td class=n>2,858</td></tr>
+<tr><td>20個以上〜</td><td class=n>20,211</td></tr>
+<tr><td>10</td><td class=n>131,320</td></tr>
+<tr><td>9</td><td class=n>237,161</td></tr>
+<tr><td>8</td><td class=n>528,531</td></tr>
+<tr><td>7</td><td class=n>897,196</td></tr>
+<tr><td>Total</td><td class=n>2,113,970</td></tr>
+</table>
+</div>
+</div>
 
+<div class=page>
+<h2>クローン検出: 所見</h2>
+<ol type=a>
+  <li> 一致するノード数が増えると (&gt; 10)、同一のコードが多く見つかる。
+  <li> 一致したノードの数によって、コードの「類似度」のようなものが測定できる。
+  <li> データフロー中のノードは必ずしも直感的な構文要素に対応していないため、
+    結果の中には一見して対応がわかりにくいものもある。
+  <li> 一致する個数が多かったノードには、<code>case</code>文の連続しているものが多かった。
+</ol>
 </div>
 
 <div class=page>
