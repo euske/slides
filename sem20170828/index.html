@@ -291,8 +291,8 @@ if (c == 1) {
 <li> 各文を component として逐次的に構築。
 <div style="border: 1px solid;"><pre>
 int a, b;
-a = 2;
-b = a + 3;
+a = a + 2;
+b = b - a;
 ...
 </pre></div>
 <div class=figure>
@@ -317,8 +317,8 @@ b = a + 3;
     <text x="350" y="250" dy="0.5em">b</text>
   </g>
   <g text-anchor="middle" style="font-family: monospace;">
-    <text x="300" y="100" dy="0.5em">a = 2;</text>
-    <text x="300" y="200" dy="0.5em">b = a + 3;</text>
+    <text x="300" y="100" dy="0.5em">a = a + 2;</text>
+    <text x="300" y="200" dy="0.5em">b = b - a;</text>
   </g>
 </svg>
 </div>
@@ -402,6 +402,39 @@ while (x) { P; }
 </div>
 
 <div class=page>
+<h2><code>break/continue/return</code>の表現</h2>
+<ul>
+<li> 各ブロックは Frame をもつ。
+<div style="border: 1px solid;"><pre>
+{ ... P; return x; ... }
+</pre></div>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="300">
+  <g fill="none" stroke="black" stroke-width="2">
+    <path d="M300,50 L300,140 M300,185 L300,250 M300,100 L100,100 L100,200 L300,250" stroke-width="4" />
+    <path d="M300,140 L300,185" stroke-width="4" stroke-dasharray="4,4" />
+    <rect x="10" y="60" width="380" height="140" stroke-dasharray="4,4" />
+    <g fill="white">
+    <rect x="250" y="75" width="100" height="50" />
+    <ellipse cx="100" cy="100" rx="80" ry="30" />
+    <rect x="50" y="175" width="100" height="50" />
+    <ellipse cx="300" cy="250" rx="80" ry="30" />
+    </g>
+  </g>
+  <g text-anchor="middle">
+    <text x="300" y="100" dy="0.5em">P</text>
+    <text x="100" y="200" dy="0.5em">x</text>
+    <text x="100" y="100" dy="0.5em">return</text>
+    <text x="300" y="250" dy="0.5em">join</text>
+  </g>
+</svg>
+</div>
+</ul>
+</div>
+
+<div class=page>
 <h2><code>try ... catch</code> の表現 (未完)</h2>
 <ul>
   <li> <code>try ... catch</code>: Monad として実現。
@@ -411,20 +444,21 @@ try { P; } catch (e) { Q; }
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg" 
      xmlns:xlink="http://www.w3.org/1999/xlink"
-     version="1.1" width="500" height="320">
+     version="1.1" width="500" height="300">
   <g fill="none" stroke="black" stroke-width="2">
-    <path d="M300,50 L300,300 M300,100 L100,125 L100,225 L300,250" stroke-width="4" />
+    <path d="M300,50 L300,300 M300,100 L100,100 L100,200 L300,250" stroke-width="4" />
+    <rect x="10" y="60" width="380" height="140" stroke-dasharray="4,4" />
     <g fill="white">
     <rect x="250" y="75" width="100" height="50" />
-    <ellipse cx="100" cy="125" rx="80" ry="30" />
-    <rect x="50" y="200" width="100" height="50" />
+    <ellipse cx="100" cy="100" rx="80" ry="30" />
+    <rect x="50" y="175" width="100" height="50" />
     <ellipse cx="300" cy="250" rx="80" ry="30" />
     </g>
   </g>
   <g text-anchor="middle">
     <text x="300" y="100" dy="0.5em">P</text>
-    <text x="100" y="225" dy="0.5em">Q</text>
-    <text x="100" y="125" dy="0.5em">catch</text>
+    <text x="100" y="200" dy="0.5em">Q</text>
+    <text x="100" y="100" dy="0.5em">catch</text>
     <text x="300" y="250" dy="0.5em">join</text>
   </g>
 </svg>
