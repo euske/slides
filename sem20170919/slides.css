@@ -17,10 +17,10 @@ body { margin: 0; }
 .page > h2 { font-size: 350%; margin: 0 0 0.5em 0; padding: 0.2em; border-bottom: solid 0.1em #000080; }
 .page > table { font-size: 300%; font-weight: bold; }
 .page > div { font-size: 250%; font-weight: bold; margin: 0.5em 1em 0.5em 1em; line-height: 150%; }
-.page > ul { font-size: 250%; font-weight: bold; margin: 0.5em 1em 0.5em 1em; }
-.page > ol { font-size: 250%; font-weight: bold; margin: 0.5em 1em 0.5em 1em; }
+.page > ul { font-size: 250%; font-weight: bold; margin: 0.2em 1em 0.2em 1em; }
+.page > ol { font-size: 250%; font-weight: bold; margin: 0.2em 1em 0.2em 1em; }
 .page > p { font-size: 250%; font-weight: bold; margin: 1em 1em; }
-.page > blockquote { font-size: 250%; font-weight: bold; margin: 1em 1em; }
+.page > blockquote { font-size: 250%; font-weight: bold; margin: 0.5em 0.5em; }
 
 li { line-height: 150%; }
 pre { line-height: 120%; margin: 0.5em; font-family: monospace; text-align: left; }

@@ -1,11 +1,13 @@
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="./slides.css">
-<title>Rust人門 / 権藤研2017夏ゼミ</title>
+<title>Rust人門 / 権藤研2017夏ゼミ資料</title>
 <style><!--
-.box { border: 1px solid black; }
+.box { border: 2px solid black; padding: 0.3em; background: #ff88ff; }
 .comment { color: #008800; }
 .error { color: red; }
+.figure { text-align: center; margin: 0.5em; }
+pre { border: 1px solid black; padding: 0.3em; }
 s { color: gray; }
 --></style>
 </head>
@@ -41,6 +43,7 @@ Rust = ポインタに関する諸問題を解決した C/C++
 <li> 2006年〜 (2009年よりMozilla公式)
 <li> LLVM経由で C ABI を生成
 <li> <a href="https://www.rust-lang.org/">www.rust-lang.org</a>
+<li> Mozilla はこれでFirefoxを安全に書き直そうとしている。
 </ul>
 </div>
 
@@ -148,15 +151,16 @@ fn main()
 }
 </pre></blockquote>
 <ul>
-<li> NULLをポインタとして認めるのではなく、
-  「値があるとき」と「値がないとき」で別の型として処理にすべき。
+<li> NULLをポインタとして認めるのではなく、<br>
+  「boolean | 有効なポインタ」として処理すべき。
 </ul>
 </div>
 
 <div class=page>
 <h2>Swiftの場合</h2>
 <ul>
-<li> Swiftのoptional型はやや限定されている。「<code>nil</code>かどうか」しか判定できない。
+<li> Swiftのoptional型はやや限定されている。<br>
+「<code>nil</code>かどうか」しか判定できない。
 <blockquote><pre>
 let s: Point?
 if let p = s {
@@ -287,8 +291,8 @@ fn show(p: &amp;Box&lt;Point&gt;) { <span class=comment>// 借り物</span>
 
 fn main() {
   let p = Box::new(Point { x:2, y:3 });
-  show(p);
-  <span class=comment>// 所有者はまだ俺。</span>
+  show(p);  <span class=comment>// 貸しただけ。</span>
+  <span class=comment>// 所有者はまだ俺だから解放しなきゃ。</span>
 }
 </pre></blockquote>
 <ul>
@@ -342,6 +346,48 @@ main() {
 </div>
 
 <div class=page>
+<h2>図で表すと…</h2>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="700" height="400">
+  <marker id="rarrow1" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="5,-5 -5,0 5,5" fill="red" stroke="none" />
+  </marker>
+  <marker id="rarrow2" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="red" stroke="none" />
+  </marker>
+  <g fill="none" stroke="black" stroke-width="2">
+    <rect x="200" y="40" width="100" height="200" />
+    <rect x="400" y="140" width="100" height="250" />
+    <line x1="250" x2="250" y1="245" y2="385" 
+	  marker-start="url(#rarrow1)" marker-end="url(#rarrow2)"
+	  stroke="red" stroke-width="4" />
+    <g stroke-dasharray="4,4">
+      <line x1="150" x2="300" y1="40" y2="40" />
+      <line x1="150" x2="500" y1="140" y2="140" />
+      <line x1="150" x2="500" y1="240" y2="240" />
+    </g>
+  </g>
+  <g fill="white" stroke="none">
+    <rect x="200" y="300" width="100" height="40" />
+    <rect x="390" y="370" width="120" height="40" />
+  </g>
+  <g text-anchor="end">
+    <text x="140" y="50">new</text>
+    <text x="140" y="150">new</text>
+    <text x="140" y="250">delete</text>
+  </g>
+  <g text-anchor="middle">
+    <text x="250" y="25">p</text>
+    <text x="450" y="125">foo</text>
+    <text x="250" y="325" fill="red">dangling</text>
+  </g>
+</svg>
+</div>
+</div>
+
+<div class=page>
 <h1>17. Rustでは…</h1>
 <blockquote><pre>
 struct Foo {
@@ -364,6 +410,7 @@ fn main() {
 <div class=page>
 <h1>18. どーなんの?</h1>
 <blockquote><pre>
+<span class=comment>// コンパイル不可</span>
 struct Foo {
   pt: &amp;Box&lt;Point&gt;,  <span class=comment>// 借り物</span>
 }
@@ -374,13 +421,9 @@ fn alloc(&amp;Box&lt;Point&gt;) -&gt; Foo {
 fn main() {
   let p = Box::new(Point { x:2, y:3 });
   let foo = alloc(&amp;p);
-  println!("p={},{}", p.x, p.y); <span class=comment>// OKのはず</span>
+  println!("p={},{}", p.x, p.y); <span class=comment>// OK...のはず</span>
 }
 </pre></blockquote>
-<ul>
-<li> もし <code>foo</code> が <code>p</code> よりも長生きしたら…?
-<li> (この例はコンパイル不可。)
-</ul>
 </div>
 
 <div class=page>
@@ -391,13 +434,52 @@ struct Foo {
 }
 </pre></blockquote>
 <ul>
-<li> 「借り物」が入った <code>Foo</code> は、借り物が有効な間しか有効ではない。
-<li> つまり <code>Foo</code> は、一生有効な型ではなく、
-     「限られた期間だけ」有効な型と考えられる。
+<li> 「借り物」が入った <code>Foo</code> 型は限られた期間だけ有効。
 <li> この「限られた期間」は、借り物の有効期間に依存する。
      つまり <code>Foo</code> はパラメータ化された型なのである。
 <li> このパラメータのことを「<mark>生存期間</mark> (lifetime)」と呼ぶ。
 </ul>
+</div>
+
+<div class=page>
+<h2>図で表すと…</h2>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="700" height="400">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <pattern id="hatch" width="5" height="5"
+	   patternTransform="rotate(-45 0 0)" patternUnits="userSpaceOnUse">
+    <line x1="0" y1="0" x2="0" y2="5" stroke="black" stroke-width="1" />
+  </pattern>
+  <g fill="none" stroke="black" stroke-width="2">
+    <rect x="200" y="50" width="100" height="340" />
+    <rect x="350" y="150" width="100" height="240" fill="url(#hatch)" />
+    <line x1="525" x2="525" y1="300" y2="380" 
+	  marker-end="url(#arrow)" stroke-width="6" />
+    <g stroke-dasharray="4,4">
+      <line x1="150" x2="300" y1="50" y2="50" />
+      <line x1="150" x2="450" y1="150" y2="150" />
+      <line x1="150" x2="600" y1="390" y2="390" />
+    </g>
+  </g>
+  <g text-anchor="end">
+    <text x="140" y="50">new</text>
+    <text x="140" y="150">new</text>
+    <text x="140" y="390">delete</text>
+  </g>
+  <g text-anchor="middle">
+    <text x="250" y="25">p</text>
+    <text x="400" y="135">Foo</text>
+    <g style="font-size: 75%;">
+      <text x="525" y="250">Fooの</text>
+      <text x="525" y="290">生存期間</text>
+    </g>
+  </g>
+</svg>
+</div>
 </div>
 
 <div class=page>
@@ -415,11 +497,23 @@ fn alloc&lt;'a&gt;(p: &amp;'a Box&lt;Point&gt;) -&gt; Foo&lt;'a&gt; {
 </pre></blockquote>
 <ul>
 <li> 生存期間識別子は <code>'a</code>, <code>'b</code> のように表す。
-<li> 生存期間は型をさらに限定するという意味で
-  <code>&lt;</code>...<code>&gt;</code> が使われている。
-<li> ただし、これは呼び出し時に明示的に指定する必要はない。
-     (コンパイラが勝手に推測する)
-<li> 生存期間が必要なのは「借り物」に対してのみ。
+  (型をさらに限定するという意味で <code>&lt;</code>...<code>&gt;</code> が使われている。)
+<li> 生存期間が必要なのは「借り物 (<code>&amp;</code>)」に対してのみ。
+</ul>
+</div>
+
+<div class=page>
+<h2>生存期間つきの型を使う</h2>
+<blockquote><pre>
+fn main() {
+  let p = Box::new(Point { x:2, y:3 });
+  let foo = alloc(&amp;p);  <span class=comment>// p と同じ生存期間をもつ。</span>
+  println!("p={},{}", p.x, p.y);
+}
+</pre></blockquote>
+<ul>
+<li> 型の使用時にコンパイラが生存時間を推測する。<br>
+  したがって呼び出し時には何も指定する必要がない。
 </ul>
 </div>
 
@@ -464,8 +558,8 @@ fn alloc&lt;'a&gt;(p: &amp;'a Box&lt;Point&gt;,
 <li> Rustは、いままでC/C++プログラマが
 無意識に使っていた概念を型システムとして
 定式化させたといえる。
-<li> 機械的にチェックできるのでミスは減るが、学習はめんどう。
-<li> Mozilla はこれでFirefoxを安全に書き直そうとしている。
+<li> 機械的にチェックできるのでミスは減るが、覚えるのは面倒。
+<li> すべて静的な検査なので、実行時のオーバーヘッドは C/C++ と同じ。
 </ul>
 </div>
 
@@ -488,7 +582,7 @@ fn alloc&lt;'a&gt;(p: &amp;'a Box&lt;Point&gt;,
 <div class=page>
 <h1>25. 余談: ほかのCライブラリとの共存</h1>
 <ul>
-<li> システムプログラミング言語なので、既存のライブラリと ABI が同じ。
+<li> 既存の Cライブラリと ABI が同じであり、相互にリンク可能。
 <li> 逃げ道: <code>unsafe { ... }</code> で囲んだ部分は、所有権・生存期間の規則を無視できる。
 </ul>
 </div>
