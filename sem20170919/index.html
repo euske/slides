@@ -266,9 +266,9 @@ fn show(p: &amp;Box&lt;Point&gt;) {  <span class=comment>// pは借り物。</sp
 
 fn main() {
   let p = Box::new(Point { x:2, y:3 });
-  show(p);
+  show(p);  <span class=comment>// 貸しただけ。</span>
   println!("area={}", p.x * p.y);
-  <span class=comment>// RAIIにより解放。</span>
+  <span class=comment>// 所有者はまだ俺だから解放しなきゃ。</span>
 }
 </pre></blockquote>
 <ul>
@@ -286,13 +286,13 @@ fn area(p: Box&lt;Point&gt;) -&gt; i32 { <span class=comment>// 本物</span>
 }
 fn show(p: &amp;Box&lt;Point&gt;) { <span class=comment>// 借り物</span>
   println!("p={},{}", p.x, p.y);
+  <span class=comment>// 借り物を本物として渡そうとすると</span>
   println!("area={}", area(p)); <span class=error>// ERROR</span>
 }
 
 fn main() {
   let p = Box::new(Point { x:2, y:3 });
-  show(p);  <span class=comment>// 貸しただけ。</span>
-  <span class=comment>// 所有者はまだ俺だから解放しなきゃ。</span>
+  show(p);
 }
 </pre></blockquote>
 <ul>
@@ -307,12 +307,13 @@ fn main() {
   let p = Point { x:2, y :3 };
   println!("p={},{}", p.x, p.y);
   let q = p;
+  println!("area={}", q.x * q.y); <span class=comment>// OK</span>
   println!("area={}", p.x * p.y); <span class=error>// ERROR</span>
 }  
 </pre></blockquote>
 <ul>
 <li> たんに参照を代入しただけでも所有権は移動する。
-<li> 参照型でない値 (=intなど) はコピーされる。
+<li> 参照型でない値 (=intなど) は暗黙コピーされる。
 </ul>
 </div>
 
@@ -398,6 +399,7 @@ fn main() {
   let p = Box::new(Point { x:2, y:3 });
   <span class=comment>// pの所有権は foo内に移動する。</span>
   let foo = Foo { pt:p };
+  <span class=comment>// もう p は俺の物じゃない。</span>
   println!("p={},{}", p.x, p.y); <span class=error>// ERROR</span>
   <span class=comment>// fooが解放されると p も解放される。</span>
 }
@@ -410,7 +412,6 @@ fn main() {
 <div class=page>
 <h1>18. どーなんの?</h1>
 <blockquote><pre>
-<span class=comment>// コンパイル不可</span>
 struct Foo {
   pt: &amp;Box&lt;Point&gt;,  <span class=comment>// 借り物</span>
 }
@@ -423,6 +424,7 @@ fn main() {
   let foo = alloc(&amp;p);
   println!("p={},{}", p.x, p.y); <span class=comment>// OK...のはず</span>
 }
+<span class=error>// 実際にはコンパイル不可</span>
 </pre></blockquote>
 </div>
 
