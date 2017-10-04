@@ -1,0 +1,157 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>パターンマッチングのためのデータフローグラフ抽出器の実装 / 新山 祐介 / SIGSS 2017</title>
+<style><!--
+.box { border: 2px solid black; padding: 0.3em; background: #ff88ff; }
+.comment { color: #008800; }
+.error { color: red; }
+.figure { text-align: center; margin: 0.5em; }
+pre { border: 1px solid black; padding: 0.3em; }
+s { color: gray; }
+--></style>
+</head>
+<body>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center style="height:5em;">
+パターンマッチングのための<br>
+データフローグラフ抽出器の実装
+</td></tr>
+</table>
+<div class=bottomright>発表者: 新山 祐介 (東工大)<br>
+荒堀 喜貴 (東工大)<br>
+権藤 克彦 (東工大)<br>
+</div>
+</div>
+
+
+<div class=page>
+<h1>1. あらまし</h1>
+<p>
+プログラム理解のためのグラフ表現 "FGyama" を提案。
+<ul>
+<li> データフローグラフの一種。
+<li> ロジックを漏れなく記述。
+<li> 蓄積・検索に向いている。
+</ul>
+</div>
+
+
+<div class=page>
+<h1>2. やりたいこと</h1>
+<p>
+変数に与えられる高水準な (ドメイン依存の) 
+意味を自動抽出したい。
+<blockquote><pre>
+a = p * 1.08;  <span class=comment>// 税込み価格</span>
+...
+b = 255;       // 残り体力
+...
+c = x + w/2;   // 中心座標
+</pre></blockquote>
+<p>
+既存のコードベースから「辞書」を獲得し、
+マッチングを用いて付与する。
+<div style="position:relative;" class=figure>
+<pre style="position: absolute; left:600px; top:50px; width: 8.4em; height: 8em; border: 2px solid black; font-size: 20px; padding: 0.2em;">
+if (c == 1) {
+    b = b - 10
+    a1 = a1 + 
+} else if (c =
+    ...
+</pre>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="700" height="300">
+  <marker id="rarrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="red" stroke="none" />
+  </marker>
+  <defs>
+    <g id="graph" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,0 L60,70 M120,10 L60,70 L100,140" stroke-width="4" />
+      <ellipse cx="0" cy="0" rx="40" ry="20" fill="white" />
+      <ellipse cx="120" cy="10" rx="40" ry="20" fill="white" />
+      <ellipse cx="60" cy="70" rx="40" ry="20" fill="white" />
+      <ellipse cx="100" cy="140" rx="40" ry="20" fill="white" />
+    </g>
+  </defs>
+  <g fill="none" stroke="black" stroke-width="4">
+    <ellipse cx="84" cy="260" rx="80" ry="20" />
+    <rect x="4" y="60" width="160" height="200" stroke="none" fill="white" />
+    <line x1="4" x2="4" y1="60" y2="260" />
+    <line x1="164" x2="164" y1="60" y2="260" />
+    <ellipse cx="84" cy="60" rx="80" ry="20" fill="white" />
+  </g>
+  <line y1="150" y2="150" x1="300" x2="400" stroke="red" fill="none"
+        stroke-width="12" marker-end="url(#rarrow)" />
+  <use xlink:href="#graph" transform="translate(130,40)" />
+  <use xlink:href="#graph" transform="translate(450,50)" />
+  <g text-anchor="middle">
+    <text x="84" y="180">GitHub</text>
+  </g>
+</svg>
+</div>
+</div>
+
+
+<div class=page>
+<h2>適切な中間表現とは?</h2>
+<ul>
+<li> ロジックのすべてをグラフによって表現したい。
+<li> プログラム解析をグラフ解析問題として扱う。
+<li> なぜグラフなのか?
+<ul>
+  <li> 十分な一般性がある。
+  <li> 見た目がわかりやすい。
+</ul>
+</ul>
+</div>
+
+
+<div class=page>
+<h2>現在までの進捗</h2>
+<ol>
+<li> Java → FGyama に変換。 (Eclipse JDT使用)
+<li> データベースに格納。(〜 1000 projects, 74M loc)
+<li> 今のところ int<u>ra</u>procedural。(拡張予定)
+</ol>
+<h3>今後の予定:</h3>
+<ol start="4">
+<li> 変数名・コメント等から対応関係を獲得。
+<li> 実際のコードに適用し、評価。
+</ol>
+</div>
+
+
+<div class=page>
+<h1>3. FGyama の構造</h1>
+<ul>
+<li> 制御フローおよびデータフローを同時に表現。
+<li> 各変数を個別に扱う。
+<li> データの依存関係を重視する。
+</ul>
+<h3>例</h3>
+<blockquote><pre>
+int max(int[] a) {
+    int y = -1;
+    for (int x : a) {
+        if (y < x) {
+            y = x;
+        }
+    }
+    return y;
+}
+</pre></blockquote>
+
+<div class=figure>
+<img src="img/dfg.svg">
+<img src="img/max.svg">
+</div>
+</div>
+
+
+<div class=page>
+<h2>簡単な例</h1>
+</div>
