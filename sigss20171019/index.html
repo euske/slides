@@ -3,19 +3,17 @@
 <link rel="stylesheet" type="text/css" href="./slides.css">
 <title>パターンマッチングのためのデータフローグラフ抽出器の実装 / 新山 祐介 / SIGSS 2017</title>
 <style><!--
-.box { border: 2px solid black; padding: 0.3em; background: #ff88ff; }
+.g { color: gray; }
 .comment { color: #008800; }
-.error { color: red; }
 .figure { text-align: center; margin: 0.5em; }
 pre { border: 1px solid black; padding: 0.3em; }
-s { color: gray; }
 --></style>
 </head>
 <body>
 
 <div class=page>
 <table align=center class=fill>
-<tr><td align=center valign=center style="height:5em;">
+<tr><td align=center valign=center style="height:10em;">
 パターンマッチングのための<br>
 データフローグラフ抽出器の実装
 </td></tr>
@@ -47,15 +45,21 @@ s { color: gray; }
 <blockquote><pre>
 a = p * 1.08;  <span class=comment>// 税込み価格</span>
 ...
-b = 255;       // 残り体力
+b = 255;       <span class=comment>// 残り体力</span>
 ...
-c = x + w/2;   // 中心座標
+c = x + w/2;   <span class=comment>// 中心座標</span>
 </pre></blockquote>
-<p>
-既存のコードベースから「辞書」を獲得し、
-マッチングを用いて付与する。
+</div>
+
+<div class=page>
+<h2>具体的な方法</h2>
+<ol>
+<li> プログラムをなんらかの中間表現に変換する。
+<li> 既存のコードベースから「辞書」を獲得しておく。
+<li> 中間表現のマッチングを用いて意味を付与する。
+</ol>
 <div style="position:relative;" class=figure>
-<pre style="position: absolute; left:600px; top:50px; width: 8.4em; height: 8em; border: 2px solid black; font-size: 20px; padding: 0.2em;">
+<pre style="position:absolute; left:750px; top:80px; width: 8.4em; height: 8em; border: 2px solid black; font-size: 20px; padding: 0.2em;">
 if (c == 1) {
     b = b - 10
     a1 = a1 + 
@@ -98,14 +102,15 @@ if (c == 1) {
 
 <div class=page>
 <h2>適切な中間表現とは?</h2>
-<ul>
+<ol type=a>
 <li> ロジックのすべてをグラフによって表現したい。
-<li> プログラム解析をグラフ解析問題として扱う。
-<li> なぜグラフなのか?
+<li> プログラム解析をグラフ解析問題として扱いたい。
+<li> あわよくば、他の目的にも利用できるものを。
+</ol>
+<h3>なぜグラフなのか?</h3>
 <ul>
   <li> 十分な一般性がある。
   <li> 見た目がわかりやすい。
-</ul>
 </ul>
 </div>
 
@@ -119,8 +124,8 @@ if (c == 1) {
 </ol>
 <h3>今後の予定:</h3>
 <ol start="4">
-<li> 変数名・コメント等から対応関係を獲得。
-<li> 実際のコードに適用し、評価。
+<li class=g> 変数名・コメント等から対応関係を獲得。
+<li class=g> 実際のコードに適用し、評価。
 </ol>
 </div>
 
@@ -137,21 +142,111 @@ if (c == 1) {
 int max(int[] a) {
     int y = -1;
     for (int x : a) {
-        if (y < x) {
-            y = x;
-        }
+        if (y < x) { y = x; }
     }
     return y;
 }
 </pre></blockquote>
-
-<div class=figure>
-<img src="img/dfg.svg">
-<img src="img/max.svg">
+<div class=figure style="position: absolute; right: 1em; bottom: 1em;">
+<a href="img/max.svg"><img width="75%" src="img/max.svg"></a>
 </div>
 </div>
 
 
 <div class=page>
-<h2>簡単な例</h1>
+<h2>従来のデータフローグラフ</h2>
+<ul style="width: 60%;">
+<li> 各変数間の具体的な演算。
+<li> 条件分岐への依存関係。
+</ul>
+<blockquote><pre>
+int max(int[] a) {
+    int y = -1;
+    for (int x : a) {
+        if (y < x) { y = x; }
+    }
+    return y;
+}
+</pre></blockquote>
+<div class=figure style="position: absolute; right: 1em; bottom: 1em;">
+<a href="img/dfg.svg"><img src="img/dfg.svg"></a>
 </div>
+</div>
+
+
+<div class=page>
+<h2>基本的な関数</h2>
+<blockquote style="height: 10em;"><pre>
+return (-a) +
+       (a + b) * c;
+</pre></blockquote>
+<div class=figure style="position: absolute; right: 1em; top: 4em;">
+<a href="img/dfg_basic.svg"><img width="100%" src="img/dfg_basic.svg"></a>
+</div>
+</div>
+
+
+<div class=page>
+<h2>副作用がある場合</h2>
+<blockquote style="height: 6em;"><pre>
+a = a + b;
+x = b * c;
+y = c;
+</pre></blockquote>
+<div class=figure style="position: absolute; right: 1em; top: 4em;">
+<a href="img/dfg_side.svg"><img width="100%" src="img/dfg_side.svg"></a>
+</div>
+</div>
+
+
+<div class=page>
+<h2>条件分岐</h2>
+<blockquote style="height: 6em;"><pre>
+if (x) {
+    y = 1;
+} else {
+    y = 2;
+}
+</pre></blockquote>
+<div class=figure style="position: absolute; right: 1em; top: 4em;">
+<a href="img/dfg_cond.svg"><img width="100%" src="img/dfg_cond.svg"></a>
+</div>
+</div>
+
+
+<div class=page>
+<h2>繰り返し</h2>
+<blockquote style="height: 6em;"><pre>
+while (p) {
+    S;  <span class=comment>// x を変更</span>
+}
+</pre></blockquote>
+<div class=figure style="position: absolute; right: 1em; bottom: 1em;">
+<a href="img/dfg_loop.svg"><img width="100%" src="img/dfg_loop.svg"></a>
+</div>
+</div>
+
+
+<div class=page>
+<h2>脱出</h2>
+<blockquote style="height: 6em;"><pre>
+while (...) {
+    S;  <span class=comment>// a を変更。</span>
+    if (t) { break; }
+}
+</pre></blockquote>
+<div class=figure style="position: absolute; right: 1em; bottom: 1em;">
+<a href="img/dfg_break.svg"><img width="100%" src="img/dfg_break.svg"></a>
+</div>
+</div>
+
+
+<div class=page>
+<h1>4. クローン検出への応用</h1>
+<ol>
+<li> 抽出したグラフをデータベースに保存。
+<li> 部分グラフを検索。
+<li> 見つかった同型のグラフをクローンとする。
+</ol>
+</div>
+
