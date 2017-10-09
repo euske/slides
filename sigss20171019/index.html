@@ -8,6 +8,9 @@
 .figure { text-align: center; margin: 0.5em; }
 .box { border: 1px solid black; padding: 2px; }
 .t td,th { padding: 0.2em; border: 2px solid; }
+.n { text-align: right; }
+.p0 { background:#ffff00; color:black; }
+.p1 { background:#00ffff; color:black; }
 pre { border: 1px solid black; padding: 0.3em; }
 --></style>
 </head>
@@ -19,19 +22,21 @@ pre { border: 1px solid black; padding: 0.3em; }
 パターンマッチングのための<br>
 データフローグラフ抽出器の実装
 </td></tr>
+<tr style="height:1em;"></tr>
 </table>
-<div class=bottomright>発表者: 新山 祐介 (東工大)<br>
+<div class=bottomright><div class=p>発表者: 新山 祐介 (東工大)<br>
 荒堀 喜貴 (東工大)<br>
 権藤 克彦 (東工大)<br>
 スライド: <a href="https://euske.github.io/">https://euske.github.io/</a>
-</div>
+</div></div>
 </div>
 
 
 <div class=page>
 <h1>1. あらまし</h1>
-<p>
+<div class=p>
 プログラム理解のためのグラフ表現 "FGyama" を提案。
+</div>
 <ul>
 <li> データフローグラフの一種。
 <li> ロジックの比較・解析に使える。
@@ -91,7 +96,7 @@ int max(int[] a) {
 
 <div class=page>
 <h1>2. 研究の目標</h1>
-<p>
+<p class=p>
 プログラム中の変数に与えられる高水準な (ドメイン依存の) 
 意味を自動抽出したい。
 <blockquote><pre>
@@ -158,6 +163,9 @@ if (c == 1) {
 <li> ロジックのすべてをグラフによって表現したい。
 <li> プログラム解析をグラフ解析問題として扱いたい。
 <li> あわよくば、他の目的にも利用できるものを。
+  <ul>
+    <li> クローン検出, taint解析, etc.
+  </ul>
 </ol>
 <h3>なぜグラフなのか?</h3>
 <ul>
@@ -172,7 +180,7 @@ if (c == 1) {
 <ol>
 <li> Java → FGyama に変換。 (Eclipse JDT使用)
 <li> データベースに格納。(〜 1000 projects, 74M loc)
-<li> 今のところ int<u>ra</u>procedural。(拡張予定)
+<li> 今のところ intraprocedural。(拡張予定)
 </ol>
 <h3>今後の予定:</h3>
 <ol start="4">
@@ -291,7 +299,7 @@ do {
 
 <div class=page>
 <h2>現在の欠点: 間接参照</h2>
-<blockquote style="position: relative; height: 4em;">
+<blockquote style="position: relative; height: 5em;">
 <pre style="position: absolute; top:0; left: 0;">
 a[0] = 4;
 a[1] = 5;
@@ -331,7 +339,7 @@ ARR = ARR + ARR;
 <li> 実際のグラフを取得し絞り込む。
 </ol>
 <div class=figure>
-<a href="img/trie.svg"><img width="60%" src="img/trie.svg"></a>
+<a href="img/find.svg"><img width="60%" src="img/find.svg"></a>
 </div>
 </div>
 
@@ -341,28 +349,100 @@ ARR = ARR + ARR;
 <table class=t border align=center>
 <tr><td>対象</td><td>GitHub 上位1000プロジェクト</td></tr>
 <tr><td>ファイル</td><td>480,627個 (3.7GB, 74M loc)</td></tr>
-<tr><td>抽出グラフ</td><td>4.2M 関数, 42M ノード</td></tr>
-<tr><td>データベース</td><td>11GB (グラフ) + 9GB (trie)</td></tr>
+<tr><td>抽出グラフ</td><td>4.3M 関数, 42M ノード</td></tr>
+<tr><td>データベース</td><td>11GB (FGyama) + 10GB (trie)</td></tr>
 </table>
 </div>
 <ul>
-<li> 処理時間: 3.5時間 (Intal i5, メモリ32G)
-<li> SSD 上で SQLite を利用。
+<li> SSD + SQLite 利用。
+<li> 処理時間: 3.5時間 (Intel i5, 1.8GHz)
+<li> Lambda 構文を使った関数 (1.3%) は未解析。
 </ul>
 </div>
 
 
 <div class=page>
 <h1>5. 取得したグラフの応用</h1>
-<h3>a. クローン検出</h3>
+<div class=pad style="height:24em;">
+<div class=figure style="position: absolute; right: 1em; top: 0;">
+<a href="img/iter.svg"><img width="80%" src="img/iter.svg"></a>
+</div>
+<h3>a. イテレータの発見</h3>
+<ul>
+<li> あるループ変数 <em>x</em> について...
+<ol type=a>
+  <li> ループの終了条件に使われている
+  <li> それ以外のループ変数に依存しない
+</ol>
+上の条件を満たせばイテレータとみなす。
+</ul>
+</div>
+</div>
+
+<div class=page>
+<h2>見つかったイテレータの例:</h2>
+<blockquote>
+<div class=src>TextUtils.java:</div>
+<pre>
+ 47:    int <span class="p0">start = 0</span>;
+ 48:    do {
+ 49:        int next = query.indexOf('&amp;', <span class="p0">start</span>);
+ 50:        int end = (next == -1) ? query.length() : next;
+            ...
+ 65:        <span class="p0">start</span> = end + 1;
+ 66:    } while (<span class="p0">start</span> &lt; query.length());
+</pre>
+<div class=src>ACache.java:</div>
+<pre>
+728:    String <span class="p1">saveTimeStr</span> = strs[0];
+729:    while (<span class="p1">saveTimeStr</span>.startsWith(&quot;0&quot;)) {
+730:        <span class="p1">saveTimeStr</span> = <span class="p1">saveTimeStr</span>
+731:                      .substring(1, <span class="p1">saveTimeStr</span>.length())</span>;
+732:    }
+</pre>
+</blockquote>
+</div>
+
+<div class=page>
+<h2>b. クローン検出</h2>
 <ol>
-<li> ある関数と同型のグラフをもつ関数を
-  データベースから検索。
-<li> 見つかったグラフ対を人手で評価。
-<li> 変数名を抽象化できるので高水準のクローンが発見できるかも?
+<li> ある関数と同型のグラフをもつ関数を検索。
+<li> 見つかった 100 コード対を人手により評価。
+<div class=figure style="margin: 1em;">
+<table class=t border align=center>
+<tr><td>完全なクローン</td><td class=n>8</td></tr>
+<tr><td>同一のコードから派生したもの</td><td class=n>39</td></tr>
+<tr><td>異なる作者による同一ロジックの実装</td><td class=n>7</td></tr>
+<tr><td>クローンではない</td><td class=n>46</td></tr>
+</table>
+</div>
 </ol>
 </div>
 
 <div class=page>
-<h2>b. イテレータの発見</h2>
+<h2>得られたコード対の例:</h2>
+<blockquote><pre>
+    canvas.translate(mBlurredView.getX() - getX(),
+                     mBlurredView.getY() - getY());
+</pre></blockquote>
+<blockquote><pre>
+    double deltaX = wCurrentPoint.getX() -
+                    wPreviousPoint.getX();
+    double deltaY = wCurrentPoint.getY() -
+                    wPreviousPoint.getY();
+    translate(deltaX, deltaY);
+</pre></blockquote>
+</div>
+
+
+<div class=page>
+<h1>6. おわりに</h1>
+<div class=p>
+プログラム理解のためのグラフ表現 "FGyama" を提案した。
+</div>
+<ul>
+<li> 研究の目的: 変数の意味抽出。
+<li> 変数間の詳細な依存関係を表現できる。
+<li> 取得したグラフの応用例を示した。
+</ul>
 </div>

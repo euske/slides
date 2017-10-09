@@ -1,0 +1,14 @@
+digraph iter {
+ N0 [label="x"];
+ N1 [label="Begin", shape=diamond];
+ N2 [label="...", shape=box];
+ N3 [label="End", shape=diamond];
+ N4 [label="x"];
+ N5 [label="x"];
+ N0 -> N1;
+ N1 -> N2;
+ N2 -> N3;
+ N4 -> N3 [label="cond", style=dotted];
+ N3 -> N5;
+ N3 -> N1 [style=dashed, constraint=false]; 
+}

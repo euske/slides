@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg xmlns="http://www.w3.org/2000/svg" 
      xmlns:xlink="http://www.w3.org/1999/xlink"
-     version="1.1" width="240" height="200">
+     version="1.1" width="420" height="200">
   <defs>
   <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="4" markerHeight="4" orient="auto">
     <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
@@ -13,41 +13,102 @@
   
   <g transform="translate(0.5,0.5)">
 
-    <g transform="translate(20,30)">
-    <text x="-20" y="-10">Graph 1</text>
+    <g transform="translate(20,40)">
+    <text x="-20" y="-20">Graph 1</text>
      <g stroke="black" fill="none" stroke-width="1">
-       <path d="M0,20 L40,20 L80,0 L120,0 L160,20 M40,20 L80,40 L120,40 L160,20 L200,20" />
+       <path d="M0,30 L50,10 L100,0 M50,10 L100,30 M0,30 L50,50" />
        <g fill="white">
-	 <circle cx="0" cy="20" r="4"/>
-	 <circle cx="40" cy="20" r="4"/>
-	 <circle cx="80" cy="0" r="4"/>
-	 <circle cx="80" cy="40" r="4"/>
-	 <circle cx="120" cy="0" r="4"/>
-	 <circle cx="120" cy="40" r="4"/>
-	 <circle cx="160" cy="20" r="4"/>
-	 <circle cx="200" cy="20" r="4"/>
+	 <circle cx="0" cy="30" r="4"/>
+	 <circle cx="50" cy="10" r="4"/>
+	 <circle cx="100" cy="0" r="4"/>
+	 <circle cx="100" cy="30" r="4"/>
+	 <circle cx="50" cy="50" r="4"/>
        </g>
-       <path d="M0,10 L40,10 L80,-10 L120,-10 L160,10 L200,10 M40,30 L80,50 L120,50 L160,30 L200,30"
-	     stroke-width="3" />
+    </g>
+    <g text-anchor="middle" style="font-weight:bold; font-size:75%;">
+      <text x="0" y="20">A</text>
+      <text x="50" y="0">B</text>
+      <text x="100" y="-10">C</text>
+      <text x="100" y="20">D</text>
+      <text x="50" y="40">C</text>
+    </g>
+    <g text-anchor="middle" style="font-size:75%;">
+      <text x="25" y="15">x</text>
+      <text x="75" y="0">y</text>
+      <text x="75" y="30">y</text>
+      <text x="25" y="50">z</text>
     </g>
     </g>
     
-    <g transform="translate(20,120)">
+    <g transform="translate(20,130)">
     <text x="-20" y="-10">Graph 2</text>
      <g stroke="black" fill="none" stroke-width="1">
-       <path d="M0,20 L40,20 L80,0 L120,0 L160,20 M40,20 L80,40 L120,40 L160,20 L200,20" />
+       <path d="M0,30 L50,10 M0,30 L50,50" />
        <g fill="white">
-	 <circle cx="0" cy="20" r="4"/>
-	 <circle cx="40" cy="20" r="4"/>
-	 <circle cx="80" cy="0" r="4"/>
-	 <circle cx="80" cy="40" r="4"/>
-	 <circle cx="120" cy="0" r="4"/>
-	 <circle cx="120" cy="40" r="4"/>
-	 <circle cx="160" cy="20" r="4"/>
-	 <circle cx="200" cy="20" r="4"/>
+	 <circle cx="0" cy="30" r="4"/>
+	 <circle cx="50" cy="10" r="4"/>
+	 <circle cx="50" cy="50" r="4"/>
        </g>
-       <path d="M0,30 L40,30 L80,50 L120,50 L160,30 L200,30 M40,10 L80,-10 L120,-10 L160,10 L200,10"
-	     stroke-width="3" />
+    </g>
+    <g stroke="red" fill="none" stroke-width="2">
+      <rect x="-40" y="-10" width="80" height="20" rx="4" ry="4"
+	    transform="translate(25,20), rotate(-22)"/>
+      <rect x="-40" y="-10" width="80" height="20" rx="4" ry="4"
+	    transform="translate(25,40), rotate(+22)"/>
+    </g>
+    <g text-anchor="middle" style="font-weight:bold; font-size:75%;">
+      <text x="0" y="20">B</text>
+      <text x="50" y="0">C</text>
+      <text x="50" y="40">D</text>
+    </g>
+    <g text-anchor="middle" style="font-size:75%;">
+      <text x="25" y="15">y</text>
+      <text x="25" y="50">y</text>
+    </g>
+    <g text-anchor="start" fill="red" style="font-weight:bold;">
+      <text x="70" y="15">(C)-(y,B)</text>
+      <text x="70" y="55">(D)-(y,B)</text>
+    </g>
+    </g>
+
+    <g transform="translate(200,20)">
+     <text x="-20" y="30">Trie</text>
+     <g stroke="black" fill="none" stroke-width="1">
+       <path d="M0,100 L50,50 L100,30 M50,50 L100,70 L150,70 M0,100 L50,120 L100,130"
+	     stroke-width="2" />
+       <g fill="white">
+	 <rect x="-6" y="94" width="12" height="12" />
+	 <rect x="-4" y="96" width="8" height="8" />
+	 <rect x="46" y="46" width="8" height="8" />
+	 <rect x="96" y="26" width="8" height="8" />
+	 <rect x="96" y="66" width="8" height="8" />
+	 <rect x="146" y="66" width="8" height="8" />
+	 <rect x="46" y="116" width="8" height="8" />
+	 <rect x="96" y="126" width="8" height="8" />
+       </g>
+    </g>
+    <g stroke="red" fill="none">
+      <path stroke-width="4"
+	    d="M0,90 L50,40 L100,60 M0,110 L50,130 L100,140" />
+      <ellipse cx="100" cy="80" rx="20" ry="10" stroke-width="2" />
+      <ellipse cx="100" cy="140" rx="20" ry="10" stroke-width="2" />
+    </g>
+    <g text-anchor="middle" style="font-weight:bold; font-size:75%;">
+      <text x="-10" y="100" text-anchor="end">root</text>
+      <text x="50" y="136">1,2</text>
+      <text x="100" y="146">1,2</text>
+      <text x="50" y="66">1,2</text>
+      <text x="100" y="46">1</text>
+      <text x="100" y="86">1,2</text>
+      <text x="150" y="86">1</text>
+    </g>
+    <g text-anchor="middle" style="font-size:75%;">
+      <text x="20" y="70">(C)</text>
+      <text x="20" y="120">(D)</text>
+      <text x="70" y="35">(z,A)</text>
+      <text x="75" y="75">(y,B)</text>
+      <text x="125" y="82">(x,A)</text>
+      <text x="75" y="140">(y,B)</text>
     </g>
     </g>
 
