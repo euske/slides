@@ -6,6 +6,8 @@
 .g { color: gray; }
 .comment { color: #008800; }
 .figure { text-align: center; margin: 0.5em; }
+.box { border: 1px solid black; padding: 2px; }
+.t td,th { padding: 0.2em; border: 2px solid; }
 pre { border: 1px solid black; padding: 0.3em; }
 --></style>
 </head>
@@ -32,16 +34,65 @@ pre { border: 1px solid black; padding: 0.3em; }
 プログラム理解のためのグラフ表現 "FGyama" を提案。
 <ul>
 <li> データフローグラフの一種。
-<li> ロジックを漏れなく記述。
-<li> 蓄積・検索に向いている。
+<li> ロジックの比較・解析に使える。
+<li> 大量に蓄積し、検索が可能。
 </ul>
 </div>
 
 
 <div class=page>
-<h1>2. やりたいこと</h1>
+<h2>FGyama の特徴</h2>
+<div class=pad style="height:40em;">
+<div class=figure style="position: absolute; right: 1em; bottom: 1em;">
+<a href="img/max.svg"><img width="75%" src="img/max.svg"></a>
+</div>
+<ul>
+<li> 制御フローおよびデータフローを同時に表現。
+<li> 各変数を個別に扱う。
+<li> データ間の依存関係を重視する。
+</ul>
+<h3>例</h3>
+<blockquote><pre>
+int max(int[] a) {
+    int y = -1;
+    for (int x : a) {
+        if (y < x) { y = x; }
+    }
+    return y;
+}
+</pre></blockquote>
+</div>
+</div>
+
+
+<div class=page>
+<h2>従来のデータフローグラフ</h2>
+<div class=pad style="height:34em;">
+<div class=figure style="position: absolute; right: 1em; bottom: 1em;">
+<a href="img/dfg.svg"><img src="img/dfg.svg"></a>
+</div>
+<h3>欠けているもの:</h3>
+<ul style="width: 60%;">
+<li> 各変数間の具体的な演算。
+<li> 条件分岐への依存関係。
+</ul>
+<blockquote><pre>
+int max(int[] a) {
+    int y = -1;
+    for (int x : a) {
+        if (y < x) { y = x; }
+    }
+    return y;
+}
+</pre></blockquote>
+</div>
+</div>
+
+
+<div class=page>
+<h1>2. 研究の目標</h1>
 <p>
-変数に与えられる高水準な (ドメイン依存の) 
+プログラム中の変数に与えられる高水準な (ドメイン依存の) 
 意味を自動抽出したい。
 <blockquote><pre>
 a = p * 1.08;  <span class=comment>// 税込み価格</span>
@@ -56,7 +107,7 @@ c = x + w/2;   <span class=comment>// 中心座標</span>
 <h2>具体的な方法</h2>
 <ol>
 <li> プログラムをなんらかの中間表現に変換する。
-<li> 既存のコードベースから「辞書」を獲得しておく。
+<li> 既存のコードから「辞書」を獲得しておく。
 <li> 中間表現のマッチングを用いて意味を付与する。
 </ol>
 <div style="position:relative;" class=figure>
@@ -94,7 +145,7 @@ if (c == 1) {
   <use xlink:href="#graph" transform="translate(130,40)" />
   <use xlink:href="#graph" transform="translate(450,50)" />
   <g text-anchor="middle">
-    <text x="84" y="180">GitHub</text>
+    <text style="font-size:200%;" x="84" y="180">GitHub</text>
   </g>
 </svg>
 </div>
@@ -110,7 +161,7 @@ if (c == 1) {
 </ol>
 <h3>なぜグラフなのか?</h3>
 <ul>
-  <li> 十分な一般性がある。
+  <li> データ構造として十分な一般性がある。
   <li> 見た目がわかりやすい。
 </ul>
 </div>
@@ -133,121 +184,185 @@ if (c == 1) {
 
 <div class=page>
 <h1>3. FGyama の構造</h1>
-<ul>
-<li> 制御フローおよびデータフローを同時に表現。
-<li> 各変数を個別に扱う。
-<li> データの依存関係を重視する。
-</ul>
-<h3>例</h3>
-<blockquote><pre>
-int max(int[] a) {
-    int y = -1;
-    for (int x : a) {
-        if (y < x) { y = x; }
-    }
-    return y;
-}
-</pre></blockquote>
-<div class=figure style="position: absolute; right: 1em; bottom: 1em;">
-<a href="img/max.svg"><img width="75%" src="img/max.svg"></a>
-</div>
-</div>
-
-
-<div class=page>
-<h2>従来のデータフローグラフ</h2>
-<ul style="width: 60%;">
-<li> 各変数間の具体的な演算。
-<li> 条件分岐への依存関係。
-</ul>
-<blockquote><pre>
-int max(int[] a) {
-    int y = -1;
-    for (int x : a) {
-        if (y < x) { y = x; }
-    }
-    return y;
-}
-</pre></blockquote>
-<div class=figure style="position: absolute; right: 1em; bottom: 1em;">
-<a href="img/dfg.svg"><img src="img/dfg.svg"></a>
-</div>
-</div>
-
-
-<div class=page>
-<h2>基本的な関数</h2>
-<blockquote style="height: 10em;"><pre>
-return (-a) +
-       (a + b) * c;
-</pre></blockquote>
-<div class=figure style="position: absolute; right: 1em; top: 4em;">
+<div class=pad style="height: 30em;">
+<div class=figure style="position: absolute; right: 2em; top: 0;">
 <a href="img/dfg_basic.svg"><img width="100%" src="img/dfg_basic.svg"></a>
+</div>
+<h3>基本的な関数</h3>
+<blockquote><pre>
+int f(a, b, c) {
+    return (-a) +
+           (a + b) * c;
+}
+</pre></blockquote>
+<ul>
+<li> 各変数・演算子は独立したノードで表される。
+<li> 終端 (<code>return</code>) はひとつ。
+<li> 変数名は途中のノードには現れない。
+</ul>
 </div>
 </div>
 
 
 <div class=page>
 <h2>副作用がある場合</h2>
-<blockquote style="height: 6em;"><pre>
+<div class=pad style="height: 30em;">
+<div class=figure style="position: absolute; right: 2em; top: 0;">
+<a href="img/dfg_side.svg"><img width="100%" src="img/dfg_side.svg"></a>
+</div>
+<blockquote><pre>
 a = a + b;
 x = b * c;
 y = c;
 </pre></blockquote>
-<div class=figure style="position: absolute; right: 1em; top: 4em;">
-<a href="img/dfg_side.svg"><img width="100%" src="img/dfg_side.svg"></a>
+<ul>
+<li> 複数の並列な終端をもつ。
+</ul>
 </div>
 </div>
 
 
 <div class=page>
 <h2>条件分岐</h2>
-<blockquote style="height: 6em;"><pre>
+<div class=pad style="height: 30em;">
+<div class=figure style="position: absolute; right: 2em; top: 0;">
+<a href="img/dfg_cond.svg"><img width="100%" src="img/dfg_cond.svg"></a>
+</div>
+<blockquote><pre>
 if (x) {
     y = 1;
 } else {
     y = 2;
 }
 </pre></blockquote>
-<div class=figure style="position: absolute; right: 1em; top: 4em;">
-<a href="img/dfg_cond.svg"><img width="100%" src="img/dfg_cond.svg"></a>
+<ul>
+<li> 2つのグラフを重ね合わせる。
+<li> Selectノードが cond の値に応じて<br>
+  いずれかのパスを選択する。
+<li> 同様の構造が<u style="color:red;">変数の数だけ</u>作成される。
+</ul>
 </div>
 </div>
 
 
 <div class=page>
 <h2>繰り返し</h2>
-<blockquote style="height: 6em;"><pre>
-while (p) {
-    S;  <span class=comment>// x を変更</span>
-}
-</pre></blockquote>
-<div class=figure style="position: absolute; right: 1em; bottom: 1em;">
+<div class=pad style="height: 30em;">
+<div class=figure style="position: absolute; right: 2em; top: 0;">
 <a href="img/dfg_loop.svg"><img width="100%" src="img/dfg_loop.svg"></a>
 </div>
+<blockquote><pre>
+do {
+    S;  <span class=comment>// x を変更</span>
+} while (p);
+</pre></blockquote>
+<ul>
+<li> ループ本体を Begin ノードと
+  <br>End ノードで囲む。
+<li> <code>cond == true</code> のときに繰り返す。
+<li> 同様の構造が<u style="color:red;">変数の数だけ</u><br>
+  作成される。
+</ul>
+</div>
 </div>
 
 
 <div class=page>
-<h2>脱出</h2>
-<blockquote style="height: 6em;"><pre>
-while (...) {
-    S;  <span class=comment>// a を変更。</span>
-    if (t) { break; }
-}
-</pre></blockquote>
-<div class=figure style="position: absolute; right: 1em; bottom: 1em;">
+<h2>脱出・例外</h2>
+<div class=pad style="height: 30em;">
+<div class=figure style="position: absolute; right: 2em; top: 0;">
 <a href="img/dfg_break.svg"><img width="100%" src="img/dfg_break.svg"></a>
 </div>
+<blockquote><pre>
+do {
+    S;  <span class=comment>// a を変更。</span>
+    if (t) { break; }
+} while (...);
+</pre></blockquote>
+<ul>
+<li> ループ内から直接ループ外へ向かう<br>
+  エッジを作成する。
+<li> 条件つき脱出の場合は Select ノードを使う。
+<li> 同様の構造が<u style="color:red;">変数の数だけ</u>作成される。
+</ul>
+</div>
 </div>
 
 
 <div class=page>
-<h1>4. クローン検出への応用</h1>
+<h2>現在の欠点: 間接参照</h2>
+<blockquote style="position: relative; height: 4em;">
+<pre style="position: absolute; top:0; left: 0;">
+a[0] = 4;
+a[1] = 5;
+b[2] = a[0] + a[1];
+</pre>
+<pre style="position: absolute; top:0; left: 50%;">
+ARR = 4;
+ARR = 5;
+ARR = ARR + ARR;
+</pre>
+</blockquote>
+<ul>
+<li> データ間の依存関係が実際以上に増える。
+<li> 依存関係の見落し (false negative) がない側に倒している。
+<li> 計画: 自明なケースに対しては points-to解析を使う。
+</ul>
+</div>
+
+
+<div class=page>
+<h1>4. FGyama データベースの構築</h1>
+<ul>
+<li> DAGの各ノードを一貫した順序で visit。
+<li> <code class=box>(ノード名, エッジ名)</code> をキーとした trie を構築。
+<li> 各グラフおよび trie を記録しておく。
+</ul>
+<div class=figure>
+<a href="img/trie.svg"><img width="60%" src="img/trie.svg"></a>
+</div>
+</div>
+
+<div class=page>
+<h2>部分グラフの検索</h2>
 <ol>
-<li> 抽出したグラフをデータベースに保存。
-<li> 部分グラフを検索。
-<li> 見つかった同型のグラフをクローンとする。
+<li> パスに分解し、trie を検索。
+<li> 各パスを含んだグラフ番号の積集合を求める。
+<li> 実際のグラフを取得し絞り込む。
+</ol>
+<div class=figure>
+<a href="img/trie.svg"><img width="60%" src="img/trie.svg"></a>
+</div>
+</div>
+
+<div class=page>
+<h2>実験内容</h2>
+<div class=figure style="margin: 2em;">
+<table class=t border align=center>
+<tr><td>対象</td><td>GitHub 上位1000プロジェクト</td></tr>
+<tr><td>ファイル</td><td>480,627個 (3.7GB, 74M loc)</td></tr>
+<tr><td>抽出グラフ</td><td>4.2M 関数, 42M ノード</td></tr>
+<tr><td>データベース</td><td>11GB (グラフ) + 9GB (trie)</td></tr>
+</table>
+</div>
+<ul>
+<li> 処理時間: 3.5時間 (Intal i5, メモリ32G)
+<li> SSD 上で SQLite を利用。
+</ul>
+</div>
+
+
+<div class=page>
+<h1>5. 取得したグラフの応用</h1>
+<h3>a. クローン検出</h3>
+<ol>
+<li> ある関数と同型のグラフをもつ関数を
+  データベースから検索。
+<li> 見つかったグラフ対を人手で評価。
+<li> 変数名を抽象化できるので高水準のクローンが発見できるかも?
 </ol>
 </div>
 
+<div class=page>
+<h2>b. イテレータの発見</h2>
+</div>
