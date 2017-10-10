@@ -96,16 +96,19 @@ int max(int[] a) {
 
 <div class=page>
 <h1>2. 研究の目標</h1>
+<div class=pad style="height: 30em;">
 <p class=p>
 プログラム中の変数に与えられる高水準な (ドメイン依存の) 
 意味を自動抽出したい。
 <blockquote><pre>
 a = p * 1.08;  <span class=comment>// 税込み価格</span>
 ...
-b = 255;       <span class=comment>// 残り体力</span>
+b = 99;        <span class=comment>// 残り体力</span>
 ...
 c = x + w/2;   <span class=comment>// 中心座標</span>
 </pre></blockquote>
+<div style="position: absolute; bottom: 0; right: 0;"><a href="http://mortalkombat.wikia.com/wiki/Fatality?file=Fatality2.png"><img src="https://vignette4.wikia.nocookie.net/mkwikia/images/9/9a/Fatality2.png"></a></div>
+</div>
 </div>
 
 <div class=page>
@@ -160,7 +163,7 @@ if (c == 1) {
 <div class=page>
 <h2>適切な中間表現とは?</h2>
 <ol type=a>
-<li> ロジックのすべてをグラフによって表現したい。
+<li> ロジックの細部まで表現したい。
 <li> プログラム解析をグラフ解析問題として扱いたい。
 <li> あわよくば、他の目的にも利用できるものを。
   <ul>
