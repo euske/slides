@@ -97,6 +97,7 @@ int max(int[] a) {
 <div class=page>
 <h1>2. 研究の目標</h1>
 <div class=pad style="height: 30em;">
+<div style="position: absolute; bottom: 0; right: 0;"><a href="http://mortalkombat.wikia.com/wiki/Fatality?file=Fatality2.png"><img src="https://vignette4.wikia.nocookie.net/mkwikia/images/9/9a/Fatality2.png"></a></div>
 <p class=p>
 プログラム中の変数に与えられる高水準な (ドメイン依存の) 
 意味を自動抽出したい。
@@ -107,7 +108,10 @@ b = 99;        <span class=comment>// 残り体力</span>
 ...
 c = x + w/2;   <span class=comment>// 中心座標</span>
 </pre></blockquote>
-<div style="position: absolute; bottom: 0; right: 0;"><a href="http://mortalkombat.wikia.com/wiki/Fatality?file=Fatality2.png"><img src="https://vignette4.wikia.nocookie.net/mkwikia/images/9/9a/Fatality2.png"></a></div>
+<ul>
+<li> 意味 = <sub>まともな</sub>プログラマが<br>
+  与えるであろう名前
+</ul>
 </div>
 </div>
 
@@ -118,14 +122,7 @@ c = x + w/2;   <span class=comment>// 中心座標</span>
 <li> 既存のコードから「辞書」を獲得しておく。
 <li> 中間表現のマッチングを用いて意味を付与する。
 </ol>
-<div style="position:relative;" class=figure>
-<pre style="position:absolute; left:750px; top:80px; width: 8.4em; height: 8em; border: 2px solid black; font-size: 20px; padding: 0.2em;">
-if (c == 1) {
-    b = b - 10
-    a1 = a1 + 
-} else if (c =
-    ...
-</pre>
+<div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg" 
      xmlns:xlink="http://www.w3.org/1999/xlink"
      version="1.1" width="700" height="300">
@@ -141,6 +138,17 @@ if (c == 1) {
       <ellipse cx="100" cy="140" rx="40" ry="20" fill="white" />
     </g>
   </defs>
+  <g transform="translate(500,110)">
+    <rect x="-4" y="-20" width="200" height="150" stroke="black"
+          fill="none" stroke-width="2" />
+  <g text-anchor="start" style="font-family: monospace; font-size: 150%;">
+    <text x="0" y="0">if (c == 1) {</text>
+    <text x="0" y="25">&nbsp;&nbsp;&nbsp;&nbsp;b = b - 10</text>
+    <text x="0" y="50">&nbsp;&nbsp;&nbsp;&nbsp;a1 = a1 +</text>
+    <text x="0" y="75">} else if (c == </text>
+    <text x="0" y="100">&nbsp;&nbsp;&nbsp;&nbsp;...</text>
+  </g>
+  </g>
   <g fill="none" stroke="black" stroke-width="4">
     <ellipse cx="84" cy="260" rx="80" ry="20" />
     <rect x="4" y="60" width="160" height="200" stroke="none" fill="white" />
@@ -148,10 +156,10 @@ if (c == 1) {
     <line x1="164" x2="164" y1="60" y2="260" />
     <ellipse cx="84" cy="60" rx="80" ry="20" fill="white" />
   </g>
-  <line y1="150" y2="150" x1="300" x2="400" stroke="red" fill="none"
+  <line y1="150" y2="150" x1="290" x2="380" stroke="red" fill="none"
         stroke-width="12" marker-end="url(#rarrow)" />
   <use xlink:href="#graph" transform="translate(130,40)" />
-  <use xlink:href="#graph" transform="translate(450,50)" />
+  <use xlink:href="#graph" transform="translate(410,50)" />
   <g text-anchor="middle">
     <text style="font-size:200%;" x="84" y="180">GitHub</text>
   </g>
@@ -165,7 +173,7 @@ if (c == 1) {
 <ol type=a>
 <li> ロジックの細部まで表現したい。
 <li> プログラム解析をグラフ解析問題として扱いたい。
-<li> あわよくば、他の目的にも利用できるものを。
+<li> あわよくば、他の目的にも利用できるもの。
   <ul>
     <li> クローン検出, taint解析, etc.
   </ul>
@@ -228,6 +236,7 @@ y = c;
 </pre></blockquote>
 <ul>
 <li> 複数の並列な終端をもつ。
+<li> 完全な実行順序は記録されない。
 </ul>
 </div>
 </div>
@@ -325,9 +334,10 @@ ARR = ARR + ARR;
 <div class=page>
 <h1>4. FGyama データベースの構築</h1>
 <ul>
-<li> DAGの各ノードを一貫した順序で visit。
+<li> 部分グラフを高速に検索したい。
+<li> DAGの集合として記録 (repeatエッジは無視)。
 <li> <code class=box>(ノード名, エッジ名)</code> をキーとした trie を構築。
-<li> 各グラフおよび trie を記録しておく。
+
 </ul>
 <div class=figure>
 <a href="img/trie.svg"><img width="60%" src="img/trie.svg"></a>
@@ -350,7 +360,7 @@ ARR = ARR + ARR;
 <h2>実験内容</h2>
 <div class=figure style="margin: 2em;">
 <table class=t border align=center>
-<tr><td>対象</td><td>GitHub 上位1000プロジェクト</td></tr>
+<tr><td>対象</td><td>GitHub 上位★1000 repo</td></tr>
 <tr><td>ファイル</td><td>480,627個 (3.7GB, 74M loc)</td></tr>
 <tr><td>抽出グラフ</td><td>4.3M 関数, 42M ノード</td></tr>
 <tr><td>データベース</td><td>11GB (FGyama) + 10GB (trie)</td></tr>
@@ -400,7 +410,7 @@ ARR = ARR + ARR;
 728:    String <span class="p1">saveTimeStr</span> = strs[0];
 729:    while (<span class="p1">saveTimeStr</span>.startsWith(&quot;0&quot;)) {
 730:        <span class="p1">saveTimeStr</span> = <span class="p1">saveTimeStr</span>
-731:                      .substring(1, <span class="p1">saveTimeStr</span>.length())</span>;
+731:                .substring(1, <span class="p1">saveTimeStr</span>.length())</span>;
 732:    }
 </pre>
 </blockquote>
@@ -423,7 +433,7 @@ ARR = ARR + ARR;
 </div>
 
 <div class=page>
-<h2>得られたコード対の例:</h2>
+<h2>得られた非クローンの例:</h2>
 <blockquote><pre>
     canvas.translate(mBlurredView.getX() - getX(),
                      mBlurredView.getY() - getY());
@@ -435,6 +445,11 @@ ARR = ARR + ARR;
                     wPreviousPoint.getY();
     translate(deltaX, deltaY);
 </pre></blockquote>
+<div class=p>
+問. 
+同一ロジックだが (人間にとって) 意味が
+異なるようなコードはあるか?
+</div>
 </div>
 
 
