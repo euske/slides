@@ -419,37 +419,57 @@ ARR = ARR + ARR;
 <div class=page>
 <h2>b. クローン検出</h2>
 <ol>
-<li> ある関数と同型のグラフをもつ関数を検索。
+<li> ある関数と同型のグラフをもつ関数を検索。<br>
+  同型 : 共通ノードが 5個以上。
 <li> 見つかった 100 コード対を人手により評価。
 <div class=figure style="margin: 1em;">
 <table class=t border align=center>
-<tr><td>完全なクローン</td><td class=n>8</td></tr>
-<tr><td>同一のコードから派生したもの</td><td class=n>39</td></tr>
-<tr><td>異なる作者による同一ロジックの実装</td><td class=n>7</td></tr>
-<tr><td>クローンではない</td><td class=n>46</td></tr>
+<tr><td>A</td><td>トークンレベルで一致</td><td class=n>33</td></tr>
+<tr><td>B</td><td>トークレベルでほぼ一致</td><td class=n>13</td></tr>
+<tr><td>C</td><td>同一ロジックの実装と思われる</td><td class=n>19</td></tr>
+<tr><td>D</td><td>クローンではない</td><td class=n>35</td></tr>
 </table>
 </div>
 </ol>
 </div>
 
 <div class=page>
-<h2>得られた非クローンの例:</h2>
+<h2>得られた非クローンの例 (1):</h2>
+<h3>同一ロジックを実装している例:</h3>
 <blockquote><pre>
-    canvas.translate(mBlurredView.getX() - getX(),
-                     mBlurredView.getY() - getY());
+public static &lt;T&gt; List&lt;T&gt; reverse_foreach(List&lt;T&gt; list) {
+    List&lt;T&gt; reversed = new ArrayList&lt;&gt;();
+    for (int i = list.size() - 1; i &gt;= 0; i--) {
+        reversed.add(list.get(i));
+    }
+    return reversed;
+}
 </pre></blockquote>
 <blockquote><pre>
-    double deltaX = wCurrentPoint.getX() -
-                    wPreviousPoint.getX();
-    double deltaY = wCurrentPoint.getY() -
-                    wPreviousPoint.getY();
-    translate(deltaX, deltaY);
+public static &lt;V&gt; List&lt;V&gt; invertList(List&lt;V&gt; sourceList) {
+    List&lt;V&gt; invertList = new ArrayList&lt;V&gt;(sourceList.size());
+    for (int i = sourceList.size() - 1; i &gt;= 0; i--) {
+        invertList.add(sourceList.get(i));
+    }
+    return invertList;
+}
 </pre></blockquote>
-<div class=p>
-問. 
-同一ロジックだが (人間にとって) 意味が
-異なるようなコードはあるか?
 </div>
+
+<div class=page>
+<h2>得られた非クローンの例 (2):</h2>
+<h3>同一ロジックだが意味が異なる例:</h3>
+<blockquote><pre>
+boolean isSet(int id) {
+  int bit = 1 &lt;&lt; id;
+  return (set &amp; bit) != 0;
+}
+</pre></blockquote>
+<blockquote><pre>
+public boolean isPointerDown(int pointerId) {
+    return (mPointersDown &amp; 1 &lt;&lt; pointerId) != 0;
+}
+</pre></blockquote>
 </div>
 
 
