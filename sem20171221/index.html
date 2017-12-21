@@ -1,0 +1,588 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>研究の進捗報告 / 新山 / 権藤研 2017 冬ゼミ資料</title>
+<style><!--
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+li ol.s { font-size: 75%; }
+.comment { color: #008800; }
+.figure { text-align: center; margin: 0.5em; }
+pre { border: 1px solid black; padding: 0.3em; }
+div table.ttt { font-size: 100%; font-weight: bold; }
+div table.ttt td { border: 2px solid black; padding: 4px; }
+--></style>
+</head>
+<body>
+
+<div class=page>
+<h1>発表の構成</h1>
+<ol>
+<li> コーディング中のリアクションを記録
+<li> ソースコードのコメント分析
+</ol>
+<div>
+スライド: <a href="https://euske.github.io/">https://euske.github.io/</a>
+</div>
+</div>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center style="height:7em;">CodeCAM - コーディング中の<br>
+リアクションを記録する<br>
+(MAINT 2018 投稿予定)</td></tr>
+</table>
+<div class=bottomright>新山 祐介<br>
+権藤研 2017 冬ゼミ資料<Br>
+</div>
+</div>
+
+<div class=page>
+<h1>1. やったこと</h1>
+<ul>
+<li> コーディング中のリアクションを記録するシステムを実装。
+<li> ソースコードから対応する表情を検索可能。
+<li> 表情の変化からソースコード中の難しい部分を検出可能か?
+</div>
+
+<div class=page>
+<h1>2. 背景</h1>
+<ul>
+<li> ときどき「オレは一体何を考えてたんだ」というコードがある:
+<blockquote><pre>
+    int retval = -1;
+    retval = doit();
+    if (retval &lt; 0) goto error; <span class=comment>// WTF?</span>
+error:
+    return -1;
+</pre></blockquote>
+<li> コーディング中の独り言を録画しておきたい。
+<li> ついでに動画も撮っちゃえばいいじゃん。
+</div>
+
+<div class=page>
+<h2>技術的な背景</h2>
+<ul>
+<li> 「他人のコーディングを見る」という文化がある。<br>
+  <a href="https://www.youtube.com/watch?v=xGmXxpIj6vs">YouTube</a> /
+  <a href="https://www.twitch.tv/communities/gamedevelopment">Twitch.tv</a>
+  &nbsp; <img height="240" src="euskecoding.jpg">
+<li> 多くの人が PC でカメラ・ヘッドセットを使っており、
+  フリーのデスクトップ録画ソフトウェアが利用可能。<br>
+  <a href="https://obsproject.com/">OBS Studio</a>
+</div>
+
+<div class=page>
+<h1>3. 問題点</h1>
+<ul>
+<li> プログラミングは何時間にもわたる。
+<li> ソースコード中のどの文字がどの時点で書かれたのか不明。
+<li> 数時間にわたる録音・録画から、該当部分を探すのは面倒。
+</ul>
+</div>
+
+<div class=page>
+<h2>解法 その1</h2>
+<ul>
+<li> IDE / エディタを改造し、各文字ごとに変更履歴を記録する。
+<li> 欠点: 改造が大変。ひとつの環境に固定されてしまう。
+</ul>
+<h2>解法 その2 (提案手法)</h2>
+<ul>
+<li> すべてのキー入力・その時刻を記録しておく。
+<li> あとからソースのどの部分が対応するか計算する。
+</ul>
+</div>
+
+<div class=page>
+<h1>4. 実装上の問題</h1>
+<ul>
+<li> テキストは通常、頻繁に削除・移動・複製される。
+  <div>ソースコード:</div>
+<pre>
+int a=456123;
+</pre>
+  <div>実際のキー入力:</div>
+<div><kbd><nobr>b</nobr></kbd> <kbd><nobr>=</nobr></kbd> <kbd><nobr>1</nobr></kbd> <kbd><nobr>2</nobr></kbd> <kbd><nobr>3</nobr></kbd> <kbd><nobr>4</nobr></kbd> <kbd><nobr>5</nobr></kbd> <kbd><nobr>6</nobr></kbd> <kbd><nobr>C-a</nobr></kbd> <kbd><nobr>i</nobr></kbd> <kbd><nobr>n</nobr></kbd> <kbd><nobr>t</nobr></kbd> <kbd><nobr>Space</nobr></kbd> <kbd><nobr>C-f</nobr></kbd> <kbd><nobr>C-h</nobr></kbd> <kbd><nobr>a</nobr></kbd> <kbd><nobr>C-e</nobr></kbd> <kbd><nobr>;</nobr></kbd> <kbd><nobr>C-b</nobr></kbd> <kbd><nobr>C-b</nobr></kbd> <kbd><nobr>C-b</nobr></kbd> <kbd><nobr>C-b</nobr></kbd> <kbd><nobr>M-d</nobr></kbd> <kbd><nobr>M-b</nobr></kbd> <kbd><nobr>C-y</nobr></kbd>
+</div>
+<li> 1対1対応は存在しない。
+</ul>
+</div>
+
+<div class=page>
+<h2>アルゴリズム</h2>
+<div>キー入力列と完成したソースコードを与えると、
+対応する文字の写像を作成する。</div>
+<ul>
+<li> 入力1: k<sub>i</sub> ∈ K (キー入力、文字の順列)
+<li> 入力2: t<sub>j</sub> ∈ T (テキスト、文字の順列)
+<li> 出力: M = {k<sub>i</sub> → t<sub>j</sub>}
+</ul>
+</div>
+
+<div class=page>
+<h2>観察</h2>
+<ol>
+<li> 順列 k<sub>i</sub> および t<sub>j</sub> がユニークならば、一意に対応するはず。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="600" height="100">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g fill="none" stroke="black" stroke-width="4">
+    <line x1="50" y1="20" x2="450" y2="20" />
+    <line x1="50" y1="80" x2="450" y2="80" />
+    <line x1="340" y1="20" x2="140" y2="80" stroke-dasharray="8,8" />
+    <rect x="300" y="5" width="80" height="30" fill="#ff00ff" />
+    <rect x="100" y="65" width="80" height="30" fill="#ff00ff" />
+  </g>
+  <g text-anchor="middle">
+    <text x="20" y="10" dy="0.7em">K</text>
+    <text x="20" y="70" dy="0.7em">T</text>
+    <text style="font-size:75%;" x="340" y="10" dy="0.7em">c</text>
+    <text style="font-size:75%;" x="140" y="70" dy="0.7em">c</text>
+  </g>
+</svg>
+</div>
+<li> 連続したキー入力は、ソースコード上でも連続している。
+<li> 連続した「キー入力 = テキスト対」をクラスタリングしていけば、
+  そのうちユニークな順列ができあがる。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="600" height="110">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g transform="translate(0,4)">
+  <g fill="none" stroke="black" stroke-width="4">
+    <line x1="50" y1="20" x2="450" y2="20" />
+    <line x1="50" y1="80" x2="450" y2="80" />
+    <line x1="230" y1="20" x2="150" y2="80" stroke-dasharray="8,8" />
+    <line x1="360" y1="20" x2="240" y2="80" stroke-dasharray="8,8" />
+    <rect x="190" y="5" width="80" height="30" fill="#44ff44" />
+    <rect x="320" y="5" width="80" height="30" fill="#ffff44" />
+    <rect x="180" y="0" width="230" height="40" stroke="red" stroke-width="2" />
+    <rect x="110" y="65" width="80" height="30" fill="#44ff44" />
+    <rect x="200" y="65" width="80" height="30" fill="#ffff44" />
+    <rect x="100" y="60" width="190" height="40" stroke="red" stroke-width="2" />
+  </g>
+  <g text-anchor="middle">
+    <text x="20" y="10" dy="0.7em">K</text>
+    <text x="20" y="70" dy="0.7em">T</text>
+    <text style="font-size:75%;" x="230" y="10" dy="0.7em">a</text>
+    <text style="font-size:75%;" x="360" y="10" dy="0.7em">b</text>
+    <text style="font-size:75%;" x="150" y="70" dy="0.7em">a</text>
+    <text style="font-size:75%;" x="240" y="70" dy="0.7em">b</text>
+  </g>
+  </g>
+</svg>
+</div>
+</ol>
+</div>
+
+<div class=page>
+<h1>5. 実装</h1>
+<ul>
+<li> Win32 用のキーロガーを作成。(C++)
+<li> ログとソースコードの対応関係算出。(Python)
+<li> ソースコードに対応した動画再生器。(HTML5/TypeScript)
+<p>
+コード: <a href="https://github.com/euske/codecam/">https://github.com/euske/codecam/</a>
+</ul>
+</div>
+
+<div class=page>
+<h1>6. 実験結果</h1>
+<div>以下のプログラミング課題を遂行:</div>
+<ol>
+<li> <a href="https://projecteuler.net/problem=89">Project Euler #89</a>
+<li> <a href="https://games.tabesugi.net/ohgj/skiii/index.html">自作の HTML5ゲーム</a>
+<li> <a href="https://adventofcode.com/2017/day/19">Advent of Code 2017 - Day 19</a>
+</ol>
+<div>
+Emacsでタイムスタンプつきの正解データを作成し比較。
+</div>
+<ul>
+<li> 適合率: 71% (まだ要追加実験)
+<li> 再現率: 21% (コピペされた部分が多いため)
+</ul>
+</div>
+
+<div class=page>
+<h1>7. 表情を抽出する</h1>
+<ul>
+<li> <a href="https://azure.microsoft.com/en-us/services/cognitive-services/emotion/">Microsoft Emotion API</a>を使用。
+<li> 画像を入力すると、顔の位置および表情を認識:
+  <ul>
+    <li> happiness, anger, contempt, disgust, fear, sadness, surprise, neutral の
+      各確率を出す。
+  </ul>
+<li> 問題: ほとんどが neutral か happiness になってしまう。
+  <br> (サンプルの不足?)
+</ul>
+</div>
+
+<div class=page>
+<h1>8. デモ</h1>
+</div>
+
+<div class=page>
+<h1>9. 今後の課題</h1>
+<ol>
+<li> より精度を上げる。(コピペを記録する?)
+<li> より多くのプログラミングを記録する。
+<li> より多くの被験者を記録する。
+</ol>
+</div>
+
+<div class=page>
+<h1>10. 関連研究</h1>
+<ul>
+<li> プログラム理解で伝統的な "Think aloud" 方式。
+<li> コーディング中の視線トラッキング。
+<li> コーディング中の脳血流トラッキング。
+<li> 表情の認識。
+<li> キーロガーの作成。
+</ul>
+</div>
+
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center style="height:7em;">ソースコード中の統計的な<br>
+詳細コメント解析<br>
+(ICPC 2018 投稿予定)</td></tr>
+</table>
+<div class=bottomright>新山 祐介<br>
+権藤研 2017 冬ゼミ資料<Br>
+</div>
+</div>
+
+<div class=page>
+<h1>1. やったこと</h1>
+<ul>
+<li> ソースコード中のコメントのうち、プログラム理解に使えそうなものを分析した。
+<li> 自動抽出・解析手法を提案し、その精度を測定した。
+</ul>
+</div>
+
+<div class=page>
+<h1>2. 背景</h1>
+<ul>
+<li> 新山の大目的: 「ソースコードからの意味抽出」
+<li> ソースコードとラベル付データ (FGyama) の関連を学習。
+<div style="position:relative;" class=figure>
+<pre style="position:absolute; left:100px; top:50px; width: 8.4em; height: 8em; border: 2px solid black; font-size: 20px; padding: 0.2em;">
+m = -1;
+for (i=0; i&lt;n;
+  if (m &lt; a[i]
+    m = a[i];
+  }
+}       <u>FGyama</u>
+</pre>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="600" height="300">
+  <marker id="rarrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="red" stroke="none" />
+  </marker>
+  <marker id="larrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="5,-5 -5,0 5,5" fill="red" stroke="none" />
+  </marker>
+  <defs>
+    <g id="graph" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,0 L60,70 M120,10 L60,70 L100,140" stroke-width="4" />
+      <ellipse cx="0" cy="0" rx="40" ry="20" fill="white" />
+      <ellipse cx="120" cy="10" rx="40" ry="20" fill="white" />
+      <ellipse cx="60" cy="70" rx="40" ry="20" fill="white" />
+      <ellipse cx="100" cy="140" rx="40" ry="20" fill="white" />
+    </g>
+  </defs>
+  <line y1="120" y2="120" x1="250" x2="350" stroke="red" fill="none"
+        stroke-width="12" marker-end="url(#rarrow)" marker-start="url(#larrow)" />
+  <use xlink:href="#graph" transform="translate(100,40)" />
+  <use xlink:href="#graph" transform="translate(400,50)" />
+  <g text-anchor="middle" style="font-size:75%;">
+    <text x="470" y="250">「最大値を求める」</text>
+  </g>
+</svg>
+</div>
+<li> どうやって「ラベル」を取得する? → 変数名・コメントから
+</ul>
+</div>
+
+<div class=page>
+<h1>3. 関連研究</h1>
+<dl>
+<dt> Tan, et al.
+  "HotComments: How to Make Program Comments More Useful?",
+  HOTOS 07
+<dd>
+  Linuxソースコードのコメントを分析し<br>
+  <code>"lock <u>L</u> must be obtained before entering <u>F</u>."</code><br>
+  のようなパターンを見つけ、静的解析によりバグ発見。
+<dt> Ying, et al.
+  "Source code that talks: an exploration of Eclipse task comments and
+  their implication to repository mining",
+  MSR 05.
+<dd>
+  Eclipse中に含まれる "<code>// TODO</code>"
+  コメントを人手で分析。
+</dl>
+</div>
+
+<div class=page>
+<h2>関連研究つづき</h2>
+<dl>
+<dt> Steidl, et al.
+  "Quality Analysis of Source Code Comments",
+  ICPC 2013.
+<dd>
+  OSSプロジェクトから2,000ファイルのコメントを分類。<br>
+  「コメント分類にはどんな種類があるか?」
+  「各カテゴリがどれくらい現れるか?」
+  「分類を自動化することは可能か?」
+<dt> Pascarella and Bacchelli,
+  "Classifying Code Comments in Java Open-source Software Systems"
+  MSR 2017.
+<dd> JavaおよびC++のコメントをそれぞれ830個と500個、手動で分類。
+  コメントの質を評価するための尺度を提案した:<br>
+  coherence, usefulness, completeness および consistency.
+</dl>
+</div>
+
+<div class=page>
+<h1>4. Research Questions</h1>
+<ul>
+<li> RQ1. 人々はコメントに何を書いているのか?
+  <ol class=s type=a>
+    <li> コメントには構造があるのか
+    <li> それは(自動)分類が可能か
+    <li> 自然言語として文法的か
+  </ol>
+<li> RQ2. コードのふるまいを説明する表現はどんなものか?
+<li> RQ3. 言語・プロジェクトによって差はあるか?
+</ul>
+</div>
+
+<div class=page>
+<h2>Motivating Example</h2>
+<div>以下のようなコメントをきちんと区別したい:</div>
+<ol type=a>
+<li>
+<pre>
+<span class=comment>// バッファはリトルエンディアン。</span>
+b[0] = x &amp; 0xff;
+b[1] = (x &gt;&gt; 8) &amp; 0xff;
+</pre>
+<li>
+<pre>
+<span class=comment>// バッファはリトルエンディアン。</span>
+x = (b[1] &lt;&lt; 8) | b[0];
+</pre>
+</ol>
+<div>例 a. はコードが実行される<u>前</u>の条件 (precondition)、
+b. はコードが実行された<u>後</u>の効果 (postcondition) を表す。
+</div>
+</div>
+
+<div class=page>
+<h2>コメントの「修飾する範囲」</h2>
+<ol type=a>
+<li> 左側の構文要素を修飾 (L):
+<pre>
+int pos = 123;  <span class=comment>// 最初の位置。</span>
+</pre>
+<li> 右側の構文要素を修飾 (R):
+<pre>
+<span class=comment>// ファイルを開く。</span>
+reader = new FileReader(path);
+</pre>
+<li> 親の構文要素を修飾 (U):
+<pre>
+while (p[i] &lt; v) {  <span class=comment>// まだ余裕がある。</span>
+  i++;
+}
+</pre>
+</ol>
+</div>
+
+<div class=page>
+<h1>5. データセット</h1>
+<ul>
+<li> GitHub から★上位 1000個の Java プロジェクトを使用。
+<li> 無作為に抽出したメソッド中のコメント1000個を人手で分類。
+  <ol type=a>
+    <li> コメント区切りを B/I/O 記法でタグづけ。
+    <li> 修飾範囲 (L/R/U)。<br>
+      L…92, R…704, U…75, 不明…129.
+    <li> コメントの分類 (後述)。
+    <li> (英文である場合) 文法的かどうか?
+  </ol>
+</ul>
+</div>
+
+<div class=page>
+<h2>コメントの分類</h2>
+<ul>
+<li> P (Postcondition - 実際の処理)
+<pre>
+<span class=comment>// if we had a prior association,
+// restore and throw an exception</span>
+if (previous != null) {
+    ...
+</pre>
+<li> A (Precondition - 前提条件)
+<pre>
+if (myStatusBar != null) { <span class=comment>//not welcome screen</span>
+    myStatusBar.addProgress(this, myInfo);
+}
+</pre>
+</ul>
+</div>
+
+<div class=page>
+<h2>コメントの分類</h2>
+<ul>
+<li> N (Nominal - 変数・値の説明)
+<pre>
+case 3: <span class=comment>// INPUT_FORMAT</span>
+    return INPUT_FORMAT;
+</pre>
+<li> C (Commented out - コメントアウト)
+<pre>
+} catch (CharacterCodingException e) {
+     System.out.println(e);
+     <span class=comment>//e.printStackTrace();</span>
+}
+</pre>
+</ul>
+</div>
+
+<div class=page>
+<h2>コメントの分類</h2>
+<ul>
+<li> I (Instruction - TODO)
+<pre>
+<span class=comment>//todo: move into ringbuffer.</span>
+if (overflowPolicy == FAIL) {
+    ...
+</pre>
+<li> V (Visual cue - 見た目用)
+<pre>
+<span class=comment>/* ---------------------------- */</span>
+</pre>
+</ul>
+</div>
+
+<div class=page>
+<h2>コメントの分類</h2>
+<ul>
+<li> D (Directive - コンパイラ用)
+<pre>
+<span class=comment>//CHECKSTYLE:OFF</span>
+} catch (final Exception ex) {
+<span class=comment>//CHECKSTYLE:ON</span>
+</pre>
+<li> M (Metadata - 作者・ライセンスなど)
+<pre>
+<span class=comment>// Took from http://stackoverflow.com/questions/
+// 8309354/formula-px-to-dp-dp-to-px-android</span>
+final float scale = context.getResources()
+  .getDisplayMetrics().density;
+</pre>
+
+<li> U (Unknown - 不明)
+</ul>
+</div>
+
+<div class=page>
+<h2>分類した1000件中の内訳</h2>
+<div>
+<table class=ttt align=center border>
+<tr><td>Postcondition - 前提条件</td><td align=right> 613</td></tr>
+<tr><td>Precondition - 実際の処理</td><td align=right> 145</td></tr>
+<tr><td>Nominal - 変数・値の説明</td><td align=right> 66</td></tr>
+<tr><td>Commented out - コメントアウト</td><td align=right> 56</td></tr>
+<tr><td>Instruction - TODO</td><td align=right> 42</td></tr>
+<tr><td>Visual cue - 見た目用</td><td align=right> 38</td></tr>
+<tr><td>Directive - コンパイラ用</td><td align=right> 26</td></tr>
+<tr><td>Metadata - 作者・ライセンスなど</td><td align=right> 5</td></tr>
+<tr><td>Unknown - 不明</td><td align=right> 9</td></tr>
+</table>
+</div>
+</div>
+
+<div class=page>
+<h2>この分類はどれくらい妥当なのか?</h2>
+<div>
+権藤先生と荒堀先生にも100件ずつ分類してもらう。(TODO)
+</div>
+</div>
+
+<div class=page>
+<h1>6. コメント解析器の実装</h1>
+<ol type=a>
+<li> コメント区切り B/I/O の自動判定。(C4.5, TODO)
+<li> コメント修飾範囲 L/R/U の自動判定。(C4.5, TODO)
+<li> コメント分類の自動判定。
+  <ul>
+    <li> 頻繁に現れる Postcondition と Precondition を
+      なんとかして区別したい。
+    <li> どうやるの?
+  </ul>
+</ul>
+</div>
+
+<div class=page>
+<h2>洞察</h2>
+<ul>
+<li> ほとんどの Postcondition (処理内容) コメントは、
+  「命令形の動詞」または「If節」によって始まっている。
+<li> 簡単な英語の構文解析を使えば判定できるのでは?
+  <ul>
+    <li> Stanford CoreNLP を利用し、constituent tree を分析する。
+    <li> 精度を測定する。(TODO)
+  </ul>
+</ul>
+</div>
+
+<div class=page>
+<h2>処理内容に頻出する英語動詞 Top 10</h2>
+<ol style="font-size:200%;">
+<li> check (20)
+<li> be (19)
+<li> do (17)
+<li> create (15)
+<li> get (14)
+<li> ignore (13)
+<li> set (9)
+<li> remove (9)
+<li> make (9)
+<li> ensure (8)
+</ol>
+</div>
+
+<div class=page>
+<h1>7. 他の言語・プロジェクトへの適用</h1>
+<ul>
+<li> 同一の判定規則を、他の言語 (C, Python) にも適用できないか? (TODO)
+  <ul>
+    <li> 精度の低下があるとしたら、言語のどのような特性によるものか?
+  </ul>
+<li> プロジェクトごとに頻出表現に差があるか? (TODO)
+</ul>
+</div>
+
+<div class=page>
+<h1>8. 結論</h1>
+<ol>
+<li> 従来あまり細かく分析されてこなかったコードの
+  ふるまいに関するコメントを分析した。
+<li> コメントの「修飾範囲」という概念に着目した。
+<li> Precondition と Postcondition に着目した。
+<li> 実際の自然言語表現 (英語) に着目した。
+</ol>
+</div>

@@ -1,0 +1,225 @@
+Super Index
+
+a. CodeCAM
+b. Comment von Comment
+
+-- CodeCAM
+
+What I did
+- Record programmer's activity (audio/video)
+- Seekable by the source code
+- Analyze facial expressions to find tricky parts
+
+Motivation:
+- int retval = -1;
+  retval = doit();
+  if (retval < 0) goto error;
+error:
+  return -1; // WTF
+- "What was I thinking!?"
+- Want to record audios!
+- Why not videos too?
+
+Feasilibity:
+- Programming session in YouTube/Twitch
+- WebCam/headset/free recorder (OBS)
+
+Problem:
+- Hours of programming session.
+- Hard to find places in very long Audio/video recording.
+- Want to seek the place from the final code.
+
+Solution 1:
+- Change IDE/editor to track char-based changes.
+- Not very ideal (hard to implement, locked into editors)
+
+Solution 2 (proposed):
+- Log everything with a keylogger.
+- Find the appropriate matching.
+
+Problem:
+- Texts are cut/moved/copied.
+  T: text: int a=456123;
+  L: keylog: [b][=][1][2][3][4][5][6][C-a][i][n][t][ ][C-f][C-h][a][C-e][;][C-b][C-b][C-b][C-b][M-d][M-b][C-y]
+- There's no one-to-one matching.
+
+Algorithm:
+- if (s in T) (s in L) is unique, there's matching.
+- two adjacent keystrokes likely to appear adjacent texts
+- cluster adjacent key/text pair until the sequence it's unique enough.
+  (flexible matching)
+
+Results:
+- 71% prec.
+- 27% recall.
+
+Linking with Emotion API.
+- Microsoft
+- happiness, etc.
+- problem: mostly neutral face
+
+Demo:
+- 2 programs.
+  project euler
+  html5 game
+
+Future Work:
+- More accuracy (track copy/paste?)
+- More programs
+- More data (people)
+
+Related Work:
+- "Think aloud" method
+- Eye tracking with coding
+- Brain activity tracking
+- Facial emotion recognition
+- Key logging
+
+-- Comment Analysis
+
+What I did
+- Extract inline comments that are usable for knowledge extraction
+- Measured the performance
+
+Motivation:
+- Grand goal: "Extract meaning from source code"
+- Extract Dataflow (FGyama)
+- Extract meaning (var names, *comments*)
+- [Learn association]
+
+Related Work:
+- Find lock clues from comments.
+    Tan, Yuan and Zhou,
+    "HotComments: How to Make Program Comments More Useful?",
+    HOTOS 07.
+      「ソースコード中のコメント解析はバグの発見に役立つか、
+      また有害なコメントがバグを発生させることはあるか?」
+      Linuxのソースコードのコメントを分析すると、lock, alloc, free という
+      3つのトピックがよく表れる。とくにlock関連のコメントは全体の
+      1割程度を占める。これらを簡単なNLPで解析し、
+        "lock L must [not] be obtained before [entering/leaving] F."
+      のようなパターンを見つけ、そこから規則を抽出して静的解析により
+      実際にロックのとり忘れを発見し、2つが実際のバグと確認された。
+- Task comment analysis
+    Ying, Wright and Abrams,
+    "Source code that talks: an exploration of Eclipse task comments and
+     their implication to repository mining",
+    MSR 05.
+      Eclipseソースコード中に含まれる 211個の "Task comments"
+      (ようするに "// TODO" で始まるコメント) を人手で分析・分類した。
+      カテゴリは "communication", "pointers to change requests",
+      "bookmark", "current task", "future task", "location marker"
+      "concern tag" に分けられる。その結果、task comments は
+      有用な情報を多く含んでいることを発見した。
+- Comment category
+Steidl, Hummel and Juergens,
+  "Quality Analysis of Source Code Comments",
+  ICPC 2013.
+     彼らは6つのOSSプロジェクトから2,000ファイルのコメントを分類している。
+       RQ1. コメントの分類にはどんな種類があるか?
+       RQ2. 各カテゴリがどれくらい現れるか?
+       RQ3. 分類を自動化することは可能か?
+     ただし、コメント分類の基準はやや大ざっぱであり、
+     とくに手続きの詳細を見ていない (新山の分析でいう a/p の差を考慮していない)。
+     分類器としては naive bayes classifier を使用。
+Pascarella L. and Bacchelli A.,
+ "Classifying Code Comments in Java Open-source Software Systems"
+ MSR 2017
+    これまでコメントがきちんと分類されてこなかったことを指摘し、Javaおよび
+    C++のコメントをそれぞれ830個と500個、手動で分類した。その結果をふまえて
+    C4.5 によるカテゴリ分類器を作成し、96% の F値を得た。またコメントの質を
+    評価するための尺度を提案し、それは一致度 (coherence)、有用性 (usefulness)、
+    完全性 (completeness) および一貫性 (consistency) である。16人のプログラマに
+    対して数例のコメントを見せてアンケートをおこない、長い・nontrivialなコメントは
+    有用である可能性が高いことを示した。
+
+Research Questions:
+    RQ1. 人々はコメントに何を書いているのか?
+      1a. コメントには構造があるのか
+      1b. それは(自動)分類が可能か
+      1c. 分類できるとしたらどんな精度か
+      1d. 自然言語として文法的か
+    RQ2. 言語・プロジェクトによって差はあるか?
+      2a. 言語によってコメントの書き方は変わるか
+      2b. プロジェクトごとに頻度が変わるか
+    RQ3. コードのふるまいを説明する表現は何か?
+      3a. 各カテゴリで、よく使われている英語表現はなにか
+      3b. (プログラミング)言語によって差はあるか
+
+Motivating example:
+      a.
+           // the buffer is in little endian.
+           b[0] = x & 0xff;
+           b[1] = (x >> 8) & 0xff;
+      b.
+           // the buffer is in little endian.
+           x = (b[1] << 8) | b[0];
+
+Data set:
+ - GitHub top 1000 Java projects
+ - Pick 1000 random inline comments from random file
+   (only in a method)
+
+Manual Tagging:
+ - B/I/O
+    // This is    [B]
+    // a comment. [I]
+                  [O]
+    /* Yeah. */   [B]
+    // Dude.      [B]
+ - L/R/U
+   int a = 123; // maximum value.
+   // do this.
+   dothis();
+   while (p[i] != 0) {
+      // not ending
+   }
+    L: 92
+    R: 704
+    U: 75
+    X: 129
+ - Type
+    p: 613 (postcondition)
+    a: 145 (precondition)
+    o: 66 (object noun)
+    c: 56 (commented out)
+    i: 42 (todo)
+    d: 26 (directive)
+    v: 38 (visual cue)
+    m: 5 (metadata)
+    u: 9 (unknown)
+
+How to decide BIO/LRU?
+ - TODO: C4.5
+ - TODO: measure performance
+
+How to distinguish P/A?
+ - Analysis: most P contain imperative verbs. (or Ifs)
+ - Use Stanford CoreNLP
+ - TODO: measure performance
+ - major expressions:
+20 check
+19 be
+17 do
+15 create
+14 get
+13 ignore
+9 set
+9 remove
+9 make
+8 ensure
+8 add
+
+How accurate the categorization?
+ - 権藤先生と荒堀さんに100件ずつ分類してもらう (todo)
+
+Other languages
+ - Apply same mechanics
+ - C and Python
+
+Contribution:
+ - 従来あまり細かく分析されてこなかったコードの
+  ふるまいに関するコメントを分析した。
+ - コメントの「修飾範囲」という概念に着目した。
+ - Precondition と Postcondition に着目した。
+ - 実際の自然言語表現 (英語) に着目した。
