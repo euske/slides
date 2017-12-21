@@ -38,10 +38,11 @@ div table.ttt td { border: 2px solid black; padding: 4px; }
 
 <div class=page>
 <h1>1. やったこと</h1>
-<ul>
+<ol type=a>
 <li> コーディング中のリアクションを記録するシステムを実装。
 <li> ソースコードから対応する表情を検索可能。
 <li> 表情の変化からソースコード中の難しい部分を検出可能か?
+</ol>
 </div>
 
 <div class=page>
@@ -262,10 +263,10 @@ Emacsでタイムスタンプつきの正解データを作成し比較。
 
 <div class=page>
 <h1>1. やったこと</h1>
-<ul>
+<ol type=a>
 <li> ソースコード中のコメントのうち、プログラム理解に使えそうなものを分析した。
 <li> 自動抽出・解析手法を提案し、その精度を測定した。
-</ul>
+</ol>
 </div>
 
 <div class=page>
@@ -374,13 +375,13 @@ for (i=0; i&lt;n;
 <li>
 <pre>
 <span class=comment>// バッファはリトルエンディアン。</span>
-b[0] = x &amp; 0xff;
-b[1] = (x &gt;&gt; 8) &amp; 0xff;
+x = (b[1] &lt;&lt; 8) | b[0];
 </pre>
 <li>
 <pre>
 <span class=comment>// バッファはリトルエンディアン。</span>
-x = (b[1] &lt;&lt; 8) | b[0];
+b[0] = x &amp; 0xff;
+b[1] = (x &gt;&gt; 8) &amp; 0xff;
 </pre>
 </ol>
 <div>例 a. はコードが実行される<u>前</u>の条件 (precondition)、
@@ -400,9 +401,9 @@ int pos = 123;  <span class=comment>// 最初の位置。</span>
 <span class=comment>// ファイルを開く。</span>
 reader = new FileReader(path);
 </pre>
-<li> 親の構文要素を修飾 (U):
+<li> ブロック全体を修飾 (U):
 <pre>
-while (p[i] &lt; v) {  <span class=comment>// まだ余裕がある。</span>
+while (p[i] &lt; v) {  <span class=comment>// まだ小さい。</span>
   i++;
 }
 </pre>
@@ -516,10 +517,11 @@ final float scale = context.getResources()
 </div>
 
 <div class=page>
-<h2>この分類はどれくらい妥当なのか?</h2>
-<div>
-権藤先生と荒堀先生にも100件ずつ分類してもらう。(TODO)
-</div>
+<h2>分類基準はどれくらい妥当なのか?</h2>
+<ol>
+<li> 権藤先生と荒堀先生にも100件ずつ分類してもらう。(TODO)
+<li> どれくらい判断が一致しているかを測定。
+</ol>
 </div>
 
 <div class=page>
@@ -531,7 +533,6 @@ final float scale = context.getResources()
   <ul>
     <li> 頻繁に現れる Postcondition と Precondition を
       なんとかして区別したい。
-    <li> どうやるの?
   </ul>
 </ul>
 </div>
