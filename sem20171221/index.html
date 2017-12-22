@@ -162,6 +162,7 @@ int a=456123;
     <line x1="50" y1="80" x2="450" y2="80" />
     <line x1="230" y1="20" x2="150" y2="80" stroke-dasharray="8,8" />
     <line x1="360" y1="20" x2="240" y2="80" stroke-dasharray="8,8" />
+    <rect x="70" y="5" width="80" height="30" fill="#ffff44" />
     <rect x="190" y="5" width="80" height="30" fill="#44ff44" />
     <rect x="320" y="5" width="80" height="30" fill="#ffff44" />
     <rect x="180" y="0" width="230" height="40" stroke="red" stroke-width="2" />
@@ -172,6 +173,7 @@ int a=456123;
   <g text-anchor="middle">
     <text x="20" y="10" dy="0.7em">K</text>
     <text x="20" y="70" dy="0.7em">T</text>
+    <text style="font-size:75%;" x="110" y="10" dy="0.7em">b</text>
     <text style="font-size:75%;" x="230" y="10" dy="0.7em">a</text>
     <text style="font-size:75%;" x="360" y="10" dy="0.7em">b</text>
     <text style="font-size:75%;" x="150" y="70" dy="0.7em">a</text>
@@ -266,6 +268,7 @@ Emacsでタイムスタンプつきの正解データを作成し比較。
 <ol type=a>
 <li> ソースコード中のコメントのうち、プログラム理解に使えそうなものを分析した。
 <li> 自動抽出・解析手法を提案し、その精度を測定した。
+  <br> (コメント解析ツール「CommentVonComment」を作成)
 </ol>
 </div>
 
@@ -490,7 +493,7 @@ if (overflowPolicy == FAIL) {
 <li> M (Metadata - 作者・ライセンスなど)
 <pre>
 <span class=comment>// Took from http://stackoverflow.com/questions/
-// 8309354/formula-px-to-dp-dp-to-px-android</span>
+// 8309354/</span>
 final float scale = context.getResources()
   .getDisplayMetrics().density;
 </pre>
@@ -503,8 +506,8 @@ final float scale = context.getResources()
 <h2>分類した1000件中の内訳</h2>
 <div>
 <table class=ttt align=center border>
-<tr><td>Postcondition - 前提条件</td><td align=right> 613</td></tr>
-<tr><td>Precondition - 実際の処理</td><td align=right> 145</td></tr>
+<tr><td>Postcondition - 実際の処理</td><td align=right> 613</td></tr>
+<tr><td>Precondition - 前提条件</td><td align=right> 145</td></tr>
 <tr><td>Nominal - 変数・値の説明</td><td align=right> 66</td></tr>
 <tr><td>Commented out - コメントアウト</td><td align=right> 56</td></tr>
 <tr><td>Instruction - TODO</td><td align=right> 42</td></tr>
