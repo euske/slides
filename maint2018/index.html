@@ -1,0 +1,322 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>CodeCAM: Capturing Programmer's Reaction during Coding Session - MAINT 2018 Presentation</title>
+<style><!--
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+li ol.s { font-size: 75%; }
+.comment { color: #008800; }
+.figure { text-align: center; margin: 0.5em; }
+.red { color: red; text-decoration: underline; }
+pre { border: 1px solid black; padding: 0.3em; }
+div table.ttt { font-size: 100%; font-weight: bold; }
+div table.ttt td { border: 2px solid black; padding: 4px; }
+--></style>
+</head>
+<body>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center style="height:4em;">CodeCAM: Capturing Programmer's Reaction during Coding Session</td></tr>
+</table>
+<div style="line-height:1.2;" align=right>→ Yusuke Shinyama<br>
+Yoshitaka Arahori<br>
+Katsuhiko Gondow<br>
+Tokyo Tech, Japan<br>
+</div>
+<div class=bottomleft>
+<a href="https://euske.github.io/">https://euske.github.io/</a>
+</div>
+</div>
+
+<div class=page>
+<h1>1. Motivation</h1>
+<div style="position: relative; height:500px;">
+<ol>
+<li> I'm a programmer by trade.
+<li> Looked at the code I wrote in past.
+<li> "What the #$%&amp; was I thinking!?"
+<li> Wanted to dissect my own brain.
+</ol>
+<div style="position: absolute; top: 0; right: 0;">
+<a href="http://www.monkeyuser.com/2017/future-self/"><img height="480" src="http://www.monkeyuser.com/assets/images/2017/57-future-self.png"></a>
+</div>
+</div>
+</div>
+
+<div class=page>
+<h1>2. Two Ways</h1>
+<ol type=a>
+<li> Make a time machine.<br>
+  <iframe src="https://giphy.com/embed/WmKrOMrTFFhPW" width="480" height="323" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><br>
+  or...
+<li> Record everything and retrieve them later.
+</ol>
+</div>
+
+<div class=page>
+<h2>Issues of Record Everything</h2>
+<ul>
+<li> Coding sessions are long.
+<li> Painful to find a right spot from hours of recording.
+</ul>
+<h2>Proposed Method</h2>
+<ul>
+<li> Trace back from the finished source code to
+the moment it was written.
+<li> <span class=red>Demo!</span>
+</ul>
+</div>
+
+<div class=page>
+<h1>3. What We Did</h1>
+<ul>
+<li> Built a system that records a programmer's environment
+  (Screencap + Webcam) during coding.
+<li> Provides mappings from source code to video.
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="400" height="104">
+  <defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="4" markerHeight="4" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  </defs>
+
+  <g transform="translate(2,2)">
+    <g fill="none" stroke="black" stroke-width="2">
+      <rect x="0" y="0" width="80" height="100" stroke-width="4" />
+      <path d="M10,10 l60,0 M10,20 l50,0 M10,30 l40,0 M10,40 l20,0 m5,0 l20,0 M10,50 l40,0 M10,60 l40,0 M10,70 l30,0 M10,80 l10,0 m5,0 l30,0 M10,90 l20,0" />
+      <line x1="100" y1="50" x2="150" y2="50" marker-end="url(#arrow)" stroke-width="6" />
+      <image x="170" y="0" width="200" height="100" xlink:href="euskecoding.jpg">
+    </g>
+  </g>
+</svg>
+</div>
+<li> Optionally, provides emotional analysis.<br>
+  (via external API)
+</ul>
+</div>
+
+<div class=page>
+<h2>System Overview</h2>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="600" height="300" transform="scale(1.5,1.6),translate(0,80)">
+  <defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="4" markerHeight="4" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g id="computer" fill="white" stroke="black" stroke-width="2">
+    <rect x="10" y="6" width="30" height="20" />
+    <polygon points="10,30 0,38 0,40 50,40 50,38 40,30" />
+  </g>
+  <g id="user" fill="none" stroke="black" stroke-width="2">
+    <path d="M2,48 Q4,40,20,35 Q10,30,10,20 Q10,5,25,5 Q40,5,40,20 Q40,30,30,35 Q46,40,48,48" />
+  </g>
+  </defs>
+
+  <g transform="translate(1,1)">
+    <use xlink:href="#user" x="15" y="0" />
+    <use xlink:href="#computer" x="15" y="92" />
+    <g text-anchor="middle" style="font-family: sans-serif; font-size: 10pt;">
+      <text x="40" y="55" dy="0.5em">Programmer</text>
+      <text x="40" y="140" dy="0.5em">Development</text>
+      <text x="40" y="140" dy="1.5em">Machine</text>
+    </g>
+
+    <g fill="none" stroke="black" stroke-width="2">
+      <rect x="100" y="10" width="60" height="30" />
+      <rect x="300" y="45" width="80" height="30" />
+      <rect x="100" y="90" width="80" height="30" />
+      <rect x="100" y="130" width="80" height="30" />
+      <rect x="298" y="128" width="84" height="34" />
+      <rect x="488" y="88" width="84" height="34" />
+      <g marker-end="url(#arrow)">
+        <path d="M70,25 l30,0 m60,0 l80,0 l0,10" />
+        <path d="M160,25 l430,0" />
+        <path d="M70,105 l30,0 m80,0 l60,0 l0,15" />
+        <path d="M280,60 l20,0 m80,0 l50,0 l0,20" />
+        <path d="M470,105 l18,0 m84,0 l18,0" />
+        <path d="M180,145 l20,0 m80,0 l18,0 m84,0 l48,0 l0,-15" />
+      </g>
+    </g>
+    <g fill="none" stroke="black" stroke-width="1">
+      <ellipse cx="240" cy="60" rx="40" ry="20" />
+      <ellipse cx="240" cy="145" rx="40" ry="20" />
+      <ellipse cx="430" cy="105" rx="40" ry="20" />
+    </g>
+    <g text-anchor="middle" style="font-family: sans-serif; font-size: 10pt;">
+      <text x="130" y="25" dy="0.4em">Video</text>
+      <text x="240" y="60" dy="-0.2em">Facial</text>
+      <text x="240" y="60" dy="0.8em">Recognition</text>
+      <text x="340" y="60" dy="0.4em">Face Data</text>
+      <text x="140" y="105" dy="0.4em">Keystroke</text>
+      <text x="140" y="145" dy="0.4em">Source Code</text>
+      <text x="240" y="145" dy="0.4em">Matching</text>
+      <text x="340" y="145" dy="-0.2em">Timestamped</text>
+      <text x="340" y="145" dy="0.8em">Source Code</text>
+      <text x="430" y="105" dy="0.4em">Combining</text>
+      <text x="530" y="105" dy="-0.2em">Annotated</text>
+      <text x="530" y="105" dy="0.8em">Source Code</text>
+    </g>
+  </g>
+</svg>
+</div>
+</div>
+
+<div class=page>
+<h1>4. Problem</h1>
+<ul>
+<li> Source codes are often moved/removed/copied.
+<li> 1-to-1 mapping doesn't exist!
+  <div><u>Text:</u></div>
+<pre>
+int a=456123;
+</pre>
+  <div><u>Actual keystrokes:</u></div>
+<div><kbd><nobr>b</nobr></kbd> <kbd><nobr>=</nobr></kbd> <kbd><nobr>1</nobr></kbd> <kbd><nobr>2</nobr></kbd> <kbd><nobr>3</nobr></kbd> <kbd><nobr>4</nobr></kbd> <kbd><nobr>5</nobr></kbd> <kbd><nobr>6</nobr></kbd> <kbd><nobr>C-a</nobr></kbd> <kbd><nobr>i</nobr></kbd> <kbd><nobr>n</nobr></kbd> <kbd><nobr>t</nobr></kbd> <kbd><nobr>Space</nobr></kbd> <kbd><nobr>C-f</nobr></kbd> <kbd><nobr>C-h</nobr></kbd> <kbd><nobr>a</nobr></kbd> <kbd><nobr>C-e</nobr></kbd> <kbd><nobr>;</nobr></kbd> <kbd><nobr>C-b</nobr></kbd> <kbd><nobr>C-b</nobr></kbd> <kbd><nobr>C-b</nobr></kbd> <kbd><nobr>C-b</nobr></kbd> <kbd><nobr>M-d</nobr></kbd> <kbd><nobr>M-b</nobr></kbd> <kbd><nobr>C-y</nobr></kbd>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h2>Algorithm</h2>
+<div>Find mappings for a given sequence of keystrokes and source code
+text:</div>
+<ul>
+<li> Input 1: k<sub>i</sub> ∈ K (Keystrokes)
+<li> Input 2: t<sub>j</sub> ∈ T (Text)
+<li> Output: M = {k<sub>i</sub> → t<sub>j</sub>}
+</ul>
+</div>
+
+<div class=page>
+<h2>Algorithm (cont'd)</h2>
+<ol>
+<li> Unique sequence k<sub>i</sub> and t<sub>j</sub> should be matched.
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="600" height="100">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g fill="none" stroke="black" stroke-width="4">
+    <line x1="50" y1="20" x2="450" y2="20" />
+    <line x1="50" y1="80" x2="450" y2="80" />
+    <line x1="340" y1="20" x2="140" y2="80" stroke-dasharray="8,8" />
+    <rect x="300" y="5" width="80" height="30" fill="#ff00ff" />
+    <rect x="100" y="65" width="80" height="30" fill="#ff00ff" />
+  </g>
+  <g text-anchor="middle">
+    <text x="20" y="10" dy="0.7em">K</text>
+    <text x="20" y="70" dy="0.7em">T</text>
+    <text style="font-size:75%;" x="340" y="10" dy="0.7em">k</text>
+    <text style="font-size:75%;" x="140" y="70" dy="0.7em">t</text>
+  </g>
+</svg>
+</div>
+<li> Consecutive keystrokes are likely to appear as consecutive characters.
+<li> By grouping keystroke/text pairs, we'll get a longer sequence.
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="600" height="110">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g transform="translate(0,4)">
+  <g fill="none" stroke="black" stroke-width="4">
+    <line x1="50" y1="20" x2="450" y2="20" />
+    <line x1="50" y1="80" x2="450" y2="80" />
+    <line x1="230" y1="20" x2="150" y2="80" stroke-dasharray="8,8" />
+    <line x1="360" y1="20" x2="240" y2="80" stroke-dasharray="8,8" />
+    <rect x="70" y="5" width="80" height="30" fill="#ffff44" />
+    <rect x="190" y="5" width="80" height="30" fill="#44ff44" />
+    <rect x="320" y="5" width="80" height="30" fill="#ffff44" />
+    <rect x="180" y="0" width="230" height="40" stroke="red" stroke-width="2" />
+    <rect x="110" y="65" width="80" height="30" fill="#44ff44" />
+    <rect x="200" y="65" width="80" height="30" fill="#ffff44" />
+    <rect x="100" y="60" width="190" height="40" stroke="red" stroke-width="2" />
+  </g>
+  <g text-anchor="middle">
+    <text x="20" y="10" dy="0.7em">K</text>
+    <text x="20" y="70" dy="0.7em">T</text>
+    <text style="font-size:75%;" x="110" y="10" dy="0.7em">b</text>
+    <text style="font-size:75%;" x="230" y="10" dy="0.7em">a</text>
+    <text style="font-size:75%;" x="360" y="10" dy="0.7em">b</text>
+    <text style="font-size:75%;" x="150" y="70" dy="0.7em">a</text>
+    <text style="font-size:75%;" x="240" y="70" dy="0.7em">b</text>
+  </g>
+  </g>
+</svg>
+</div>
+</ol>
+</div>
+
+<div class=page>
+<h1>5. Implementation</h1>
+<ul>
+<li> Keylogger (Win32 and Mac).
+<li> Sequence matcher.
+<li> HTML5 video player.
+<p>
+Code: <a href="https://github.com/euske/codecam/">https://github.com/euske/codecam/</a>
+</ul>
+</div>
+
+<div class=page>
+<h1>6. Experiments</h1>
+<div>Conducted programming tasks:</div>
+<ol>
+<li> <a href="https://projecteuler.net/problem=89">Project Euler #89</a>
+<li> <a href="https://games.tabesugi.net/ohgj/skiii/index.html">Make an HTML5 game</a>
+<li> <a href="https://adventofcode.com/2017/day/18">Advent of Code 2017 - Day 18</a>
+</ol>
+<div><u>Performance</u></div>
+<ul>
+<li> Precision: 71%
+<li> Recall: 21% (copy-and-paste not recorded!)
+</ul>
+</div>
+
+<div class=page>
+<h2>Sample output</h2>
+<iframe width="100%" height="400" src="https://euske.github.io/codecam/day18.html"></iframe>
+</div>
+
+<div class=page>
+<h1>7. Emotion Analysis</h1>
+<ul>
+<li> Feed facial images to <a href="https://azure.microsoft.com/en-us/services/cognitive-services/emotion/">Microsoft Emotion API</a>.
+<li> Gives probabilities for each image:<br>
+  "happiness", "anger", "contempt", "disgust", "fear", "sadness", "surprise" or "neutral".
+<li> Problem: mostly recognized as "neutral" or "happiness".
+</ul>
+</div>
+
+<div class=page>
+<h1>8. Conclusions</h1>
+<ul>
+<li> Built a system that captures programmer's reaction.
+<li> Demonstrated its usefulness.<br>
+  - This is future!
+</ul>
+</div>
+
+<div class=page>
+<h1>9. Comments from Reviewers</h1>
+<ol>
+<li> <span class=comment>"Why not make an IDE plugin?"</span><br>
+  - Applicable to any editor/IDE.<br>
+  - We could record interactions outside the editor.
+<li> <span class=comment>"Filming everything is not acceptable."</span><br>
+  - Programmers should be held responsible.<br>
+  - <a href="https://en.wikipedia.org/wiki/Hawthorne_effect">Hawthone effect</a>?
+<li> <span class=comment>"This is good for education!"</span><br>
+  - We're working on it!
+</ol>
+</div>
