@@ -1,0 +1,63 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>権藤研 輪講資料 2018/6/12 新山 (充足可能性問題について)</title>
+<style><!--
+.ub { text-decoration: overline; }
+.example { border: 2px solid black; padding: 8px; margin: 8px; }
+--></style>
+</head>
+<body>
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>充足可能性問題について<br>
+
+</td></tr>
+</table>
+<div class=bottomright>権藤研 輪講 2018/6/12<br>新山 祐介</div>
+</div>
+
+<div class=page>
+<h1>メタ背景知識</h1>
+<ul>
+<li> Knuth による未完の大著:<br>
+  "<a href="https://en.wikipedia.org/wiki/The_Art_of_Computer_Programming">The Art of Computer Programming</a>"
+<ul>
+<li> Volume 1: 1968年, Volume 7: 2018年, ...<br>
+  <small>(生きてるうちに完成すんの? 謎)</small>
+<li> 悪いプロジェクトの見本 (納期遅れ, TeX, etc.)。
+<li> それでも (この本で) チューリング賞授賞。
+</ul>
+<li> 今日やる部分: Volume 4, Fascicle 6.<br>
+  (7.2.2.2. 節のみ、約300ページ)
+</ul>
+</div>
+
+<div class=page>
+<h1>背景知識</h1>
+<ul>
+  <li> 「Boolean Satisfiability Problem (二値充足可能性問題)」
+    通称: <u>SAT</u>
+    <div class=example>例: (x&vee;<span class=ub>y</span>)&wedge;(y&vee;z)&wedge;(<span class=ub>x</span>&vee;y&vee;<span class=ub>z</span>) = 1 のとき x, y, z = ?</div>
+  <li> 有名な<span class=bl>NP完全</span>問題として知られる。
+  <li> あらゆる応用問題に適用可能。
+    <ul>
+      <li> 離散的なパズル (Sudoku, ナンプレなど)。
+      <li> Z3 などの SMTソルバは、
+        SATソルバを効率化したもの。
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>構成</h1>
+<ol>
+  <li> SATソルバの応用例。
+  <li> 手法その1 - バックトラック。
+  <li> 手法その2 - ランダム。
+  <li> 手法その3 - リゾリューション。
+  <li> 手法その4 - CL法。
+</ol>
+</div>
