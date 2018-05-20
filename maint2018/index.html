@@ -48,21 +48,22 @@ Tokyo Tech, Japan<br>
 <h1>2. Two Ways</h1>
 <ol type=a>
 <li> Make a time machine.<br>
-  <iframe src="https://giphy.com/embed/WmKrOMrTFFhPW" width="480" height="323" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><br>
-  or...
-<li> Record everything and retrieve them later.
+  <a href="https://memegenerator.net/instance/81511557/121-gigawatts-121-gigawatts"><img src="https://memegenerator.net/img/instances/81511557/121-gigawatts.jpg" width="480"></a> or...
+<li> Record everything and retrieve them later.<br>
+  - Code, monologue and reaction.
 </ol>
 </div>
 
 <div class=page>
 <h2>Issues of Record Everything</h2>
 <ul>
-<li> Coding sessions are long.
+<li> Coding sessions are long.<br>
+     (Data size: 50GB for 8hrs. = non issue!)
 <li> Painful to find a right spot from hours of recording.
 </ul>
 <h2>Proposed Method</h2>
 <ul>
-<li> Trace back from the finished source code to
+<li> A way to trace back from the finished source code to
 the moment it was written.
 <li> <span class=red>Demo!</span>
 </ul>
@@ -94,7 +95,7 @@ the moment it was written.
   </g>
 </svg>
 </div>
-<li> Optionally, provides emotional analysis.<br>
+<li> Optionally, provides emotion analysis.<br>
   (via external API)
 </ul>
 </div>
@@ -127,9 +128,11 @@ the moment it was written.
       <text x="40" y="140" dy="1.5em">Machine</text>
     </g>
 
+    <rect x="196" y="36" width="190" height="48" rx="10" ry="10"
+          fill="none" stroke="red" stroke-width="2" stroke-dasharray="4,2" />
     <g fill="none" stroke="black" stroke-width="2">
       <rect x="100" y="10" width="60" height="30" />
-      <rect x="300" y="45" width="80" height="30" />
+      <rect x="300" y="45" width="80" height="30" stroke="gray" />
       <rect x="100" y="90" width="80" height="30" />
       <rect x="100" y="130" width="80" height="30" />
       <rect x="298" y="128" width="84" height="34" />
@@ -138,21 +141,24 @@ the moment it was written.
         <path d="M70,25 l30,0 m60,0 l80,0 l0,10" />
         <path d="M160,25 l430,0" />
         <path d="M70,105 l30,0 m80,0 l60,0 l0,15" />
-        <path d="M280,60 l20,0 m80,0 l50,0 l0,20" />
+        <path d="M280,60 l20,0 m80,0 l50,0 l0,20"stroke="gray" />
         <path d="M470,105 l18,0 m84,0 l18,0" />
-        <path d="M180,145 l20,0 m80,0 l18,0 m84,0 l48,0 l0,-15" />
+        <path d="M180,145 l20,0 m80,0 l18,0 m84,0 l48,0 l0,-15"/>
       </g>
     </g>
     <g fill="none" stroke="black" stroke-width="1">
-      <ellipse cx="240" cy="60" rx="40" ry="20" />
+      <ellipse cx="240" cy="60" rx="40" ry="20" stroke="gray" />
       <ellipse cx="240" cy="145" rx="40" ry="20" />
       <ellipse cx="430" cy="105" rx="40" ry="20" />
     </g>
     <g text-anchor="middle" style="font-family: sans-serif; font-size: 10pt;">
+      <text x="420" y="50" dy="-0.2em" fill="red">Optional</text>
       <text x="130" y="25" dy="0.4em">Video</text>
-      <text x="240" y="60" dy="-0.2em">Facial</text>
-      <text x="240" y="60" dy="0.8em">Recognition</text>
-      <text x="340" y="60" dy="0.4em">Face Data</text>
+      <g fill="gray">
+        <text x="240" y="60" dy="-0.2em">Facial</text>
+        <text x="240" y="60" dy="0.8em">Recognition</text>
+        <text x="340" y="60" dy="0.4em">Face Data</text>
+      </g>
       <text x="140" y="105" dy="0.4em">Keystroke</text>
       <text x="140" y="145" dy="0.4em">Source Code</text>
       <text x="240" y="145" dy="0.4em">Matching</text>
@@ -220,7 +226,7 @@ text:</div>
 </svg>
 </div>
 <li> Consecutive keystrokes are likely to appear as consecutive characters.
-<li> By grouping keystroke/text pairs, we'll get a longer sequence.
+<li> By grouping keystroke/text pairs, we'll get a longer unique sequence.
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -289,7 +295,7 @@ Code: <a href="https://github.com/euske/codecam/">https://github.com/euske/codec
 </div>
 
 <div class=page>
-<h1>7. Emotion Analysis</h1>
+<h1>7. Emotion Analysis (Optional)</h1>
 <ul>
 <li> Feed facial images to <a href="https://azure.microsoft.com/en-us/services/cognitive-services/emotion/">Microsoft Emotion API</a>.
 <li> Gives probabilities for each image:<br>
@@ -301,9 +307,11 @@ Code: <a href="https://github.com/euske/codecam/">https://github.com/euske/codec
 <div class=page>
 <h1>8. Conclusions</h1>
 <ul>
-<li> Built a system that captures programmer's reaction.
+<li> Built a system that captures programmer's reaction.<br>
+  - Emotionless most of time.<br>
+  - Any emotion = notable.<br>
 <li> Demonstrated its usefulness.<br>
-  - This is future!
+  - This is the future!
 </ul>
 </div>
 
@@ -316,7 +324,7 @@ Code: <a href="https://github.com/euske/codecam/">https://github.com/euske/codec
 <li> <span class=comment>"Filming everything is not acceptable."</span><br>
   - Programmers should be held responsible.<br>
   - <a href="https://en.wikipedia.org/wiki/Hawthorne_effect">Hawthone effect</a>?
-<li> <span class=comment>"This is good for education!"</span><br>
+<li> <span class=comment>"This is better suited to education!"</span><br>
   - We're working on it!
 </ol>
 </div>
