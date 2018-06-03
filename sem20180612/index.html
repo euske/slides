@@ -6,6 +6,11 @@
 <style><!--
 .ub { text-decoration: overline; }
 .example { border: 2px solid black; padding: 8px; margin: 8px; }
+.comment { color: green; }
+.figure td,th { border: 2px solid black; padding: 4px; }
+.right td { text-align: right; }
+.slow { background: #ffaaaa; }
+.learn { background: #ffff88; }
 --></style>
 </head>
 <body>
@@ -13,17 +18,19 @@
 <div class=page>
 <table class=fill>
 <tr><td align=center valign=center>充足可能性問題について<br>
-
 </td></tr>
 </table>
-<div class=bottomright>権藤研 輪講 2018/6/12<br>新山 祐介</div>
+<div class=bottomright>
+新山 祐介<br>
+権藤研 輪講 2018/6/19
+</div>
 </div>
 
 <div class=page>
 <h1>メタ背景知識</h1>
 <ul>
 <li> Knuth による未完の大著:<br>
-  "<a href="https://en.wikipedia.org/wiki/The_Art_of_Computer_Programming">The Art of Computer Programming</a>"
+  "<a href="https://en.wikipedia.org/wiki/The_Art_of_Computer_Programming">The Art of Computer Programming</a>" (TAoCP)
 <ul>
 <li> Volume 1: 1968年, Volume 7: 2018年, ...<br>
   <small>(生きてるうちに完成すんの? 謎)</small>
@@ -31,33 +38,496 @@
 <li> それでも (この本で) チューリング賞授賞。
 </ul>
 <li> 今日やる部分: Volume 4, Fascicle 6.<br>
-  (7.2.2.2. 節のみ、約300ページ)
-</ul>
-</div>
-
-<div class=page>
-<h1>背景知識</h1>
-<ul>
-  <li> 「Boolean Satisfiability Problem (二値充足可能性問題)」
-    通称: <u>SAT</u>
-    <div class=example>例: (x&vee;<span class=ub>y</span>)&wedge;(y&vee;z)&wedge;(<span class=ub>x</span>&vee;y&vee;<span class=ub>z</span>) = 1 のとき x, y, z = ?</div>
-  <li> 有名な<span class=bl>NP完全</span>問題として知られる。
-  <li> あらゆる応用問題に適用可能。
-    <ul>
-      <li> 離散的なパズル (Sudoku, ナンプレなど)。
-      <li> Z3 などの SMTソルバは、
-        SATソルバを効率化したもの。
-    </ul>
+  (7.2.2.2. 節のみ、約300ページ、<a href="http://www-cs-faculty.stanford.edu/~knuth/fasc6a.ps.gz">ドラフト</a>)
 </ul>
 </div>
 
 <div class=page>
 <h1>構成</h1>
 <ol>
-  <li> SATソルバの応用例。
-  <li> 手法その1 - バックトラック。
-  <li> 手法その2 - ランダム。
-  <li> 手法その3 - リゾリューション。
-  <li> 手法その4 - CL法。
+  <li> SATソルバとは何か? どう役に立つのか?
+  <li> 手法1 - バックトラックによる解法。
+  <li> 手法2 - Resolutionによる解法。
+  <li> 手法3 - CDCL法。
 </ol>
+</div>
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>SATソルバって何。<br>
+</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h1>SATソルバとは何か?</h1>
+<ul>
+  <li> 「Boolean Satisfiability Problem (二値充足可能性問題)」
+    通称: <u>SAT</u>
+    <div class=example>例: (x&vee;<span class=ub>y</span>)&wedge;(y&vee;z)&wedge;(<span class=ub>x</span>&vee;y&vee;<span class=ub>z</span>) = 1 のとき x, y, z = ?</div>
+  <li> 有名な<span class=bl>NP完全</span>問題として知られる。
+  <li> あらゆる離散的な問題 (パズルなど) に適用可能。
+  <li> すべての命題を CNF形式 (Conjunctive Normal Form) として表す:<br>
+    (&vee;&vee;&vee;...) &wedge; (&vee;&vee;...) &wedge; ...
+</ul>
+</div>
+
+<div class=page>
+<h1>例題 1</h1>
+<ul>
+  <li> 2種類の形を 3×3 のマスにはめ込む (回転あり)。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="400" height="200">
+  <g stroke="black" fill="none" stroke-width="4">
+  <rect x="10" y="40" width="96" height="32" />
+  <rect x="140" y="10" width="32" height="96" />
+  <path d="M20,100 l64,0 l0,32 l-32,0 l0,32 l-32,0 l0,-64" />
+  <path d="M140,130 m64,64 l-64,0 l0,-32 l32,0 l0,-32 l32,0 l0,64" />
+  <rect x="280" y="50" width="96" height="96" />
+  <rect x="272" y="42" width="112" height="112" />
+  <path d="M280,50 m32,0 l0,96 m32,-96 l0,96 m-64,-64 l96,0 m-96,32 l96,0"
+        stroke-width="2" stroke-dasharray="4,4" />
+  </g>
+</svg>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h1>例題 1 (つづき)</h1>
+<ul>
+  <li> 各マスに入る形を変数とする。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="600" height="360">
+  <g stroke="black" fill="none" stroke-width="4">
+  <rect x="80" y="50" width="96" height="32" />
+  <rect x="380" y="50" width="32" height="96" />
+  <path d="M140,180 l64,0 l0,32 l-32,0 l0,32 l-32,0 l0,-64" />
+  <path d="M440,180 l64,0 l0,64 l-32,0 l0,-32 l-32,0 l0,-32" />
+  <path d="M140,280 l32,0 l0,32 l32,0 l0,32 l-64,0 l0,-64" />
+  <path d="M440,280 m64,64 l-64,0 l0,-32 l32,0 l0,-32 l32,0 l0,64" />
+  </g>
+  <g fill="black">
+    <text x="10" y="20" dy="0.5em">a1,</text>
+    <text x="10" y="20" dy="1.5em">a2,</text>
+    <text x="10" y="20" dy="2.5em">a3</text>
+    <text x="300" y="20" dy="0.5em">b1, b2, b3</text>
+    <text x="10" y="180" dy="0.5em">c1, c2,</text>
+    <text x="10" y="180" dy="1.5em">c3, c4</text>
+    <text x="300" y="180" dy="0.5em">d1, d2,</text>
+    <text x="300" y="180" dy="1.5em">d3, d4</text>
+    <text x="10" y="280" dy="0.5em">e1, e2,</text>
+    <text x="10" y="280" dy="1.5em">e3, e4</text>
+    <text x="300" y="280" dy="0.5em">f1, f2,</text>
+    <text x="300" y="280" dy="1.5em">f3, f4</text>
+  </g>
+</svg>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h1>例題 1 (つづき)</h1>
+<ul>
+<li> 左上のマスは
+  a<sub>1</sub>,b<sub>1</sub>,c<sub>1</sub>,d<sub>1</sub>,e<sub>1</sub>
+  のどれかひとつが 1 になる:<br>
+  = (a<sub>1</sub>&vee;b<sub>1</sub>&vee;c<sub>1</sub>&vee;d<sub>1</sub>&vee;e<sub>1</sub>) &wedge;<br>
+  (<span class=ub>a<sub>1</sub></span>&vee;<span class=ub>b<sub>1</sub></span>) &wedge;
+  (<span class=ub>a<sub>1</sub></span>&vee;<span class=ub>c<sub>1</sub></span>) &wedge;
+  (<span class=ub>a<sub>1</sub></span>&vee;<span class=ub>d<sub>1</sub></span>) &wedge;
+  (<span class=ub>a<sub>1</sub></span>&vee;<span class=ub>e<sub>1</sub></span>) &wedge;<br>
+  (<span class=ub>b<sub>1</sub></span>&vee;<span class=ub>c<sub>1</sub></span>) &wedge;
+  (<span class=ub>b<sub>1</sub></span>&vee;<span class=ub>d<sub>1</sub></span>) &wedge;
+  (<span class=ub>b<sub>1</sub></span>&vee;<span class=ub>e<sub>1</sub></span>) &wedge;<br>
+  (<span class=ub>c<sub>1</sub></span>&vee;<span class=ub>d<sub>1</sub></span>) &wedge;
+  (<span class=ub>c<sub>1</sub></span>&vee;<span class=ub>e<sub>1</sub></span>) &wedge;
+  (<span class=ub>d<sub>1</sub></span>&vee;<span class=ub>e<sub>1</sub></span>)
+</ul>
+</div>
+
+<div class=page>
+<h1>例題 2</h1>
+<ul>
+  <li> 2つの整数 a (3ビット) × b (2ビット) = 5 となるような
+    a, b を求める。
+    <ul>
+      <li> a, b をビット列
+        [a<sub>3</sub> a<sub>2</sub> a<sub>1</sub>],
+        [b<sub>2</sub> b<sub>1</sub>] で表現する。
+<table class=right align=center>
+<tr><td></td><td></td><td>a<sub>3</sub></td><td>a<sub>2</sub></td><td>a<sub>1</sub></td></tr>
+<tr><td></td><td>×</td><td></td><td>b<sub>2</sub></td><td>b<sub>1</sub></td></tr>
+<tr><td colspan="5" style="background:black;"></td></tr>
+<tr><td></td><td></td>
+<td>(a<sub>3</sub>&wedge;b<sub>1</sub>)</td>
+<td>(a<sub>2</sub>&wedge;b<sub>1</sub>)</td>
+<td>(a<sub>1</sub>&wedge;b<sub>1</sub>)</td></tr>
+<tr><td></td>
+<td>(a<sub>3</sub>&wedge;b<sub>2</sub>)</td>
+<td>(a<sub>2</sub>&wedge;b<sub>2</sub>)</td>
+<td>(a<sub>1</sub>&wedge;b<sub>2</sub>)</td>
+<td></td></tr>
+<tr><td>+</td>
+<td>c<sub>2</sub></td>
+<td>c<sub>1</sub></td>
+<td></td>
+<td></td></tr>
+<tr><td colspan="5" style="background:black;"></td></tr>
+<tr><td></td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+</table>
+    </ul>
+</div>
+
+<div class=page>
+<h1>例題 2 (つづき)</h1>
+<ul>
+  <li> ここで
+    <ul>
+      <li> a<sub>1</sub>&wedge;b<sub>1</sub> = 1
+      <li> (a<sub>2</sub>&wedge;b<sub>1</sub>) &oplus; (a<sub>1</sub>&wedge;b<sub>2</sub>) = 0
+      <li> (a<sub>2</sub>&wedge;b<sub>1</sub>) &wedge; (a<sub>1</sub>&wedge;b<sub>2</sub>) = c<sub>1</sub>
+      <li> (a<sub>3</sub>&wedge;b<sub>1</sub>) &oplus; (a<sub>2</sub>&wedge;b<sub>2</sub>) &oplus; c<sub>1</sub> = 1
+      <li> (a<sub>3</sub>&wedge;b<sub>1</sub>&wedge;a<sub>2</sub>&wedge;b<sub>2</sub>) &vee;
+         (a<sub>3</sub>&wedge;b<sub>1</sub>&wedge;c<sub>1</sub>) &vee;
+        (a<sub>2</sub>&wedge;b<sub>2</sub>&wedge;c<sub>1</sub>) = c<sub>2</sub>
+      <li> (a<sub>3</sub>&wedge;b<sub>2</sub>) &oplus; c2 = 0
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>Tseytin Encoding</h1>
+<div class=figure>
+<table border align=center>
+<tr><th>式</th><th>CNF式</th></tr>
+<tr><td>X = 1</td><td align=center>X</td></tr>
+<tr><td>X = 0</td><td align=center><span class=ub>X</span></td></tr>
+<tr><td>Y = X</td><td align=center>(<span class=ub>X</span>&vee;Y) &wedge; (X&vee;<span class=ub>Y</span>)</td></tr>
+<tr><td>Y = <span class=ub>X</span></td><td align=center>(X&vee;Y) &wedge; (<span class=ub>X</span>&vee;<span class=ub>Y</span>)</td></tr>
+<tr><td>Z = X &wedge; Y</td><td align=center>(X&vee;<span class=ub>Z</span>) &wedge; (Y&vee;<span class=ub>Z</span>) &wedge; (<span class=ub>X</span>&vee;<span class=ub>Y</span>&vee;Z)</td></tr>
+<tr><td>Z = X &vee; Y</td><td align=center>(<span class=ub>X</span>&vee;Z) &wedge; (<span class=ub>Y</span>&vee;Z) &wedge; (X&vee;Y&vee;<span class=ub>Z</span>)</td></tr>
+<tr><td>Z = X &oplus; Y</td><td align=center>(<span class=ub>X</span>&vee;Y&vee;Z) &wedge; (X&vee;<span class=ub>Y</span>&vee;Z) &wedge; (X&vee;Y&vee;<span class=ub>Z</span>) &wedge; (<span class=ub>X</span>&vee;<span class=ub>Y</span>&vee;<span class=ub>Z</span>)</td></tr>
+</table>
+</div>
+</div>
+
+<div class=page>
+<h1>SATソルバ → SMTソルバ</h1>
+<ul>
+  <li> SMTソルバ (Satisfiability Modulo Theories)<br>
+    = SATソルバを効率化したもの。
+  <li> 整数、文字列などの型を扱えるようにする。
+  <li> それぞれの型について、追加の「理論」を与える:
+    <ul>
+      <li> "a+b = b+a" はつねに真
+      <li> "a+1 &lt; a" は充足不能
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>例題 3</h1>
+<ul>
+  <li> 縦・横・ナナメの数を足した数を等しくせよ。
+    <div class=figure>
+      <table border align=center>
+	<tr><td>a<sub>1</sub></td><td>a<sub>2</sub></td><td>a<sub>3</sub></td></tr>
+	<tr><td>a<sub>4</sub></td><td>a<sub>5</sub></td><td>a<sub>6</sub></td></tr>
+	<tr><td>a<sub>7</sub></td><td>a<sub>8</sub></td><td>a<sub>9</sub></td></tr>
+      </table>
+    </div>
+    <ul>
+  <li> a<sub>1</sub> ... a<sub>9</sub> は 1〜9 の数。
+  <li> a<sub>1</sub> ... a<sub>9</sub> はすべて異なる。
+  <li>
+    a<sub>1</sub>+a<sub>2</sub>+a<sub>3</sub> =
+    a<sub>4</sub>+a<sub>5</sub>+a<sub>6</sub> =
+    a<sub>7</sub>+a<sub>8</sub>+a<sub>9</sub> =<br>
+    a<sub>1</sub>+a<sub>4</sub>+a<sub>7</sub> =
+    a<sub>2</sub>+a<sub>5</sub>+a<sub>8</sub> =
+    a<sub>3</sub>+a<sub>6</sub>+a<sub>9</sub> =<br>
+    a<sub>1</sub>+a<sub>5</sub>+a<sub>9</sub> =
+    a<sub>3</sub>+a<sub>5</sub>+a<sub>7</sub>
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>Z3を使ってみる</h1>
+<ul>
+  <li> <a href="https://rise4fun.com/z3/">https://rise4fun.com/z3/</a>
+<div class=figure>
+<pre>
+(declare-const a1 Int)   ; a1は整数型。
+...
+(assert (&lt;= 1 a1 9))     ; 1 &lt;= a1 &lt;= 9
+...
+(assert (distinct a1 a2 ... a9))  ; a1...a9は異なる。
+...
+(assert (= (+ a1 a2 a3) ... (+ a3 a5 a7)))
+(check-sat)              ; 制約充足可能性をチェック。
+(get-model)              ; 可能なときの値を表示。
+</pre>
+</div>
+</ul>
+</div>
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>SATソルバの作り方<br>
+手法1 - バックトラック。
+</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h1>SATソルバ - アホアホ版</h1>
+<ul>
+  <li> アホすぎて教科書にも載ってない。
+  <li> 充足不能の場合 = 確実に O(2<sup>n</sup>) かかる。
+<blockquote><pre>
+def doit():
+    for a in [0, 1]:
+        for b in [0, 1]:
+            for c in [0, 1]:
+                for d in [0, 1]:
+                    for e in [0, 1]:
+                        if f(a,b,c,d,e):
+                            return SAT
+    return UNSAT
+</pre></blockquote>
+</ul>
+</div>
+
+<div class=page>
+<h1>SATソルバの効率化</h1>
+<ul>
+  <li> すべての組み合わせを試さなくても
+    充足不能な例:
+<div class=figure>
+    <span class=ub>a</span> &wedge;
+    <span class=ub>b</span> &wedge;
+    <span class=ub>c</span> &wedge;
+    <span class=ub>d</span> &wedge;
+    <span class=ub>e</span> &wedge;
+    (a&vee;b&vee;c&vee;d&vee;e)
+</div>
+  <li> 方針:
+    <ul>
+      <li> Unit rule: 「テンパった」状態を検出。<br>
+        (0&vee;0&vee;...&vee;0&vee;X) → X=1 がくれば上がり。
+      <li> 同じ過ちを2度 繰り返さない。
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>DP (David-Patnum) 法</h1>
+<blockquote><pre>
+decisions = []    <span class=comment># 決めた値</span>
+implications = [] <span class=comment># 推論した値</span>
+
+while 未定義の変数がある:
+    decide()      <span class=comment># ひとつ決める</span>
+    bcp()         <span class=comment># 推論する</span>
+    if 失敗:
+        undo()    <span class=comment># もとに戻す</span>
+        flip()    <span class=comment># 別の選択肢を試す</span>
+        if 失敗:
+            return UNSAT  <span class=comment># もう試すものがない</span>
+return SAT
+</pre></blockquote>
+<ul>
+  <li> DPLL法 = DP法 + 統計的な小技
+</ul>
+</div>
+
+<div class=page>
+<h1>関数 <code>decide()</code></h1>
+<blockquote><pre>
+<span class=comment># 未定義の変数の値をひとつ決める</span>
+def decide():
+    for v in 各変数:
+        if v == 未定義:
+           decisions.append((v, 1))
+           break
+</pre></blockquote>
+<ul>
+  <li> 決めた値は <code>decisions</code> に記録される。
+</ul>
+</div>
+
+
+<div class=page>
+<h1>関数 <code>bcp()</code></h1>
+<blockquote><pre>
+<span class=comment># 推論して値を決める</span>
+def bcp():
+    for C in 各CNF節:
+        if Cはすでに充足している:
+            continue
+        <span class=comment># Cはまだ充足していない。</span>
+        U = [ C中の変数で、未定義なもの ]
+        if len(U) == 0:    <span class=comment># 変更の余地なし</span>
+            return 失敗
+        elif len(U) == 1:  <span class=comment># テンパってる</span>
+            implications.append((v, 0または1))
+    return 成功
+</pre></blockquote>
+</div>
+
+<div class=page>
+<h1>実際の実装</h1>
+<blockquote><pre>
+while level &lt; N:   <span class=comment># level = 現在の段階</span>
+    decide(level)   <span class=comment># ひとつ決める</span>
+    bcp(level)      <span class=comment># 推論する</span>
+    if 成功:
+        level += 1  <span class=comment># 次の段階へ</span>
+    else:
+        level = まだ選択肢がある段階
+        undo(level)  <span class=comment># その状態に戻す</span>
+        flip(level)  <span class=comment># 別の選択肢を試す</span>
+        if 失敗:
+            return UNSAT
+return SAT
+</pre></blockquote>
+</div>
+
+<div class=page>
+<h1>Chaff [1]の実装</h1>
+<ul>
+  <li> 革新的なSATソルバ: (Moskewiczら, 2001年)<br>
+    <a href="https://www.princeton.edu/~chaff/publication/DAC2001v56.pdf">"Chaff: Engineering an Efficient SAT Solver"</a>
+  <li> 問題: <code>bcp()</code> が遅い。
+<pre>
+def bcp():
+<div class=slow>    for C in 各CNF節:                <span class=comment># ループ1</span>
+        if Cはすでに充足している:
+            continue
+        U = [ C中の変数で、未定義なもの ]  <span class=comment># ループ2</span>
+</div>    ...
+</pre>
+  <li> 洞察: すべての節・変数を毎回チェックする必要はない。
+</ul>
+</div>
+
+<div class=page>
+<h2>ウォッチリストを用いたBCPの高速化</h2>
+
+</div>
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>SATソルバの作り方<br>
+手法2 - Resolution。
+</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h1>Resolutionとは何か?</h1>
+<ul>
+  <li> (x&vee;A) &wedge; (<span class=ub>x</span>&vee;B) が成り立つとする。
+  <li> もし <span class=ub>x</span> が成り立つならば (x&vee;A) = A である。
+  <li> もし x が成り立つならば (<span class=ub>x</span>&vee;B) = B である。
+  <li> (x&vee;<span class=ub>x</span>) はつねに成り立つ。
+  <li> したがって (A&vee;B) も成り立つ。
+    <div class=example>(x&vee;A) &wedge; (<span class=ub>x</span>&vee;B) &rarr; (A&vee;B)</div>
+</ul>
+</div>
+
+<div class=page>
+<h1>Resolutionを使った例</h1>
+<ul>
+</ul>
+</div>
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>SATソルバの作り方<br>
+手法3 - CDCL法。
+</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h1>CDCL法</h1>
+<blockquote><pre>
+<span class=comment># Conflict Driven Clause Learning 法</span>
+decisions = []    <span class=comment># 決めた値</span>
+implications = [] <span class=comment># 推論した値</span>
+
+while 未定義の変数がある:
+    decide()      <span class=comment># ひとつ決める</span>
+    bcp()         <span class=comment># 推論する</span>
+    if 失敗:
+<div class=learn>        learn(decisions)  <span class=comment># 失敗から学ぶ</span>
+</div>        undo()    <span class=comment># もとに戻す</span>
+        flip()    <span class=comment># 別の選択肢を試す</span>
+        if 失敗:
+            return UNSAT  <span class=comment># もう試すものがない</span>
+return SAT
+</pre></blockquote>
+</div>
+
+<div class=page>
+<h1>CDCL法の原理</h1>
+<ol>
+<li> たとえば a=0, b=1, c=1 と決めた (<code>decide</code>) とする。
+<li> 失敗した。(;_;)
+<li> (<span class=ub>a</span> &wedge; b &wedge; c) は正しくないことが判明した。
+<li> (<span class=ub>a</span> &wedge; b &wedge; c) の<u>否定</u> =<br>
+  (a &vee; <span class=ub>b</span> &vee; <span class=ub>c</span>) が正しいという事実を学習した。
+<li> 節 (a &vee; <span class=ub>b</span> &vee; <span class=ub>c</span>) を
+  既存のCNF式の列に追加する。
+</ol>
+</div>
+
+<div class=page>
+<h1>その他いろいろな工夫 (Chaff)</h1>
+<ul>
+  <li> 統計・ヒューリスティクスを用いて、<code>decide()</code> する
+    順番をより賢く決める (a la DPLL法)。
+  <li> 役に立たなそうな節を自動的に削除する。
+  <li> 一定の条件で「ご破算 (restart)」機能をつける
+    (ただし、一旦学習した節はそのまま)。
+  <li> 数千〜数十万の変数をもつSAT問題が解決可能になり、
+    これを機に実用が広まった。
+</ul>
+</div>
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>まとめ。<br>
+</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h1>結論</h1>
+<ul>
+  <li> SATソルバは汎用の問題解決器であり、幅広い用途をもつ。
+  <li> 効率的なSATソルバを作るための手法を紹介した。
+  <li> SATソルバの普及は、近年のCSにおけるメジャーな進歩といえる。
+  <li> これからより一般に普及するだろう。(新山の予想)
+</ul>
+</div>
+
+<div class=page>
+<h1>TAoCP = 教科書としてはダメ。</h1>
+<ul>
+<li> 例の順番が途中で変わる。
+<li> 同じ文字を複数の意味で使う。
+<li> 中間的な説明なしにいきなり実装レベルの説明になる。
+<li> 例題を解かないと説明がわからない。
+<li> 本1冊がひとつのsubsubsectionである:<br>
+  話の区切りがわかりにくい。
+<li> しかし百科事典としてはすごい。
+</ul>
 </div>
