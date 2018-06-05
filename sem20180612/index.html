@@ -2,7 +2,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="stylesheet" type="text/css" href="./slides.css">
-<title>権藤研 輪講資料 2018/6/12 新山 (充足可能性問題について)</title>
+<title>権藤研 輪講資料 2018/6/19 新山 (充足可能性問題について)</title>
 <style><!--
 .ub { text-decoration: overline; }
 .example { border: 2px solid black; padding: 8px; margin: 8px; }
@@ -48,7 +48,7 @@
   <li> SATソルバとは何か? どう役に立つのか?
   <li> 手法1 - バックトラックによる解法。
   <li> 手法2 - Resolutionによる解法。
-  <li> 手法3 - CDCL法。
+  <li> 手法3 - 節の学習による解法。
 </ol>
 </div>
 
@@ -211,7 +211,7 @@
 <tr><td>Y = <span class=ub>X</span></td><td align=center>(X&vee;Y) &wedge; (<span class=ub>X</span>&vee;<span class=ub>Y</span>)</td></tr>
 <tr><td>Z = X &wedge; Y</td><td align=center>(X&vee;<span class=ub>Z</span>) &wedge; (Y&vee;<span class=ub>Z</span>) &wedge; (<span class=ub>X</span>&vee;<span class=ub>Y</span>&vee;Z)</td></tr>
 <tr><td>Z = X &vee; Y</td><td align=center>(<span class=ub>X</span>&vee;Z) &wedge; (<span class=ub>Y</span>&vee;Z) &wedge; (X&vee;Y&vee;<span class=ub>Z</span>)</td></tr>
-<tr><td>Z = X &oplus; Y</td><td align=center>(<span class=ub>X</span>&vee;Y&vee;Z) &wedge; (X&vee;<span class=ub>Y</span>&vee;Z) &wedge; (X&vee;Y&vee;<span class=ub>Z</span>) &wedge; (<span class=ub>X</span>&vee;<span class=ub>Y</span>&vee;<span class=ub>Z</span>)</td></tr>
+<tr><td>Z = X &oplus; Y</td><td align=center><small>(<span class=ub>X</span>&vee;Y&vee;Z) &wedge; (X&vee;<span class=ub>Y</span>&vee;Z) &wedge; (X&vee;Y&vee;<span class=ub>Z</span>) &wedge; (<span class=ub>X</span>&vee;<span class=ub>Y</span>&vee;<span class=ub>Z</span>)</small></td></tr>
 </table>
 </div>
 </div>
@@ -224,8 +224,8 @@
   <li> 整数、文字列などの型を扱えるようにする。
   <li> それぞれの型について、追加の「理論」を与える:
     <ul>
-      <li> "a+b = b+a" はつねに真
-      <li> "a+1 &lt; a" は充足不能
+      <li> "<em>a</em>+<em>b</em> = <em>b</em>+<em>a</em>" はつねに真
+      <li> "<em>a</em>+1 &lt; <em>a</em>" は充足不能
     </ul>
 </ul>
 </div>
@@ -348,6 +348,36 @@ return SAT
 </div>
 
 <div class=page>
+<h1>例</h1>
+<div class=example>
+(<span class=ub>a</span> &vee; b) &wedge; (<span class=ub>b</span> &vee; <span class=ub>c</span>)
+</div>
+<ol>
+  <li> a=1 を決定 (decide)。
+  <li> b=1 を推論 (bcp)。
+  <li> c=0 を推論 (bcp)。
+  <li> 成功。(SAT)
+</ol>
+</div>
+
+<div class=page>
+<h1>例</h1>
+<div class=example>
+(a &vee; b &vee; c) &wedge; (<span class=ub>b</span> &vee; <span class=ub>c</span>) &wedge; (<span class=ub>a</span> &vee; <span class=ub>b</span> &vee; c)
+</div>
+<ol>
+  <li> a=1 を決定 (decide)。
+  <li> b=1 を決定 (decide)。
+  <li> c=0 を推論 (bcp)。
+  <li> (<span class=ub>a</span> &vee; <span class=ub>b</span> &vee; c) が充足不能 (bcp 失敗)。
+  <li> c を未定義に戻す (undo)。
+  <li> b=1 → b=0 にする (flip)。
+  <li> c=1 を決定 (decide)。
+  <li> 成功。(SAT)
+</ol>
+</div>
+
+<div class=page>
 <h1>関数 <code>decide()</code></h1>
 <blockquote><pre>
 <span class=comment># 未定義の変数の値をひとつ決める</span>
@@ -413,13 +443,79 @@ def bcp():
         U = [ C中の変数で、未定義なもの ]  <span class=comment># ループ2</span>
 </div>    ...
 </pre>
-  <li> 洞察: すべての節・変数を毎回チェックする必要はない。
+  <li> 毎回、すべての変数をチェックしたくないよね?
 </ul>
 </div>
 
 <div class=page>
-<h2>ウォッチリストを用いたBCPの高速化</h2>
-
+<h2>「見張り」を用いたBCPの高速化</h2>
+<ul>
+  <li> 「テンパった」瞬間を検出する:<br>
+    「2変数が未定義」 → 「1変数が未定義」
+  <li> ランダムに2つの変数を見張っておく。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="50">
+  <defs>
+  <pattern id="hatch" width="5" height="5"
+	   patternTransform="rotate(-45 0 0)" patternUnits="userSpaceOnUse">
+    <line x1="0" y1="0" x2="0" y2="5" stroke="black" stroke-width="1" />
+  </pattern>
+  </defs>
+  <g stroke="black" fill="none" stroke-width="2">
+    <rect x="5" y="5" width="40" height="40" />
+    <rect x="45" y="5" width="40" height="40" />
+    <rect x="85" y="5" width="40" height="40" />
+    <rect x="125" y="5" width="40" height="40" fill="url(#hatch)" />
+    <rect x="165" y="5" width="40" height="40" />
+    <rect x="205" y="5" width="40" height="40" fill="url(#hatch)" />
+    <rect x="245" y="5" width="40" height="40" />
+  </g>
+  <g text-anchor="middle">
+    <text x="25" y="25" dy="0.4em">?</text>
+    <text x="65" y="25" dy="0.4em">?</text>
+    <text x="105" y="25" dy="0.4em">0</text>
+    <text x="145" y="25" dy="0.4em">?</text>
+    <text x="185" y="25" dy="0.4em">1</text>
+    <text x="225" y="25" dy="0.4em">?</text>
+    <text x="265" y="25" dy="0.4em">1</text>
+  </g>
+</svg>
+</div>
+  <li> 「どちらかの変数が定義された」→
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="50">
+  <defs>
+  <pattern id="hatch" width="5" height="5"
+	   patternTransform="rotate(-45 0 0)" patternUnits="userSpaceOnUse">
+    <line x1="0" y1="0" x2="0" y2="5" stroke="black" stroke-width="1" />
+  </pattern>
+  </defs>
+  <g stroke="black" fill="none" stroke-width="2">
+    <rect x="5" y="5" width="40" height="40" />
+    <rect x="45" y="5" width="40" height="40" fill="url(#hatch)" />
+    <rect x="85" y="5" width="40" height="40" />
+    <rect x="125" y="5" width="40" height="40" fill="url(#hatch)" />
+    <rect x="165" y="5" width="40" height="40" />
+    <rect x="205" y="5" width="40" height="40" />
+    <rect x="245" y="5" width="40" height="40" />
+  </g>
+  <g text-anchor="middle">
+    <text x="25" y="25" dy="0.4em">?</text>
+    <text x="65" y="25" dy="0.4em">?</text>
+    <text x="105" y="25" dy="0.4em">0</text>
+    <text x="145" y="25" dy="0.4em">?</text>
+    <text x="185" y="25" dy="0.4em">1</text>
+    <text fill="red" x="225" y="25" dy="0.4em">0</text>
+    <text x="265" y="25" dy="0.4em">1</text>
+  </g>
+</svg>
+</div>
+    見張りを移動し「一向聴」状態をキープ。
+</ul>
 </div>
 
 <div class=page>
@@ -443,15 +539,40 @@ def bcp():
 </div>
 
 <div class=page>
-<h1>Resolutionを使った例</h1>
+<h1>Resolutionの例</h1>
 <ul>
+  <li> Resolutionを使って、以下の式が充足不能であることを示せ:
+<div class=example>
+ (a&vee;b&vee;c&vee;d) &wedge;
+    (a&vee;<span class=ub>b</span>) &wedge;
+    (<span class=ub>a</span>&vee;<span class=ub>b</span>&vee;<span class=ub>c</span>) &wedge;
+    (<span class=ub>a</span>&vee;c) &wedge;
+    (b&vee;<span class=ub>c</span>) &wedge;
+    (c&vee;<span class=ub>d</span>)
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h1>Resolutionは速いのか?</h1>
+<ul>
+<li> Resolutionで追加される節は非常に多くなりうる。
+<li> 結局、n個の変数に対して、最悪O(2<sup>n</sup>)個の節が必要。<br>
+  → 速くない。
+</ul>
+</div>
+
+<div class=page>
+<h1>バックトラックとの類似点</h1>
+<ul>
+
 </ul>
 </div>
 
 <div class=page>
 <table class=fill>
 <tr><td align=center valign=center>SATソルバの作り方<br>
-手法3 - CDCL法。
+手法3 - 学習する。
 </td></tr>
 </table>
 </div>
@@ -515,19 +636,23 @@ return SAT
   <li> SATソルバは汎用の問題解決器であり、幅広い用途をもつ。
   <li> 効率的なSATソルバを作るための手法を紹介した。
   <li> SATソルバの普及は、近年のCSにおけるメジャーな進歩といえる。
-  <li> これからより一般に普及するだろう。(新山の予想)
+  <li> これからより一般に普及するだろう。(予想)
+  <li> 新山が実際に書いたプログラム:
+    <a href="https://github.com/euske/slides/blob/master/sem20180612/cdcl.py"><code>cdcl.py</code></a>
 </ul>
 </div>
 
 <div class=page>
 <h1>TAoCP = 教科書としてはダメ。</h1>
 <ul>
-<li> 例の順番が途中で変わる。
-<li> 同じ文字を複数の意味で使う。
-<li> 中間的な説明なしにいきなり実装レベルの説明になる。
-<li> 例題を解かないと説明がわからない。
-<li> 本1冊がひとつのsubsubsectionである:<br>
-  話の区切りがわかりにくい。
-<li> しかし百科事典としてはすごい。
+  <li> 網羅性のため読みやすさを犠牲にしている:
+    <ul>
+      <li> 本1冊がひとつのsubsubsection。
+      <li> 例を出す順序が一貫していない。
+      <li> 同じ文字が複数の意味で使われる。
+      <li> 中間的な説明なしにいきなり実装の話がでる。
+      <li> 例題を解かないと説明がわからない。
+    </ul>
+  <li> しかし百科事典としてはすごい。
 </ul>
 </div>
