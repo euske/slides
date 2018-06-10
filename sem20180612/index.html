@@ -49,12 +49,13 @@
   <li> 手法1 - バックトラックによる解法。
   <li> 手法2 - Resolutionによる解法。
   <li> 手法3 - 節の学習による解法。
+  <li> SATソルバとSMTソルバの違い。
 </ol>
 </div>
 
 <div class=page>
 <table class=fill>
-<tr><td align=center valign=center>SATソルバって何。<br>
+<tr><td align=center valign=center>SATソルバって何。
 </td></tr>
 </table>
 </div>
@@ -217,70 +218,9 @@
 </div>
 
 <div class=page>
-<h1>SATソルバ → SMTソルバ</h1>
-<ul>
-  <li> SMTソルバ (Satisfiability Modulo Theories)<br>
-    = SATソルバを効率化したもの。
-  <li> 整数、文字列などの型を扱えるようにする。
-  <li> それぞれの型について、追加の「理論」を与える:
-    <ul>
-      <li> "<em>a</em>+<em>b</em> = <em>b</em>+<em>a</em>" はつねに真
-      <li> "<em>a</em>+1 &lt; <em>a</em>" は充足不能
-    </ul>
-</ul>
-</div>
-
-<div class=page>
-<h1>例題 3</h1>
-<ul>
-  <li> 縦・横・ナナメの数を足した数を等しくせよ。
-    <div class=figure>
-      <table border align=center>
-	<tr><td>a<sub>1</sub></td><td>a<sub>2</sub></td><td>a<sub>3</sub></td></tr>
-	<tr><td>a<sub>4</sub></td><td>a<sub>5</sub></td><td>a<sub>6</sub></td></tr>
-	<tr><td>a<sub>7</sub></td><td>a<sub>8</sub></td><td>a<sub>9</sub></td></tr>
-      </table>
-    </div>
-    <ul>
-  <li> a<sub>1</sub> ... a<sub>9</sub> は 1〜9 の数。
-  <li> a<sub>1</sub> ... a<sub>9</sub> はすべて異なる。
-  <li>
-    a<sub>1</sub>+a<sub>2</sub>+a<sub>3</sub> =
-    a<sub>4</sub>+a<sub>5</sub>+a<sub>6</sub> =
-    a<sub>7</sub>+a<sub>8</sub>+a<sub>9</sub> =<br>
-    a<sub>1</sub>+a<sub>4</sub>+a<sub>7</sub> =
-    a<sub>2</sub>+a<sub>5</sub>+a<sub>8</sub> =
-    a<sub>3</sub>+a<sub>6</sub>+a<sub>9</sub> =<br>
-    a<sub>1</sub>+a<sub>5</sub>+a<sub>9</sub> =
-    a<sub>3</sub>+a<sub>5</sub>+a<sub>7</sub>
-    </ul>
-</ul>
-</div>
-
-<div class=page>
-<h1>Z3を使ってみる</h1>
-<ul>
-  <li> <a href="https://rise4fun.com/z3/">https://rise4fun.com/z3/</a>
-<div class=figure>
-<pre>
-(declare-const a1 Int)   ; a1は整数型。
-...
-(assert (&lt;= 1 a1 9))     ; 1 &lt;= a1 &lt;= 9
-...
-(assert (distinct a1 a2 ... a9))  ; a1...a9は異なる。
-...
-(assert (= (+ a1 a2 a3) ... (+ a3 a5 a7)))
-(check-sat)              ; 制約充足可能性をチェック。
-(get-model)              ; 可能なときの値を表示。
-</pre>
-</div>
-</ul>
-</div>
-
-<div class=page>
 <table class=fill>
-<tr><td align=center valign=center>SATソルバの作り方<br>
-手法1 - バックトラック。
+<tr><td align=center valign=center>SATソルバの作り方。<br>
+手法1 - バックトラック
 </td></tr>
 </table>
 </div>
@@ -335,16 +275,13 @@ implications = [] <span class=comment># 推論した値</span>
 while 未定義の変数がある:
     decide()      <span class=comment># ひとつ決める</span>
     bcp()         <span class=comment># 推論する</span>
-    if 失敗:
+z`    if 失敗:
         undo()    <span class=comment># もとに戻す</span>
         flip()    <span class=comment># 別の選択肢を試す</span>
         if 失敗:
             return UNSAT  <span class=comment># もう試すものがない</span>
 return SAT
 </pre></blockquote>
-<ul>
-  <li> DPLL法 = DP法 + 統計的な小技
-</ul>
 </div>
 
 <div class=page>
@@ -389,6 +326,7 @@ def decide():
 </pre></blockquote>
 <ul>
   <li> 決めた値は <code>decisions</code> に記録される。
+  <li> DPLL法: 統計 + ヒューリスティクスを使う。
 </ul>
 </div>
 
@@ -520,8 +458,8 @@ def bcp():
 
 <div class=page>
 <table class=fill>
-<tr><td align=center valign=center>SATソルバの作り方<br>
-手法2 - Resolution。
+<tr><td align=center valign=center>SATソルバの作り方。<br>
+手法2 - Resolution
 </td></tr>
 </table>
 </div>
@@ -543,12 +481,12 @@ def bcp():
 <ul>
   <li> Resolutionを使って、以下の式が充足不能であることを示せ:
 <div class=example>
- (a&vee;b&vee;c&vee;d) &wedge;
-    (a&vee;<span class=ub>b</span>) &wedge;
-    (<span class=ub>a</span>&vee;<span class=ub>b</span>&vee;<span class=ub>c</span>) &wedge;
-    (<span class=ub>a</span>&vee;c) &wedge;
-    (b&vee;<span class=ub>c</span>) &wedge;
-    (c&vee;<span class=ub>d</span>)
+ (x<sub>1</sub>&vee;x<sub>2</sub>&vee;x<sub>3</sub>&vee;x<sub>4</sub>) &wedge;<br>
+ (x<sub>1</sub>&vee;<span class=ub>x<sub>2</sub></span>) &wedge;<br>
+ (<span class=ub>x<sub>1</sub></span>&vee;<span class=ub>x<sub>2</sub></span>&vee;<span class=ub>x<sub>3</sub></span>) &wedge;<br>
+ (<span class=ub>x<sub>1</sub></span>&vee;x<sub>3</sub>) &wedge;<br>
+ (x<sub>2</sub>&vee;<span class=ub>x<sub>3</sub></span>) &wedge;<br>
+ (x<sub>3</sub>&vee;<span class=ub>x<sub>4</sub></span>)
 </div>
 </ul>
 </div>
@@ -557,22 +495,48 @@ def bcp():
 <h1>Resolutionは速いのか?</h1>
 <ul>
 <li> Resolutionで追加される節は非常に多くなりうる。
-<li> 結局、n個の変数に対して、最悪O(2<sup>n</sup>)個の節が必要。<br>
-  → 速くない。
+  <ul>
+    <li> どの節とどの節を使えば最も効率がよいか、
+      試してみるまでわからない!
+  </ul>
+<li> 結局、n個の変数に対して、最悪O(2<sup>n</sup>)個の節が必要。
 </ul>
 </div>
 
 <div class=page>
-<h1>バックトラックとの類似点</h1>
+<h1>DP法との類似点</h1>
 <ul>
+  <li> DF法「x=0 でも x=1 でもダメなことが判明」 →<br>
+    (x&vee;A) &wedge; (<span class=ub>x</span>&vee;B) が
+    充足不能の証明に使えることが判明。
+  <li> CNFが充足不能であることを示す構造 (= refutation tree) は、
+    DP法の木と同一。
+</ul>
+</div>
 
+<div class=page>
+<h1>Refutation Tree の例</h1>
+<ul>
+<li><small>
+  (x<sub>1</sub>&vee;x<sub>2</sub>&vee;<span class=ub>x<sub>3</sub></span>) &wedge;
+  (x<sub>2</sub>&vee;x<sub>3</sub>&vee;<span class=ub>x<sub>4</sub></span>) &wedge;
+  (x<sub>3</sub>&vee;x<sub>4</sub>&vee;x<sub>1</sub>) &wedge;
+  (x<sub>4</sub>&vee;<span class=ub>x<sub>1</sub></span>&vee;x<sub>2</sub>) &wedge;<br>
+  (<span class=ub>x<sub>1</sub></span>&vee;<span class=ub>x<sub>2</sub></span>&vee;x<sub>3</sub>) &wedge;
+  (x<sub>2</sub>&vee;<span class=ub>x<sub>3</sub></span>&vee;x<sub>4</sub>) &wedge;
+  (<span class=ub>x<sub>3</sub></span>&vee;<span class=ub>x<sub>4</sub></span>&vee;<span class=ub>x<sub>1</sub></span>) &wedge;
+  (<span class=ub>x<sub>4</sub></span>&vee;x<sub>1</sub>&vee;<span class=ub>x<sub>2</sub></span>)<br>
+  </small>
+  <div class=figure>
+    <a href="img/fig_48.PNG"><img src="img/fig_48.PNG" height="300"></a>
+  </div>
 </ul>
 </div>
 
 <div class=page>
 <table class=fill>
-<tr><td align=center valign=center>SATソルバの作り方<br>
-手法3 - 学習する。
+<tr><td align=center valign=center>SATソルバの作り方。<br>
+手法3 - 学習する
 </td></tr>
 </table>
 </div>
@@ -606,7 +570,8 @@ return SAT
 <li> (<span class=ub>a</span> &wedge; b &wedge; c) の<u>否定</u> =<br>
   (a &vee; <span class=ub>b</span> &vee; <span class=ub>c</span>) が正しいという事実を学習した。
 <li> 節 (a &vee; <span class=ub>b</span> &vee; <span class=ub>c</span>) を
-  既存のCNF式の列に追加する。
+  既存のCNF式の列に追加する。<br>
+  → 「転んでもただでは起きない」ソルバ。
 </ol>
 </div>
 
@@ -620,6 +585,74 @@ return SAT
     (ただし、一旦学習した節はそのまま)。
   <li> 数千〜数十万の変数をもつSAT問題が解決可能になり、
     これを機に実用が広まった。
+</ul>
+</div>
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>SATソルバとSMTソルバ。<br>
+</td></tr>
+</table>
+</div>
+
+<div class=page>
+<h1>SATソルバ → SMTソルバ</h1>
+<ul>
+  <li> SMTソルバ (Satisfiability Modulo Theories)<br>
+    = SATソルバを効率化したもの。
+  <li> 整数、文字列などの型を扱えるようにする。
+  <li> それぞれの型について、追加の「理論」を与える:
+    <ul>
+      <li> "<em>a</em>+<em>b</em> = <em>b</em>+<em>a</em>" はつねに真
+      <li> "<em>a</em>+1 &lt; <em>a</em>" は充足不能
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>例題 3</h1>
+<ul>
+  <li> 縦・横・ナナメの数を足した数を等しくせよ。
+    <div class=figure>
+      <table border align=center>
+	<tr><td>a<sub>1</sub></td><td>a<sub>2</sub></td><td>a<sub>3</sub></td></tr>
+	<tr><td>a<sub>4</sub></td><td>a<sub>5</sub></td><td>a<sub>6</sub></td></tr>
+	<tr><td>a<sub>7</sub></td><td>a<sub>8</sub></td><td>a<sub>9</sub></td></tr>
+      </table>
+    </div>
+    <ul>
+  <li> a<sub>1</sub> ... a<sub>9</sub> は 1〜9 の数。
+  <li> a<sub>1</sub> ... a<sub>9</sub> はすべて異なる。
+  <li>
+    a<sub>1</sub>+a<sub>2</sub>+a<sub>3</sub> =
+    a<sub>4</sub>+a<sub>5</sub>+a<sub>6</sub> =
+    a<sub>7</sub>+a<sub>8</sub>+a<sub>9</sub> =<br>
+    a<sub>1</sub>+a<sub>4</sub>+a<sub>7</sub> =
+    a<sub>2</sub>+a<sub>5</sub>+a<sub>8</sub> =
+    a<sub>3</sub>+a<sub>6</sub>+a<sub>9</sub> =<br>
+    a<sub>1</sub>+a<sub>5</sub>+a<sub>9</sub> =
+    a<sub>3</sub>+a<sub>5</sub>+a<sub>7</sub>
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>Z3を使ってみる</h1>
+<ul>
+  <li> <a href="https://rise4fun.com/z3/">https://rise4fun.com/z3/</a>
+<div class=figure>
+<pre>
+(declare-const a1 Int)   ; a1は整数型。
+...
+(assert (&lt;= 1 a1 9))     ; 1 &lt;= a1 &lt;= 9
+...
+(assert (distinct a1 a2 ... a9))  ; a1...a9は異なる。
+...
+(assert (= (+ a1 a2 a3) ... (+ a3 a5 a7)))
+(check-sat)              ; 制約充足可能性をチェック。
+(get-model)              ; 可能なときの値を表示。
+</pre>
+</div>
 </ul>
 </div>
 
@@ -648,7 +681,7 @@ return SAT
   <li> 網羅性のため読みやすさを犠牲にしている:
     <ul>
       <li> 本1冊がひとつのsubsubsection。
-      <li> 例を出す順序が一貫していない。
+      <li> 例の順序・使い方が一貫していない。
       <li> 同じ文字が複数の意味で使われる。
       <li> 中間的な説明なしにいきなり実装の話がでる。
       <li> 例題を解かないと説明がわからない。
