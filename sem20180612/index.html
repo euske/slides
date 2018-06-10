@@ -275,7 +275,7 @@ implications = [] <span class=comment># 推論した値</span>
 while 未定義の変数がある:
     decide()      <span class=comment># ひとつ決める</span>
     bcp()         <span class=comment># 推論する</span>
-z`    if 失敗:
+    if 失敗:
         undo()    <span class=comment># もとに戻す</span>
         flip()    <span class=comment># 別の選択肢を試す</span>
         if 失敗:
@@ -290,9 +290,9 @@ return SAT
 (<span class=ub>a</span> &vee; b) &wedge; (<span class=ub>b</span> &vee; <span class=ub>c</span>)
 </div>
 <ol>
-  <li> a=1 を決定 (decide)。
-  <li> b=1 を推論 (bcp)。
-  <li> c=0 を推論 (bcp)。
+  <li> a=1 を決定 (<code>decide</code>)。
+  <li> b=1 を推論 (<code>bcp</code>)。
+  <li> c=0 を推論 (<code>bcp</code>)。
   <li> 成功。(SAT)
 </ol>
 </div>
@@ -303,13 +303,13 @@ return SAT
 (a &vee; b &vee; c) &wedge; (<span class=ub>b</span> &vee; <span class=ub>c</span>) &wedge; (<span class=ub>a</span> &vee; <span class=ub>b</span> &vee; c)
 </div>
 <ol>
-  <li> a=1 を決定 (decide)。
-  <li> b=1 を決定 (decide)。
-  <li> c=0 を推論 (bcp)。
-  <li> (<span class=ub>a</span> &vee; <span class=ub>b</span> &vee; c) が充足不能 (bcp 失敗)。
-  <li> c を未定義に戻す (undo)。
-  <li> b=1 → b=0 にする (flip)。
-  <li> c=1 を決定 (decide)。
+  <li> a=1 を決定 (<code>decide</code>)。
+  <li> b=1 を決定 (<code>decide</code>)。
+  <li> c=0 を推論 (<code>bcp</code>)。
+  <li> (<span class=ub>a</span> &vee; <span class=ub>b</span> &vee; c) が充足不能 (<code>bcp</code> 失敗)。
+  <li> c を未定義に戻す (<code>undo</code>)。
+  <li> b=1 → b=0 にする (<code>flip</code>)。
+  <li> c=1 を決定 (<code>decide</code>)。
   <li> 成功。(SAT)
 </ol>
 </div>
