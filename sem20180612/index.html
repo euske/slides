@@ -642,15 +642,15 @@ return SAT
   <li> <a href="https://rise4fun.com/z3/">https://rise4fun.com/z3/</a>
 <div class=figure>
 <pre>
-(declare-const a1 Int)   ; a1は整数型。
+(declare-const a1 Int)   <span class=comment>; a1は整数型。</span>
 ...
-(assert (&lt;= 1 a1 9))     ; 1 &lt;= a1 &lt;= 9
+(assert (&lt;= 1 a1 9))     <span class=comment>; 1 &lt;= a1 &lt;= 9</span>
 ...
-(assert (distinct a1 a2 ... a9))  ; a1...a9は異なる。
+(assert (distinct a1 a2 ... a9))  <span class=comment>; a1...a9は異なる。</span>
 ...
 (assert (= (+ a1 a2 a3) ... (+ a3 a5 a7)))
-(check-sat)              ; 制約充足可能性をチェック。
-(get-model)              ; 可能なときの値を表示。
+(check-sat)              <span class=comment>; 制約充足可能性をチェック。</span>
+(get-model)              <span class=comment>; 可能なときの値を表示。</span>
 </pre>
 </div>
 </ul>
