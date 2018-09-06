@@ -4,6 +4,7 @@
 <link rel="stylesheet" type="text/css" href="./slides.css">
 <title>博士中間審査 資料 2018/9/13 新山祐介</title>
 <style><!--
+u { font-weight: bold; color: red; }
 .s { font-size: 80%; line-height: 120%; }
 .ub { text-decoration: overline; }
 .example { border: 2px solid black; padding: 8px; margin: 8px; }
@@ -42,7 +43,7 @@
 <ul>
 <li> 複雑な問題であり、複数の側面から取り組む必要がある:
 <div class=figure>
-<svg xmlns="http://www.w3.org/2000/svg" 
+<svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
      version="1.1" width="650" height="390">
   <defs>
@@ -62,7 +63,7 @@
     <text x="560" y="130">設計手法</text>
     <text fill="red" x="250" y="370">ソフトウェア理解支援</text>
     <text x="300" y="200" dy="-0.2em">ソフトウェア</text>
-    <text x="300" y="200" dy="1.0em">問題</text>
+    <text x="300" y="200" dy="1.0em">開発の問題</text>
   </g>
   <g stroke="black" fill="none"
      stroke-width="8" marker-end="url(#barrow)">
@@ -70,7 +71,7 @@
     <path d="M200,70 l30,60" />
     <path d="M380,80 l-30,60" />
     <path d="M480,130 l-50,30" />
-    <path d="M240,330 l30,-60" 
+    <path d="M240,330 l30,-60"
           stroke="red" stroke-width="10" marker-end="url(#rarrow)"/>
   </g>
 </svg>
@@ -95,7 +96,7 @@
   MAINT 2018</div>
 <li> コメントに書かれた文章を分析する:
   <div class=s>"Analyzing Code Comments to Boost Program Comprehension",
-  APSEC 2018 投稿済</div>
+  APSEC 2018</div>
 <li> → どちらも、ソフトウェア理解を支援するための
   メタ情報の取得を目標としている。
 </ul>
@@ -113,7 +114,7 @@ b = a + 3;
 if (c) { b--; }
 </pre>
 <div class=figure style="position: absolute; right: 0; top: 10;">
-<svg xmlns="http://www.w3.org/2000/svg" 
+<svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
      version="1.1" width="360" height="390">
   <defs>
@@ -181,18 +182,81 @@ if (c) { b--; }
 
 <div class=page>
 <h1>本研究の新規性</h1>
+<div style="position: relative;">
 <ul>
-  <li> コードをデータフロー解析のための一般的な意味形式に変換する。
-  <li> プログラム全体にわたる (interprocedural な) 情報を活用し、
-    より詳細な解析をおこなう。
+  <li> 従来手法:<br>
+    2点間のフローを計算
+    <ul>
+      <li> ad-hoc
+      <li> 非効率
+    </ul>
 </ul>
+<pre style="width: 12em; border: 2px solid black; padding: 0.5em;">
+x = 1;
+<u>y</u> = z + <u>input</u>;
+if (cond) {
+  <u>x</u> = y;
+}
+print(<u>x</u>);
+</pre>
+<ul style="position: absolute; top: -1em; left: 50%;">
+  <li> 本研究: グラフを構築・<br>
+    パスとして表現
+    <ul>
+      <li> 多くの素性を抽出可能
+      <li> 再利用が可能
+    </ul>
+</ul>
+<div class=figure style="position: absolute; left:60%; top: 6em;">
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="380" height="360">
+  <defs>
+    <marker id="barrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g fill="none" stroke="black" stroke-width="4" marker-end="url(#barrow)">
+    <path d="M75,40 q0,50,40,80" />
+    <path d="M230,40 q0,50,-40,80" />
+    <path d="M150,160 q0,50,20,80" />
+    <path d="M300,160 q0,30,-90,90" />
+    <path d="M40,220 q20,50,70,50" stroke-dasharray="8,8" />
+  </g>
+  <g fill="white" stroke="black" stroke-width="2">
+    <rect x="30" y="10" width="90" height="50" />
+    <rect x="180" y="10" width="100" height="50" />
+    <ellipse cx="150" cy="150" rx="50" ry="30" />
+    <rect x="260" y="125" width="90" height="50" />
+    <path d="M180,270 m-60,0 l60,-30 l60,30 l-60,30 l-60,-30" />
+  </g>
+  <g text-anchor="middle" style="font-family: monospace;">
+    <text x="75" y="50">z</text>
+    <text x="230" y="50">input</text>
+    <text x="150" y="160">+</text>
+    <text x="305" y="160">1</text>
+    <text x="180" y="280">join</text>
+    <text x="40" y="210">cond</text>
+  </g>
+  <g text-anchor="start" style="font-family: monospace;">
+    <text x="205" y="170">y</text>
+    <text x="360" y="170">x</text>
+    <text x="250" y="280">x</text>
+  </g>
+  <g fill="none" stroke="red" stroke-width="6" stroke-dasharray="12,8"
+     marker-end="url(#rarrow)">
+    <path d="M240,50 q0,50,-50,90 q-30,40,-20,60 q30,40,30,110" />
+  </g>
+</svg>
+</div>
+</div>
 </div>
 
 <div class=page>
-<h1>データフローグラフ FGyama</h1>
+<h1>データフローグラフ FGyama の提案</h1>
 <ul>
   <li> 手続き型言語の各変数・引数間における
-    データフロー表現グラフ。
+    データの流れを表現するグラフ。
   <li> Interprocedural, Flow/Context/Field-sensitive.
   <li> 条件分岐、ループ、例外を表現可能。
   <li> "パターンマッチングのためのデータフローグラフ抽出器の実装", SIGSS 2017
@@ -203,9 +267,22 @@ if (c) { b--; }
 <h1>今後の計画</h1>
 <ul>
 <li> データフロー表現のための一般的な形式 FGyama を設計する (済)。
-<li> <a href="https://github.com/euske/fgyama/">Javaソースコード → FGyama 変換ツール</a>を実装する (ほぼ済)。 
+<li> <a href="https://github.com/euske/fgyama/">Javaソースコード → FGyama 変換ツール</a>を実装する (ほぼ済)。
 <li> GitHubからのデータ収集 (済)。
 <li> 素性を抽出し、興味深い結果をみつける。
 <li> 国際会議で発表後、論文誌に投稿予定。
+</ul>
+</div>
+
+<div class=page>
+<h1>発表状況</h1>
+<ul>
+<li> "CodeCAM: Capturing Programmer's Reaction during Coding Session",
+  MAINT 2018 (査読付 国際会議 5頁)
+<li> "Analyzing Code Comments to Boost Program Comprehension",
+  APSEC 2018 採択 (査読付 国際会議 10頁)
+<li> "Semantic Analysis using Data-flow Graph"<br>
+  データフローパスを用いて関数の機能を推測・グループ分けする
+  (投稿予定、査読付 国際会議および論文誌)
 </ul>
 </div>
