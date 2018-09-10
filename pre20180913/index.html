@@ -25,7 +25,7 @@ u { font-weight: bold; color: red; }
 </table>
 <div class=bottomright>
 指導教官: 権藤 克彦 教授<br>
-発表者: 新山 祐介, 2018/09/13
+発表者: 新山 祐介, 2018/09/13<br>
 </div>
 </div>
 
@@ -34,7 +34,8 @@ u { font-weight: bold; color: red; }
 <ul>
 <li> ソフトウェアの問題は深刻である。<br>
   Tesla Model X の Autopilot 事故 (2018年3月)<br>
-  <a href="https://www.ntsb.gov/investigations/AccidentReports/Pages/HWY18FH011-preliminary.aspx"><img src="https://www.ntsb.gov/investigations/AccidentReports/PublishingImages/hwy18fh011-fig1.JPG"></a>
+  <a href="https://www.ntsb.gov/investigations/AccidentReports/Pages/HWY18FH011-preliminary.aspx"><img src="https://www.ntsb.gov/investigations/AccidentReports/PublishingImages/hwy18fh011-fig1.JPG"></a><br>
+  <a href="https://goo.gl/maps/vRt6VNvUACJ2">Google Maps</a>
 </ul>
 </div>
 
@@ -187,15 +188,15 @@ if (c) { b--; }
   <li> 従来手法:<br>
     2点間のフローを計算
     <ul>
-      <li> ad-hoc
-      <li> 非効率
+      <li> アドホック
+      <li> 非効率的
     </ul>
 </ul>
 <pre style="width: 12em; border: 2px solid black; padding: 0.5em;">
 x = 1;
 <u>y</u> = z + <u>input</u>;
 if (cond) {
-  <u>x</u> = y;
+    <u>x</u> = y;
 }
 print(<u>x</u>);
 </pre>
@@ -210,33 +211,36 @@ print(<u>x</u>);
 <div class=figure style="position: absolute; left:60%; top: 6em;">
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
-     version="1.1" width="380" height="360">
+     version="1.1" width="380" height="380">
   <defs>
     <marker id="barrow" viewBox="-5 -5 10 10" orient="auto">
       <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
     </marker>
   </defs>
   <g fill="none" stroke="black" stroke-width="4" marker-end="url(#barrow)">
-    <path d="M75,40 q0,50,40,80" />
-    <path d="M230,40 q0,50,-40,80" />
-    <path d="M150,160 q0,50,20,80" />
-    <path d="M300,160 q0,30,-90,90" />
-    <path d="M40,220 q20,50,70,50" stroke-dasharray="8,8" />
+    <path d="M75,30 q0,50,40,80" />
+    <path d="M230,30 q0,50,-40,80" />
+    <path d="M150,150 q0,50,20,80" />
+    <path d="M300,150 q0,30,-90,90" />
+    <path d="M40,210 q20,50,70,50" stroke-dasharray="8,8" />
+    <path d="M180,260 l0,60" />
   </g>
   <g fill="white" stroke="black" stroke-width="2">
-    <rect x="30" y="10" width="90" height="50" />
-    <rect x="180" y="10" width="100" height="50" />
-    <ellipse cx="150" cy="150" rx="50" ry="30" />
-    <rect x="260" y="125" width="90" height="50" />
-    <path d="M180,270 m-60,0 l60,-30 l60,30 l-60,30 l-60,-30" />
+    <rect x="30" y="10" width="90" height="40" />
+    <rect x="180" y="10" width="100" height="40" />
+    <ellipse cx="150" cy="140" rx="50" ry="30" />
+    <rect x="260" y="115" width="90" height="40" />
+    <path d="M180,260 m-60,0 l60,-30 l60,30 l-60,30 l-60,-30" />
+    <rect x="130" y="330" width="100" height="40" />
   </g>
   <g text-anchor="middle" style="font-family: monospace;">
-    <text x="75" y="50">z</text>
-    <text x="230" y="50">input</text>
-    <text x="150" y="160">+</text>
-    <text x="305" y="160">1</text>
-    <text x="180" y="280">join</text>
-    <text x="40" y="210">cond</text>
+    <text x="75" y="40">z</text>
+    <text x="230" y="40">input</text>
+    <text x="150" y="150">+</text>
+    <text x="305" y="145">1</text>
+    <text x="180" y="270">join</text>
+    <text x="40" y="200">cond</text>
+    <text x="180" y="360">print</text>
   </g>
   <g text-anchor="start" style="font-family: monospace;">
     <text x="205" y="170">y</text>
@@ -245,7 +249,7 @@ print(<u>x</u>);
   </g>
   <g fill="none" stroke="red" stroke-width="6" stroke-dasharray="12,8"
      marker-end="url(#rarrow)">
-    <path d="M240,50 q0,50,-50,90 q-30,40,-20,60 q30,40,30,110" />
+    <path d="M240,50 q0,50,-50,90 q-30,40,-20,60 q30,40,30,120" />
   </g>
 </svg>
 </div>
@@ -259,7 +263,12 @@ print(<u>x</u>);
     データの流れを表現するグラフ。
   <li> Interprocedural, Flow/Context/Field-sensitive.
   <li> 条件分岐、ループ、例外を表現可能。
-  <li> "パターンマッチングのためのデータフローグラフ抽出器の実装", SIGSS 2017
+  <li> 期待される利用例:
+    <ul>
+      <li> よりよい変数名・関数名の提案。
+      <li> 類似した用途の変数・関数の関連づけ。
+      <li> 抽象化度合いを計測。
+    </ul>
 </ul>
 </div>
 
