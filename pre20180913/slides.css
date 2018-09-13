@@ -7,7 +7,7 @@ body { margin: 0; font-family: sans-serif; }
 }
 @media screen {
     .page { margin: 1em; padding: 2em; border: 1px solid gray; }
-    .fill { width: 100%; height: 70%; }
+    .fill { width: 100%; height: 100%; }
     .bl { color: transparent; }
 }
 .page { position: relative; }
