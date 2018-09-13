@@ -12,8 +12,22 @@ u { font-weight: bold; color: red; }
 .figure td,th { border: 2px solid black; padding: 4px; }
 .right td { text-align: right; }
 --></style>
+<script>
+function doit() {
+  if (document.baseURI.startsWith("file:")) {
+    for (e of document.getElementsByClassName("offline")) {
+      if (e.tagName == "IMG") {
+        let i = e.src.lastIndexOf("/");
+        let src = "./"+e.src.substr(i+1);
+        console.log("offline: "+e.src+" -> "+src);
+        e.src = src;
+      }
+    }
+  }
+}
+</script>
 </head>
-<body>
+<body onload="doit()">
 
 <div class=page>
 <table class=fill>
@@ -35,7 +49,7 @@ u { font-weight: bold; color: red; }
 <ul>
 <li> ソフトウェアの問題は深刻である。<br>
   Tesla Model X の Autopilot 事故 (2018年3月)<br>
-  <a href="https://www.ntsb.gov/investigations/AccidentReports/Pages/HWY18FH011-preliminary.aspx"><img src="https://www.ntsb.gov/investigations/AccidentReports/PublishingImages/hwy18fh011-fig1.JPG"></a><br>
+  <a href="https://www.ntsb.gov/investigations/AccidentReports/Pages/HWY18FH011-preliminary.aspx"><img class=offline src="https://www.ntsb.gov/investigations/AccidentReports/PublishingImages/hwy18fh011-fig1.JPG"></a><br>
   <a href="https://goo.gl/maps/vRt6VNvUACJ2">Google Maps</a>
 </ul>
 </div>
