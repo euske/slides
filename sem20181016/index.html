@@ -1,0 +1,316 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>権藤研 輪講資料 2018/10/16 新山 (データフローグラフ FGyama とソフトウェア情報抽出の見通し)</title>
+<style><!--
+.ub { text-decoration: overline; }
+.box { border: 2px solid black; padding: 2px; }
+.example { border: 2px solid black; padding: 8px; margin: 8px; }
+.comment { color: green; }
+.figure td,th { border: 2px solid black; padding: 4px; }
+.right td { text-align: right; }
+.slow { background: #ffaaaa; }
+.learn { background: #ffff88; }
+--></style>
+</head>
+<body>
+
+<div class=page>
+<table class=fill>
+<tr><td align=center valign=center>データフローグラフ FGyama と<br>
+ソフトウェア情報抽出の見通し<br>
+</td></tr>
+</table>
+<div class=bottomright>
+新山 祐介<br>
+権藤研 輪講 2018/10/16
+</div>
+</div>
+
+<div class=page>
+<h1>そもそものモチベーション</h1>
+<ul>
+<li> 「知性とは何か?」
+  <ul>
+    <li> 「ゲーデル・エッシャー・バッハ」に感化される。
+    <li> 認知科学・自然言語処理に興味。
+      <ul>
+        <li> 空間的位置関係の言語による表現<br>
+          (徳永研、1998年)
+        <li> ニュース記事のマイニング<br>
+          (NYU、2006年)
+      </ul>
+    <li> 失望: 自然言語処理 = ほぼ文字列処理だった。
+  </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>モチベーションつづき</h1>
+<ul>
+<li> まず「意味とは何か?」を考える必要がある。
+  <ul>
+    <li> そもそも言語の意味に関する理論は不十分。
+      <ul>
+        <li> 自然言語処理では「意味」という単語はタブー。
+        <li> 意味 = 重みづけベクトル。(word2vec)
+          <ul>
+          <li> リンゴ = 赤 + 甘い + 果物 + ...
+          <li> お金 = ???
+          </ul>
+      </ul>
+    <li> 単語 → 実体に関連づける枠組み (grounding) がない。
+  </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>モチベーションつづき</h1>
+<ul>
+<li> 前段階として「ソフトウェアの意味」なら
+  もう少し厳密に定義できるのでは?
+  <ul>
+    <li> ソフトウェアは社会のあらゆる概念を
+      処理するのに使われている。(リンゴ、お金、etc.)
+    <li> 概念は仕様書ですべて定義されている (はず)。
+    <li> 実際には、曖昧な概念が多い。
+      <ul>
+        <li> C/C++/Java における「ストリーム」
+        <li> Java/C++ における「クラス」
+        <li> git の「commit」
+      </ul>
+  </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>背景知識</h1>
+<ul>
+  <li> 大目標:
+    「ソフトウェアの意味を表現・分析できるような
+    枠組み・ツールを開発する」
+    <ul>
+      <li> 問題の簡略化:
+        <span class=box>入力</span> →
+        <span class=box>処理</span> →
+        <span class=box>出力</span>
+      <li> ソフトウェアの意味 =
+        (数学的な) 入力-出力の関連に着目。
+        <li>
+          「プログラムのデータフロー」 &cong;
+          「プログラムの意味」と仮定。
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>研究の目標</h1>
+<ul>
+  <li> プログラムの意味を表現・分析に使える
+    データフロー形式を提案し、その変換・処理ツールを開発する。
+    <ul>
+      <li> 特定のプログラミング言語に依存しないこと。
+      <li> なるべく汎用的な目的に使えること。
+      <li> 現実的な資源で処理できること。
+    </ul>
+  <li> 「開発ツール」「検査ツール」は飽きた。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="650" height="390">
+  <defs>
+    <marker id="rarrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="red" stroke="none" />
+    </marker>
+    <marker id="barrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <ellipse stroke="black" fill="#4ff" stroke-width="4"
+           cx="300" cy="200" rx="200" ry="120" />
+  <g text-anchor="middle" fill="black">
+    <text x="50" y="100">言語</text>
+    <text x="200" y="50">ツール</text>
+    <text x="400" y="70">モデル</text>
+    <text x="560" y="130">設計手法</text>
+    <text fill="red" x="250" y="370">ソフトウェア理解支援</text>
+    <text x="300" y="200" dy="-0.2em">ソフトウェア</text>
+    <text x="300" y="200" dy="1.0em">開発の問題</text>
+  </g>
+  <g stroke="black" fill="none"
+     stroke-width="8" marker-end="url(#barrow)">
+    <path d="M100,100 l80,50" />
+    <path d="M200,70 l30,60" />
+    <path d="M380,80 l-30,60" />
+    <path d="M480,130 l-50,30" />
+    <path d="M240,330 l30,-60"
+          stroke="red" stroke-width="10" marker-end="url(#rarrow)"/>
+  </g>
+</svg>
+</div>
+    大規模なコードベースを理解することが深刻な問題。
+    (職業プログラマの勘)
+
+</ul>
+</div>
+
+<div class=page>
+<h1>研究のプロセス</h1>
+<ol>
+  <li> データフローグラフ FGyama を考案する。
+    <ul>
+      <li> よさそうなのができるまで試行錯誤する。
+    </ul>
+  <li> とりあえずJavaからの変換器を実装する。
+  <li> FGyama を使うことで、ソフトウェアの意味に関する
+    <u>興味深い</u>特性が抽出可能であることを示す。
+    <ul>
+      <li> なにが興味深いのか?
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>各学年における「研究」</h1>
+<ul>
+<li> 学部における「研究」…
+  やればできる。やるだけ。
+<li> 修士における「研究」…
+  ガンバればできそう。
+<li> 博士における「研究」…
+  できるかどうか謎。
+</ul>
+</div>
+
+<div class=page>
+<h1>argmax (新規性 × 有用性)</h1>
+<ul>
+  <li> 新規性の追求 =
+    プログラム意味解析に役立つ新たな方法論を
+    提案できれば面白いだろう。
+  <li> 有用性の追求 =
+    大規模ソフトウェアの解析・理解に貢献することが
+    もっとも切実である。
+  <li> 目標 = 大規模ソフトウェアの
+    "big picture" を提供できる手法をあみだす。
+</ul>
+</div>
+
+<div class=page>
+<h1>FGyama の特徴</h1>
+<ul>
+  <li> ソースコード解析である。
+    <ul>
+      <li> プログラマの「意図」を抽出したい。
+<pre>
+int seconds = 60;
+int minutes = 60;
+int hours = 24;
+int limit = seconds * minutes * horus;
+timeleft = limit;
+</pre>
+vs.
+<pre>
+mov $86400, %eax
+</pre>
+      <li> コードの一部でも解析可能。
+    </ul>
+  <li> Interproceduralである。
+    <ul>
+      <li> 大局的な意味解析に使いたい。
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>FGyama の利用可能性</h1>
+<ul>
+  <li> 基本的な手法は「データフローグラフの比較」である。
+  <li> 関数・メソッドの相関検出:<br>
+    「その関数の使われ方が類似していれば、それらは関連する機能をもつだろう」
+(… ホントかっ。)
+<pre>
+int add(int a, int b);
+int sub(int c, int d);
+</pre>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="600" height="200">
+  <g transform="translate(2,2)">
+  <g stroke="red" fill="none" stroke-width="4">
+    <path d="M50,20 l100,30 l150,0 l150,0" />
+    <path d="M50,120 l100,30 l150,0 l150,0" />
+  </g>
+  <g stroke="black" fill="white" stroke-width="2">
+    <rect x="0" y="0" width="100" height="50" />
+    <ellipse cx="200" cy="50" rx="60" ry="25" />
+    <ellipse cx="350" cy="50" rx="60" ry="25" />
+    <ellipse cx="500" cy="50" rx="60" ry="25" />
+    <rect x="0" y="100" width="100" height="50" />
+    <ellipse cx="200" cy="150" rx="60" ry="25" />
+    <ellipse cx="350" cy="150" rx="60" ry="25" />
+    <ellipse cx="500" cy="150" rx="60" ry="25" />
+  </g>
+  <g text-anchor="middle" fill="black">
+    <text x="50" y="20" dy="0.5em">add</text>
+    <text x="200" y="50" dy="0.5em">=</text>
+    <text x="350" y="50" dy="0.5em">&gt;</text>
+    <text x="500" y="50" dy="0.5em">print</text>
+    <text x="50" y="120" dy="0.5em">sub</text>
+    <text x="200" y="150" dy="0.5em">=</text>
+    <text x="350" y="150" dy="0.5em">&gt;</text>
+    <text x="500" y="150" dy="0.5em">print</text>
+  </g>
+  </g>
+</svg>
+</div>
+  <li> メンバ変数の相関検出。
+<pre>
+struct mark {
+  int x;
+  int y;
+  int color;  <span class=comment>// 明らかに別用途。</span>
+};
+</pre>
+  <li> 変数の「属性」を発見する:<br>
+    (taint解析に近い)
+    <ol type=a>
+      <li> 「ループの終了判定に使われる」
+      <li> 「処理のセレクタとして使われる」
+      <li> 「ネットワークに送られる運命にある」
+    </ol>
+  <li> Leaky abstractionの判定?
+<pre>
+basedir = "/home";
+path = basedir+"/"+username; <span class=comment>// leaky</span>
+data = open(path).read();
+</pre>
+
+  <li> Nullable/const/enum型の検出。
+</ul>
+</div>
+
+<div class=page>
+<h1>既存研究との関連</h1>
+<ul>
+  <li> 既存のデータフロー解析 (例: FlowDroid) は
+    おもに「2点間のフローが存在するか」を検査するものである。
+  <li> 一方、本手法ではフローの存在よりも
+    データ間の「関連」を重視する。
+  <li> データフロー「グラフ」を
+    ここまで真剣に考慮している研究は存在しない。
+</div>
+
+<div class=page>
+<h1>今後の計画</h1>
+<ul>
+<li> データフロー表現のための一般的な形式 FGyama を設計する (済)。<br>
+    (Java, 6kloc, 実装の苦労話)
+<li> <a href="https://github.com/euske/fgyama/">Javaソースコード → FGyama 変換ツール</a>を実装する (ほぼ済)。
+<li> GitHubからのデータ収集 (済)。
+<li> 素性を抽出し、興味深い結果をみつける。
+<li> 国際会議で発表後、論文誌に投稿予定。
+</ul>
+</div>

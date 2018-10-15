@@ -5,6 +5,7 @@
 <title>博士中間審査 資料 2018/9/13 新山祐介</title>
 <style><!--
 u { font-weight: bold; color: red; }
+.small li { font-size: 80%; }
 .s { font-size: 80%; line-height: 120%; }
 .ub { text-decoration: overline; }
 .example { border: 2px solid black; padding: 8px; margin: 8px; }
@@ -12,8 +13,22 @@ u { font-weight: bold; color: red; }
 .figure td,th { border: 2px solid black; padding: 4px; }
 .right td { text-align: right; }
 --></style>
+<script>
+function doit() {
+  if (document.baseURI.startsWith("file:")) {
+    for (e of document.getElementsByClassName("offline")) {
+      if (e.tagName == "IMG") {
+        let i = e.src.lastIndexOf("/");
+        let src = "./"+e.src.substr(i+1);
+        console.log("offline: "+e.src+" -> "+src);
+        e.src = src;
+      }
+    }
+  }
+}
+</script>
 </head>
-<body>
+<body onload="doit()">
 
 <div class=page>
 <table class=fill>
@@ -26,6 +41,7 @@ u { font-weight: bold; color: red; }
 <div class=bottomright>
 指導教官: 権藤 克彦 教授<br>
 発表者: 新山 祐介, 2018/09/13<br>
+<a href="https://euske.github.io/slides/"><code>euske.github.io</code></a>
 </div>
 </div>
 
@@ -34,7 +50,7 @@ u { font-weight: bold; color: red; }
 <ul>
 <li> ソフトウェアの問題は深刻である。<br>
   Tesla Model X の Autopilot 事故 (2018年3月)<br>
-  <a href="https://www.ntsb.gov/investigations/AccidentReports/Pages/HWY18FH011-preliminary.aspx"><img src="https://www.ntsb.gov/investigations/AccidentReports/PublishingImages/hwy18fh011-fig1.JPG"></a><br>
+  <a href="https://www.ntsb.gov/investigations/AccidentReports/Pages/HWY18FH011-preliminary.aspx"><img class=offline src="https://www.ntsb.gov/investigations/AccidentReports/PublishingImages/hwy18fh011-fig1.JPG"></a><br>
   <a href="https://goo.gl/maps/vRt6VNvUACJ2">Google Maps</a>
 </ul>
 </div>
@@ -261,7 +277,8 @@ print(<u>x</u>);
 <ul>
   <li> 手続き型言語の各変数・引数間における
     データの流れを表現するグラフ。
-  <li> Interprocedural, Flow/Context/Field-sensitive.
+  <li> Interprocedural, Flow/Context/Field-sensitive.<br>
+    このようなデータフローグラフの研究は希少。
   <li> 条件分岐、ループ、例外を表現可能。
   <li> 期待される利用例:
     <ul>
@@ -275,7 +292,8 @@ print(<u>x</u>);
 <div class=page>
 <h1>今後の計画</h1>
 <ul>
-<li> データフロー表現のための一般的な形式 FGyama を設計する (済)。
+<li> データフロー表現のための一般的な形式 FGyama を設計する (済)。<br>
+    (Java, 6kloc, 実装の苦労話)
 <li> <a href="https://github.com/euske/fgyama/">Javaソースコード → FGyama 変換ツール</a>を実装する (ほぼ済)。
 <li> GitHubからのデータ収集 (済)。
 <li> 素性を抽出し、興味深い結果をみつける。
@@ -293,5 +311,24 @@ print(<u>x</u>);
 <li> "Semantic Analysis using Data-flow Graph"<br>
   データフローパスを用いて関数の機能を推測・グループ分けする
   (投稿予定、査読付 国際会議および論文誌)
+</ul>
+</div>
+
+<div class=page>
+<h1>References</h1>
+<ul class=small>
+  <li> Allen and Cocke, A Program Data Flow Analysis Procedure, Commun. ACM, 1976.
+  <li> Thomas Reps, Program Analysis via Graph Reachability, 1988.
+  <li> Hammer, et al., Flow-sensitive, Context-sensitive, and Object-sensitive Information Flow Control Based on Program Dependence Graphs, Int. J. Inf. Secur., 2009.
+  <li> Nanda, et al., Accurate Interprocedural Null-Dereference Analysis for Java, ICSE 2009.
+  <li> Just, et al., Information Flow Analysis for Javascript, 2011.
+  <li> Eric Bodden, Inter-procedural Data-flow Analysis with IFDS/IDE and Soot, SOAP 2012.
+  <li> Padhye, et al., Interprocedural Data Flow Analysis in Soot Using Value Contexts, SOAP 2013.
+  <li> Jaffar, et al., A Path-sensitively Sliced Control Flow Graph, FSE 2014.
+  <li> Raychev, et al., Predicting Program Properties from "Big Code", SIGPLAN, 2015.
+  <li> Raychev, et al., Probabilistic Model for Code with Decision Trees, SIGPLAN, 2016.
+  <li> Tang, et al., Summary-Based Context-Sensitive Data-Dependence Analysis in Presence of Callbacks, SIGPLAN, 2015.
+  <li> Miltiadis, et al., Learning to Represent Programs with Graphs, CoRR, 2017.
+  <li> Brockschmidt, et al., Generative Code Modeling with Graphs, CoRR, 2018.
 </ul>
 </div>
