@@ -18,19 +18,11 @@ th { background: #cccccc; }
 </head>
 <body>
 
-<!--
-基本方針: 「お客様 (聴衆) に満足して帰っていただく」
-
-たいていの人は 1つのことしか覚えられないので、1個のメッセージだけを確実に届ける。
-
-退屈させない。楽しんでもらう。
--->
-
 <div class=page>
 <table align=center class=fill>
 <tr><td align=center valign=center style="height:4em;">Analyzing Code Comments to Boost Program Comprehension</td></tr>
 </table>
-<div style="line-height:1.2;" align=right>→ Yusuke Shinyama<br>
+<div class=bottomright style="line-height:1.2;" align=right>→ Yusuke Shinyama<br>
 Yoshitaka Arahori<br>
 Katsuhiko Gondow<br>
 (Tokyo Tech)<br>
@@ -41,7 +33,7 @@ Katsuhiko Gondow<br>
 </div>
 
 <div class=page>
-<div class=figure style="margin-top: 3em; margin-bottom: 2em;">
+<div class=figure style="margin-top: 4em; margin-bottom: 3em;">
 <pre style="margin-left: 2em; margin-right: 2em;">
 /*
  * You are not expected to understand this.
@@ -181,7 +173,7 @@ float Q_rsqrt( float number )
   </g>
 </svg>
 <div class=box>
-Code comment is Relationship.
+Code comment forms a relationship.
 </div>
 </div>
 </div>
@@ -385,7 +377,49 @@ static final int REQUEST_CODE = 6384;
 </div>
 
 <div class=page>
-<h1>10. Building Classifier</h1>
+<h1>10. Key Observation (Again)</h1>
+<ul>
+<li> Comment = relationship.
+<li> Each comment has three elements.
+<div class=figure style="margin: 1em;">
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="600" height="350">
+  <defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="4" markerHeight="4" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  </defs>
+  <g transform="translate(2,2) scale(2,2)">
+    <g fill="none" stroke="black" stroke-width="2">
+      <g marker-end="url(#arrow)" stroke-width="3">
+        <path d="M40,80 q100,-100,196,-6" />
+      </g>
+      <rect x="0" y="80" width="84" height="60" />
+      <rect x="196" y="80" width="84" height="60" />
+      <ellipse cx="140" cy="30" rx="30" ry="30" fill="white" />
+    </g>
+    <g text-anchor="middle" style="font-family:Helvetica; font-size:12pt;">
+      <text x="40" y="150" dy="0.4em">Extent</text>
+      <text x="240" y="150" dy="0.4em">Target</text>
+      <text x="140" y="70" dy="0.4em">Category</text>
+      <g style="font-style:italic; font-size:10pt;">
+      <text fill="blue" x="140" y="30" dy="0.0em">post-</text>
+      <text fill="blue" x="140" y="30" dy="1.0em">condition</text>
+      </g>
+    </g>
+    <g style="font-family:Monospace; font-size:12pt;">
+      <text fill="#008800" x="4" y="100" dy="0.3em">// Do the</text>
+      <text fill="#008800" x="4" y="100" dy="1.5em">// thing.</text>
+      <text x="204" y="100" dy="0.8em">doit();</text>
+    </g>
+  </g>
+</svg>
+</div>
+</div>
+
+<div class=page>
+<h1>11. Building Classifier</h1>
 <ul>
 <li> We built three classifiers:
   <ol>
@@ -517,7 +551,7 @@ static final int REQUEST_CODE = 6384;
 </div>
 
 <div class=page>
-<h1>11. Experiments</h1>
+<h1>12. Experiments</h1>
 <ul>
 <li> Data sets (Java):
   <ul>
@@ -553,7 +587,7 @@ static final int REQUEST_CODE = 6384;
 </div>
 
 <div class=page>
-<h1>12. Results</h1>
+<h1>13. Results</h1>
 <ul>
   <ul>
     <li> Comment Extent: 98%
@@ -824,7 +858,7 @@ static final int REQUEST_CODE = 6384;
 </div>
 
 <div class=page>
-<h1>13. Findings</h1>
+<h1>14. Findings</h1>
 <ul>
 <li> Reasonable accuracy for the two biggest categories
   (<code>Postcondition</code> and <code>Precondition</code>) were obtained.
@@ -856,7 +890,7 @@ while(line != null) {
 </div>
 
 <div class=page>
-<h1>14. Conclusion</h1>
+<h1>15. Conclusion</h1>
 <ul>
 <li> We performed in-depth analysis of local comments.
   <ul>
@@ -871,37 +905,101 @@ while(line != null) {
 
 <div class=page>
 <h2>Related Work</h2>
+<h3>Comment Categories</h3>
 <ul>
+<li> Steidl, Hummel and Jurgens,
+  "<em>Quality Analysis of Source Code Comments</em>",
+  ICPC '13.
+<li> Pascarella and Bacchelli,
+  "<em>Classifying code comments in Java open-source software systems</em>",
+  MSR '17.
+<li> Kramer,
+  "<em>API Documentation from Source Code Comments: A Case Study of Javadoc</em>",
+  SIGDOC '99.
+</ul>
+<h3>Using Comments</h3>
+<ul>
+<li> Jiang and Hassan,
+  "<em>Examining the Evolution of Code Comments in PostgreSQL</em>",
+  MSR '06.
+<li> Tan, Yuan and Zhou,
+  "<em>HotComments: How to Make Program Comments More Useful?</em>",
+  HotOS '07.
 </ul>
 </div>
 
 <div class=page>
 <h1>Threats to Validity</h1>
 <ul>
+<li> Incomplete definition of categories?
+  (uncategorized: 21/300)
+<li> Weak inter-rater agreement.
+  (Fleiss' Kappa: 0.49)
+<li> Not enough data.
+  (only 100 for testing)
+<li> Varying code quality at GitHub.
 </ul>
 </div>
 
 <div class=page>
-<h1>Popular Phrases</h1>
-<ul>
-</ul>
+<h1>Popular Phrases (Java)</h1>
+<div class=figure>
+<table align=center class=ttt border>
+<tr><td><code>do nothing</code></td><td>332</td></tr>
+<tr><td><code>throw exception</code></td><td>170</td></tr>
+<tr><td><code>set default</code></td><td>161</td></tr>
+<tr><td><code>add list</code></td><td>154</td></tr>
+<tr><td><code>do anything</code></td><td>146</td></tr>
+<tr><td><code>set value</code></td><td>140</td></tr>
+<tr><td><code>use default</code></td><td>122</td></tr>
+<tr><td><code>have value</code></td><td>119</td></tr>
+<tr><td><code>create file</code></td><td>119</td></tr>
+<tr><td><code>create list</code></td><td>116</td></tr>
+</table>
 </div>
-
+</div>
 
 <div class=page>
 <h1>Features (for Comment Extent)</h1>
-<ul>
-</ul>
+<div class=figure>
+<table align=center class=ttt border>
+<tr><td><code>DeltaRows</code></td><td>Distance in lines from a previous comment.</td></tr>
+<tr><td><code>DeltaCols</code></td><td>Difference in columns from a previous comment.</td></tr>
+<tr><td><code>DeltaLeft</code></td><td>Difference in columns between a comment and syntax element.</td></tr>
+<tr><td><code>LeftSyntax</code></td><td>Syntax element left to the comment.</td></tr>
+<tr><td><code>RightSyntax</code></td><td>Syntax element right to the comment.</td></tr>
+<tr><td><code>ParentSyntax</code></td><td>Parent syntax element of the comment.</td></tr>
+</table>
+</div>
 </div>
 
 <div class=page>
-<h1>Features (for Comment Target)</h1>
-<ul>
-</ul>
+<h1>Features (for Target / Category)</h1>
+<div class=figure>
+<table align=center class=ttt border>
+<tr><td><code>LeftSyntax</code></td><td>Syntax element left to the comment.</td></tr>
+<tr><td><code>RightSyntax</code></td><td>Syntax element right to the comment.</td></tr>
+<tr><td><code>ParentSyntax</code></td><td>Parent syntax element of the comment.</td></tr>
+<tr><td><code>HasSymbol</code></td><td>Does the comment text include a symbol?</td></tr>
+<tr><td><code>PosTagFirst</code></td><td>POS tag of the first word of the comment.</td></tr>
+<tr><td><code>PosTagAny</code></td><td>Does the comment text include a certain POS tag?</td></tr>
+<tr><td><code>WordFirst</code></td><td>First word of the comment text.</td></tr>
+<tr><td><code>WordAny</code></td><td>Does the comment text include a certain word?</td></tr>
+</table>
+</div>
 </div>
 
 <div class=page>
-<h1>Features (for Comment Category)</h1>
+<h1>おまけ: 発表を有意義なものにする</h1>
 <ul>
+<li> 基本方針: 「お客様 (聴衆) に満足して帰っていただく」
+<li> たいていの人は 1つのことしか覚えられない。
+  <ul>
+    <li> 無理に複数のメッセージを伝えようとしない。
+    <li> 1個のメッセージ<u>だけ</u>を確実に届ける。
+  </ul>
+<li> 途中で退屈したりテンションが落ちないように、
+  ジョークやトリビアを所々に入れる。
+  (ただし、入れすぎないこと)
 </ul>
 </div>

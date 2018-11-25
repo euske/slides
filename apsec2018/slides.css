@@ -6,7 +6,7 @@ body { margin: 0; }
 }
 @media screen {
     .page { margin: 1em; padding: 2em; border: 1px solid gray; }
-    .fill { }
+    .fill { height: 15em; }
 }
 .page { position: relative; }
 .fill td { font-size: 150%; }
