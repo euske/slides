@@ -10,6 +10,7 @@ li ol.s { font-size: 75%; }
 .figure { text-align: center; margin: 0.5em; }
 .box { border: 2px solid black; padding: 0.5em; margin: 0.5em; background: #ff99ff; }
 .good { background: #99ff99; }
+.feat { color: red; }
 pre { border: 1px solid black; padding: 0.3em; }
 div table.ttt { font-size: 100%; font-weight: bold; }
 div table.ttt td,th { border: 2px solid black; padding: 8px; }
@@ -159,7 +160,7 @@ float Q_rsqrt( float number )
     <g text-anchor="middle" style="font-family:Helvetica; font-size:12pt;">
       <text x="40" y="150" dy="0.4em">Comment</text>
       <text x="240" y="150" dy="0.4em">Code</text>
-      <text x="140" y="70" dy="0.4em">Type</text>
+      <text x="140" y="70" dy="0.4em">Role</text>
       <g style="font-style:italic; font-size:10pt;">
       <text fill="blue" x="140" y="30" dy="0.0em">post-</text>
       <text fill="blue" x="140" y="30" dy="1.0em">condition</text>
@@ -217,18 +218,27 @@ one comment extent. */</span></pre>
       <path d="M14,92 l-8,0 l0,38" />
     </g>
     <g style="font-family:Monospace; font-size:12pt;" transform="translate(40,0)">
-      <text x="0" y="0" dy="0.0em">1: // Make sure we have enough space for</text>
-      <text x="0" y="0" dy="1.1em">2: // the first packet.</text>
+      <text x="0" y="0" dy="0.0em">1: </text>
+      <text x="0" y="0" dy="1.1em">2: </text>
       <text x="0" y="0" dy="2.2em">3: if (i + p.length &lt;= buf.length) {</text>
-      <text x="0" y="0" dy="3.3em">4: &#x00a0;&#x00a0;arraycopy(p, 0, buf, i, p.length); // don't change i.</text>
-      <text x="0" y="0" dy="4.4em">5: &#x00a0;&#x00a0;// The buf can be overwritten by the second one.</text>
+      <text x="0" y="0" dy="3.3em">4: &#160;&#160;arraycopy(p, 0, buf, i, p.length);</text>
+      <text x="0" y="0" dy="4.4em">5: </text>
       <text x="0" y="0" dy="5.5em">6: }</text>
-      <text x="0" y="0" dy="6.6em">7: // When the second packet has doesn't have</text>
-      <text x="0" y="0" dy="7.7em">8: // signature, it will simply discarded, and</text>
+      <text x="0" y="0" dy="6.6em">7: </text>
+      <text x="0" y="0" dy="7.7em">8: </text>
       <text x="20" y="0" dy="8.8em">...</text>
+    </g>
+    <g fill="#008800" style="font-family:Monospace; font-size:12pt;" transform="translate(40,0)">
+      <text x="0" y="0" dy="0.0em">&#160;&#160; // Make sure we have enough space for</text>
+      <text x="0" y="0" dy="1.1em">&#160;&#160; // the first packet.</text>
+      <text x="0" y="0" dy="3.3em">&#160;&#160; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;// don't change i.</text>
+      <text x="0" y="0" dy="4.4em">&#160;&#160; &#160;&#160;// The buf can be overwritten by the second one.</text>
+      <text x="0" y="0" dy="6.6em">&#160;&#160; // When the second packet has doesn't have</text>
+      <text x="0" y="0" dy="7.7em">&#160;&#160; // signature, it will simply discarded, and</text>
     </g>
     <g text-anchor="middle" style="font-family:Times; font-size:12pt; font-weight: bold"
        transform="translate(24,0)">
+      <g fill="red">
       <text x="0" y="0" dy="0.0em">B</text>
       <text x="0" y="0" dy="1.1em">I</text>
       <text x="0" y="0" dy="2.2em">O</text>
@@ -237,15 +247,16 @@ one comment extent. */</span></pre>
       <text x="0" y="0" dy="5.5em">O</text>
       <text x="0" y="0" dy="6.6em">B</text>
       <text x="0" y="0" dy="7.7em">I</text>
+      </g>
       <text x="0" y="0" dy="8.8em">...</text>
     </g>
   </g>
 </svg>
 </div>
 <ul>
-  <li> <code>B</code>: Beginning of Comment
-  <li> <code>I</code>: Inside Comment
-  <li> <code>O</code>: Other
+  <li> <code class=feat>B</code>: Beginning of Comment
+  <li> <code class=feat>I</code>: Inside Comment
+  <li> <code class=feat>O</code>: Other
 </ul>
 </ul>
 </div>
@@ -255,12 +266,12 @@ one comment extent. */</span></pre>
 <ul>
 <li> Type of role that each comment play</u>:
 <ol type=a>
-  <li> Explains what the code does: (<code>Postcondition</code>)
+  <li> Explains what the code does: (<code class=feat>Postcondition</code>)
 <pre>
 <span class=comment>// create some test data</span>
 Map&lt;String, String&gt; data = createTestData(testSize);
 </pre>
-  <li> Explains why the code is there: (<code>Precondition</code>)
+  <li> Explains why the code is there: (<code class=feat>Precondition</code>)
 <pre>
 <span class=comment>// Unable to find the specified document.</span>
 return Status.ERROR;
@@ -315,8 +326,8 @@ static final int REQUEST_CODE = 6384;
 <h2>Frequency - Comment Categories</h2>
 <div class=figure>
 <table align=center class=ttt border>
-<tr><td>Postcondition (What do)</td><td align=right>75</td></tr>
-<tr><td>Precondition (Why do)</td><td align=right>37</td></tr>
+<tr class=good><td>Postcondition (What do)</td><td align=right>75</td></tr>
+<tr class=good><td>Precondition (Why do)</td><td align=right>37</td></tr>
 <tr><td>Value Desc. (What is)</td><td align=right>15</td></tr>
 <tr><td>Instruction (Todo, etc.)</td><td align=right>14</td></tr>
 <tr><td>Comment Out</td><td align=right>12</td></tr>
@@ -342,7 +353,7 @@ static final int REQUEST_CODE = 6384;
   </marker>
   </defs>
   <g transform="scale(2,2) translate(10,40)">
-    <g style="font-family:Sans-Serif; font-size:12pt; font-weight: bold;">
+    <g fill="red" style="font-family:Sans-Serif; font-size:12pt; font-weight: bold;">
       <text x="-2" y="56">Left</text>
       <text x="200" y="48">Right</text>
       <text x="44" y="-20">Parent</text>
@@ -369,9 +380,9 @@ static final int REQUEST_CODE = 6384;
 </svg>
 </div>
 <ul>
-  <li> <code>Parent</code>: Parent syntax element.
-  <li> <code>Left</code>: Previous sibling.
-  <li> <code>Right</code>: Next sibling.
+  <li> <code class=feat>Parent</code>: Parent syntax element.
+  <li> <code class=feat>Left</code>: Previous sibling.
+  <li> <code class=feat>Right</code>: Next sibling.
 </ul>
 </ul>
 </div>
@@ -861,8 +872,8 @@ static final int REQUEST_CODE = 6384;
 <h1>14. Findings</h1>
 <ul>
 <li> Reasonable accuracy for the two biggest categories
-  (<code>Postcondition</code> and <code>Precondition</code>) were obtained.
-<li> Some category (<code>Postcondition</code>) has similar
+  (<code class=feat>Postcondition</code> and <code class=feat>Precondition</code>) were obtained.
+<li> Some category (<code class=feat>Postcondition</code>) has similar
   characteristics across different languages (Java and Python).
 <li> This suggests the existence of the
   "<a href="https://en.wikipedia.org/wiki/Universal_grammar">Universal Grammar</a>" of
@@ -987,6 +998,12 @@ while(line != null) {
 <tr><td><code>WordAny</code></td><td>Does the comment text include a certain word?</td></tr>
 </table>
 </div>
+</div>
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center>This page intentionally left blank.</td></tr>
+</table>
 </div>
 
 <div class=page>
