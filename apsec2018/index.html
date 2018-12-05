@@ -54,7 +54,7 @@ Katsuhiko Gondow<br>
 <ul>
   <li> <pre>/* clear the buffer. */
 b.start = b.end = 0;</pre>
-  <li> <pre>x = 0;  // reset the location.</pre>
+  <li> <pre>i = 0;  // reset the location.</pre>
 </ul>
 <li> Recover codes such as...
 <ul>
@@ -81,19 +81,24 @@ b.start = b.end = 0;</pre>
 </div>
 
 <div class=page>
-<h1>3. Types of Comments</h1>
+<h1>3. Our Contribution</h1>
+<div class=box>
+To propose a theoretical framework
+for analyzing source code comments.
+</div>
 <ul>
-<li> Module or method-level comments:
+<li> Existing work: Module or method-level comments:
+  Javadoc, etc.
   <ul>
-    <li> Javadoc, etc.
     <li> <pre>/** Performs buffer operation. ... */</pre>
   </ul>
-<li> <mark>Local comments:</mark> (this work)
+<li> Our work: <mark>Local comments:</mark>
   <ul>
     <li> <pre>{
     /* clear the buffer. */
     b.start = b.end = 0;
 }</pre>
+    A lot of freedom!
   </ul>
 </ul>
 </div>
@@ -133,7 +138,7 @@ float Q_rsqrt( float number )
 <ol>
 <li> Manually review comments and discover the commonality.
 <li> Categorize the types of comments.
-<li> Build a classifier to measure the validity.
+<li> Build a classifier to verify the hypothesis.
 </ol>
 </div>
 
@@ -203,65 +208,6 @@ one comment extent. */</span></pre>
 </div>
 
 <div class=page>
-<h2>Annotating Comment Extents</h2>
-<ul>
-<li> IOB (BIO) notation:
-<div class=figure>
-<svg xmlns="http://www.w3.org/2000/svg"
-     xmlns:xlink="http://www.w3.org/1999/xlink"
-     version="1.1" width="1000" height="340">
-  <g transform="scale(2,2) translate(0,20)">
-    <g fill="none" stroke="black" stroke-width="2">
-      <path d="M14,-10 l-8,0 l0,30 l8,0" />
-      <path d="M14,42 l-8,0 l0,10 l8,0" />
-      <path d="M14,58 l-8,0 l0,10 l8,0" />
-      <path d="M14,92 l-8,0 l0,38" />
-    </g>
-    <g style="font-family:Monospace; font-size:12pt;" transform="translate(40,0)">
-      <text x="0" y="0" dy="0.0em">1: </text>
-      <text x="0" y="0" dy="1.1em">2: </text>
-      <text x="0" y="0" dy="2.2em">3: if (i + p.length &lt;= buf.length) {</text>
-      <text x="0" y="0" dy="3.3em">4: &#160;&#160;arraycopy(p, 0, buf, i, p.length);</text>
-      <text x="0" y="0" dy="4.4em">5: </text>
-      <text x="0" y="0" dy="5.5em">6: }</text>
-      <text x="0" y="0" dy="6.6em">7: </text>
-      <text x="0" y="0" dy="7.7em">8: </text>
-      <text x="20" y="0" dy="8.8em">...</text>
-    </g>
-    <g fill="#008800" style="font-family:Monospace; font-size:12pt;" transform="translate(40,0)">
-      <text x="0" y="0" dy="0.0em">&#160;&#160; // Make sure we have enough space for</text>
-      <text x="0" y="0" dy="1.1em">&#160;&#160; // the first packet.</text>
-      <text x="0" y="0" dy="3.3em">&#160;&#160; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;// don't change i.</text>
-      <text x="0" y="0" dy="4.4em">&#160;&#160; &#160;&#160;// The buf can be overwritten by the second one.</text>
-      <text x="0" y="0" dy="6.6em">&#160;&#160; // When the second packet has doesn't have</text>
-      <text x="0" y="0" dy="7.7em">&#160;&#160; // signature, it will simply discarded, and</text>
-    </g>
-    <g text-anchor="middle" style="font-family:Times; font-size:12pt; font-weight: bold"
-       transform="translate(24,0)">
-      <g fill="red">
-      <text x="0" y="0" dy="0.0em">B</text>
-      <text x="0" y="0" dy="1.1em">I</text>
-      <text x="0" y="0" dy="2.2em">O</text>
-      <text x="0" y="0" dy="3.3em">B</text>
-      <text x="0" y="0" dy="4.4em">B</text>
-      <text x="0" y="0" dy="5.5em">O</text>
-      <text x="0" y="0" dy="6.6em">B</text>
-      <text x="0" y="0" dy="7.7em">I</text>
-      </g>
-      <text x="0" y="0" dy="8.8em">...</text>
-    </g>
-  </g>
-</svg>
-</div>
-<ul>
-  <li> <code class=feat>B</code>: Beginning of Comment
-  <li> <code class=feat>I</code>: Inside Comment
-  <li> <code class=feat>O</code>: Other
-</ul>
-</ul>
-</div>
-
-<div class=page>
 <h1>8. Comment Category</h1>
 <ul>
 <li> Type of role that each comment play</u>:
@@ -286,63 +232,9 @@ static final int REQUEST_CODE = 6384;
 </div>
 
 <div class=page>
-<h2>Annotating Comment Categories</h2>
-<ul>
-  <li> We reviewed 1,000 comments and defined <u>11</u> categories.
-  <li> Three people manually categorized 100 comments.
-    <ul>
-      <li> Fleiss' Kappa = 0.49 (moderate agreement)
-    </ul>
-</ul>
-<div class=figure>
-<svg xmlns="http://www.w3.org/2000/svg"
-     xmlns:xlink="http://www.w3.org/1999/xlink"
-     version="1.1" width="500" height="250">
-  <defs>
-    <g id="user" fill="none" stroke="black" stroke-width="2">
-      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
-    </g>
-  </defs>
-  <g transform="translate(4,4)">
-    <use xlink:href="#user" x="250" y="0" />
-    <use xlink:href="#user" x="100" y="100" />
-    <use xlink:href="#user" x="350" y="150" />
-    <g fill="none" stroke="black" stroke-width="4">
-      <path d="M220,100 l-50,30" stroke="red" />
-      <path d="M180,150 l160,30" />
-      <path d="M320,100 l30,40" />
-    </g>
-    <g text-anchor="middle" style="font-size: 24px;">
-      <text x="125" y="170" dy="0.5em">Reviewer 1</text>
-      <text x="275" y="70" dy="0.5em">Reviewer 2</text>
-      <text x="375" y="220" dy="0.5em">Reviewer 3</text>
-    </g>
-  </g>
-</svg>
-</div>
-</div>
-
-<div class=page>
-<h2>Frequency - Comment Categories</h2>
-<div class=figure>
-<table align=center class=ttt border>
-<tr class=good><td>Postcondition (What do)</td><td align=right>75</td></tr>
-<tr class=good><td>Precondition (Why do)</td><td align=right>37</td></tr>
-<tr><td>Value Desc. (What is)</td><td align=right>15</td></tr>
-<tr><td>Instruction (Todo, etc.)</td><td align=right>14</td></tr>
-<tr><td>Comment Out</td><td align=right>12</td></tr>
-<tr><td>Visual Cue</td><td align=right>11</td></tr>
-<tr><td>Directive</td><td align=right>8</td></tr>
-<tr><td>Guide</td><td align=right>0</td></tr>
-<tr><td>Uncategorized</td><td align=right>9</td></tr>
-</table>
-</div>
-</div>
-
-<div class=page>
 <h1>9. Comment Target</h1>
 <ul>
-<li> Piece of code that a comment refers to.
+<li> Syntax element that a comment refers to.
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -499,6 +391,119 @@ static final int REQUEST_CODE = 6384;
 </div>
 
 <div class=page>
+<h2>Annotating Comment Extents</h2>
+<ul>
+<li> IOB (BIO) notation:
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="1000" height="340">
+  <g transform="scale(2,2) translate(0,20)">
+    <g fill="none" stroke="black" stroke-width="2">
+      <path d="M14,-10 l-8,0 l0,30 l8,0" />
+      <path d="M14,42 l-8,0 l0,10 l8,0" />
+      <path d="M14,58 l-8,0 l0,10 l8,0" />
+      <path d="M14,92 l-8,0 l0,38" />
+    </g>
+    <g style="font-family:Monospace; font-size:12pt;" transform="translate(40,0)">
+      <text x="0" y="0" dy="0.0em">1: </text>
+      <text x="0" y="0" dy="1.1em">2: </text>
+      <text x="0" y="0" dy="2.2em">3: if (i + p.length &lt;= buf.length) {</text>
+      <text x="0" y="0" dy="3.3em">4: &#160;&#160;arraycopy(p, 0, buf, i, p.length);</text>
+      <text x="0" y="0" dy="4.4em">5: </text>
+      <text x="0" y="0" dy="5.5em">6: }</text>
+      <text x="0" y="0" dy="6.6em">7: </text>
+      <text x="0" y="0" dy="7.7em">8: </text>
+      <text x="20" y="0" dy="8.8em">...</text>
+    </g>
+    <g fill="#008800" style="font-family:Monospace; font-size:12pt;" transform="translate(40,0)">
+      <text x="0" y="0" dy="0.0em">&#160;&#160; // Make sure we have enough space for</text>
+      <text x="0" y="0" dy="1.1em">&#160;&#160; // the first packet.</text>
+      <text x="0" y="0" dy="3.3em">&#160;&#160; &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;// don't change i.</text>
+      <text x="0" y="0" dy="4.4em">&#160;&#160; &#160;&#160;// The buf can be overwritten by the second one.</text>
+      <text x="0" y="0" dy="6.6em">&#160;&#160; // When the second packet has doesn't have</text>
+      <text x="0" y="0" dy="7.7em">&#160;&#160; // signature, it will simply discarded, and</text>
+    </g>
+    <g text-anchor="middle" style="font-family:Times; font-size:12pt; font-weight: bold"
+       transform="translate(24,0)">
+      <g fill="red">
+      <text x="0" y="0" dy="0.0em">B</text>
+      <text x="0" y="0" dy="1.1em">I</text>
+      <text x="0" y="0" dy="2.2em">O</text>
+      <text x="0" y="0" dy="3.3em">B</text>
+      <text x="0" y="0" dy="4.4em">B</text>
+      <text x="0" y="0" dy="5.5em">O</text>
+      <text x="0" y="0" dy="6.6em">B</text>
+      <text x="0" y="0" dy="7.7em">I</text>
+      </g>
+      <text x="0" y="0" dy="8.8em">...</text>
+    </g>
+  </g>
+</svg>
+</div>
+<ul>
+  <li> <code class=feat>B</code>: Beginning of Comment
+  <li> <code class=feat>I</code>: Inside Comment
+  <li> <code class=feat>O</code>: Other
+</ul>
+</ul>
+</div>
+
+<div class=page>
+<h2>Annotating Comment Categories</h2>
+<ul>
+  <li> We reviewed 1,000 comments and defined <u>11</u> categories.
+  <li> Three people manually categorized 100 comments.
+    <ul>
+      <li> Fleiss' Kappa = 0.49 (moderate agreement)
+    </ul>
+</ul>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="250">
+  <defs>
+    <g id="user" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+  </defs>
+  <g transform="translate(4,4)">
+    <use xlink:href="#user" x="250" y="0" />
+    <use xlink:href="#user" x="100" y="100" />
+    <use xlink:href="#user" x="350" y="150" />
+    <g fill="none" stroke="black" stroke-width="4">
+      <path d="M220,100 l-50,30" stroke="red" />
+      <path d="M180,150 l160,30" />
+      <path d="M320,100 l30,40" />
+    </g>
+    <g text-anchor="middle" style="font-size: 24px;">
+      <text x="125" y="170" dy="0.5em">Reviewer 1</text>
+      <text x="275" y="70" dy="0.5em">Reviewer 2</text>
+      <text x="375" y="220" dy="0.5em">Reviewer 3</text>
+    </g>
+  </g>
+</svg>
+</div>
+</div>
+
+<div class=page>
+<h2>Frequency - Comment Categories</h2>
+<div class=figure>
+<table align=center class=ttt border>
+<tr class=good><td>Postcondition (What do)</td><td align=right>75</td></tr>
+<tr class=good><td>Precondition (Why do)</td><td align=right>37</td></tr>
+<tr><td>Value Desc. (What is)</td><td align=right>15</td></tr>
+<tr><td>Instruction (Todo, etc.)</td><td align=right>14</td></tr>
+<tr><td>Comment Out</td><td align=right>12</td></tr>
+<tr><td>Visual Cue</td><td align=right>11</td></tr>
+<tr><td>Directive</td><td align=right>8</td></tr>
+<tr><td>Guide</td><td align=right>0</td></tr>
+<tr><td>Uncategorized</td><td align=right>9</td></tr>
+</table>
+</div>
+</div>
+
+<div class=page>
 <h2>Classifier Implementation</h2>
 <ul>
 <li> Decision Tree (C4.5):
@@ -557,7 +562,7 @@ static final int REQUEST_CODE = 6384;
   </g>
 </svg>
 </div>
-<li> We implemented classifiers for two languages:<br>
+<li> We implemented classifiers for two languages:
   Java and Python.
 </div>
 
@@ -566,10 +571,8 @@ static final int REQUEST_CODE = 6384;
 <ul>
 <li> Data sets (Java):
   <ul>
-    <li> Training:
-      <ul>
-        <li> 1,000 comments (from GitHub projects).
-      </ul>
+    <li> Training: 
+      1,000 comments (from GitHub projects).
     <li> Test:
       <ul>
         <li> 100 comments (for Extent and Target).
@@ -903,14 +906,15 @@ while(line != null) {
 <div class=page>
 <h1>15. Conclusion</h1>
 <ul>
-<li> We performed in-depth analysis of local comments.
+<li> We proposed a theoretical framework for
+  analyzing local comments.
   <ul>
-    <li> Three elements: Extent, Category and Target.
+    <li> "Grammar" of comments.
+    <li> Extent, Category and Target.
   </ul>
-<li> We built a classifier with program syntax and
-  linguistic features.
-<li> Various OSS projects were explored to test
+<li> We built a classifier to test
   our hypothesis.
+<li> Various OSS projects were explored.
 </ul>
 </div>
 
