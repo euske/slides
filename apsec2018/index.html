@@ -16,8 +16,22 @@ div table.ttt { font-size: 100%; font-weight: bold; }
 div table.ttt td,th { border: 2px solid black; padding: 8px; }
 th { background: #cccccc; }
 --></style>
+<script>
+function doit() {
+  if (document.baseURI.startsWith("file:")) {
+    for (e of document.getElementsByClassName("offline")) {
+      if (e.tagName == "IMG") {
+        let i = e.src.lastIndexOf("/");
+        let src = "./"+e.src.substr(i+1);
+        console.log("offline: "+e.src+" -> "+src);
+        e.src = src;
+      }
+    }
+  }
+}
+</script>
 </head>
-<body>
+<body onload="doit()">
 
 <div class=page>
 <table align=center class=fill>
@@ -49,12 +63,11 @@ Katsuhiko Gondow<br>
 <div class=page>
 <h1>1. Background</h1>
 <ul>
-<li> Use code comments for program understanding
-  / reverse engineering.
+<li> Use code comments for getting software insights:
 <ul>
-  <li> <pre>/* clear the buffer. */
+  <li> <pre><span class=comment>/* clear the buffer. */</span>
 b.start = b.end = 0;</pre>
-  <li> <pre>i = 0;  // reset the location.</pre>
+  <li> <pre>i = 0;  <span class=comment>// the location.</span></pre>
 </ul>
 <li> (In future) Recover codes such as...
 <ul>
@@ -75,7 +88,7 @@ b.start = b.end = 0;</pre>
 <li> Bad:
 <ul>
   <li> Unstructured. &#x1f44e
-  <li> Hard for formal analysis. &#x1f44e
+  <li> Defies formal analysis. &#x1f44e
 </ul>
 </ul>
 </div>
@@ -90,12 +103,12 @@ for analyzing source code comments.
 <li> Existing work: Module or method-level comments:
   Javadoc, etc.
   <ul>
-    <li> <pre>/** Performs buffer operation. ... */</pre>
+    <li> <pre><span class=comment>/** Performs buffer operation. ... */</span></pre>
   </ul>
 <li> Our work: <mark>Local comments:</mark>
   <ul>
     <li> <pre>{
-    /* clear the buffer. */
+    <span class=comment>/* clear the buffer. */</span>
     b.start = b.end = 0;
 }</pre>
     A lot of variability!
@@ -227,6 +240,23 @@ static final int REQUEST_CODE = 6384;
 </pre>
 </ol>
 </ul>
+</div>
+
+<div class=page>
+<h2>Frequency - Comment Categories</h2>
+<div class=figure>
+<table align=center class=ttt border>
+<tr class=good><td>Postcondition (What do)</td><td align=right>75</td></tr>
+<tr class=good><td>Precondition (Why do)</td><td align=right>37</td></tr>
+<tr><td>Value Desc. (What is)</td><td align=right>15</td></tr>
+<tr><td>Instruction (Todo, etc.)</td><td align=right>14</td></tr>
+<tr><td>Comment Out</td><td align=right>12</td></tr>
+<tr><td>Visual Cue</td><td align=right>11</td></tr>
+<tr><td>Directive</td><td align=right>8</td></tr>
+<tr><td>Guide</td><td align=right>0</td></tr>
+<tr><td>Uncategorized</td><td align=right>9</td></tr>
+</table>
+</div>
 </div>
 
 <div class=page>
@@ -481,23 +511,6 @@ static final int REQUEST_CODE = 6384;
     </g>
   </g>
 </svg>
-</div>
-</div>
-
-<div class=page>
-<h2>Frequency - Comment Categories</h2>
-<div class=figure>
-<table align=center class=ttt border>
-<tr class=good><td>Postcondition (What do)</td><td align=right>75</td></tr>
-<tr class=good><td>Precondition (Why do)</td><td align=right>37</td></tr>
-<tr><td>Value Desc. (What is)</td><td align=right>15</td></tr>
-<tr><td>Instruction (Todo, etc.)</td><td align=right>14</td></tr>
-<tr><td>Comment Out</td><td align=right>12</td></tr>
-<tr><td>Visual Cue</td><td align=right>11</td></tr>
-<tr><td>Directive</td><td align=right>8</td></tr>
-<tr><td>Guide</td><td align=right>0</td></tr>
-<tr><td>Uncategorized</td><td align=right>9</td></tr>
-</table>
 </div>
 </div>
 
@@ -864,7 +877,7 @@ static final int REQUEST_CODE = 6384;
 
 <div class=page>
 <div class=figure style="margin: 1em;">
-<a href="https://i.redd.it/iuy9fxt300811.png"><img src="https://i.redd.it/iuy9fxt300811.png"></a>
+<a href="https://i.redd.it/iuy9fxt300811.png"><img class=offline src="https://i.redd.it/iuy9fxt300811.png"></a>
 <div align=right>- <a href="https://www.reddit.com/r/ProgrammerHumor/comments/8w54mx/code_comments_be_like/">/r/ProgrammerHumor</a></div>
 </div>
 </div>
