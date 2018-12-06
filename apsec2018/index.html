@@ -56,7 +56,7 @@ Katsuhiko Gondow<br>
 b.start = b.end = 0;</pre>
   <li> <pre>i = 0;  // reset the location.</pre>
 </ul>
-<li> Recover codes such as...
+<li> (In future) Recover codes such as...
 <ul>
   <li> <pre>clearBuffer(b);</pre>
   <li> <pre>location = 0;</pre>
@@ -98,7 +98,7 @@ for analyzing source code comments.
     /* clear the buffer. */
     b.start = b.end = 0;
 }</pre>
-    A lot of freedom!
+    A lot of variability!
   </ul>
 </ul>
 </div>
@@ -132,13 +132,11 @@ float Q_rsqrt( float number )
 <ol type=a>
 <li> What are the general structure of local comments?
 <li> How can we use them for program comprehension?
-<li> Can we identify them automatically?
 </ol>
 <h3>Methodology</h3>
 <ol>
 <li> Manually review comments and discover the commonality.
-<li> Categorize the types of comments.
-<li> Build a classifier to verify the hypothesis.
+<li> Build a classifier to test the hypothesis.
 </ol>
 </div>
 
@@ -452,7 +450,7 @@ static final int REQUEST_CODE = 6384;
 <div class=page>
 <h2>Annotating Comment Categories</h2>
 <ul>
-  <li> We reviewed 1,000 comments and defined <u>11</u> categories.
+  <li> We reviewed 1,000 comments and defined <mark>11</mark> categories.
   <li> Three people manually categorized 100 comments.
     <ul>
       <li> Fleiss' Kappa = 0.49 (moderate agreement)
@@ -875,9 +873,9 @@ static final int REQUEST_CODE = 6384;
 <h1>14. Findings</h1>
 <ul>
 <li> Reasonable accuracy for the two biggest categories
-  (<code class=feat>Postcondition</code> and <code class=feat>Precondition</code>) were obtained.
-<li> Some category (<code class=feat>Postcondition</code>) has similar
-  characteristics across different languages (Java and Python).
+  (<code class=feat>Postcondition</code> and <code class=feat>Precondition</code>).
+<li> Some characteristics (<code class=feat>Postcondition</code>) are
+  preserved across different languages (Java and Python).
 <li> This suggests the existence of the
   "<a href="https://en.wikipedia.org/wiki/Universal_grammar">Universal Grammar</a>" of
   code comments among programmers.
@@ -907,9 +905,9 @@ while(line != null) {
 <h1>15. Conclusion</h1>
 <ul>
 <li> We proposed a theoretical framework for
-  analyzing local comments.
+  analyzing local (microscopic) comments.
   <ul>
-    <li> "Grammar" of comments.
+    <li> Relationship: "Grammar" of comments.
     <li> Extent, Category and Target.
   </ul>
 <li> We built a classifier to test
