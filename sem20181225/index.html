@@ -1,0 +1,263 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>権藤研 冬ゼミ 資料 2018/12/25 新山 (論文紹介)</title>
+<style><!--
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+.comment { color: #008800; }
+.figure { text-align: center; margin: 0.5em; }
+.box { border: 2px solid black; padding: 0.5em; margin: 0.5em; background: #ff99ff; }
+pre { border: 1px solid black; padding: 0.3em; }
+div table.ttt { font-size: 80%; font-weight: bold; }
+div table.ttt td,th { border: 2px solid black; padding: 8px; }
+--></style>
+<script>
+function doit() {
+  if (document.baseURI.startsWith("file:")) {
+    for (e of document.getElementsByClassName("offline")) {
+      if (e.tagName == "IMG") {
+        let i = e.src.lastIndexOf("/");
+        let src = "./"+e.src.substr(i+1);
+        console.log("offline: "+e.src+" -> "+src);
+        e.src = src;
+      }
+    }
+  }
+}
+</script>
+</head>
+<body onload="doit()">
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center style="height:4em;">論文紹介:<br>
+"Microservice候補の自動抽出"<br>(他2本)</td></tr>
+</table>
+<div class=bottomright style="line-height:1.2;" align=right>新山 祐介<br>
+2018年12月25日
+</div>
+<div class=bottomleft>
+<a href="https://euske.github.io/">https://euske.github.io/</a>
+</div>
+</div>
+
+<div class=page>
+<h1>ソフトウェア工学研究における2つの柱</h1>
+<ol type=a>
+<li> プログラムのふるまいを理解する<br>
+  (主なアプローチ: 動的解析)
+<li> <mark>プログラマー (の意図) を理解する</mark><br>
+  (主なアプローチ: 静的解析)
+</ol>
+<p>
+a と b が一致しているとき、
+そのソフトウェアはベストな状態といえる。
+</div>
+
+<div class=page>
+<h1>紹介する論文</h1>
+<ul>
+<li> 基本的に同じグループ (富士通研) の人々による一連の研究。
+<li> Kobayashi, et al.
+  "<a href="https://arxiv.org/abs/1306.2096">Feature-Gathering Dependency-Based Software Clustering Using Dedication and Modularity</a>"
+  (ICSM 2012)
+<li> Kobayashi, et al.
+  "<a href="https://arxiv.org/abs/1306.0958">SArF Map: Visualizing Software Architecture from Feature and Layer Viewpoints</a>"
+  (ICPC 2013)
+<li> Kamimura, et al.
+  "Extracting Candidates of Microservices from Monolithic Application Code"
+  (APSEC 2018)
+</ul>
+</div>
+
+<div class=page>
+<h1>論文1: SArF Clustering</h1>
+<ul>
+<li> Software clustering =
+  大量のソースコードを意味的なまとまりのある「クラスタ」に分割する。
+  (できれば全自動で)
+<li> コード中の要素 (識別子、AST) またはトレース情報を
+  素性ベクトルに変換し、クラスタリングをおこなう。
+<li> 従来方式の欠点:
+  <ul>
+    <li> 手動でパラメータ調整が必要であった (全自動でなかった)。
+    <li> ユーティリティ的なコード (全域で使われる) がノイズになっていた。
+  </ul>
+<li> 本論文の貢献:
+  よりよりクラスタリング手法を開発した。
+</ul>
+</div>
+
+<div class=page>
+<h2>SArF (Software Architecture Finder) の特徴</h2>
+<ul>
+  <li> クラス間の依存情報を使う:
+<ol>
+<li> メソッド呼び出し
+<li> フィールドアクセス
+<li> 他クラスからの継承
+<li> 他クラスの参照
+</ol>
+  <li> class 間の依存情報のみを使う:
+  <li> Dedication Score = あるクラスが
+    別のクラスと共通している可能性。
+    <div class=ex>
+      クラスAがBに依存しているとき (A→B)、
+      このクラス間の Dedication Score を
+      D<sub>A→B</sub> = 1 / (Bへの流入数) とする。
+    </div>
+  <li> 凝集度 (cohesion) みたいなもん?
+  <li> 類似度とも似ているが、方向性がある。
+  <li> 依存関係を使うことにより、
+    共通して利用されているモジュール群を分離できる。
+  <li> 得られたエッジの集合を、Modularity Maximization という
+    方法でクラスタリングする。
+</ul>
+</div>
+
+<div class=page>
+<h2>評価方法</h2>
+<ul>
+  <li> 自動で分類したクラスタと、
+    人手で分類したクラスタを比較する。
+  <li> Weka, Javaassist, Ant などのソフトウェアを
+    クラスタリングした結果、従来手法よりもよい精度を得た。
+</ul>
+</div>
+
+<div class=page>
+<h1>論文2: SArF Map</h1>
+<ul>
+<li> 論文1 の技術の応用。
+<li> ソフトウェアの構造を都市として
+表すというアイデアは古くからある…らしい
+(<a href="https://wettel.github.io/codecity.html">CodeCity</a>, 2007).
+</ul>
+<div class=figure>
+<img src="sarfmap1.jpg">
+</div>
+</div>
+
+<div class=page>
+<h2>SArF Map の特徴:</h2>
+<ul>
+<li> 全自動かつ言語非依存で、dependency graph さえあれば作れる。
+<li> 1つの建物 = 1つのクラス。
+<li> 1つの機能 (クラスタ) = 1つのブロック
+<li> 上のレイヤーほど上に表示される。
+<li> 機能間の関連性 = 街路の距離
+<li> 保守しにくいクラスは乱れたビルで表現される。
+<li> よく実行されるクラスは明るい色で表現される。
+<li> 最近変更されたクラスは工事中のビルで表現される。
+</ul>
+<div class=figure>
+<img src="sarfmap2.jpg">
+</div>
+</div>
+
+<div class=page>
+<h2>生成手法:</h2>
+<ol>
+<li> Jarファイル解析。
+<li> SArFクラスタリングを実行。
+<li> 各クラスを2次元ブロックとしてレイアウト。
+<li> 街路をレイアウト。
+<li> 付加情報をオーバレイ(色など)として追加。
+</ol>
+</div>
+
+<div class=page>
+<h2>2次元レイアウト</h2>
+<ul>
+<li> 次の関数を最小化するように各建物の X座標を決定する。
+<div class=ex>
+f(x<sub>i</sub> | i)
+ = &sum; <sub>j&isin;ins(i)</sub> (d<sub>ji</sub> (x<sub>i</sub> - x<sub>j</sub>))<sup>2</sup>
+ + &sum; <sub>j&isin;outs(i)</sub> (d<sub>ij</sub> (x<sub>i</sub> - x<sub>j</sub>))<sup>2</sup>
+<br>
+(d(i,j) は Dedication Score)
+</div>
+</ul>
+</div>
+
+<div class=page>
+<h2>評価方法</h2>
+<ul>
+<li> RQ1: SArF Map は機能を可視化できるか? - yes.
+<li> RQ2: SArF Map はレイヤーを可視化できるか? - yes.
+<li> RQ3: SArF Map でデザインの質を見積れるか? - yes.
+<li> RQ4: SArF Map でアークテクチャが理解できるか? - yes.
+<li> RQ5: SArF Map は異なるステークホルダの間で一貫した見方を提供できるか? -
+  yes. (保守担当者向けと経営者向けの 2種類のマップを生成)
+</ul>
+</div>
+
+<div class=page>
+<h1>論文3: Microservicesの検出</h1>
+<ul>
+<li> Microservice = 独立に開発・展開可能なモジュール。
+<li> モノリシックな巨大アプリを microservices に
+  分割しようという試みが活発。しかし人手で分析するのは困難。
+</ul> 
+</div>
+
+<div class=page>
+<h2>基本的な戦略</h2>
+<ol>
+<li> 各モジュールの API となる部分を発見する。
+<li> 依存関係が少ないモジュール (クラスタ) を microservice の候補とする。
+<li> 複数のモジュールから依存されている共通部分は各 microservice で複製する。
+<li> ただしデータベースは原子性が失われるので複製しない。
+</ol>
+<div class=figure>
+<img src="fig3.png">
+</div>
+</div>
+
+<div class=page>
+<h2>プログラム解析</h2>
+<ul>
+<li> JavaおよびCOBOLを静的解析。<br>
+  (計装すると動作が変わってしまう場合があるため)
+<li> メソッド名およびJavaアノテーションを使って、
+  プログラム(メソッド)-プログラム間、および
+  プログラム-データ間の依存関係を抽出。
+<li> CFGをたどり、データアクセスに到達するまで続ける。
+<table class=ttt border>
+<tr><th>Elements</th><th>Java</th><th>COBOL</th></tr>
+<tr><td>API</td><td><code>@Control</code></td><td>メインプログラム</td></tr>
+<tr><td>Data</td><td><code>@Entry</code> / <code>@Table</code></td><td>DBファイル</td></tr>
+<tr><td>Program calls</td><td>メソッド呼び出し</td><td>CALL文</td></tr>
+</div>
+<tr><td>Write</td><Td>メソッド名 <code>set〜</code></td><td>テーブル作成および更新</td></tr>
+<tr><td>Read</td><td>メソッド名 <code>get〜</code></td><td>File参照のTable文</td></tr>
+</table>
+</ul>
+</div>
+
+<div class=page>
+<h2>評価方法</h2>
+<ul>
+<li> 2つのアプリケーションに対して適用:
+<ol>
+  <li> Spring Boot Pet Clinic (Java, 630 loc, 25 classes)
+  <li> 自社開発アプリ (COBOL, 2031 kloc, 2269 files)
+</ol>
+<li> 開発者が人手で評価する:
+<ol type=a>
+  <li> 抽出された microservice 候補が機能的な単位と一致しているか?
+  <li> 抽出された microservice 候補が独立している (loosely coupled) か?
+</ol>
+</ul>
+</div>
+
+<div class=page>
+<h1>読んだ感想</h1>
+<ul>
+<li> アプローチは興味深かったが、
+  あまり具体的なことが書かれておらず
+  得るものが少なかった。
+<li> 評価が yes/no question で
+  さらに主観的である。(いいのか?)
+</ul>
+</div>
