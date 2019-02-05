@@ -1,0 +1,683 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="./slides.css">
+<title>権藤研 輪講資料 2019/02/05 新山 (研究進捗報告 - データパスを用いた機能的クローンの発見)</title>
+<style><!--
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+.comment { color: #008800; }
+.figure { text-align: center; margin: 0.5em; }
+.ex { border: 2px solid black; padding: 0.5em; margin: 0.5em; }
+.ex ol { margin: 0; }
+.bl { border: solid 1px gray; padding: 2px; margin: 2px; word-break: keep-all; color: transparent; }
+.red { color: red; }
+pre { border: 1px solid black; padding: 0.3em; }
+div table.ttt { font-size: 100%; font-weight: bold; }
+div table.ttt td,th { border: 2px solid black; padding: 8px; }
+--></style>
+<script>
+function doit() {
+  if (document.baseURI.startsWith("file:")) {
+    for (e of document.getElementsByClassName("offline")) {
+      if (e.tagName == "IMG") {
+        let i = e.src.lastIndexOf("/");
+        let src = "./"+e.src.substr(i+1);
+        console.log("offline: "+e.src+" -> "+src);
+        e.src = src;
+      }
+    }
+  }
+}
+</script>
+</head>
+<body onload="doit()">
+
+<div class=page>
+<table align=center class=fill>
+<tr><td align=center valign=center style="height:4em;">研究進捗報告:<br>
+"データパスを用いた<br>
+機能的クローンの発見" (仮題)
+</td></tr>
+</table>
+<div class=bottomright style="line-height:1.2;" align=right>新山 祐介<br>
+2019年2月5日
+</div>
+<div class=bottomleft>
+<a href="https://euske.github.io/">https://euske.github.io/</a>
+</div>
+</div>
+
+<div class=page>
+<h1>一枚だけで概要説明</h1>
+<ul>
+<li> RQ: コードの意味は、
+  その処理自体だけでなく利用方法によっても規定されるのではないか?
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="600" height="120">
+  <g stroke="black" fill="none" stroke-width="4">
+    <rect x="5" y="5" width="390" height="110" fill="#ffcc44" />
+    <ellipse cx="200" cy="60" rx="50" ry="30" fill="#88ffff" />
+    <path d="M160,40 l-60,-15 l-30,0 M155,60 l-100,0 l0,20 l-20,0 M155,70 l-60,20 l20,0 M190,85 l-5,15 l-20,0" />
+    <path d="M220,40 l10,-20 l80,0 M250,55 l20,-10 l50,0 M230,80 l40,0 l20,20 l40,0" />
+    <line x1="330" y1="45" x2="420" y2="20" stroke-width="2" stroke="red" />
+  </g>
+  <g text-anchor="middle" style="font-size:80%;">
+    <text x="200" y="60" dy="0.5em">code</text>
+    <text text-anchor="start" fill="red" x="425" y="10" dy="0.5em">data path</text>
+  </g>
+</svg>
+</div>
+<li> 様々なメソッド呼び出しにおける周辺の<u>データパス</u>を
+  取得・解析してみよう。
+<li> あるメソッドから出る2つのパスが類似していれば、
+  それらのメソッドは意味的に
+  類似しているのでは? (機能的クローン)
+</ul>
+</div>
+
+<div class=page>
+<h1>機能的クローンとは何か?</h1>
+<ul>
+<li> 機能的クローン = (ほぼ) 等価な機能をもつ異なるコード。
+<blockquote><pre>
+int max(x, y)
+{
+    return (x &lt; y)? y : x;
+}
+</pre></blockquote>
+<blockquote><pre>
+int max(x, y)
+{
+   if (x &lt; y) {
+      x = y;
+   }
+   return x;
+}
+</pre></blockquote>
+</ul>
+
+</div>
+
+<div class=page>
+<h2>比喩による例 (1)</h2>
+<p>
+問. つぎの<span class=bl>資格</span>を埋めなさい。
+<div class=ex>
+<ol type=a>
+<li> 「<span class=red>おにぎり</span>を買いにコンビニへ出かけた」
+<li> 「<span class=bl>洗剤　　</span>を買いにコンビニへ出かけた」
+</ol>
+</div>
+</div>
+
+<div class=page>
+<h2>比喩による例 (2)</h2>
+<p>
+問. つぎの<span class=bl>資格</span>を埋めなさい。
+<div class=ex>
+<ol type=a>
+<li> 「腹がへったので<span class=red>おにぎり</span>を買いにコンビニへ出かけた」
+<li> 「腹がへったので<span class=bl>ラーメン</span>を買いにコンビニへ出かけた」
+</ol>
+</div>
+</div>
+
+<div class=page>
+<h2>比喩による例 (3)</h2>
+<p>
+問. つぎの<span class=bl>資格</span>を埋めなさい。
+<div class=ex>
+<ol type=a>
+<li> 「腹がへったので<span class=red>赤いきつね</span>を買いにコンビニへ出かけたが、
+  ポットのお湯がなかった」
+<li> 「腹がへったので<span class=bl>どん兵衛　</span>を買いにコンビニへ出かけたが、
+  ポットのお湯がなかった」
+</ol>
+</div>
+<p>
+観察: 文脈が長くなるほど、単語の意味は類似してくる。
+</div>
+
+<div class=page>
+<h2>比喩による例 (4)</h2>
+<p>
+<div class=ex>
+<ol type=a>
+<li> 「売れ残った大量の <span class=red>zxmqtg</span> を家畜のエサにした」
+<li> 「売れ残った大量の <span class=red>pfkrjw</span> を家畜のエサにした」
+</ol>
+</div>
+<p>
+単語が何を指しているかは不明でも、
+<u>似たようなものだろう</u>ということは推測できる。
+</div>
+
+<div class=page>
+<h1>基本的なアイデア</h1>
+<ul>
+<li> RQ: あるメソッド呼び出しの<u>使われ方</u> (=文脈) が類似していれば、
+  そのメソッドは類似した<u>機能</u> (=意味) をもっているのではないか?
+  <ul>
+    <li> Let's find out!
+  </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>メソッドの使われ方 = データパス</h1>
+<ul>
+<li> ここでは、あるメソッドの返り値が通る一連の処理を、
+  そのメソッドの「使われ方」と定義する。
+<li> 「データフロー解析」というと既存の手法と誤解されそうなので、
+  <u>データパス</u>という単語を用いた。
+</ul>
+</div>
+
+<div class=page>
+<h2>データパスの例</h2>
+<p>
+問. 以下の例で <code>fp.readLine()</code> の返り値は
+2回利用される。どのように利用されているか?
+<div class=figure>
+<blockquote><pre>
+private BufferedReader fp;
+
+public String get() {
+    String s = null;
+    s = <mark>fp.readLine()</mark>;
+    int i = s.indexOf(' ');
+    return s.substring(0, i);
+}
+</pre></blockquote>
+</div>
+<p>
+グラフ化するとこうなる:
+<div class=figure>
+<!-- Title: get() Pages: 1 -->
+<svg width="270pt" height="454pt"
+ viewBox="0.00 0.00 270.00 454.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 450)">
+<title>get()</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-450 266,-450 266,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_a</title>
+<polygon fill="none" stroke="#000000" points="8,-65 8,-367 254,-367 254,-65 8,-65"/>
+</g>
+<!-- N1 -->
+<g id="node1" class="node">
+<title>N1</title>
+<ellipse fill="none" stroke="#000000" cx="184" cy="-428" rx="27" ry="18"/>
+<text text-anchor="middle" x="184" y="-424.3" font-family="Times,serif" font-size="14.00" fill="#000000">fp</text>
+</g>
+<!-- N2 -->
+<g id="node2" class="node">
+<title>N2</title>
+<polygon fill="yellow" stroke="#000000" points="230,-359 138,-359 138,-323 230,-323 230,-359"/>
+<text text-anchor="middle" x="184" y="-337.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">readLine()</text>
+</g>
+<!-- N1&#45;&gt;N2 -->
+<g id="edge1" class="edge">
+<title>N1&#45;&gt;N2</title>
+<path fill="none" stroke="#000000" d="M184,-409.9735C184,-398.1918 184,-382.5607 184,-369.1581"/>
+<polygon fill="#000000" stroke="#000000" points="187.5001,-369.0033 184,-359.0034 180.5001,-369.0034 187.5001,-369.0033"/>
+<text text-anchor="middle" x="203" y="-380.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N4 -->
+<g id="node4" class="node">
+<title>N4</title>
+<polygon fill="none" stroke="#000000" points="172,-234 88,-234 88,-198 172,-198 172,-234"/>
+<text text-anchor="middle" x="130" y="-212.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">indexOf()</text>
+</g>
+<!-- N2&#45;&gt;N4 -->
+<g id="edge2" class="edge">
+<title>N2&#45;&gt;N4</title>
+<path fill="none" stroke="#000000" d="M176.1479,-322.8239C167.1497,-301.9946 152.3056,-267.6333 141.8884,-243.5193"/>
+<polygon fill="#000000" stroke="#000000" points="145.0404,-241.99 137.8615,-234.198 138.6144,-244.7661 145.0404,-241.99"/>
+<text text-anchor="middle" x="178" y="-274.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N6 -->
+<g id="node6" class="node">
+<title>N6</title>
+<polygon fill="none" stroke="#000000" points="179.5,-109 80.5,-109 80.5,-73 179.5,-73 179.5,-109"/>
+<text text-anchor="middle" x="130" y="-87.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">substring()</text>
+</g>
+<!-- N2&#45;&gt;N6 -->
+<g id="edge4" class="edge">
+<title>N2&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M195.0166,-322.8274C201.3258,-310.7139 208,-294.1913 208,-278.5 208,-278.5 208,-278.5 208,-153.5 208,-137.118 197.3924,-124.3189 184.0009,-114.6879"/>
+<polygon fill="#000000" stroke="#000000" points="185.6684,-111.5979 175.3729,-109.097 181.8617,-117.4724 185.6684,-111.5979"/>
+<text text-anchor="middle" x="227" y="-212.3" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N3 -->
+<g id="node3" class="node">
+<title>N3</title>
+<polygon fill="none" stroke="#000000" points="104,-359 50,-359 50,-323 104,-323 104,-359"/>
+<text text-anchor="middle" x="77" y="-337.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">&#39; &#39;</text>
+</g>
+<!-- N3&#45;&gt;N4 -->
+<g id="edge3" class="edge">
+<title>N3&#45;&gt;N4</title>
+<path fill="none" stroke="#000000" d="M78.5297,-322.8344C80.2411,-308.3271 83.7865,-287.7294 91,-271 95.3103,-261.0035 101.6359,-251.0116 107.9437,-242.3401"/>
+<polygon fill="#000000" stroke="#000000" points="110.8998,-244.2351 114.1702,-234.1576 105.3292,-239.9961 110.8998,-244.2351"/>
+<text text-anchor="middle" x="110" y="-274.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N4&#45;&gt;N6 -->
+<g id="edge6" class="edge">
+<title>N4&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M130,-197.8239C130,-177.2723 130,-143.5472 130,-119.4893"/>
+<polygon fill="#000000" stroke="#000000" points="133.5001,-119.198 130,-109.198 126.5001,-119.198 133.5001,-119.198"/>
+<text text-anchor="middle" x="149" y="-149.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg1</text>
+</g>
+<!-- N5 -->
+<g id="node5" class="node">
+<title>N5</title>
+<polygon fill="none" stroke="#000000" points="70,-234 16,-234 16,-198 70,-198 70,-234"/>
+<text text-anchor="middle" x="43" y="-212.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">0</text>
+</g>
+<!-- N5&#45;&gt;N6 -->
+<g id="edge5" class="edge">
+<title>N5&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M54.0754,-197.8986C62.9531,-183.6074 75.8861,-163.2677 88,-146 94.7619,-136.3613 102.5016,-126.0422 109.4796,-116.9762"/>
+<polygon fill="#000000" stroke="#000000" points="112.2585,-119.1041 115.6239,-109.058 106.7282,-114.8127 112.2585,-119.1041"/>
+<text text-anchor="middle" x="107" y="-149.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N7 -->
+<g id="node7" class="node">
+<title>N7</title>
+<polygon fill="none" stroke="#000000" points="161,-36 99,-36 99,0 161,0 161,-36"/>
+<text text-anchor="middle" x="130" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">return</text>
+</g>
+<!-- N6&#45;&gt;N7 -->
+<g id="edge7" class="edge">
+<title>N6&#45;&gt;N7</title>
+<path fill="none" stroke="#000000" d="M130,-72.9551C130,-64.8828 130,-55.1764 130,-46.1817"/>
+<polygon fill="#000000" stroke="#000000" points="133.5001,-46.0903 130,-36.0904 126.5001,-46.0904 133.5001,-46.0903"/>
+</g>
+</g>
+</svg>
+</div>
+<ul>
+<li> グラフ中の <code><mark>readLine()</mark></code> からたどったノードをデータパスとする:
+<ul>
+  <li> <code><mark>readLine()</mark></code> - <code>#this:indexOf()</code> - <code>#arg1:substring()</code> - <code>return</code>
+  <li> <code><mark>readLine()</mark></code> - <code>#this:substring()</code> - <code>return</code>
+</ul>
+<li> これは <code>readLine()</code> の返り値がどのように使われたかを示している。
+</ul>
+</div>
+
+<div class=page>
+<h2>Interprocedural 化する</h2>
+<div class=figure>
+<blockquote><pre>
+private BufferedReader fp;
+
+public String get() {
+    String s = null;
+    s = <mark>fp.readLine()</mark>;
+    int i = s.indexOf(' ');
+    return s.substring(0, i);
+}
+
+void show() {
+    String x = <mark>get()</mark>;
+    System.out.println(x+"!!");
+}
+</pre></blockquote>
+</div>
+<p>
+グラフ化するとこうなる:
+<div class=figure>
+<!-- Title: A Pages: 1 -->
+<svg width="301pt" height="797pt"
+ viewBox="0.00 0.00 300.79 797.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 793)">
+<title>A</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-793 296.7947,-793 296.7947,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_a</title>
+<polygon fill="none" stroke="#000000" points="8,-387 8,-712 254,-712 254,-387 8,-387"/>
+<text text-anchor="middle" x="131" y="-696.8" font-family="Times,serif" font-size="14.00" fill="#000000">get()</text>
+</g>
+<g id="clust2" class="cluster">
+<title>cluster_b</title>
+<polygon fill="none" stroke="#000000" points="23,-8 23,-368 165,-368 165,-8 23,-8"/>
+<text text-anchor="middle" x="94" y="-352.8" font-family="Times,serif" font-size="14.00" fill="#000000">show()</text>
+</g>
+<!-- N1 -->
+<g id="node1" class="node">
+<title>N1</title>
+<ellipse fill="none" stroke="#000000" cx="184" cy="-771" rx="27" ry="18"/>
+<text text-anchor="middle" x="184" y="-767.3" font-family="Times,serif" font-size="14.00" fill="#000000">fp</text>
+</g>
+<!-- N2 -->
+<g id="node2" class="node">
+<title>N2</title>
+<polygon fill="yellow" stroke="#000000" points="230,-681 138,-681 138,-645 230,-645 230,-681"/>
+<text text-anchor="middle" x="184" y="-659.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">readLine()</text>
+</g>
+<!-- N1&#45;&gt;N2 -->
+<g id="edge1" class="edge">
+<title>N1&#45;&gt;N2</title>
+<path fill="none" stroke="#000000" d="M184,-752.6793C184,-735.821 184,-710.5651 184,-691.147"/>
+<polygon fill="#000000" stroke="#000000" points="187.5001,-691.0501 184,-681.0502 180.5001,-691.0502 187.5001,-691.0501"/>
+<text text-anchor="middle" x="203" y="-723.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N4 -->
+<g id="node4" class="node">
+<title>N4</title>
+<polygon fill="none" stroke="#000000" points="172,-556 88,-556 88,-520 172,-520 172,-556"/>
+<text text-anchor="middle" x="130" y="-534.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">indexOf()</text>
+</g>
+<!-- N2&#45;&gt;N4 -->
+<g id="edge2" class="edge">
+<title>N2&#45;&gt;N4</title>
+<path fill="none" stroke="#000000" d="M176.1479,-644.8239C167.1497,-623.9946 152.3056,-589.6333 141.8884,-565.5193"/>
+<polygon fill="#000000" stroke="#000000" points="145.0404,-563.99 137.8615,-556.198 138.6144,-566.7661 145.0404,-563.99"/>
+<text text-anchor="middle" x="178" y="-596.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N6 -->
+<g id="node6" class="node">
+<title>N6</title>
+<polygon fill="none" stroke="#000000" points="179.5,-431 80.5,-431 80.5,-395 179.5,-395 179.5,-431"/>
+<text text-anchor="middle" x="130" y="-409.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">substring()</text>
+</g>
+<!-- N2&#45;&gt;N6 -->
+<g id="edge4" class="edge">
+<title>N2&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M195.0166,-644.8274C201.3258,-632.7139 208,-616.1913 208,-600.5 208,-600.5 208,-600.5 208,-475.5 208,-459.118 197.3924,-446.3189 184.0009,-436.6879"/>
+<polygon fill="#000000" stroke="#000000" points="185.6684,-433.5979 175.3729,-431.097 181.8617,-439.4724 185.6684,-433.5979"/>
+<text text-anchor="middle" x="227" y="-534.3" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N3 -->
+<g id="node3" class="node">
+<title>N3</title>
+<polygon fill="none" stroke="#000000" points="104,-681 50,-681 50,-645 104,-645 104,-681"/>
+<text text-anchor="middle" x="77" y="-659.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">&#39; &#39;</text>
+</g>
+<!-- N3&#45;&gt;N4 -->
+<g id="edge3" class="edge">
+<title>N3&#45;&gt;N4</title>
+<path fill="none" stroke="#000000" d="M78.5297,-644.8344C80.2411,-630.3271 83.7865,-609.7294 91,-593 95.3103,-583.0035 101.6359,-573.0116 107.9437,-564.3401"/>
+<polygon fill="#000000" stroke="#000000" points="110.8998,-566.2351 114.1702,-556.1576 105.3292,-561.9961 110.8998,-566.2351"/>
+<text text-anchor="middle" x="110" y="-596.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N4&#45;&gt;N6 -->
+<g id="edge6" class="edge">
+<title>N4&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M130,-519.8239C130,-499.2723 130,-465.5472 130,-441.4893"/>
+<polygon fill="#000000" stroke="#000000" points="133.5001,-441.198 130,-431.198 126.5001,-441.198 133.5001,-441.198"/>
+<text text-anchor="middle" x="149" y="-471.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg1</text>
+</g>
+<!-- N5 -->
+<g id="node5" class="node">
+<title>N5</title>
+<polygon fill="none" stroke="#000000" points="70,-556 16,-556 16,-520 70,-520 70,-556"/>
+<text text-anchor="middle" x="43" y="-534.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">0</text>
+</g>
+<!-- N5&#45;&gt;N6 -->
+<g id="edge5" class="edge">
+<title>N5&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M54.0754,-519.8986C62.9531,-505.6074 75.8861,-485.2677 88,-468 94.7619,-458.3613 102.5016,-448.0422 109.4796,-438.9762"/>
+<polygon fill="#000000" stroke="#000000" points="112.2585,-441.1041 115.6239,-431.058 106.7282,-436.8127 112.2585,-441.1041"/>
+<text text-anchor="middle" x="107" y="-471.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N9 -->
+<g id="node7" class="node">
+<title>N9</title>
+<polygon fill="yellow" stroke="#000000" points="157,-337 103,-337 103,-301 157,-301 157,-337"/>
+<text text-anchor="middle" x="130" y="-315.3" font-family="Courier,monospace" font-size="14.00" fill="gray">get()</text>
+</g>
+<!-- N6&#45;&gt;N9 -->
+<g id="edge7" class="edge">
+<title>N6&#45;&gt;N9</title>
+<path fill="none" stroke="#000000" d="M130,-394.8759C130,-381.3516 130,-362.6192 130,-347.1514"/>
+<polygon fill="#000000" stroke="#000000" points="133.5001,-347.0685 130,-337.0685 126.5001,-347.0685 133.5001,-347.0685"/>
+</g>
+<!-- N11 -->
+<g id="node10" class="node">
+<title>N11</title>
+<polygon fill="none" stroke="#000000" points="142,-212 88,-212 88,-176 142,-176 142,-212"/>
+<text text-anchor="middle" x="115" y="-190.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">+</text>
+</g>
+<!-- N9&#45;&gt;N11 -->
+<g id="edge8" class="edge">
+<title>N9&#45;&gt;N11</title>
+<path fill="none" stroke="#000000" d="M127.8189,-300.8239C125.3416,-280.1798 121.2692,-246.2431 118.3798,-222.1648"/>
+<polygon fill="#000000" stroke="#000000" points="121.8504,-221.7097 117.1838,-212.198 114.9002,-222.5438 121.8504,-221.7097"/>
+<text text-anchor="middle" x="127" y="-252.8" font-family="Times,serif" font-size="14.00" fill="#000000">L</text>
+</g>
+<!-- N8 -->
+<g id="node8" class="node">
+<title>N8</title>
+<ellipse fill="none" stroke="#000000" cx="233" cy="-121" rx="59.5901" ry="18"/>
+<text text-anchor="middle" x="233" y="-117.3" font-family="Times,serif" font-size="14.00" fill="#000000">System.out</text>
+</g>
+<!-- N12 -->
+<g id="node11" class="node">
+<title>N12</title>
+<polygon fill="none" stroke="#000000" points="157,-52 73,-52 73,-16 157,-16 157,-52"/>
+<text text-anchor="middle" x="115" y="-30.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">println()</text>
+</g>
+<!-- N8&#45;&gt;N12 -->
+<g id="edge11" class="edge">
+<title>N8&#45;&gt;N12</title>
+<path fill="none" stroke="#000000" d="M210.2484,-104.2255C192.5512,-91.1776 167.7499,-72.8919 147.8916,-58.2506"/>
+<polygon fill="#000000" stroke="#000000" points="149.8446,-55.3421 139.7187,-52.2248 145.6905,-60.9763 149.8446,-55.3421"/>
+<text text-anchor="middle" x="200" y="-73.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N10 -->
+<g id="node9" class="node">
+<title>N10</title>
+<polygon fill="none" stroke="#000000" points="85,-337 31,-337 31,-301 85,-301 85,-337"/>
+<text text-anchor="middle" x="58" y="-315.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">!!</text>
+</g>
+<!-- N10&#45;&gt;N11 -->
+<g id="edge9" class="edge">
+<title>N10&#45;&gt;N11</title>
+<path fill="none" stroke="#000000" d="M66.2883,-300.8239C75.7865,-279.9946 91.4552,-245.6333 102.4512,-221.5193"/>
+<polygon fill="#000000" stroke="#000000" points="105.7372,-222.7489 106.7017,-212.198 99.3681,-219.8445 105.7372,-222.7489"/>
+<text text-anchor="middle" x="93" y="-252.8" font-family="Times,serif" font-size="14.00" fill="#000000">R</text>
+</g>
+<!-- N11&#45;&gt;N12 -->
+<g id="edge10" class="edge">
+<title>N11&#45;&gt;N12</title>
+<path fill="none" stroke="#000000" d="M115,-175.957C115,-148.3487 115,-95.3746 115,-62.5255"/>
+<polygon fill="#000000" stroke="#000000" points="118.5001,-62.2225 115,-52.2226 111.5001,-62.2226 118.5001,-62.2225"/>
+<text text-anchor="middle" x="134" y="-117.3" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+</g>
+</svg>
+</div>
+<ul>
+<li> ここから得られる <code>readLine()</code> のデータパスは:
+<ul>
+  <li> <code><mark>readLine()</mark></code> - <code>#this:indexOf()</code> - <code>#arg1:substring()</code> - <code>L:+</code> - <code class=bl>#arg0:println()</code>
+  <li> <code><mark>readLine()</mark></code> - <code>#this:substring()</code> - <code>L:+</code> - <code class=bl>#arg0:println()</code>
+</ul>
+<li> 以上2つの順列が、このプログラムにおける「<code>readLine()</code>の使い方」ということになる。
+<ul>
+  <li> 単純化のため、いまのところメソッドの返り値のみを使う。
+  <li> グラフ上の分岐は考慮せず、一本のパスのみを扱う。
+</ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>データパスを収集する</h1>
+<ul>
+  <li> フローグラフ抽出器 <a href="https://github.com/euske/fgyama/">FGyama</a> を利用する。
+  <li> Java ソースコードから前出のようなグラフを生成する。
+    <ul>
+      <li> 問. 上のグラフで...
+        <ol>
+          <li> Flow sensitivity が必要な箇所はどこか。
+          <li> Context sensitivity が必要な箇所はどこか。
+          <li> Field sensitivity が必要な箇所はどこか。
+        </ol>
+    </ul>
+  <li> グラフをデータパスに変換する。
+</ul>
+</div>
+
+<div class=page>
+<h2>ソースコード解析のいいところ</h2>
+<ul>
+  <li> なるべくプログラマの意図を残しておける。
+  <li> コンパイルの過程で消される部分も使える:
+    <ul>
+      <li> コメント
+      <li> 最適化でなくなる変数:
+<pre>
+<mark>const int a = 3;</mark>
+int b = a + 1;
+</pre>
+    </ul>
+  <li> バイナリでは同一になる部分も区別できる:
+    <ul>
+      <li> Java の type erasure による同一化:
+        <ul>
+          <li> <code>List&lt;Integer&gt;.add()</code>
+          <li> <code>List&lt;String&gt;.add()</code>
+        </ul>
+      <li> Calling context によってメソッドの区別, etc.
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h1>メソッドをクラスタリングする</h1>
+<ul>
+  <li> 各メソッドのデータパスをその「素性」とする。
+  <li> 同じ素性をもつメソッドをグループ化。
+  <li> 素性の順列の現れる確率に応じてランキング。
+    <div class=ex>
+      P = p<sub>0</sub>(s<sub>0</sub>) × p<sub>1</sub>(s<sub>1</sub>) × ... × p<sub>n</sub>(s<sub>n</sub>)<br>
+      (確率が低いものが一致するほどよい)
+    </div>
+</ul>
+</div>
+
+<div class=page>
+<h1>評価実験</h1>
+<ul>
+  <li> RQ: あるメソッド呼び出しの<u>使われ方</u> (=文脈) が類似していれば、
+    そのメソッドは類似した<u>機能</u> (=意味) をもっているのではないか?
+  <li> 評価方法: データパスによってクラスタリングしたメソッドが、
+    実際に機能的に類似しているかどうかを検査する。
+  <li> 実際の評価は人手で作成したデータをもとに行う:
+    <ul>
+      <li> 100件程度のメソッドを目で見てグループ化する。
+      <li> 権藤先生と荒堀さんにもオネガイする。
+    </ul>
+</ul>
+</div>
+
+<div class=page>
+<h2>機能的クローンの評価基準</h2>
+<ul>
+<li> 2つのメソッド A, B に対して:
+<ol>
+  <li> A と B が完全に同じ。
+  <li> 条件分岐によって A または B が使われる。
+<pre>
+x = (c)? A() : B();
+</pre>
+  <li> 一方が他方を継承したメソッドである。
+  <li> 一方の機能を使って、他方の機能を実現可能。
+  <li> 一方と他方の機能が正反対 (相補的) である。
+  <li> 同じ型を対象とした処理である。
+</ol>
+</ul>
+</div>
+
+<div class=page>
+<h2>比較実験 (予定)</h2>
+<ul>
+  <li> 別の手法によって機能的クローンを発見し、精度を比較する:
+    <ol type=a>
+      <li> メソッド名による比較。<br>
+        (似た名前であれば機能的に似てるだろう)
+      <li> メソッドのコード自身による比較。<br>
+        (似たコードであれば機能的に似てるだろう)<br>
+        [トークン + ベクトル類似度]
+    </ol>
+  <li> (期待する) 本手法の有利な点:
+    <ol type=a>
+      <li> 名前がまったく違っていても比較できる。
+      <li> そのメソッド自身のコードが存在しなくても比較できる。
+    </ol>
+</ul>
+</div>
+
+<div class=page>
+<h2>実験対象</h2>
+<p>
+以下のソースコードからデータパスを抽出した:
+<div class=figure>
+<table border class=ttt align=center>
+<tr><th>プロジェクト</th><th>SLOC</th><th>メソッド</th><th>ノード</th></tr>
+<tr><td>xz-1.8</td><td align=right>6,864</td><td align=right>747</td><td align=right>54,170</td></tr>
+<tr><td>jhotdraw-5.3</td><td align=right>14,611</td><td align=right>2,269</td><td align=right>66,508</td></tr>
+<tr><td>antlr4-4.7.2</td><td align=right>31,122</td><td align=right>2,206</td><td align=right>78,362</td></tr>
+<tr><td>jedit-5.3.2</td><td align=right>116,416</td><td align=right>-</td><td align=right>-</td></tr>
+<tr><td>tomcat-8.5.33</td><td align=right>235,009</td><td align=right>21,954</td><td align=right>1,443,730</td></tr>
+</table>
+</div>
+<p>
+このほかの予定検体:
+ant, junit, weka, javaassist, pmd
+</div>
+
+<div class=page>
+<h2>これまでの結果</h2>
+<ul>
+  <li> ひとつのプロジェクト内での機能的クローン:<br>
+    そこそこよい:
+    <a href="xz.html">xz</a>,
+    <a href="tomcat.html">tomcat</a>,
+    <a href="jhotdraw.html">jhotdraw</a>.<br>
+  <li> 異なるプロジェクト間での機能的クローン:<br>
+    ぜんぜんダメ:
+    <a href="combo.html">3種混合</a>.
+</ul>
+</div>
+
+<div class=page>
+<h2>結果が悪い原因</h2>
+<ul>
+  <li> そもそもクローンが存在しないのでは?
+  <li> 抽出プログラムにバグがあるのでは? (大アリ)
+  <li> 一本のデータパスだけを素性として考慮するのでは弱い
+    (複数のデータパスだけを同時に考慮する必要がある) かもしれない。
+</ul>
+</div>
+
+<div class=page>
+<h1>将来の計画</h1>
+<ul>
+<li> 現在はメソッドのデータパスだけだが、
+  フィールドのデータパスも収集し比較する:
+  <ul>
+    <li> → 「似たような意味をもつ異なるフィールド」を発見できるようにする。
+  </ul>
+<li> データパスは逆方向にたどることもできる。
+  メソッドへの入力 (引数) をたどっていくと、何がわかるのか?
+</ul>
+</div>
+
+<div class=page>
+<h2>すぐやること</h2>
+<ul>
+  <li> 論文誌に投稿する:<br>
+    <a href="http://www.ieice.org/eng/s_issue/cfp/2019_12ED_2.pdf">IECIE CFP</a>,
+    8ページ (2019/2/28 JST 締め切り)
+  <li> FGyama のバグ修正。
+  <li> 比較手法 (名前、トークン) の実装。
+  <li> 評価システムの構築および評価。
+    <ul>
+      <li> 定量的な評価基準の構築。(おそらく Fleiss' Kappa)
+    </ul>
+</ul>
+</div>

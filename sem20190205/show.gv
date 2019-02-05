@@ -1,0 +1,30 @@
+digraph "A" {
+ N1 [label="fp"];
+ subgraph "cluster_a" {
+  label="get()";
+  N2 [shape="box", fontname="courier", label="readLine()"];
+  N3 [shape="box", fontname="courier", label="' '"];
+  N4 [shape="box", fontname="courier", label="indexOf()"];
+  N5 [shape="box", fontname="courier", label="0"];
+  N6 [shape="box", fontname="courier", label="substring()"];
+ }
+ N1 -> N2 [label="#this"];
+ N2 -> N4 [label="#this"];
+ N3 -> N4 [label="#arg0"];
+ N2 -> N6 [label="#this"];
+ N5 -> N6 [label="#arg0"];
+ N4 -> N6 [label="#arg1"];
+ N6 -> N9 [];
+ N8 [label="System.out"];
+ subgraph "cluster_b" {
+  label="show()";
+  N9 [shape="box", fontname="courier", label="get()"];
+  N10 [shape="box", fontname="courier", label="!!"];
+  N11 [shape="box", fontname="courier", label="+"];
+  N12 [shape="box", fontname="courier", label="println()"];
+ }
+ N9 -> N11 [label="L"];
+ N10 -> N11 [label="R"];
+ N11 -> N12 [label="#arg0"];
+ N8 -> N12 [label="#this"];
+}

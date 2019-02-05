@@ -1,0 +1,32 @@
+body { margin: 0; }
+
+@media print {
+    .page { height: 100%; margin: 0; padding: 0; }
+    .fill { width: 100%; height: 100%; }
+}
+@media screen {
+    .page { margin: 1em; padding: 2em; border: 1px solid gray; }
+    .fill { height: 15em; }
+}
+.page { position: relative; }
+.fill td { font-size: 150%; }
+.bottomright { position: absolute; bottom: 0em; right: 0em; text-align: right; }
+.bottomleft { position: absolute; bottom: 0em; left: 0em; }
+.topleft { position: absolute; top: 1em; left: 1em; }
+
+.page > h1 { font-size: 400%; margin: 0 0 0.5em 0; padding: 0.2em; background: #8888ff; }
+.page > h2 { font-size: 350%; margin: 0 0 0.5em 0; padding: 0.2em; border-bottom: solid 0.1em #000080; }
+.page > h3 { font-size: 300%; margin: 0.5em 0 0.2em 0; padding: 0.2em; border-bottom: solid 2px #000080; }
+.page > table { font-size: 300%; font-weight: bold; }
+.page > div { font-size: 250%; font-weight: bold; margin: 0.5em 1em 0.5em 1em; line-height: 150%; }
+.page > ul { font-size: 250%; font-weight: bold; margin: 0.2em 1em 0.2em 1em; }
+.page > ol { font-size: 250%; font-weight: bold; margin: 0.2em 1em 0.2em 1em; }
+.page > dl { font-size: 250%; font-weight: bold; margin: 0.2em 1em 0.2em 1em; }
+.page > p { font-size: 250%; font-weight: bold; margin: 1em 1em; }
+.page > blockquote { font-size: 250%; font-weight: bold; margin: 0.5em 0.5em; }
+
+li { line-height: 150%; }
+dt { line-height: 120%; margin-top: 0.5em; margin-bottom: 0.5em; }
+dd { line-height: 120%; }
+pre { line-height: 120%; margin: 0.5em; font-family: monospace; text-align: left; }
+table { border-collapse: collapse; }
