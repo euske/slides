@@ -3,7 +3,7 @@
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="./slides.css">
-<title>権藤研 輪講資料 2019/02/05 新山 (研究進捗報告 - データパスを用いた機能的クローンの発見)</title>
+<title>権藤研 輪講資料 2019/04/09 新山 (研究進捗報告 - データフローを用いたプログラムの文書化)</title>
 <style><!--
 kbd { border: 1px solid black; padding: 4px; margin: 4px; }
 .comment { color: #008800; }
@@ -36,12 +36,12 @@ function doit() {
 <div class=page>
 <table align=center class=fill>
 <tr><td align=center valign=center style="height:4em;">研究進捗報告:<br>
-"データパスを用いた<br>
-機能的クローンの発見" (仮題)
+"データフローを用いた<br>
+プログラムの文書化"
 </td></tr>
 </table>
 <div class=bottomright style="line-height:1.2;" align=right>新山 祐介<br>
-2019年2月5日
+2019年4月9日
 </div>
 <div class=bottomleft>
 <a href="https://euske.github.io/">https://euske.github.io/</a>
@@ -51,8 +51,18 @@ function doit() {
 <div class=page>
 <h1>一枚だけで概要説明</h1>
 <ul>
-<li> RQ: コードの意味は、
-  その処理自体だけでなく利用方法によっても規定されるのではないか?
+<li> 大目標: <u>コードの理解</u>を促進することにより
+  大規模ソフトウェアの開発を支援する。ex. 文書自動生成
+<ul>
+  <li> 直接バグを発見するのが目的ではない。
+</ul>
+<li> RQ: プログラムの「意味」とは何か?
+<ul>
+  <li> この質問は広すぎるので、とりあえず「変数の意味」に絞る。
+    ex. <a href="https://github.com/torvalds/linux/blob/master/kernel/sched/core.c#L5779">この変数 cpu の意味は何か?</a>
+</ul>
+<li> データの<u>流れ</u>を詳細に検査することで
+  意味を推測できるのでは?
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -70,109 +80,17 @@ function doit() {
   </g>
 </svg>
 </div>
-<li> 様々なメソッド呼び出しにおける周辺の<u>データパス</u>を
-  取得・解析してみよう。
-<li> あるメソッドから出る2つのパスが類似していれば、
-  それらのメソッドは意味的に
-  類似しているのでは? (機能的クローン)
 </ul>
 </div>
 
 <div class=page>
-<h1>機能的クローンとは何か?</h1>
+<h1>変数・関数の使われ方 = データパス</h1>
 <ul>
-<li> 機能的クローン = (ほぼ) 等価な機能をもつ異なるコード。
-<blockquote><pre>
-int max(x, y)
-{
-    return (x &lt; y)? y : x;
-}
-</pre></blockquote>
-<blockquote><pre>
-int max(x, y)
-{
-   if (x &lt; y) {
-      x = y;
-   }
-   return x;
-}
-</pre></blockquote>
-</ul>
-
-</div>
-
-<div class=page>
-<h2>比喩による例 (1)</h2>
-<p>
-問. つぎの<span class=bl>資格</span>を埋めなさい。
-<div class=ex>
-<ol type=a>
-<li> 「<span class=red>おにぎり</span>を買いにコンビニへ出かけた」
-<li> 「<span class=bl>洗剤　　</span>を買いにコンビニへ出かけた」
-</ol>
-</div>
-</div>
-
-<div class=page>
-<h2>比喩による例 (2)</h2>
-<p>
-問. つぎの<span class=bl>資格</span>を埋めなさい。
-<div class=ex>
-<ol type=a>
-<li> 「腹がへったので<span class=red>おにぎり</span>を買いにコンビニへ出かけた」
-<li> 「腹がへったので<span class=bl>ラーメン</span>を買いにコンビニへ出かけた」
-</ol>
-</div>
-</div>
-
-<div class=page>
-<h2>比喩による例 (3)</h2>
-<p>
-問. つぎの<span class=bl>資格</span>を埋めなさい。
-<div class=ex>
-<ol type=a>
-<li> 「腹がへったので<span class=red>赤いきつね</span>を買いにコンビニへ出かけたが、
-  ポットのお湯がなかった」
-<li> 「腹がへったので<span class=bl>どん兵衛　</span>を買いにコンビニへ出かけたが、
-  ポットのお湯がなかった」
-</ol>
-</div>
-<p>
-観察: 文脈が長くなるほど、単語の意味は類似してくる。
-</div>
-
-<div class=page>
-<h2>比喩による例 (4)</h2>
-<p>
-<div class=ex>
-<ol type=a>
-<li> 「売れ残った大量の <span class=red>zxmqtg</span> を家畜のエサにした」
-<li> 「売れ残った大量の <span class=red>pfkrjw</span> を家畜のエサにした」
-</ol>
-</div>
-<p>
-単語が何を指しているかは不明でも、
-<u>似たようなものだろう</u>ということは推測できる。
-</div>
-
-<div class=page>
-<h1>基本的なアイデア</h1>
-<ul>
-<li> RQ: あるメソッド呼び出しの<u>使われ方</u> (=文脈) が類似していれば、
-  そのメソッドは類似した<u>機能</u> (=意味) をもっているのではないか?
-  <ul>
-    <li> Let's find out!
-  </ul>
-</ul>
-</div>
-
-<div class=page>
-<h1>メソッドの使われ方 = データパス</h1>
-<ul>
-<li> ここでは、あるメソッドの返り値が通る一連の処理を、
-  そのメソッドの「使われ方」と定義する。
+<li> ここでは、ある変数に代入される値が通る一連の処理
+  (または関数の引数および返り値が通る処理) を、
+  その変数・関数の「<u>データパス</u>」と定義する。
 <li> 「データフロー解析」というと既存の手法と誤解されそうなので、
-  <u>データパス</u>という単語を用いた。
+  データパスという単語を用いた。
 </ul>
 </div>
 
@@ -519,7 +437,8 @@ void show() {
           <li> Field sensitivity が必要な箇所はどこか。
         </ol>
     </ul>
-  <li> グラフをデータパスに変換する。
+  <li> グラフをデータパスに変換する。<br>
+    この後、いろいろな分析(?)をおこなう。
 </ul>
 </div>
 
@@ -549,114 +468,16 @@ int b = a + 1;
 </div>
 
 <div class=page>
-<h1>メソッドをクラスタリングする</h1>
-<ul>
-  <li> 各メソッドのデータパスをその「素性」とする。
-  <li> 同じ素性をもつメソッドをグループ化。
-  <li> 素性の順列の現れる確率に応じてランキング。
-    <div class=ex>
-      P = p<sub>0</sub>(s<sub>0</sub>) × p<sub>1</sub>(s<sub>1</sub>) × ... × p<sub>n</sub>(s<sub>n</sub>)<br>
-      (確率が低いものが一致するほどよい)
-    </div>
-</ul>
-</div>
-
-<div class=page>
-<h1>評価実験</h1>
-<ul>
-  <li> RQ: あるメソッド呼び出しの<u>使われ方</u> (=文脈) が類似していれば、
-    そのメソッドは類似した<u>機能</u> (=意味) をもっているのではないか?
-  <li> 評価方法: データパスによってクラスタリングしたメソッドが、
-    実際に機能的に類似しているかどうかを検査する。
-  <li> 実際の評価は人手で作成したデータをもとに行う:
-    <ul>
-      <li> 100件程度のメソッドを目で見てグループ化する。
-      <li> 権藤先生と荒堀さんにもオネガイする。
-    </ul>
-</ul>
-</div>
-
-<div class=page>
-<h2>機能的クローンの評価基準</h2>
-<ul>
-<li> 2つのメソッド A, B に対して:
-<ol>
-  <li> A と B が完全に同じ。
-  <li> 条件分岐によって A または B が使われる。
-<pre>
-x = (c)? A() : B();
-</pre>
-  <li> 一方が他方を継承したメソッドである。
-  <li> 一方の機能を使って、他方の機能を実現可能。
-  <li> 一方と他方の機能が正反対 (相補的) である。
-  <li> 同じ型を対象とした処理である。
-</ol>
-</ul>
-</div>
-
-<div class=page>
-<h2>比較実験 (予定)</h2>
-<ul>
-  <li> 別の手法によって機能的クローンを発見し、精度を比較する:
-    <ol type=a>
-      <li> メソッド名による比較。<br>
-        (似た名前であれば機能的に似てるだろう)
-      <li> メソッドのコード自身による比較。<br>
-        (似たコードであれば機能的に似てるだろう)<br>
-        [トークン + ベクトル類似度]
-    </ol>
-  <li> (期待する) 本手法の有利な点:
-    <ol type=a>
-      <li> 名前がまったく違っていても比較できる。
-      <li> そのメソッド自身のコードは存在しなくても比較できる。
-      <li> データパスの強度によって、類似度のようなものを計算可能。
-    </ol>
-</ul>
-</div>
-
-<div class=page>
-<h2>実験対象</h2>
-<p>
-以下のソースコードからデータパスを抽出した:
-<div class=figure>
-<table border class=ttt align=center>
-<tr><th>プロジェクト</th><th>SLOC</th><th>メソッド</th><th>ノード</th></tr>
-<tr><td>xz-1.8</td><td align=right>6,864</td><td align=right>747</td><td align=right>54,170</td></tr>
-<tr><td>jhotdraw-5.3</td><td align=right>14,611</td><td align=right>2,269</td><td align=right>66,508</td></tr>
-<tr><td>antlr4-4.7.2</td><td align=right>31,122</td><td align=right>2,206</td><td align=right>78,362</td></tr>
-<tr><td>jedit-5.3.2</td><td align=right>116,416</td><td align=right>-</td><td align=right>-</td></tr>
-<tr><td>tomcat-8.5.33</td><td align=right>235,009</td><td align=right>21,954</td><td align=right>1,443,730</td></tr>
-</table>
-</div>
-<p>
-このほかの予定検体:
-ant, junit, weka, javaassist, pmd
-</div>
-
-<div class=page>
 <h2>これまでの結果</h2>
 <ul>
-  <li> ひとつのプロジェクト内での機能的クローン:<br>
-    そこそこよい:
-    <a href="xz.html">xz</a>,
-    <a href="tomcat.html">tomcat</a>,
-    <a href="jhotdraw.html">jhotdraw</a>.<br>
-  <li> 異なるプロジェクト間での機能的クローン:<br>
-    ぜんぜんダメ:
-    <a href="combo.html">3種混合</a>.
-</ul>
-</div>
-
-<div class=page>
-<h2>結果が悪い原因</h2>
-<ul>
-  <li> そもそもクローンが存在しないのでは?
-  <li> 抽出プログラムにバグがあるのでは? (大アリ)
-  <li> 一本のデータパスだけを素性として考慮するのでは弱い
-    (複数のデータパスだけを同時に考慮する必要がある) かもしれない。
-    <ul>
-      <li> データパスを階層的にマッチングさせる手もある。
-    </ul>
+  <li> 関数の機能的クローンを発見するために
+    データパスを利用。
+    (ジャーナル論文投稿済)
+  <li> 類似した意味のフィールド (メンバ変数) も
+    同様の方法で発見できることが判明。
+  <li> プログラム中のコメントを分析し
+    コード・変数の説明部分を抜き出すことに成功。
+    (APSEC2018論文)
 </ul>
 </div>
 
@@ -670,20 +491,5 @@ ant, junit, weka, javaassist, pmd
   </ul>
 <li> データパスは逆方向にたどることもできる。
   メソッドへの入力 (引数) をたどっていくと、何がわかるのか?
-</ul>
-</div>
-
-<div class=page>
-<h2>すぐやること</h2>
-<ul>
-  <li> 論文誌に投稿する:<br>
-    <a href="http://www.ieice.org/eng/s_issue/cfp/2019_12ED_2.pdf">IEICE CFP</a>,
-    8ページ (2019/2/28 JST 締め切り)
-  <li> FGyama のバグ修正。
-  <li> 比較手法 (名前、トークン) の実装。
-  <li> 評価システムの構築および評価。
-    <ul>
-      <li> 定量的な評価基準の構築。(おそらく Fleiss' Kappa)
-    </ul>
 </ul>
 </div>
