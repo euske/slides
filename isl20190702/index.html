@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<html>
+<head>
+<title>権藤研 輪講資料 2019/07/02 新山 (An Introduction to Statistical Learning, 4.1節〜4.4節)</title>
+<style><!--
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+code { font-weight: bold; color: purple; }
+.h { text-align: right; }
+.q { border: 2px solid black; padding: 1em; margin: 1em; background: #ff8; }
+.figure { border: 1px solid black; text-align: center; padding: 0.5em; margin: 0.5em; }
+.exp { border: 1px solid black; padding: 1em; margin: 1em; }
+.exp strong { color: blue; }
+pre { border: 1px solid black; padding: 0.3em; }
+--></style>
+<script>
+function doit() {
+    if (document.baseURI.startsWith("file:")) {
+        for (e of document.getElementsByClassName("offline")) {
+            if (e.tagName == "IMG") {
+                let i = e.src.lastIndexOf("/");
+                let src = "./"+e.src.substr(i+1);
+                console.log("offline: "+e.src+" -> "+src);
+                e.src = src;
+            }
+        }
+    }
+}
+</script>
+<script>
+var lpoly;
+var lparams;
+var lcost;
+var lpts0 = [];
+var lpts1 = [];
+function grandom() {
+    return ((Math.random()*2-1)+(Math.random()*2-1)+
+            (Math.random()*2-1)+(Math.random()*2-1))/4;
+}
+function logit(a, b, v) {
+    return 1.0 / (1.0+Math.exp(a + b*v));
+}
+function makesvg(tag, stroke, fill) {
+    let e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    e.setAttribute("stroke", stroke);
+    e.setAttribute("fill", fill);
+    return e;
+}
+function makedot(color, x, y) {
+    var circle = makesvg("circle", "black", color);
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", 5);
+    return circle;
+}
+function linit() {
+    var lsvg = document.getElementById("lsvg");
+    var axis = makesvg("path", "black", "none");
+    axis.setAttribute("d", "M0,0 l200,0 M0,100 l200,0");
+    lsvg.appendChild(axis);
+    lpoly = makesvg("polyline", "black", "none");
+    lsvg.appendChild(lpoly);
+    lparams = makesvg("text", "none", "black");
+    lparams.setAttribute("x", "50");
+    lparams.setAttribute("y", "20");
+    lparams.setAttribute("text-anchor", "middle");
+    lsvg.appendChild(lparams);
+    lcost = makesvg("text", "none", "black");
+    lcost.setAttribute("x", "150");
+    lcost.setAttribute("y", "80");
+    lcost.setAttribute("text-anchor", "middle");
+    lsvg.appendChild(lcost);
+    for (var i = 0; i < 50; i++) {
+        var x0 = grandom()*2-1;
+        lpts0.push(x0);
+        lsvg.appendChild(makedot("red", x0*50+100, 100));
+        var x1 = grandom()*2+1;
+        lpts1.push(x1);
+        lsvg.appendChild(makedot("blue", x1*50+100, 0));
+    }
+}
+function lupdate() {
+    var a = parseFloat(document.getElementById("la").value);
+    a = (a-50)/10;
+    var b = parseFloat(document.getElementById("lb").value);
+    b = (b-50)/5;
+    var p = [];
+    for (var x = 0; x <= 200; x++) {
+        var y = 100*logit(a, b, (x-100)*0.02);
+        p.push(x+","+y);
+    }
+    var z = 0.0;
+    for (var x0 of lpts0) {
+        z += Math.log(logit(a, b, x0));
+    }
+    for (var x1 of lpts1) {
+        z += Math.log(1.0-logit(a, b, x1));
+    }
+    lpoly.setAttribute("points", p);
+    lparams.innerHTML = a.toFixed(2)+"+"+b.toFixed(2)+"x";
+    lcost.innerHTML = z.toFixed(2);
+}
+</script>
+<script>
+const COLORS = ["red","green","blue"];
+const BKGND = ["#fcc","#8f8","#ccf"];
+var gsvg;
+var gcanvas;
+var gctx;
+var gpts = [];
+var gclass = 0;
+var gcenters;
+function ginit() {
+    gsvg = document.getElementById("gsvg");
+    gsvg.onclick = gclick;
+    gcanvas = document.getElementById("gcanvas");
+    gctx = gcanvas.getContext("2d");
+    gcenters = []
+    for (let color of COLORS) {
+        let rect = makesvg("rect", "none", color);
+        gcenters.push(rect);
+    }
+    greset();
+}
+function greset() {
+    while (gsvg.firstChild) {
+        gsvg.removeChild(gsvg.firstChild);
+    }
+    for (let rect of gcenters) {
+        gsvg.appendChild(rect);
+    }
+    gpts = [];
+    gclass = 0;
+}
+function gupdate() {
+    if (gpts.length == 0) {
+        gctx.fillStyle = "#dddddd";
+        gctx.fillRect(0, 0, gcanvas.width, gcanvas.height);
+        return;
+    }
+    let N = COLORS.length;
+    let t = [];
+    for (let k = 0; k < N; k++) {
+        t.push({n:0, x:0, y:0, xx:0, yy:0, xy:0});
+    }
+    for (let p of gpts) {
+        t[p.k].n++;
+        t[p.k].x += p.x;
+        t[p.k].y += p.y;
+        t[p.k].xx += (p.x*p.x);
+        t[p.k].yy += (p.y*p.y);
+        t[p.k].xy += (p.x*p.y);
+    }
+    for (let k = 0; k < N; k++) {
+        let n = Math.max(1, t[k].n);
+        t[k].x /= n;
+        t[k].y /= n;
+        t[k].xx /= n;
+        t[k].yy /= n;
+        t[k].xy /= n;
+        t[k].cxx = t[k].xx - t[k].x*t[k].x;
+        t[k].cyy = t[k].yy - t[k].y*t[k].y;
+        t[k].cxy = t[k].xy - t[k].x*t[k].y;
+        //console.log("cov", k, t[k]);
+    }
+    for (let k = 0; k < N; k++) {
+        let rect = gcenters[k];
+        rect.setAttribute("x", t[k].x-5);
+        rect.setAttribute("y", t[k].y-5);
+        rect.setAttribute("width", 10);
+        rect.setAttribute("height", 10);
+    }
+    const step = 10;
+    for (let y = 0; y < gcanvas.height; y += step) {
+        for (let x = 0; x < gcanvas.width; x += step) {
+            let mk = 0, mv = 0;
+            for (let k = 0; k < N; k++) {
+                let det = t[k].xx * t[k].yy - t[k].xy**2;
+                let dx = (x-t[k].x);
+                let dy = (y-t[k].y);
+                let v = dx*dx*t[k].yy + dy*dy*t[k].xx + 2*dx*dy*t[k].xy;
+                v = Math.exp(-v/det);
+                if (mv < v) {
+                    mv = v; mk = k;
+                }
+            }
+            gctx.fillStyle = BKGND[mk];
+            gctx.fillRect(x, y, step, step);
+        }
+    }
+}
+function gchange() {
+    gclass = (gclass+1) % COLORS.length;
+}
+function gclick(e) {
+    if (e.target !== gsvg) return;
+    let rect = e.target.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    let k = gclass;
+    let circle = makesvg("circle", "black", COLORS[k]);
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", 4);
+    gsvg.appendChild(circle);
+    gpts.push({k:k,x:x,y:y});
+    gupdate();
+}
+</script>
+</head>
+<body onload="doit(); linit(); lupdate(); ginit(); gupdate();">
+
+<h1>An Introduction to Statistical Learning (4.1. 〜 4.4.)</h1>
+
+<div class=h>
+権藤研 輪講資料 2019/07/02<br>
+新山
+</div>
+
+<h2>4. Classification (分類)</h2>
+
+<h3>はじめに</h3>
+<ul>
+<li> 3章でやった変数 Y は<u>量</u>を表すものであった (quantitative)。
+<li> 4章では変数 Y は <u>種類 (カテゴリ)</u> を表す (qualitative)。<br>
+  このような変数は "categorical" とも呼ばれる。
+<li> 与えられたものの種類を予測することを、<u>分類</u> (classification) と呼ぶ。<br>
+  <u>分類器</u> (classifier) には多くの種類があるが、
+  各カテゴリの確率を予測するような関数を仮定すると、
+  これは回帰とも関連がある。
+<li> この章では代表的な 3つの分類器
+  (<u>ロジスティック回帰</u>, <u>線形判別解析</u>, <u>k-NN法</u>) を扱う。
+</ul>
+
+<h3>4.1. 分類とは</h3>
+<p>
+「分類」は、たとえば以下のような状況で使われる:
+<ol type=a>
+<li> ある患者が救急車で運ばれてきたとして、各種検査結果から
+  「心臓発作」「薬物中毒」「てんかん」のどれかを判定したい。
+<li> オンラインである品物が購入されようとしているとき、
+  そのユーザの過去の購入履歴およびIPアドレスなどから、
+  それが詐欺であるか否かを判定したい。
+<li> 被験者の DNA 配列の中から、ある病気にかかりやすい
+  配列とそうでない配列を特定したい。
+</ol>
+
+<p>
+この章では、あるクレジットカード利用者の
+収入 (income) と利用額 (balance) から、
+その利用者が債務不履行 (default) を起こすかどうかを
+決定するタスクを例として利用する。
+ここでの分類の結果は "Yes (True)" あるいは "No (False)" のどちらかである。
+このような分類器を <u>binary classifier</u> という。
+(これは 10,000件の利用者データからなるが、
+実際に債務不履行を起こす利用者は全体の 3% である。)
+ちなみに "債務不履行データ" では、
+利用額と不履行の可否に大きな相関があることがわかっている。
+
+<div class=figure>
+<a href="defaults.png"><img height="307" src="defaults.png"></a>
+</div>
+
+<h3>4.2. なぜ線形回帰ではダメなのか?</h3>
+<p>
+上記の例 a. を線形回帰でやろうとして、
+予測する値 y を以下のように決めるとする:
+<ul>
+<li> <code>y == 1</code> : 心臓発作
+<li> <code>y == 2</code> : 薬物中毒
+<li> <code>y == 3</code> : てんかん
+</ul>
+この割り当ては恣意的である。
+結果に「心臓発作」&lt;「薬物中毒」&lt;「てんかん」のような順序関係が
+あるかどうかわからないし、「心臓発作」と「薬物中毒」の差 (?) が、
+「薬物中毒」と「てんかん」の差に等しい保証もない。
+<p>
+あるいは、3つのケースごとに独立した確率を線形回帰で
+モデルするという手もある:
+<ul>
+<li> <code>p == 0</code> : 債務不履行の確率 0%
+<li> <code>p == 1</code> : 債務不履行の確率 100%
+</ul>
+この問題点は、直線で近似するため、
+確率がある時点で必ず 0 あるいは 1 を超えてしまうことと、
+"債務不履行データ" をもとにした学習では確率がつねに低くなってしまうことである。
+
+<div class=figure>
+<a href="probabilities.png"><img height="250" src="probabilities.png"></a>
+</div>
+
+<h3>4.3. ロジスティック回帰 (Logistic Regression)</h3>
+<p>
+ここでは線形回帰のかわりに、確率をモデル化するのに
+適した<u>ロジスティック回帰</u> (logistic regression) を使う。
+
+<h4>4.3.1. ロジスティック関数</h4>
+<p>
+確率を、以下のような関数でモデル化することを考える:
+
+<div class=exp>
+<table>
+<tr><td>p(<strong>X</strong>)</td><td> = </td><td>exp(a + b<strong>X</strong>) /</td></tr>
+<tr><td></td><td></td><td>(1 + exp(a + b<strong>X</strong>))</td></tr>
+</table>
+</div>
+
+<p>
+この式を変換すると、以下のようになる:
+
+<div class=exp>
+p(<strong>X</strong>) / (1 - p(<strong>X</strong>)) = exp(a+b<strong>X</strong>)
+</div>
+
+<div class=q>
+<strong>問1.</strong>
+上の変形を証明せよ。
+</div>
+
+<p>
+ここで p / (1 - p) は、<u>オッズ</u> (odds) を表している。
+オッズは確率を別の方法で表したもので、
+競馬などの賭け事における払い戻し金を計算するのによく使われる。
+<ul>
+<li> たとえば p=0.5 の場合、オッズは 1 である。
+<li> 確率が 0.5 以下の場合、オッズは 1 以下になり、
+<li> 確率が 0.5 以上の場合、オッズは 1 以上になる。
+</ul>
+(なお、日本の競馬で配当をあらわす「オッズ」は、実際にはここでいうオッズの逆数である。)
+
+<div class=q>
+<strong>問2.</strong>
+<ol type=a>
+<li> たとえば p=0.2 の場合、オッズはいくらか。競馬なら、配当は何倍か。
+<li> たとえば p=0.8 の場合、オッズはいくらか。(競馬では、これはありえない)
+</ol>
+</div>
+
+<h4>4.3.2. Maximim Likelihood を使った推定</h4>
+
+<p>
+ロジスティック回帰の学習では、パラメータ a と b を推定する。
+このとき、
+<ul>
+<li> 「positive」な例の確率が、なるべく p=1 に近くなるようにする。
+<li> 「negative」な例の確率が、なるべく p=0 に近くなるようにする。
+</ul>
+ようにすればよい。
+
+<p>
+これは以下のような Likelihood 関数を最大化することにより求まる
+(maximum likelihood 法):
+
+<div class=exp>
+<table>
+<tr><td>L(a, b)</td><td> = </td><td>p(<strong>X<sub>P0</sub></strong>) &times; p(<strong>X<sub>P1</sub></strong>) &times; ... &times; p(<strong>X<sub>Pn</sub></strong>) &times;</td></tr>
+<tr><td></td><td></td><td>(1 - p(<strong>X<sub>N0</sub></strong>)) &times; (1 - p(<strong>X<sub>N1</sub></strong>)) &times; ... &times; (1 - p(<strong>X<sub>Nn</sub></strong>))</td></tr>
+</table>
+</div>
+
+<h4>4.3.3. ロジスティック回帰を使う</h4>
+<p>
+たとえば「債務不履行データ」の場合、
+ロジスティック回帰は、
+
+<div class=exp>
+p(<code>債務不履行 == Yes</code> | <code>ある利用額</code>)
+</div>
+
+の確率を推定することになる。
+ここで <code>p &gt;= 0.5</code> なら「ヤバい」と判断すればよい。
+(別のしきい値を使う手もありうる)
+
+<div class=figure>
+<svg id="lsvg" width="200" height="100">
+</svg><br>
+a: <input id="la" type="range" min="0" max="100" value="50" oninput="lupdate();"><br>
+b: <input id="lb" type="range" min="0" max="100" value="50" oninput="lupdate();"><br>
+</div>
+
+<h4>4.3.4. 複数の素性がある場合</h4>
+<p>
+ロジスティック回帰に入れる素性は複数あってもよい。
+この場合、確率を
+
+<div class=exp>
+<table>
+<tr><td>p(<strong>X</strong>)</td><td> = </td><td>exp(a + b<strong>X</strong>) /</td></tr>
+<tr><td></td><td></td><td>(1 + exp(a + b<strong>X</strong>))</td></tr>
+</table>
+</div>
+ではなく
+<div class=exp>
+<table>
+<tr><td>p(<strong>X</strong>)</td><td> = </td><td>exp(a + b<strong>x<sub>1</sub></strong> + c<strong>x<sub>2</sub></strong> + ... ) /</td></tr>
+<tr><td></td><td></td><td>(1 + exp(a + b<strong>x<sub>1</sub></strong> + c<strong>x<sub>2</sub></strong> + ... ))</td></tr>
+</table>
+</div>
+のようにモデル化する。
+
+<p>
+これを使って「債務不履行データ」を
+<code>balance</code>, <code>income</code> および 
+<code>student?</code> の3つの素性でモデル化すると、
+素性 <code>student?</code> は債務不履行に対して負の相関があることがわかる。
+<p>
+いっぽう、<code>student?</code> だけの素性を使うと
+<code>student? == Yes</code> であるほど
+<code>債務不履行 == Yes</code> しやすいという結果になる。
+これはなぜなのか?
+<p>
+実は <code>balance</code> が同じであれば <code>student? == Yes</code> のほうが
+<code>債務不履行 == Yes</code> の確率が<u>低い</u>。
+ただし学生は一般に <code>balance</code> がより高いので、
+総合的に<code>債務不履行 == Yes</code> に寄与しているというわけだった。
+
+<h4>4.3.5. カテゴリが3つ以上ある場合</h4>
+<p>
+Rを使えばできるけど、ここではやらない。
+
+
+<h3>4.4. 線形判別解析 (Linear Discriminant Analysis)</h3>
+
+<p>
+<strong>注意:</strong>
+Linear Discriminant Analysis は通称 LDA と略されるが、
+自然言語処理の分野で LDA (Latent Dirichlet Allocation) という、
+まったく別の学習モデルもあるので混同に注意。
+
+<p>
+ロジスティック回帰は
+<div class=exp>
+P(<code>Y==k</code> | <code>X==x</code>)
+</div>
+をモデル化していた。
+LDA では、正規分布していると仮定した変数 X と Y の相関をモデル化する。
+LDA はカテゴリが 3つ以上あるときに威力を発揮する。
+
+<h4>4.4.1. まず Bayes の定理を使う</h4>
+
+<p>
+まず密度関数 (density function)
+<div class=exp>
+f<sub>k</sub>(<strong>X</strong>) = P(<strong>X</strong> | <code>Y==k</code>)
+</div>
+を考える。
+<p>
+
+Bayes の定理により
+<div class=exp>
+<table>
+<tr><td>P(<code>Y==k</code> | <strong>X</strong>)</td><td> = </td><td>P(<code>Y==k</code>) &times; f<sub>k</sub>(<strong>X</strong>) /</td></tr>
+<tr><td></td><td></td><td>sum(P(<code>Y==i</code>) &times; f<sub>i</sub>(<strong>X</strong>))</td></tr>
+</table>
+</div>
+とモデル化できる。
+
+<div class=q>
+<strong>問3.</strong>
+上の式を導出せよ。
+</div>
+
+<p>
+実際には f<sub>k</sub>(<strong>X</strong>) の形を
+仮定しないと推定は難しい。LDA では
+f<sub>k</sub>(<strong>X</strong>) をガウシアン関数
+<div class=exp>
+<table>
+<tr><td>f<sub>k</sub>(<strong>X</strong>)</td><td> = </td><td>exp(-1/(2&times;&sigma;<sub>k</sub><sup>2</sup>) &times; (<strong>X</strong> - avg<sub>k</sub>(<strong>X</strong>))<sup>2</sup>) /</td></tr>
+<tr><td></td><td></td><td>(sqrt(2&times;PI) &times; &sigma;<sub>k</sub>)</td></tr>
+</table>
+</div>
+とする。
+
+<h4>4.4.2. LDA (パラメータ数=1 の場合)</h4>
+
+<p>
+素性が1つしかない場合は簡単である。
+まず、簡単のため
+
+<div class=exp>
+&sigma;<sub>1</sub> = &sigma;<sub>2</sub> = ... = <strong>&sigma;</strong>
+</div>
+と仮定し、これを上の Bayes の式に入れると
+<div class=exp>
+<table>
+<tr><td>P(<code>Y==k</code> | <strong>X</strong>)</td><td> = </td><td>P(<code>Y==k</code>) &times; exp(-1/(2&times;&sigma;<sup>2</sup>) &times; (<strong>X</strong> - avg<sub>k</sub>(<strong>X</strong>))<sup>2</sup>) /</td></tr>
+<tr><td></td><td></td><td>sum(P(<code>Y==i</code>) &times; exp(-1/(2&times;&sigma;<sup>2</sup>) &times; (<strong>X</strong> - avg<sub>i</sub>(<strong>X</strong>))<sup>2</sup>)</td></tr>
+</table>
+</div>
+となる。ここで、
+<div class=exp>
+argmax<sub>k</sub> P(<code>Y==k</code> | <strong>X</strong>)
+</div>
+となるような k を求める。
+<div class=exp>
+argmax<sub>k</sub> (kが含まれている式) + (kが含まれていない式) =
+argmax<sub>k</sub> (kが含まれている式)
+</div>
+であるので、最終的に
+<div class=exp>
+argmax<sub>k</sub> (<strong>X</strong> &times; avg<sub>k</sub>(<strong>X</strong>) / &sigma;<sup>2</sup>) - (avg<sub>k</sub>(<strong>X</strong>) &times; 2 &times; &sigma;<sup>2</sup>) + log(P(<code>Y==k</code>))
+</div>
+となるような k を求めればよい。
+<div class=q>
+<strong>問4.</strong>
+上の式を証明せよ。
+</div>
+
+<h4>学習アルゴリズム</h4>
+<ol>
+<li> 観測データをもとに avg<sub>k</sub>(<strong>X</strong>) および &sigma;<sup>2</sup> を求める。
+<div class=figure>
+<a href="exp415.png"><img height="99" src="exp415.png"></a>
+</div>
+<li> P(<code>Y==k</code>) を求める。(数えるだけ)
+</ol>
+
+<div class=q>
+<strong>問5.</strong>
+式 (4.15) の間違いを発見せよ。
+</div>
+
+<p>
+例として |k| = 2、P(<code>Y==0</code>) = P(<code>Y==1</code>) = 0.5 と仮定すると
+<div class=exp>
+Bayes 境界の位置 = (avg<sub>0</sub>(<strong>X</strong>) + avg<sub>1</sub>(<strong>X</strong>)) / 2
+</div>
+となる。
+
+<div class=figure>
+<a href="lda2.png"><img height="250" src="lda2.png"></a>
+</div>
+
+<h4>4.4.3. LDA (パラメータ数&gt;1 の場合)</h4>
+<p>
+変数が 2つある場合、
+&sigma; のかわりに共分散行列
+Cov(<strong>X</strong><sub>1</sub>, <strong>X</strong><sub>2</sub>) を使う。
+共分散行列は 2つの分布の幅および傾きを指定する。
+
+<div class=figure>
+<a href="gaussians.png"><img height="235" src="gaussians.png"></a>
+</div>
+
+<p>
+ここでも、簡単のため Cov は各 k に対して同一であると仮定する。
+
+<div class=figure>
+<a href="lda3.png"><img height="336" src="lda3.png"></a>
+</div>
+
+<p>
+実際にプログラムしてみた例 (自信なし):
+
+<div class=figure>
+<div style="position:relative; height:200px; width:200px;">
+ <canvas style="position:absolute; x:0; y:0;"
+         id="gcanvas" width="200" height="200">
+ </canvas>
+ <svg style="position:absolute; x:0; y:0;" 
+      id="gsvg" width="200" height="200">
+ </svg>
+</div>
+<div>
+ <button onclick="gchange();">Color</button>
+ <button onclick="greset(); gupdate();">Reset</button>
+</div>
+</div>
+
+<h4>機械学習のトレードオフ</h4>
+<p>
+"債務不履行" タスクの場合、
+分類の間違いには2種類のエラーが存在する。
+つまり「本来 Yes のはずのものを No と判定した」場合と、
+「本来 No のはずのものを Yes と判定した」場合である。
+これらを表 (行列) の形式で記したものを
+<u>Confusion Matrix</u> とよぶ。
+
+<div class=figure>
+<a href="confusion1.png"><img height="199" src="confusion1.png"></a>
+</div>
+
+<div class=q>
+<strong>問6.</strong>
+上の confusion matrix 中の各数値の意味を、日本語で説明せよ。
+また、間違った分類結果の数は全部でいくつあるか。
+</div>
+
+<p>
+じつは、この分類結果には実用上の問題がある。
+本来「<code>債務不履行 == Yes</code> であるものを No と判定してしまった」
+エラーが多いのである。これは 2種類のエラーの<strong>合計</strong>を
+最小化するようにしたためであるが、実際のクレジットカード会社にとっては
+一方のエラーのリスクのほうが、他方のエラーのリスクよりも大きい。
+そこで「<code>債務不履行 == Yes</code>」の確率を重視することにして、
+従来までは P(<code>債務不履行 == Yes</code>) &gt; 0.5 であれば
+「Yes」と判定していたものを、
+P(<code>債務不履行 == Yes</code>) &gt; 0.2 であれば
+「Yes」と判定するようにする。
+すると、confusion matrix は以下のようになる:
+
+<div class=figure>
+<a href="confusion2.png"><img height="167" src="confusion2.png"></a>
+</div>
+
+<p>
+こうすると、クレジットカード会社の恐れるエラーは減少する。
+が、全体的なエラーの合計は増えてしまう。
+
+<p>
+このような機械学習のトレードオフを表現するために、
+<u>ROC Curve</u> というものがよく使われる。
+これは True Positive (正しく判定できた Yes の割合) と
+False Positive (間違って Yes と判定されたものの割合) を
+それぞれ縦軸・横軸に表したもので、左上にいけばいくほどよく、
+曲線の右下部分の面積がその学習アルゴリズムの「能力」を
+表すと考える。
+
+<div class=figure>
+<a href="roccurve.png"><img height="437" src="roccurve.png"></a>
+</div>
+
+<h4>用語解説</h4>
+<p>
+実際の文献では、True Positive, False Positive などの割合は
+いろいろな用語で呼ばれている。以下に代表的なものを示す:
+
+<table border>
+<tr><th>指標</th><th>使われる用語</th></tr>
+<tr><td>|間違った Yes 判定| / |すべてのYes物件|</td><td><u>Type 1 error</u>, 1-Specificity</td></tr>
+<tr><td>|正しい Yes 判定| / |すべてのYes物件|</td><td>1-Type 2 error, Power, Sensitivity, <u>Recall</u></td></tr>
+<tr><td>|正しい Yes 物件| / |Yes判定されたもの|</td><td>Precision, 1-False dicovery proportion</td></tr>
+<tr><td>|正しい No 物件| / |No判定されたもの|</td><td></td></tr>
+</table>
+
+<h4>4.4.4. Quadratic Discriminant Analysis (QDA)</h4>
+
+<p>
+これまでの例では、&sigma; または Cov がすべての k に対して
+同一の場合を仮定していた。これが各 k ごとに異なると仮定すると、
+先の argmax の式は
+<div class=exp>
+argmax<sub>k</sub> -(<strong>X</strong> - avg<sub>k</sub>(<strong>X</strong>))<sup>2</sup> / (2 &times; &sigma;<sub>k</sub><sup>2</sup>) - log(&sigma;<sub>k</sub>) / 2 + log(P(<code>Y==k</code>))
+</div>
+となり、x の2次項が残ってしまう。これが QDA である。
+
+<div class=q>
+<strong>問7.</strong>
+上の式を証明せよ。
+</div>
+
+<p>
+QDA はより複雑な形状の分布を表現できるため柔軟性は高いが、
+同時に学習しなければならないパラメータが |k| p &times; (p+1) / 2 個に
+なってしまう。少ないデータでは、これは過学習の危険性がある。
+Bayes 境界が直線の場合、QDA よりも LDA のほうが
+適していることもある (下図)。
+
+<div class=figure>
+<a href="qda.png"><img height="299" src="qda.png"></a>
+</div>
+
+<div class=q>
+<strong>おさらい問題.</strong>
+<ol type=a>
+<li> 分類とは何か、説明せよ。
+<li> 分類器とは何か、説明せよ。
+<li> なぜ分類を線形回帰として扱うとまずいのか、説明せよ。
+<li> ロジスティック回帰と LDA の違いは何か。
+<li> Binary classifier とは何か。
+<li> Confusion matrix とは何か。
+<li> ROC curve とは何か。
+<li> Type-1 error とは何か。
+<li> なぜ QDA よりも LDA のほうが過学習の危険性が少ないのか。
+</ol>
+</div>
+
+<hr>
+<address>Yusuke Shinyama</address>
