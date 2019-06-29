@@ -336,7 +336,7 @@ p(<strong>X</strong>) / (1 - p(<strong>X</strong>)) = exp(a+b<strong>X</strong>)
 <strong>問2.</strong>
 <ol type=a>
 <li> たとえば p=0.2 の場合、オッズはいくらか。競馬なら、配当は何倍か。
-<li> たとえば p=0.8 の場合、オッズはいくらか。(競馬では、これはありえない)
+<li> たとえば p=0.8 の場合、オッズはいくらか。競馬では、これはありえないが、それはなぜか。
 </ol>
 </div>
 
@@ -352,7 +352,8 @@ p(<strong>X</strong>) / (1 - p(<strong>X</strong>)) = exp(a+b<strong>X</strong>)
 ようにすればよい。
 
 <p>
-これは以下のような Likelihood 関数を最大化することにより求まる
+これは以下のような Likelihood 関数を最大化するような
+a と b を求めることにより決まる
 (maximum likelihood 法):
 
 <div class=exp>
@@ -372,7 +373,7 @@ p(<code>債務不履行 == Yes</code> | <code>ある利用額</code>)
 </div>
 
 の確率を推定することになる。
-ここで <code>p &gt;= 0.5</code> なら「ヤバい」と判断すればよい。
+ここで <code>p &gt; 0.5</code> なら「ヤバい」と判断すればよい。
 (別のしきい値を使う手もありうる)
 
 <div class=figure>
@@ -407,6 +408,11 @@ b: <input id="lb" type="range" min="0" max="100" value="50" oninput="lupdate();"
 <code>balance</code>, <code>income</code> および 
 <code>student?</code> の3つの素性でモデル化すると、
 素性 <code>student?</code> は債務不履行に対して負の相関があることがわかる。
+
+<div class=figure>
+<a href="coefficients.png"><img height="174" src="coefficients.png"></a>
+</div>
+
 <p>
 いっぽう、<code>student?</code> だけの素性を使うと
 <code>student? == Yes</code> であるほど
