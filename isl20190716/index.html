@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<html>
+<head>
+<title>権藤研 輪講資料 2019/07/16 新山 (An Introduction to Statistical Learning, 6.3節〜6.4節)</title>
+<style><!--
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+code { font-weight: bold; color: purple; }
+.h { text-align: right; }
+.q { border: 2px solid black; padding: 1em; margin: 1em; background: #ff8; }
+.figure { border: 1px solid black; text-align: center; padding: 0.5em; margin: 0.5em; }
+.exp { border: 1px solid black; padding: 1em; margin: 1em; }
+.exp strong { color: blue; }
+pre { border: 1px solid black; padding: 0.3em; }
+--></style>
+<script>
+function doit() {
+    if (document.baseURI.startsWith("file:")) {
+        for (e of document.getElementsByClassName("offline")) {
+            if (e.tagName == "IMG") {
+                let i = e.src.lastIndexOf("/");
+                let src = "./"+e.src.substr(i+1);
+                console.log("offline: "+e.src+" -> "+src);
+                e.src = src;
+            }
+        }
+    }
+}
+</script>
+<script>
+function makesvg(tag, stroke, fill) {
+    let e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    e.setAttribute("stroke", stroke);
+    e.setAttribute("fill", fill);
+    return e;
+}
+function makedot(color, x, y) {
+    var circle = makesvg("circle", "black", color);
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", 5);
+    return circle;
+}
+var gsvg;
+var gcenter;
+var gline;
+var gpts;
+function ginit() {
+  gsvg = document.getElementById("gsvg");
+  gsvg.onclick = gclick;
+  gcenter = makesvg("rect", "none", "black");
+  gcenter.setAttribute("width", 10);
+  gcenter.setAttribute("height", 10);
+  gline = makesvg("line", "black", "none");
+  gline.setAttribute("stroke-width", "2");
+}
+function greset() {
+  while (gsvg.firstChild) {
+    gsvg.removeChild(gsvg.firstChild);
+  }
+  gsvg.appendChild(gcenter);
+  gsvg.appendChild(gline);
+  gpts = [];
+}
+function gclick(e) {
+  if (e.target !== gsvg) return;
+  let rect = e.target.getBoundingClientRect();
+  let x = e.clientX - rect.left;
+  let y = e.clientY - rect.top;
+  let circle = makesvg("circle", "black", "red");
+  circle.setAttribute("cx", x);
+  circle.setAttribute("cy", y);
+  circle.setAttribute("r", 4);
+  gsvg.appendChild(circle);
+  gpts.push({x:x,y:y});
+  gupdate();
+}
+function gupdate() {
+  let n = gpts.length;
+  if (n == 0) return;
+  let sx = 0, sy = 0, sx2 = 0, sy2 = 0;
+  for (let p of gpts) {
+    sx += p.x; sy += p.y;
+    sx2 += p.x*p.x; sy2 += p.y*p.y;
+  }
+  let cx = sx/n;
+  let cy = sy/n;
+  gcenter.setAttribute("x", cx-5);
+  gcenter.setAttribute("y", cy-5);
+  let vx = sx2/n - cx*cx;
+  let vy = sy2/n - cy*cy;
+  gline.setAttribute("x1", cx-vx);
+  gline.setAttribute("y1", cy-vy);
+  gline.setAttribute("x2", cx+vx);
+  gline.setAttribute("y2", cy+vy);
+}
+</script>
+</head>
+<body onload="ginit(); greset(); gupdate();">
+
+<h1>An Introduction to Statistical Learning (6.3. 〜 6.4.)</h1>
+
+<div class=h>
+権藤研 輪講資料 2019/07/16<br>
+新山
+</div>
+
+<h2>6. Linear Model Selection and Regularization (線型モデルの選択および正規化)</h2>
+
+<h3>はじめに</h3>
+<ul>
+<li> 3章では、最小二乗法を用いた線型回帰をやった。
+<div class=exp>
+<strong>Y</strong> = &beta;<sub>0</sub> +
+&beta;<sub>1</sub> <strong>x<sub>1</sub></strong> +
+&beta;<sub>2</sub> <strong>x<sub>2</sub></strong> + ... +
+&beta;<sub>p</sub> <strong>x<sub>p</sub></strong> + &epsilon;
+</div>
+<li> この章では、線型モデルに最小二乗法<u>以外</u>の手法を適用する。
+その理由はおもに2つあって:
+<ul>
+  <li> 精度を改善するため。
+  <li> モデルの理解しやすさ (model interpretability) を上げるため。
+</ul>
+<li> 具体的には、つぎの手法を紹介する:
+<ol type=a>
+  <li> 部分集合の選択 (subset selection)。相関を求める変数の数を減らす。[6.1節]
+  <li> 縮退 (shrinkage)。各係数 (の絶対値) がなるべく小さくなるモデルを求める。
+    これにより係数が 0 になり、使用する変数が削減できる場合がある。[6.2節]
+  <li> 次元削減 (dimension reduction)。
+    相関を求めるp個の変数を別のM個の変数 (<em>M</em> &lt; <em>p</em>) に
+    置き換えて相関を求める (投影、projection)。[6.3節]
+</ol>
+</ul>
+
+<h3>6.3. 次元削減の手法</h3>
+
+<p>
+ここでは、p個のパラメータ
+<strong>X<sub>1</sub></strong>, <strong>X<sub>2</sub></strong>, ...
+<strong>X<sub>p</sub></strong> から観測された変数 Y を、
+p よりも少ない M個の変数
+<strong>Z<sub>1</sub></strong>, <strong>Z<sub>2</sub></strong>, ...
+<strong>Z<sub>M</sub></strong> の線形和で表現することを考える:
+<div class=exp>
+<strong>Z<sub>m</sub></strong> =
+&phi;<sub>1m</sub> <strong>X<sub>1</sub></strong> +
+&phi;<sub>2m</sub> <strong>X<sub>2</sub></strong> + ... +
+&phi;<sub>pm</sub> <strong>X<sub>p</sub></strong> =
+&Sigma;(&phi;<sub>jm</sub> <strong>X<sub>j</sub></strong>)
+</div>
+<p>
+このとき、Y はこうなる:
+<div class=exp>
+<strong>y<sub>i</sub></strong> = &theta;<sub>0</sub> +
+&theta;<sub>1</sub> &Sigma;(&phi;<sub>j1</sub> <strong>z<sub>i1</sub></strong>) +
+&theta;<sub>2</sub> &Sigma;(&phi;<sub>j2</sub> <strong>z<sub>i2</sub></strong>) + ... +
+&theta;<sub>M</sub> &Sigma;(&phi;<sub>jM</sub> <strong>z<sub>iM</sub></strong>) =
+&Sigma;(&theta;<sub>m</sub> &Sigma;(&phi;<sub>jm</sub> <strong>z<sub>im</sub></strong>))
+</div>
+<p>
+ここで &theta;<sub>0</sub>, &theta;<sub>1</sub>, ..., &theta;<sub>M</sub> は
+線型回帰の係数である。もし、
+&phi;<sub>1m</sub>, &phi;<sub>2m</sub>, ..., &phi;<sub>pm</sub> の値が
+うまく選ばれていれば、これを使った最小二乗法の誤差は
+もとの式の最小二乗法の誤差よりも小さくなるはずである。
+ここでは p+1 個の係数を推定するかわりに
+M+1 個の係数を推定することで「次元の削減」をおこなっている。
+<p>
+ちなみに
+<div class=exp>
+&theta;<sub>m</sub> &Sigma;(<strong>z<sub>im</sub></strong>) =
+&Sigma;(&beta;<sub>j</sub> <strong>x<sub>ij</sub></strong>)
+</div>
+である。
+
+<div class=q>
+<strong>問1.</strong>
+上の式を証明せよ。
+</div>
+
+<h4>6.3.1. 主成分回帰 (Pricipal Component Regression, PCR)</h4>
+<p>
+主成分分析 (Principal Component Analysis, PCA) は
+多変量のデータを少数の素性に分解するポピュラーな手法である。
+たとえば図 6.14 は各都市の人口 (<code>pop</code>) と広告費 (<code>ad</code>) の
+関係にみられる第1主成分 (first principal component) を表している:
+
+<div class=figure>
+<a href="fig614.png"><img height="316" src="fig614.png"></a>
+</div>
+
+<p>
+これを実際の直線上に分布させてみると、次のようになる。
+図6.15の右側は、各点を第1主成分の上に<u>投影</u> (projection) した
+点が示されている。
+
+<div class=figure>
+<a href="fig615.png"><img height="332" src="fig615.png"></a>
+</div>
+
+<p>
+数学的には、この第1主成分 Z<sub>1</sub> は次のように表現される:
+<div class=exp>
+Z<sub>1</sub> =
+0.839 × (<code>pop</code> - Avg(<code>pop</code> )) +
+0.544 × (<code>ad</code> - Avg(<code>ad</code> ))
+</div>
+<div class=q>
+<strong>問2.</strong>
+上の Z<sub>1</sub> における 0.839 および 0.544 の意味を、
+以下の変数名から選べ。(添字も含む)
+<div class=exp>
+<strong>y<sub>i</sub></strong> = &theta;<sub>0</sub> +
+&theta;<sub>1</sub> &Sigma;(&phi;<sub>j1</sub> <strong>z<sub>i1</sub></strong>) +
+&theta;<sub>2</sub> &Sigma;(&phi;<sub>j2</sub> <strong>z<sub>i2</sub></strong>) + ... +
+&theta;<sub>M</sub> &Sigma;(&phi;<sub>jM</sub> <strong>z<sub>iM</sub></strong>) =
+&Sigma;(&theta;<sub>m</sub> &Sigma;(&phi;<sub>jm</sub> <strong>z<sub>im</sub></strong>))
+</div>
+</div>
+<p>
+データ上のある点における Z<sub>1</sub> の値を、
+その点の第1主成分の<strong>スコア</strong> (first principal component score) とよぶ。
+PCA では、スコアの分散が<u>最大になるように</u>変数の組み合わせを求める。
+(実際には、係数を大きくすれば分散はいくらでも大きくなってしまうので、
+&Sigma;(各係数<sup>2</sup>) = 1 となるように制限する。)
+<p>
+<strong>注意:</strong>
+ここで得られる直線は普通の最小二乗法に近いが、
+<strong>同じではない</strong>ことに注意。
+最小二乗法は各点と直線との
+<div class=exp>
+&Sigma;(&Delta;Y座標<sup>2</sup>)
+</div>
+を最小化するが、PCA の直線は各点との
+<div class=exp>
+&Sigma;(距離 = 各点から直線上に鉛直におろした線分の長さ)
+</div>
+を最小化する。
+<p>
+図 6.16 に示すように、
+第1主成分と各変数 <code>pop</code> および <code>ad</code> の
+相関はどちらも高い。
+
+<div class=figure>
+<a href="fig616.png"><img height="253" src="fig616.png"></a>
+</div>
+
+いっぽう、第2主成分は以下に式で表される。
+<div class=exp>
+Z<sub>2</sub> =
+0.544 × (<code>pop</code> - Avg(<code>pop</code> )) -
+0.839 × (<code>ad</code> - Avg(<code>ad</code> ))
+</div>
+各変数の相関は高くない。
+一般に、2つの主成分が互いに直行する
+(orthogonal / parpendicular) 直線で表される場合、
+2つの成分の相関はゼロである。
+各点の主成分スコアを比べてみると
+Z<sub>1</sub> に比べて Z<sub>2</sub> の値は非常に低い。
+これは、第2主成分が分散しておらず、そこに含まれている情報は
+ほとんどないことを示している。
+
+<div class=figure>
+<a href="fig617.png"><img height="256" src="fig617.png"></a>
+</div>
+
+<div class=figure>
+ <svg id="gsvg" width="200" height="200" style="background:#ddd;">
+ </svg>
+ <button onclick="greset(); gupdate();">Reset</button>
+</div>
+
+<p>
+主成分回帰 (Pricipal Component Regression, PCR) とは、まず
+主成分分析をおこない、その上位M個の主成分 Z<sub>1</sub>, ..., Z<sub>M</sub> に
+対して線型回帰を行う方法である。これは、ほとんどのデータの変化は
+少数の主成分の変化のみによって説明できるという仮定にもとづいている。
+この仮定は必ずしも正しくないが、うまくいくことが多い。
+上の広告費データの例では、変数 <code>pop</code> と <code>ad</code> の変化は
+ほとんど第1主成分 Z<sup>1</sup> の変化によって説明できるので、
+ここからさらに別の変数 (<code>sales</code> など) を予測することはたやすい。
+ただし、PCR では素性の線形和を求めているだけで、
+素性そのものの数を減らしているわけではないことに注意。
+この点で、PCR は 6.2.1. 節で説明した "Ridge regression" に近い。(?)
+<p>
+PCR で使用する主成分の個数 M は、
+ふつうクロス・バリデーション (cross validation) によって
+決定される。たとえば図 6.20 は <code>Credit</code>データの回帰を
+PCR によって (M の数を変化させつつ) 行った結果である。
+M = 10 でエラーが最も小さくなっているが、もともとの変数は 11個なので、
+これではほとんど次元を削減していることにならない。
+
+<div class=figure>
+<a href="fig620.png"><img height="299" src="fig620.png"></a>
+</div>
+
+<h4>6.3.2. 部分二乗和 (Partial Least Squares, PLS)</h4>
+<p>
+PCR の基本アプローチは、入力変数 <strong>X</strong> の値だけを見て、
+主成分を決定するというものであった。
+しかし実際には PCA の結果が出力変数 <strong>Y</strong> と相関しているという保証はない。
+そこで、変数 <strong>Y</strong> の値を見ながら「教示つきで (supervised)」
+主成分 Z<sub>1</sub>, ..., Z<sub>M</sub> の線形和を決定するのが PLS である。
+PLS では、<strong>X</strong> および <strong>Y</strong> 両方の変化を
+説明するような組み合せを探す。
+
+<div class=figure>
+<a href="fig621.png"><img height="293" src="fig621.png"></a>
+</div>
+
+<p>
+PLS は以下のようなステップで計算する:
+<ol>
+<li> まず単純な最小二乗法で Y と X<sub>j</sub> の相関を推定し、
+その各係数を Z<sub>1</sub> 中の &phi;<sub>i1</sub> に使う。
+すると、
+<div class=exp>
+<strong>Z<sub>1</sub></strong> =
+&Sigman; (&phi;<sub>j1</sub> <strong>X<sub>1</sub></strong>)
+</div>
+となり、変数 Y にもっとも強く相関する変数の組み合わせになる。
+<li> つぎに <strong>Z<sub>1</sub></strong> 中の各変数の
+残差 (residuals) に対して回帰をおこなうことで、各変数を調整する。
+これは PLS の最初の成分では説明できない残りの差異を説明するのに使われる。
+
+</ol>
+
+<h3>6.4. 高次元なデータを扱う際の注意</h3>
+
+<h4>6.4.1. 高次元なデータとは</h4>
+<p>
+伝統的に、統計で扱うデータは predictor の個数 p が
+サンプル数 n に比べてはるかに低い (p ≪ n) ものが多かった。
+ところが過去20年のうちに、p &gt; n であるようなデータが
+扱われるようになった。たとえば:
+<ul>
+<li> 血圧を予測するのに、年齢・身長・体重といった情報のほかに、
+  DNAの変異情報も利用する。
+  この場合 n &approx; 200 に対して p &approx; 500,000 である。
+<li> 人々の購買傾向を予測するのに、年齢・性別などのほかに
+  人々が検索エンジンで入力するキーワードの情報も利用する。
+  各単語を bag-of-word 方式 (0 または 1) で扱うとすると、p の数は非常に多い。
+</ul>
+<p>
+サンプルの数よりもパラメータ数が多いデータを
+「高次元な (high-dimensional)」データという。
+過学習 (overfitting) の問題はつねに存在したが、
+高次元ではこれがなおさら重要になる。
+
+<div class=q>
+<strong>問.</strong>
+人が日常生活で直面する、高次元なデータを使った推定の例をあげよ。
+</div>
+
+<h4>6.4.2. 具体的に何が問題か?</h4>
+<p>
+最小二乗法など多くの統計的手法において、
+推定するパラメータ数がサンプル数よりも
+多い場合、ほぼつねに「完璧フィット」する解が見つかってしまう
+(図6.22)。これはほぼ確実に過学習である。
+同様のことはロジスティック回帰やLDAなどでも発生する。
+
+<div class=figure>
+<a href="fig622.png"><img height="343" src="fig622.png"></a>
+</div>
+
+<p>
+図6.23 はこの問題をさらに如実に表している。
+n=20 のデータに対して、p の値を 1〜20 まで変化させなて
+最小二乗法を行った場合、R<sup>2</sup> の値は
+p が増えるにつれ増加し、MSE は減少する。
+すると p が増えたほうがよさそうに見えるが、
+実際に独立したテストセットを使った MSE は非常に大きくなる。
+
+<div class=figure>
+<a href="fig623.png"><img height="306" src="fig623.png"></a>
+</div>
+
+<h4>6.4.3. 高次元における回帰</h4>
+
+<p>
+この章 (6章) でとりあげた手法はどれも、
+モデルの柔軟性を意図的に<u>下げる</u>ものであった。
+
+<h4>6.4.4. 高次元の結果を解釈する</h4>
+
+<div class=q>
+<strong>おさらい問題.</strong>
+<ol type=a>
+<li> <u>第1主成分</u>とは何か?
+<li> 第1主成分の<u>スコア</u>とは何か?
+<li> Curse of dimenstionality を説明せよ。
+</ol>
+</div>
+
+<hr>
+<address>Yusuke Shinyama</address>
