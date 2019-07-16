@@ -171,10 +171,10 @@ p よりも少ない M個の変数
 このとき、Y はこうなる:
 <div class=exp>
 <strong>y<sub>i</sub></strong> = &theta;<sub>0</sub> +
-&theta;<sub>1</sub> &Sigma;(&phi;<sub>j1</sub> <strong>z<sub>i1</sub></strong>) +
-&theta;<sub>2</sub> &Sigma;(&phi;<sub>j2</sub> <strong>z<sub>i2</sub></strong>) + ... +
-&theta;<sub>M</sub> &Sigma;(&phi;<sub>jM</sub> <strong>z<sub>iM</sub></strong>) =
-&Sigma;(&theta;<sub>m</sub> &Sigma;(&phi;<sub>jm</sub> <strong>z<sub>im</sub></strong>))
+&theta;<sub>1</sub> &Sigma;(&phi;<sub>j1</sub> <strong>x<sub>i1</sub></strong>) +
+&theta;<sub>2</sub> &Sigma;(&phi;<sub>j2</sub> <strong>x<sub>i2</sub></strong>) + ... +
+&theta;<sub>M</sub> &Sigma;(&phi;<sub>jM</sub> <strong>x<sub>iM</sub></strong>) =
+&Sigma;(&theta;<sub>m</sub> &Sigma;(&phi;<sub>jm</sub> <strong>x<sub>im</sub></strong>))
 </div>
 <p>
 ここで &theta;<sub>0</sub>, &theta;<sub>1</sub>, ..., &theta;<sub>M</sub> は
@@ -187,7 +187,7 @@ M+1 個の係数を推定することで「次元の削減」をおこなって�
 <p>
 ちなみに
 <div class=exp>
-&theta;<sub>m</sub> &Sigma;(<strong>z<sub>im</sub></strong>) =
+&Sigma;(&theta;<sub>m</sub> <strong>z<sub>im</sub></strong>) =
 &Sigma;(&beta;<sub>j</sub> <strong>x<sub>ij</sub></strong>)
 </div>
 である。
@@ -230,10 +230,10 @@ Z<sub>1</sub> =
 以下の変数名から選べ。(添字も含む)
 <div class=exp>
 <strong>y<sub>i</sub></strong> = &theta;<sub>0</sub> +
-&theta;<sub>1</sub> &Sigma;(&phi;<sub>j1</sub> <strong>z<sub>i1</sub></strong>) +
-&theta;<sub>2</sub> &Sigma;(&phi;<sub>j2</sub> <strong>z<sub>i2</sub></strong>) + ... +
-&theta;<sub>M</sub> &Sigma;(&phi;<sub>jM</sub> <strong>z<sub>iM</sub></strong>) =
-&Sigma;(&theta;<sub>m</sub> &Sigma;(&phi;<sub>jm</sub> <strong>z<sub>im</sub></strong>))
+&theta;<sub>1</sub> &Sigma;(&phi;<sub>j1</sub> <strong>x<sub>i1</sub></strong>) +
+&theta;<sub>2</sub> &Sigma;(&phi;<sub>j2</sub> <strong>x<sub>i2</sub></strong>) + ... +
+&theta;<sub>M</sub> &Sigma;(&phi;<sub>jM</sub> <strong>x<sub>iM</sub></strong>) =
+&Sigma;(&theta;<sub>m</sub> &Sigma;(&phi;<sub>jm</sub> <strong>x<sub>im</sub></strong>))
 </div>
 </div>
 <p>
@@ -289,7 +289,7 @@ Z<sub>1</sub> に比べて Z<sub>2</sub> の値は非常に低い。
 argmax &phi;<sub>1</sub>, &phi;<sub>2</sub>
 (Var(&phi;<sub>1</sub><strong>x<sub>1</sub></strong> + &phi;<sub>2</sub><strong>x<sub>2</sub></strong>)) = <br>
 argmax &phi;<sub>1</sub>, &phi;<sub>2</sub>
-{ &Sigma;(&phi;<sub>1</sub><strong>x<sub>1</sub></strong> + &phi;<sub>2</sub><strong>x<sub>2</sub></strong> - E(&phi;<sub>1</sub><strong>X</strong> + &phi;<sub>2</sub><strong>Y</strong>))<sup>2</sup> } =<br>
+{ &Sigma;(&phi;<sub>1</sub><strong>x<sub>1</sub></strong> + &phi;<sub>2</sub><strong>x<sub>2</sub></strong> - Avg(&phi;<sub>1</sub><strong>x<sub>1</sub></strong> + &phi;<sub>2</sub><strong>x<sub>2</sub></strong>))<sup>2</sup> } =<br>
 ...<br>
 argmax &phi;<sub>1</sub>, &phi;<sub>2</sub>
 [ &phi;<sub>1</sub><sup>2</sup> { &Sigma;(x<sub>1</sub><sup>2</sup>) - 2(&Sigma;x<sub>1</sub>)/n + (&Sigma;x<sub>1</sub>)<sup>2</sup>/n } +
@@ -438,7 +438,7 @@ p が増えるにつれ増加し、MSE は減少する。
 この章 (6章) でとりあげた手法はどれも、
 モデルの柔軟性を意図的に<u>下げる</u>ものであった。
 一般的に、使用するデータが高次元になるほどテストデータを使った精度は減少する。
-この現象を「次元の呪い (Curse of dimensionality)」とよぶ。
+この現象を「<u>次元の呪い</u> (Curse of dimensionality)」とよぶ。
 ふつう与えるパラメータは多いほうがモデルが正確になると思いがちだが、
 多くは相関のないパラメータであるために、ノイズのほうが多くなってしまう。
 ようするに、パラメータの多さは諸刃の剣なのである。
