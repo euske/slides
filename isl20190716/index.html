@@ -82,17 +82,31 @@ function gclick(e) {
 function gupdate() {
   let n = gpts.length;
   if (n == 0) return;
-  let sx = 0, sy = 0, sx2 = 0, sy2 = 0;
+  let sx = 0, sy = 0, sx2 = 0, sy2 = 0, sxy = 0;
   for (let p of gpts) {
     sx += p.x; sy += p.y;
     sx2 += p.x*p.x; sy2 += p.y*p.y;
+    sxy += p.x*p.y;
   }
+  console.info("sum:", n, sx, sy, sx2, sy2, sxy);
   let cx = sx/n;
   let cy = sy/n;
   gcenter.setAttribute("x", cx-5);
   gcenter.setAttribute("y", cy-5);
-  let vx = sx2/n - cx*cx;
-  let vy = sy2/n - cy*cy;
+  let mz = -Infinity, mt = 0;
+  for (let t = 0; t < 2*Math.PI; t += 0.01) {
+    let q1 = Math.sin(t);
+    let q2 = Math.cos(t);
+    let z = (q1*q1*(sx2 - 2*sx/n + sx*sx/n) +
+             q2*q2*(sy2 - 2*sy/n + sy*sy/n) +
+             q1*q2*(sxy - 2*(sx+sy)/n + sx*sy/n));
+    if (mz < z) {
+      mz = z;
+      mt = t;
+    }
+  }
+  let vx = Math.sin(mt)*100;
+  let vy = Math.cos(mt)*100;;
   gline.setAttribute("x1", cx-vx);
   gline.setAttribute("y1", cy-vy);
   gline.setAttribute("x2", cx+vx);
@@ -269,6 +283,35 @@ Z<sub>1</sub> に比べて Z<sub>2</sub> の値は非常に低い。
 <a href="fig617.png"><img height="256" src="fig617.png"></a>
 </div>
 
+<p>
+例: p = 2 の場合、Z<sub>1</sub> を求めてみると…
+<div class=exp>
+argmax &phi;<sub>1</sub>, &phi;<sub>2</sub>
+(Var(&phi;<sub>1</sub><strong>x<sub>1</sub></strong> + &phi;<sub>2</sub><strong>x<sub>2</sub></strong>)) = <br>
+argmax &phi;<sub>1</sub>, &phi;<sub>2</sub>
+{ &Sigma;(&phi;<sub>1</sub><strong>x<sub>1</sub></strong> + &phi;<sub>2</sub><strong>x<sub>2</sub></strong> - E(&phi;<sub>1</sub><strong>X</strong> + &phi;<sub>2</sub><strong>Y</strong>))<sup>2</sup> } =<br>
+...<br>
+argmax &phi;<sub>1</sub>, &phi;<sub>2</sub>
+[ &phi;<sub>1</sub><sup>2</sup> { &Sigma;(x<sub>1</sub><sup>2</sup>) - 2(&Sigma;x<sub>1</sub>)/n + (&Sigma;x<sub>1</sub>)<sup>2</sup>/n } +
+  &phi;<sub>2</sub><sup>2</sup> { &Sigma;(x<sub>2</sub><sup>2</sup>) - 2(&Sigma;x<sub>2</sub>)/n + (&Sigma;x<sub>2</sub>)<sup>2</sup>/n } +
+  &phi;<sub>1</sub>&phi;<sub>2</sub> { &Sigma;(x<sub>1</sub>x<sub>2</sub>) - 2(&Sigma;x<sub>1</sub>+&Sigma;x<sub>2</sub>)/n + (&Sigma;x<sub>1</sub>)(&Sigma;x<sub>2</sub>)/n }
+</div>
+となる。
+
+<div class=q>
+<strong>問3.</strong>
+上の 「...」 の部分を導出せよ。(チョー大変)
+</div>
+
+ここでさらに
+<div class=exp>
+&phi;<sub>1</sub><sup>2</sup> + &phi;<sub>2</sub><sup>2</sup> = 1
+</div>
+という制限をつけると、
+&phi;<sub>1</sub> = sin(t), &phi;<sub>2</sub> = cos(t) と
+表すことができ、これを最大化する t を求めればよい。
+<p>
+これを力ずくで (!) 求めるような実装が以下である (バグっている):
 <div class=figure>
  <svg id="gsvg" width="200" height="200" style="background:#ddd;">
  </svg>
@@ -321,14 +364,22 @@ PLS は以下のようなステップで計算する:
 すると、
 <div class=exp>
 <strong>Z<sub>1</sub></strong> =
-&Sigman; (&phi;<sub>j1</sub> <strong>X<sub>1</sub></strong>)
+&Sigma;(&phi;<sub>j1</sub> <strong>X<sub>1</sub></strong>)
 </div>
 となり、変数 Y にもっとも強く相関する変数の組み合わせになる。
 <li> つぎに <strong>Z<sub>1</sub></strong> 中の各変数の
 残差 (residuals) に対して回帰をおこなうことで、各変数を調整する。
 これは PLS の最初の成分では説明できない残りの差異を説明するのに使われる。
-
+このステップを繰り返し、M 個の成分を抽出する。
+<li> 最後に、各 Z<sub>m</sub> と Y との相関を最小二乗法により求める。
 </ol>
+
+図6.21は生成された Sales データ 100個に対する PLS と PCR の違いを図示したものである。
+これは pop のほうが ad よりも Y と相関が高いということを示している。
+PLS は PCA とは異なり、入力の差異をそれほど説明しないが、Y の違いはよく説明する。
+PCR と同じように PLS で使う M個の成分もクロス・バリデーションにより決定する。
+PLS は計量化学 (chemometrics) の分野でスペクトル分析によく利用されているが、
+多くの場合は PCR とそれほどの違いはない。
 
 <h3>6.4. 高次元なデータを扱う際の注意</h3>
 
@@ -340,7 +391,7 @@ PLS は以下のようなステップで計算する:
 扱われるようになった。たとえば:
 <ul>
 <li> 血圧を予測するのに、年齢・身長・体重といった情報のほかに、
-  DNAの変異情報も利用する。
+  DNAの変異情報 (Single Nucleotide Polymorphisim, SNP) も利用する。
   この場合 n &approx; 200 に対して p &approx; 500,000 である。
 <li> 人々の購買傾向を予測するのに、年齢・性別などのほかに
   人々が検索エンジンで入力するキーワードの情報も利用する。
@@ -353,7 +404,7 @@ PLS は以下のようなステップで計算する:
 高次元ではこれがなおさら重要になる。
 
 <div class=q>
-<strong>問.</strong>
+<strong>問4.</strong>
 人が日常生活で直面する、高次元なデータを使った推定の例をあげよ。
 </div>
 
@@ -386,15 +437,33 @@ p が増えるにつれ増加し、MSE は減少する。
 <p>
 この章 (6章) でとりあげた手法はどれも、
 モデルの柔軟性を意図的に<u>下げる</u>ものであった。
+一般的に、使用するデータが高次元になるほどテストデータを使った精度は減少する。
+この現象を「次元の呪い (Curse of dimensionality)」とよぶ。
+ふつう与えるパラメータは多いほうがモデルが正確になると思いがちだが、
+多くは相関のないパラメータであるために、ノイズのほうが多くなってしまう。
+ようするに、パラメータの多さは諸刃の剣なのである。
 
 <h4>6.4.4. 高次元の結果を解釈する</h4>
+<p>
+高次元なデータでは、結果と関係のない変数が互いに相関している可能性がある
+(3章でやった multicollinearity)。たとえば 50万種類の SNP と血圧の相関を
+学習しようとして、17種類のSNPとの相関が発見された場合、これだけが唯一の
+正しいモデルであるとは限らない (他にも正しいモデルが無数に存在するかもしれない)。
+そのため、高次元なデータによって作られたモデルは、各データの特徴に
+依存する可能性が高い (これはようするに過学習の別の言い方である)。
+<p>
+また、高次元なデータを使った場合、モデルの妥当性を二乗誤差や p-value や
+R<sup>2</sup> で測定してはならない。p &gt; n の状態では、これらは簡単に小さくなる。
+モデルの妥当性はつねに訓練データとは別の、
+独立したテストデータを使って評価するべきである。
 
 <div class=q>
 <strong>おさらい問題.</strong>
 <ol type=a>
 <li> <u>第1主成分</u>とは何か?
 <li> 第1主成分の<u>スコア</u>とは何か?
-<li> Curse of dimenstionality を説明せよ。
+<li> Curse of dimensionality とは何か? また、これはなぜ起こるか?
+<li> 高次元のデータを使った場合、モデルの評価で気をつけるべきことは何か?
 </ol>
 </div>
 
