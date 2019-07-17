@@ -97,9 +97,9 @@ function gupdate() {
   for (let t = 0; t < 2*Math.PI; t += 0.01) {
     let q1 = Math.sin(t);
     let q2 = Math.cos(t);
-    let z = (q1*q1*(sx2 - 2*sx/n + sx*sx/n) +
-             q2*q2*(sy2 - 2*sy/n + sy*sy/n) +
-             q1*q2*(sxy - 2*(sx+sy)/n + sx*sy/n));
+    let z = (q1*q1*(sx2 - sx*sx/n) +
+             q2*q2*(sy2 - sy*sy/n) +
+             2*q1*q2*(sxy - sx*sy/n));
     if (mz < z) {
       mz = z;
       mt = t;
@@ -287,14 +287,16 @@ Z<sub>1</sub> に比べて Z<sub>2</sub> の値は非常に低い。
 例: p = 2 の場合、Z<sub>1</sub> を求めてみると…
 <div class=exp>
 argmax &phi;<sub>1</sub>, &phi;<sub>2</sub>
-(Var(&phi;<sub>1</sub><strong>x<sub>1</sub></strong> + &phi;<sub>2</sub><strong>x<sub>2</sub></strong>)) = <br>
+{Var(&phi;<sub>1</sub><strong>x<sub>1</sub></strong> + &phi;<sub>2</sub><strong>x<sub>2</sub></strong>)} = <br>
 argmax &phi;<sub>1</sub>, &phi;<sub>2</sub>
-{ &Sigma;(&phi;<sub>1</sub><strong>x<sub>1</sub></strong> + &phi;<sub>2</sub><strong>x<sub>2</sub></strong> - Avg(&phi;<sub>1</sub><strong>x<sub>1</sub></strong> + &phi;<sub>2</sub><strong>x<sub>2</sub></strong>))<sup>2</sup> } =<br>
+{&phi;<sub>1</sub><sup>2</sup> Var(<strong>x<sub>1</sub></strong>) +
+&phi;<sub>2</sub><sup>2</sup> Var(<strong>x<sub>2</sub></strong>) +
+2&phi;<sub>1</sub>&phi;<sub>2</sub> Cov(<strong>x<sub>1</sub></strong>, <strong>x<sub>2</sub></strong>)} =<br>
 ...<br>
 argmax &phi;<sub>1</sub>, &phi;<sub>2</sub>
-[ &phi;<sub>1</sub><sup>2</sup> { &Sigma;(x<sub>1</sub><sup>2</sup>) - 2(&Sigma;x<sub>1</sub>)/n + (&Sigma;x<sub>1</sub>)<sup>2</sup>/n } +
-  &phi;<sub>2</sub><sup>2</sup> { &Sigma;(x<sub>2</sub><sup>2</sup>) - 2(&Sigma;x<sub>2</sub>)/n + (&Sigma;x<sub>2</sub>)<sup>2</sup>/n } +
-  &phi;<sub>1</sub>&phi;<sub>2</sub> { &Sigma;(x<sub>1</sub>x<sub>2</sub>) - 2(&Sigma;x<sub>1</sub>+&Sigma;x<sub>2</sub>)/n + (&Sigma;x<sub>1</sub>)(&Sigma;x<sub>2</sub>)/n }
+[ &phi;<sub>1</sub><sup>2</sup> {&Sigma;(x<sub>1</sub><sup>2</sup>) - (&Sigma;x<sub>1</sub>)<sup>2</sup>/n} +
+  &phi;<sub>2</sub><sup>2</sup> {&Sigma;(x<sub>2</sub><sup>2</sup>) - (&Sigma;x<sub>2</sub>)<sup>2</sup>/n} +
+  2 &phi;<sub>1</sub>&phi;<sub>2</sub> {&Sigma;(x<sub>1</sub>x<sub>2</sub>) - (&Sigma;x<sub>1</sub>)(&Sigma;x<sub>2</sub>)/n} ]
 </div>
 となる。
 
@@ -311,7 +313,7 @@ argmax &phi;<sub>1</sub>, &phi;<sub>2</sub>
 &phi;<sub>1</sub> = sin(t), &phi;<sub>2</sub> = cos(t) と
 表すことができ、これを最大化する t を求めればよい。
 <p>
-これを力ずくで (!) 求めるような実装が以下である (バグっている):
+これを力ずくで (!) 求めるような実装が以下である (7/17 バグ修正済):
 <div class=figure>
  <svg id="gsvg" width="200" height="200" style="background:#ddd;">
  </svg>
