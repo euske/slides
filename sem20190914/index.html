@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<html>
+<head>
+<title>権藤研 講習会資料 2019/09/14 Python + SQLiteを使った実験データ処理</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 0.5em; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+code { font-weight: bold; color: purple; }
+.h { text-align: right; }
+.q { border: 2px solid black; padding: 1em; margin: 1em; background: #ff8; }
+.figure { border: 1px solid black; text-align: center; padding: 0.5em; margin: 0.5em; }
+.exp { border: 1px solid black; padding: 1em; margin: 1em; }
+pre { border: 1px solid black; padding: 0.3em; }
+--></style>
+<script>
+function doit() {
+    if (document.baseURI.startsWith("file:")) {
+        for (e of document.getElementsByClassName("offline")) {
+            if (e.tagName == "IMG") {
+                let i = e.src.lastIndexOf("/");
+                let src = "./"+e.src.substr(i+1);
+                console.log("offline: "+e.src+" -> "+src);
+                e.src = src;
+            }
+        }
+    }
+}
+</script>
+</head>
+<body>
+
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>Python + SQLiteを使った実験データ処理</h1>
+
+<div class=h>
+権藤研 講習会資料 2019/09/14<br>
+新山
+</div>
+
+<h2 id="warmup">0. ウォームアップ問題</h2>
+<p>
+( ) 内はおおまかな目安時間です。
+<ol>
+<li> <a href="https://www.python.org/downloads/">Python 3.7</a> をインストールせよ。(5分)
+<li> 以下のようなCSVファイルから単語と出現回数を読み込み、
+回数が多い順にソートして表示するプログラムを書け。
+なお、同じ単語が複数回出てきた場合は、それらの合計を使用するものとする: (15分)
+<pre>
+foo,3
+baa,1
+john,5
+foo,1
+</pre>
+出力例:
+<pre>
+john,5
+foo,4
+baa,1
+</pre>
+<li> <a href="https://www.sqlite.org/download.html">SQLite3</a> をインストールせよ。(5分)
+<li> 以下の表を作成し値を入力する <a href="https://www.sqlite.org/lang.html">SQL</a> を書け。(10分)
+<table border>
+<tr><th>Id</th><th>Name</th><th>Score</th></tr>
+<tr><td>1</td><td>Alcie</td><td>100</td></tr>
+<tr><td>2</td><td>Bob</td><td>50</td></tr>
+<tr><td>3</td><td>Carol</td><td>75</td></tr>
+</table>
+<li> 上の表から、Scoreが50点であるような行を表示する SQL を書け。(5分)
+<li> <code>a001.txt</code>, <code>a002.txt</code>, ... という名前のついた
+複数のファイルがあるとする。これらの名前を一括して
+<code>a001.html</code>, <code>a002.html</code>, ... に変更するような
+シェルスクリプトを書け。 (5分)
+<li> 上のスクリプトで、ファイル名の一覧があらかじめ決まっておらず、
+あるテキストファイル <code>files.txt</code> 中に一行ずつ書かれている場合は
+スクリプトをどう変更すべきか。(5分)
+</ol>
+
+<h2>1. UNIXスクリプト処理の基本</h2>
+<p>
+awk, sort, grep, find, xargs
+
+<h2>2. 実験データの管理</h2>
+<p>
+パイプラインの設計、
+ディレクトリ構造、
+ファイル名のつけ方、
+条件を変えて何度も実行する場合。
+
+<h2>3. データのSerializationについて</h2>
+<p>
+テキスト、CSV, XML, JSON, SQLite
+
+<h2>4. 大量のデータを蓄積・処理する場合のTips</h2>
+<p>
+可能なかぎり stream可能にする。
+ディスク上に置けるものはディスク上に置く。
+計算をはしょる、ごまかす、後回しにする。
+
+<h2>5. Python から SQLite を使う</h2>
+
+<h2>6. Python による決定木の実装</h2>
+
+<h2>7. Python による Naive Bayes の実装</h2>
+
+<h2>8. Vector Space Model を使った類似度計算</h2>
+
+
+<hr>
+<address>Yusuke Shinyama</address>
