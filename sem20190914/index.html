@@ -44,6 +44,7 @@ function doit() {
 新山
 </div>
 
+
 <h2 id="warmup">0. ウォームアップ問題</h2>
 <p>
 ( ) 内はおおまかな目安時間です。
@@ -82,34 +83,279 @@ baa,1
 スクリプトをどう変更すべきか。(5分)
 </ol>
 
+
 <h2>1. UNIXスクリプト処理の基本</h2>
+
+<h3>1.1. シェルの基本</h3>
+
 <p>
-awk, sort, grep, find, xargs
+特殊な記号 (<kbd>{</kbd>, <kbd>}</kbd>, <kbd>$</kbd>, <kbd>*</kbd>, <kbd>;</kbd>) を
+引数に渡す場合は <kbd>'〜'</kbd> で囲む。
+
+<blockquote><pre>
+$ <strong>history</strong>
+</pre></blockquote>
+
+<h3>1.2. パイプの使い方</h3>
+
+<blockquote><pre>
+$ <strong>ls -l</strong>
+$ <strong>ls -l | wc</strong>
+$ <strong>ls -l | sort</strong>
+$ <strong>ls -l | sort -k4</strong>
+$ <strong>ls -l | sort -k4 -r</strong>
+$ <strong>ls -l | sort -k4 -r -n</strong>
+$ <strong>ls -l | awk '{print $5;}'</strong>
+$ <strong>ls -l | awk '{a+=$5;}'</strong>
+$ <strong>ls -l | awk 'BEGIN{a=0;} {a+=$5;} END{print(a);}'</strong>
+$ <strong>ls -l | awk '/euske/ {print $4;}' | uniq</strong>
+$ <strong>ls -l | awk '/euske/ {print $4;}' | uniq -c</strong>
+$ <strong>ls -l | awk '/euske/ {print $4;}' | uniq -c | wc</strong>
+</pre></blockquote>
+
+<blockquote><pre>
+$ <strong>find ~</strong>
+$ <strong>find ~ -type f</strong>
+$ <strong>find ~ -type f | grep test</strong>
+$ <strong>find ~ -type f | grep -i test</strong>
+$ <strong>find ~ -type f | grep -i test | wc</strong>
+$ <strong>find ~ -type f -name '*test*'</strong>
+$ <strong>find ~ -type d -ctime -3</strong>
+$ <strong>find ~ -type d -mtime +3</strong>
+$ <strong>find ~ -type d -mtime +3</strong>
+</pre></blockquote>
+
+<h3>1.3. shスクリプトの基本</h3>
+
+<blockquote><pre>
+$ <strong>chmod 755 foo.sh</strong>
+</pre></blockquote>
+
+<blockquote><pre>
+#!/bin/sh
+</pre></blockquote>
+
+<blockquote><pre>
+`<em>コマンド</em>`
+または
+$(<em>コマンド</em>)
+</pre></blockquote>
+
+<blockquote><pre>
+echo "foo"
+echo "$1"
+a="$1"
+b="$a $a"
+</pre></blockquote>
+
+<blockquote><pre>
+if <em>式</em>; then ...; else ...; fi
+</pre></blockquote>
+
+<blockquote><pre>
+if <em>式</em>; then
+    ...
+else
+    ...
+fi
+</pre></blockquote>
+
+<blockquote><pre>
+for <em>変数</em> in <em>式</em>; do
+    ...
+done
+</pre></blockquote>
+
+<blockquote><pre>
+while read <em>変数</em>; do
+    ...
+done
+</pre></blockquote>
+
+<blockquote><pre>
+case 式 in
+パターン1)
+    ...
+    ;;
+パターン2)
+    ...
+    ;;
+*)
+    ...
+    ;;
+esac
+</pre></blockquote>
+
+<h3>1.4. xargs</h3>
+
+<blockquote><pre>
+$ <strong>cat files.txt</strong>
+a.txt
+b.txt
+c.txt
+$ <strong>cat files.txt | xargs echo</strong>
+$ <strong>cat files.txt | xargs cat</strong>
+$ <strong>find -type d | xargs ls</strong>
+</pre></blockquote>
+
+<h3>1.5. 実験パイプラインの設計</h3>
+
+<ul>
+<li> できるだけ各コマンドが
+<strong>ひとつだけ</strong>のことをするように設計する。
+<li> できるだけ標準入力から入力を受けとり、標準出力に結果を表示する:
+<blockquote><pre>
+$ <strong>cmd1 input.txt | cmd2 | cmd3 &gt; output.txt</strong>
+</pre></blockquote>
+<li> 途中結果を確認したい場合:
+<blockquote><pre>
+$ <strong>cmd1 input.txt</strong>
+</pre></blockquote>
+<li> 途中結果を保存しておき、後で続きをやりたい場合:
+<blockquote><pre>
+$ <strong>cmd1 input.txt &gt; temp.txt</strong>
+$ <strong>cmd2 &lt; temp.txt | cmd3 &gt; output.txt</strong>
+</pre></blockquote>
+<li> 途中結果をモニタしたい場合:
+<blockquote><pre>
+$ <strong>cmd1 input.txt | tee temp.txt | cmd2 | cmd3 &gt; output.txt</strong>
+</pre></blockquote>
+</ul>
+
+<h4>a. フィルタとして設計する場合</h4>
+<blockquote><pre>
+$ <em>コマンド</em> [<em>オプション</em>] &lt; <em>入力ファイル</em> &gt; <em>出力ファイル</em>
+</pre></blockquote>
+
+<h4>b. 1つのファイルを入力する場合</h4>
+<blockquote><pre>
+$ <em>コマンド</em> [<em>オプション</em>] <em>入力ファイル</em>
+</pre></blockquote>
+
+<h4>c. 可変個のファイルを入力する場合 (理想形)</h4>
+<blockquote><pre>
+$ <em>コマンド</em> [<em>オプション</em>] <em>入力ファイル1</em> <em>入力ファイル2</em> ...
+</pre></blockquote>
+こうしておくと
+<blockquote><pre>
+$ <strong>find ... | <em>コマンド</em> [<em>オプション</em>]</strong>
+</pre></blockquote>
+のようにできる。
+
 
 <h2>2. 実験データの管理</h2>
-<p>
-パイプラインの設計、
-ディレクトリ構造、
-ファイル名のつけ方、
-条件を変えて何度も実行する場合。
 
-<h2>3. データのSerializationについて</h2>
+<h3>2.1. ファイル名のつけ方</h3>
 <p>
-テキスト、CSV, XML, JSON, SQLite
+基本戦略は、シェルのワイルドカード (<kbd>*</kbd>) で
+ある条件をもったファイルだけを簡単に指定できるようにすることである。
+<ul>
+<li> 規則的にする。(日付・条件・用途によって予測可能にする)
+<li> 一定の prefix をつける。
+<ul>
+  <li> ×: <code>jikken</code>, <code>jiken2</code>, ..., <code>kekka3</code>
+  <li> ○: <code>jikken_1</code>, <code>jikken_2</code>, ..., <code>jikken_3</code>
+</ul>
+<li> データの種類・用途によって拡張子を変える。
+  <ul>
+    <li> <code>jikken_2.input</code>
+    <li> <code>jikken_2.output</code>
+    <li> <code>jikken_2.graph</code>
+    <li> <code>jikken_2.graph.svg</code>
+  </ul>
+<li> 数値が入る場合は、桁数を揃える。
+<ul>
+  <li> ×: <code>f1</code>, <code>f2</code>, ..., <code>f443</code>
+  <li> ○: <code>f0001</code>, <code>f0002</code>, ..., <code>f0443</code>
+</ul>
+</ul>
 
-<h2>4. 大量のデータを蓄積・処理する場合のTips</h2>
+<h3>2.2. ディレクトリ構造</h3>
 <p>
-可能なかぎり stream可能にする。
-ディスク上に置けるものはディスク上に置く。
+基本的にUNIXのファイル名は<strong>逐次探索</strong>である!
+したがって、あまり1個のディレクトリに沢山のファイルを置かないこと
+(せいぜい1000個程度)。
+<p>
+それからパス名が長くなりすぎると見にくいし、入力も大変。
+<ol>
+<li> データの種類・用途ごとにまとめる (<code>input/</code>, <code>output/</code>)
+<li> 日付ごとにまとめる (<code>s201909121012/</code>, ...)
+<li> 実験条件ごとにまとめる (<code>data_seg01_p3_q4/</code>, ...)
+<li> 1., 2., 3. の混合 (<code>data_201909121012_seg01_p3_input</code>, ...)
+</ol>
+
+
+<h2>3. 大量のデータを蓄積・処理する場合のTips</h2>
+<p>
+可能なかぎり stream可能にする (データ形式が重要)。
+<p>
+速度が重要 (parseに時間をかけない)。
+<p>
+変更頻度が少ないものはディスク上に置く。
+<p>
+参照頻度が多くても、シーク可能ならディスク上に置けるかもしれない。
+(OSがキャッシュするので)
+<p>
 計算をはしょる、ごまかす、後回しにする。
 
-<h2>5. Python から SQLite を使う</h2>
 
-<h2>6. Python による決定木の実装</h2>
+<h2>4. データのSerializationについて</h2>
 
-<h2>7. Python による Naive Bayes の実装</h2>
+<h3>4.1. 考慮する要素</h3>
+<ul>
+<li> 複雑さ (数値、テキスト、構造体)
+<li> データ量 (オンメモリ, 10GBytes, 1TBytes)
+<li> 変更する頻度 (0回、それ以上)
+<li> 参照パターン (シークの要・不要)
+<li> 共有度
+<li> キャッシュ可能性
+</ul>
+<p>
+できるだけ既存のツール・ライブラリで処理できるようにする。
 
-<h2>8. Vector Space Model を使った類似度計算</h2>
+<h3>4.2. テキストファイル (自分フォーマット)</h3>
+<p>
+おすすめしない。
+
+<h3>4.3. バイナリファイル (自分フォーマット)</h3>
+<p>
+<u>超</u>おすすめしない。
+<p>
+超簡単なデータだけならいいかも
+(たとえば 32ビット列のひたすら羅列とか)。
+
+<h3>4.4. CSV</h3>
+<p>
+簡単。
+Excelで編集できる。微妙に仕様が一貫してない。
+(とくに <kbd>&quot;</kbd> や <kbd>,</kbd> が入ったセルの場合)
+巨大なデータには向かない。シーク不可。書き換え不可。
+
+<h3>4.5. JSON</h3>
+<p>
+簡単。
+エディタで見れる。言語非依存。
+ストリーム可。シーク不可。書き換え不可。
+
+<h3>4.6. XML</h3>
+<p>
+複雑なデータ向け。エディタで見にくい。言語非依存。
+巨大なデータには向かない。シーク不可。書き換え不可。
+
+<h3>4.7. SQLite</h3>
+<p>
+型が決まっているデータ向け。エディタで見にくい。言語非依存。
+4GぐらいのデータまでならOK。シーク可。書き換え可。
+
+
+<h2>5. Python から CSV/JSON/SQLite を使う</h2>
+
+
+<h2>6. Vector Space Model を使った類似度計算</h2>
+
+<h2>7. Python による決定木の実装</h2>
+
+<h2>8. Python による Naive Bayes の実装</h2>
 
 
 <hr>
