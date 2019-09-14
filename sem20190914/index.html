@@ -11,8 +11,9 @@ h3 { border-bottom: solid 1px #000080; }
 table { border-collapse: collapse; margin: 0.5em; }
 kbd { border: 1px solid black; padding: 4px; margin: 4px; }
 code { font-weight: bold; color: purple; }
+em { color: blue; }
 .h { text-align: right; }
-.q { border: 2px solid black; padding: 1em; margin: 1em; background: #ff8; }
+.q { border: 2px solid black; padding: 1em; margin: 1em; }
 .figure { border: 1px solid black; text-align: center; padding: 0.5em; margin: 0.5em; }
 .exp { border: 1px solid black; padding: 1em; margin: 1em; }
 pre { border: 1px solid black; padding: 0.3em; }
@@ -92,11 +93,57 @@ baa,1
 特殊な記号 (<kbd>{</kbd>, <kbd>}</kbd>, <kbd>$</kbd>, <kbd>*</kbd>, <kbd>;</kbd>) を
 引数に渡す場合は <kbd>'〜'</kbd> で囲む。
 
+<div class=q>
+<strong>演習.</strong>
+カレントディレクトリの中にある「<code>-t</code>」というファイル中から
+<code>*</code> という文字列を検索する <code>grep</code> コマンドを書け。
+</div>
+
+<h3>1.2. 変数の活用</h3>
+
 <blockquote><pre>
-$ <strong>history</strong>
+a="foo"
+echo "$a"
+b="$a $a"
+c='$a $a'
+d='$a '"$a"
 </pre></blockquote>
 
-<h3>1.2. パイプの使い方</h3>
+<div class=q>
+<strong>演習.</strong>
+シェル変数と環境変数の違いは何か?
+</div>
+
+<h3>1.3. Historyを活用する</h3>
+<p>
+「こんなコマンドを実行したはずなんだけど、なんだっけ」
+
+<blockquote><pre>
+$ <strong>history | grep <em>なんか</em></strong>
+</pre></blockquote>
+<p>
+<strong>注意:</strong>
+historyファイルはときどき消されることがある。
+
+<h4>過去のコマンドラインをすべて記録しておく</h4>
+<blockquote><pre>
+function _prompt_cmd {
+    local s=$?
+    echo "`date '+%Y-%m-%d %H:%M:%S'` $HOSTNAME:$$ $PWD ($s) `history 1`" &gt;&gt; $MYHISTFILE
+}
+PROMPT_COMMAND=_prompt_cmd
+</pre></blockquote>
+<p>
+コマンドラインの記録は、そのまま実験ノートにもなる。
+あとで実験手順を再現したいときに参考になる。
+
+<h3>1.4. パイプの使い方</h3>
+
+<div class=q>
+<strong>演習.</strong>
+以下のコマンドラインを順に実行し、
+つぎの表現が何をするか予測せよ。
+</div>
 
 <blockquote><pre>
 $ <strong>ls -l</strong>
@@ -125,28 +172,39 @@ $ <strong>find ~ -type d -mtime +3</strong>
 $ <strong>find ~ -type d -mtime +3</strong>
 </pre></blockquote>
 
-<h3>1.3. shスクリプトの基本</h3>
+<h3>1.5. shスクリプトの基本</h3>
+
+<p>
+shスクリプトはこの行から始める。
+<blockquote><pre>
+#!/bin/sh
+  または
+#!/bin/bash
+</pre></blockquote>
 
 <blockquote><pre>
 $ <strong>chmod 755 foo.sh</strong>
 </pre></blockquote>
 
+<h4>コマンドライン引数の扱い</h4>
+
 <blockquote><pre>
-#!/bin/sh
+echo "$0"
+a=$1
+shift
+b=$1
+c="$@"
 </pre></blockquote>
+
+<h4>あるプロセスの標準出力を値として使う</h4>
 
 <blockquote><pre>
 `<em>コマンド</em>`
-または
+  または
 $(<em>コマンド</em>)
 </pre></blockquote>
 
-<blockquote><pre>
-echo "foo"
-echo "$1"
-a="$1"
-b="$a $a"
-</pre></blockquote>
+<h4>よく使う制御構造</h4>
 
 <blockquote><pre>
 if <em>式</em>; then ...; else ...; fi
@@ -166,6 +224,13 @@ for <em>変数</em> in <em>式</em>; do
 done
 </pre></blockquote>
 
+<div class=q>
+<strong>演習.</strong>
+与えられた引数を1行ずつ表示するシェルスクリプトを書け。
+ただし、その行が <kbd>foo</kbd> であるときのみ、
+<kbd>bar</kbd> と表示すること。
+</div>
+
 <blockquote><pre>
 while read <em>変数</em>; do
     ...
@@ -173,11 +238,11 @@ done
 </pre></blockquote>
 
 <blockquote><pre>
-case 式 in
-パターン1)
+case <em>式</em> in
+<em>パターン1</em>)
     ...
     ;;
-パターン2)
+<em>パターン2</em>)
     ...
     ;;
 *)
@@ -186,7 +251,7 @@ case 式 in
 esac
 </pre></blockquote>
 
-<h3>1.4. xargs</h3>
+<h3>1.6. xargs を使う</h3>
 
 <blockquote><pre>
 $ <strong>cat files.txt</strong>
@@ -198,7 +263,14 @@ $ <strong>cat files.txt | xargs cat</strong>
 $ <strong>find -type d | xargs ls</strong>
 </pre></blockquote>
 
-<h3>1.5. 実験パイプラインの設計</h3>
+<h3>1.7. 実験パイプラインの設計</h3>
+
+<p>
+UNIXプログラムのお約束:
+<ul>
+<li> 出力は、標準出力に。
+<li> ログは、標準エラー出力に。
+</ul>
 
 <ul>
 <li> できるだけ各コマンドが
@@ -236,11 +308,112 @@ $ <em>コマンド</em> [<em>オプション</em>] <em>入力ファイル</em>
 <blockquote><pre>
 $ <em>コマンド</em> [<em>オプション</em>] <em>入力ファイル1</em> <em>入力ファイル2</em> ...
 </pre></blockquote>
+ファイル名が与えられない場合は標準入力を使用する。
+<p>
 こうしておくと
 <blockquote><pre>
 $ <strong>find ... | <em>コマンド</em> [<em>オプション</em>]</strong>
 </pre></blockquote>
 のようにできる。
+<p>
+また、実験パラメータの変更はコードをじかに変更するのではなく、
+コマンドラインオプションとして処理すること。
+<h4>例</h4>
+<blockquote><pre>
+$ <strong>exp1 -a1 -p2 -k0 input.txt &gt; output_a1_p2_k0.txt</strong>
+$ <strong>exp1 -a2 -p3 -k5 input.txt &gt; output_a2_p3_k5.txt</strong>
+...
+</pre></blockquote>
+
+<h4>ログに関する注意</h4>
+<p>
+ログは、たとえ人間が読む場合でも、
+なるべく機械的に処理できるようにしておくこと。
+(grep/awk 等でのおおまかな統計が簡単にとれる。)
+<ul>
+<li> ×: <code>print("kokodayo", x, y)</code>
+<li> ○: <code>print(n"DEBUG: data read complete: x={x}, y={y}.")</code>
+</ul>
+
+<h4>長く走らせるスクリプト</h4>
+
+<blockquote><pre>
+#!/bin/sh
+exec &lt;/dev/null
+exec &gt;log
+exec 2&gt;&amp;1
+renice +20 -p $$
+
+echo "*** START `date` ***"
+/usr/bin/time -v <em>実際のコマンド</em>
+echo "*** END `date` ***"
+</pre></blockquote>
+
+<h3>1.8. Pythonスクリプトの定石</h3>
+<p>
+Pythonスクリプトは慣例によりこの行から始める。
+<blockquote><pre>
+#!/usr/bin/env python
+</pre></blockquote>
+<p>
+だいたい以下のようなパターンで書くと、
+上に示した「お約束」に沿ったコマンドになる。
+<blockquote><pre>
+import sys
+import fileinput
+
+def doit(args):
+    for line in fileinput.input(args):
+        print(line)
+    return
+
+def main(argv):
+    import getopt
+    def usage():
+        print('usage: %s [-d] [-o output] [file ...]' % argv[0])
+        return 100
+    try:
+        (opts, args) = getopt.getopt(argv[1:], 'do:')
+    except getopt.GetoptError:
+        return usage()
+    debug = 0
+    output = None
+    for (k, v) in opts:
+        if k == '-d': debug += 1
+        elif k == '-o': output = v
+    return doit(args)
+
+if __name__ == '__main__': sys.exit(main(sys.argv))
+</pre></blockquote>
+
+<ul>
+<li> <code>sys.argv</code> でコマンドライン引数を取得。
+<li> <code>getopt</code> でオプションを取得。
+<li> <code>main()</code> 関数はコマンドラインの解析のみをおこない
+  実際の処理は <code>doit()</code> 関数に正式なパラメータを渡してやらせる。
+  (これにより、他モジュールから利用することが可能)
+</ul>
+
+<blockquote><pre>
+$ <strong>python test.py input.txt</strong>
+  または
+$ <strong>test.py input.txt</strong>
+  または
+$ <strong>cat input.txt | test.py</strong>
+</pre></blockquote>
+
+<div class=q>
+<strong>演習.</strong>
+<ol>
+<li> 上のプログラムを書き換え、
+  変数 <code>debug</code> により <code>doit()</code> 内の
+  なんらかの挙動が変わるようにせよ。
+<li> 引数をとる <code>-p</code> オプションを追加せよ:
+<blockquote><pre>
+$ <strong>test.py -p 4 input.txt</strong>
+</pre></blockquote>
+</ol>
+</div>
 
 
 <h2>2. 実験データの管理</h2>
@@ -250,7 +423,14 @@ $ <strong>find ... | <em>コマンド</em> [<em>オプション</em>]</strong>
 基本戦略は、シェルのワイルドカード (<kbd>*</kbd>) で
 ある条件をもったファイルだけを簡単に指定できるようにすることである。
 <ul>
+<li> <strong>名前</strong>は重要である。できるだけ意味がわかる名前にすること。
+  (さもないと、あとでワケわかんなくなる)
 <li> 規則的にする。(日付・条件・用途によって予測可能にする)
+<ul>
+  <li> <code>src_exp1_ver2.csv</code>
+  <li> <code>result-v4-20190803-temp.txt</code>
+  <li> <code>out.3cddd4d137ad4f794a8ccf0763b4d5a6450934b5</code>
+</ul>
 <li> 一定の prefix をつける。
 <ul>
   <li> ×: <code>jikken</code>, <code>jiken2</code>, ..., <code>kekka3</code>
@@ -272,8 +452,8 @@ $ <strong>find ... | <em>コマンド</em> [<em>オプション</em>]</strong>
 
 <h3>2.2. ディレクトリ構造</h3>
 <p>
-基本的にUNIXのファイル名は<strong>逐次探索</strong>である!
-したがって、あまり1個のディレクトリに沢山のファイルを置かないこと
+基本的にUNIXのファイル名は<strong>逐次探索</strong>である。
+したがって、あまり1個のディレクトリに沢山のファイルを置くと遅くなる
 (せいぜい1000個程度)。
 <p>
 それからパス名が長くなりすぎると見にくいし、入力も大変。
@@ -289,15 +469,20 @@ $ <strong>find ... | <em>コマンド</em> [<em>オプション</em>]</strong>
 <p>
 可能なかぎり stream可能にする (データ形式が重要)。
 <p>
-速度が重要 (parseに時間をかけない)。
+なるべく高速に parse できる形式にする。
+(しかし自己流バイナリ形式はおすすめしない)
 <p>
-変更頻度が少ないものはディスク上に置く。
+変更頻度が少ないものはディスク上に置いてもよい。
 <p>
 参照頻度が多くても、シーク可能ならディスク上に置けるかもしれない。
 (OSがキャッシュするので)
-<p>
-計算をはしょる、ごまかす、後回しにする。
 
+<h4>高速化のためのよくある手段</h4>
+<ul>
+<li> 計算をサボる。(事前条件の強化)
+<li> 計算をごまかす。(近似値の使用)
+<li> 計算を後回しにする/先にやっておく。(キャッシュ・lookup tableの使用)
+</ul>
 
 <h2>4. データのSerializationについて</h2>
 
@@ -305,58 +490,272 @@ $ <strong>find ... | <em>コマンド</em> [<em>オプション</em>]</strong>
 <ul>
 <li> 複雑さ (数値、テキスト、構造体)
 <li> データ量 (オンメモリ, 10GBytes, 1TBytes)
-<li> 変更する頻度 (0回、それ以上)
+<li> 変更する頻度 (0回 / 1回以上)
 <li> 参照パターン (シークの要・不要)
-<li> 共有度
+<li> 共有度 (複数のプロセス、タスク、マシン間で?)
 <li> キャッシュ可能性
+<li> 堅牢性 (データの一部が崩れても全体に影響を与えないか?)
 </ul>
 <p>
+<strong>重要:</strong>
 できるだけ既存のツール・ライブラリで処理できるようにする。
 
 <h3>4.2. テキストファイル (自分フォーマット)</h3>
 <p>
 おすすめしない。
+もしやるとしたら、parseが簡単にできるようにすること。
+
+<h4>新山がときどき使っているフォーマット</h4>
+<blockquote><pre>
+# コメント
++キー1 バリュー1
++キー2 バリュー2
+(空行がレコード区切り)
+</pre></blockquote>
+
+<ul>
+<li> 利点: 特定のフィールドが grep で簡単に見れる。データに注釈が入れられる。
+Pythonで簡単に解析可能。エディタで修正が簡単。
+<li> 欠点: 自己流。
+1行 = 1レコードではない。
+</ul>
+
+<blockquote><pre>
+rec = {}
+for line in fp:
+    line = line.strip()
+    if line.startswith('#'): continue
+    if line.startswith('+'):
+        (k,_,v) = line.partition(' ')
+        rec[k] = v
+    elif not line:
+        yield rec
+        rec = {}
+</pre></blockquote>
 
 <h3>4.3. バイナリファイル (自分フォーマット)</h3>
 <p>
-<u>超</u>おすすめしない。
+<strong>超</strong>おすすめしない。
 <p>
-超簡単なデータだけならいいかも
-(たとえば 32ビット列のひたすら羅列とか)。
+簡単なデータだけならいいかも
+(たとえば 32ビット列の羅列ひたすら1G個とか)。
 
-<h3>4.4. CSV</h3>
-<p>
-簡単。
-Excelで編集できる。微妙に仕様が一貫してない。
+<h3>4.4. よく知られている形式 (おすすめ)</h3>
+
+<h4>CSV</h4>
+<ul>
+<li> 利点:
+簡単。テキスト。
+Excelで編集できる。
+<li> 欠点:
+微妙に仕様が標準化されていない。
 (とくに <kbd>&quot;</kbd> や <kbd>,</kbd> が入ったセルの場合)
 巨大なデータには向かない。シーク不可。書き換え不可。
+</ul>
 
-<h3>4.5. JSON</h3>
-<p>
-簡単。
-エディタで見れる。言語非依存。
-ストリーム可。シーク不可。書き換え不可。
+<h4>JSON</h4>
+<ul>
+<li> 利点:
+簡単。テキスト。言語非依存。
+ストリーム可。
+<li> 欠点:
+巨大になるとエディタでは見にくい。
+シーク不可。書き換え不可。
+</ul>
 
-<h3>4.6. XML</h3>
-<p>
-複雑なデータ向け。エディタで見にくい。言語非依存。
-巨大なデータには向かない。シーク不可。書き換え不可。
+<h4>XML</h4>
+<ul>
+<li> 利点:
+複雑な階層構造をもったデータ向け。テキスト。言語非依存。
+<li> 欠点:
+巨大になるとエディタでは見にくい。
+シーク不可。書き換え不可。
+</ul>
 
-<h3>4.7. SQLite</h3>
+<h4>SQLite</h4>
+<ul>
+<li> 利点:
+型が決まっているデータ向け。
+言語非依存。
+4Gぐらいのデータまでなら余裕。
+シーク可。書き換え可。堅牢。
+<li> 欠点:
+あらかじめテーブルの設計が必要。
+ツールを使わないと見れない。
+</ul>
+
+<h4>SQLite + JSON</h4>
 <p>
-型が決まっているデータ向け。エディタで見にくい。言語非依存。
-4GぐらいのデータまでならOK。シーク可。書き換え可。
+複雑な構造 × 膨大な数があるときに使う方法。
+
+<h3>4.5. もっと高度な方法</h3>
+<p>
+ProtocolBuffer, HDF, MongoDB, ...
+<p>
+導入に手間がかかりすぎて、個人でやる実験には向かない。
 
 
 <h2>5. Python から CSV/JSON/SQLite を使う</h2>
 
+<h3>5.1. CSV</h3>
+<h4>書き込み</h4>
+<blockquote><pre>
+import csv
+with open('output.csv', 'w') as fp:
+    writer = csv.writer(fp)
+    writer.writerow(['a', 'b', 'ccc'])
+</pre></blockquote>
+
+<h4>読み込み</h4>
+<blockquote><pre>
+import csv
+with open('input.csv') as fp:
+    for row in csv.reader(fp):
+        print(row)
+</pre></blockquote>
+
+<h3>5.2. JSON</h3>
+<h4>書き込み</h4>
+<blockquote><pre>
+import json
+with open(output.json') as fp:
+    data = {'a':123, b:['x','y']}
+    fp.write(json.dumps(data))
+</pre></blockquote>
+
+<h4>読み込み</h4>
+<blockquote><pre>
+import json
+with open('input.json') as fp:
+    for line in fp:
+        data = json.loads(line)
+</pre></blockquote>
+
+<h3>5.3. SQLite</h3>
+
+<h4>書き込み</h4>
+<blockquote><pre>
+import sqlite3
+db = sqlite3.connect('data.db')
+cur = db.cursor()
+cur.executescript('''
+CREATE TABLE Student (
+    Id INTEGER PRIMARY KEY,
+    Name TEXT,
+    Score INTEGER);
+''')
+for (name,id,score) in scores:
+    cur.execute('INSERT INTO Student VALUES (?, ?, ?);', name, id, score)
+</pre></blockquote>
+
+<h4>読み込み</h4>
+<blockquote><pre>
+import sqlite3
+db = sqlite3.connect('data.db')
+cur = db.cursor()
+for row in cur.execute('SELECT Name,Id FROM Student;'):
+    (name,id) = row
+</pre></blockquote>
 
 <h2>6. Vector Space Model を使った類似度計算</h2>
+<p>
+Vector Space Model (VSM) とは離散的な素性からなる
+データの類似度を計算する簡単な方法である。
+<div class=exp>
+A = {a<sub>i</sub>}, B = {b<sub>i</sub>}
+</div>
+というデータがあるとき、簡単な方法では:
+<div class=exp>
+Jaccard係数 = (A &cup; B) / (A &cap; B)
+</div>
+<p>
+VSM はこれをもうちょっと高度にしたもので、
+各素性の「重み (頻度)」を考慮する。
+これはようするに
+{a<sub>i</sub>}, {b<sub>i</sub>} の各要素を並べ、これを
+ベクトルとしてみたときの cosine距離である:
+<div class=exp>
+類似度 = &Sigma; (a<sub>i</sub> &times; b<sub>i</sub>) /
+&radic; (&Sigma; |a<sub>i</sub>|<sup>2</sup>) &times;
+&radic; (&Sigma; |b<sub>i</sub>|<sup>2</sup>)
+</div>
+<p>
+これがなぜうまくいくのかは、次の例を考えてみるとわかる。
+<p>
+(揃っているときの図)
+<p>
+(揃ってないときの図)
+<p>
+さらに、次のようなケースもある:
+<p>
+(高さが違うときの図)
 
-<h2>7. Python による決定木の実装</h2>
+<h3>6.1. Pythonによる実装</h3>
+<p>
+各素性の集合からなるベクトルは、Python では辞書 (<code>dict</code>) として
+表すのがもっとも自然である。そこで、2つの与えられた辞書オブジェクトから
+cosine距離を求めるような関数 <code>calcdot()</code> を作る。
 
-<h2>8. Python による Naive Bayes の実装</h2>
+<blockquote><pre>
+def calcdot(a, b):
+    ...
+    return
 
+v1 = {'x':1, 'y':2}
+v2 = {'x':2, 'y':1, 'z':3}
+print(calcdot(v1, v2))  # 0.47809144373375745
+</pre></blockquote>
+
+<div class=q>
+<strong>演習.</strong>
+上の関数を完成させよ。
+</div>
+
+<h3>6.2. 実際のデータへの適用</h3>
+<ul>
+<li> <a href="enwiki-20140102-10000.txt.gz">Wikipedia英語版の記事データ (10000記事)</a>
+</ul>
+<div class=q>
+<strong>演習a.</strong>
+上の記事データをダウンロードし、
+各記事中の単語を単純な正規表現で切り出してカウントする
+Python プログラムを書け。
+このデータは以下のような構造になっている。
+<blockquote><pre>
+# 2428190 Melbourne Shuffle
+The Melbourne Shuffle (also known as Rocking or simply The Shuffle) is
+a rave and club dance that originated in the late 1980s in the
+underground rave music scene in Melbourne, Australia. The basic
+...
+(空行)
+# 442370 List of prime numbers
+By Euclid's theorem, there is an infinite number of prime
+numbers. Subsets of the prime numbers may be generated with various
+formulas for primes. The first 500 primes are listed below, followed
+...
+(空行)
+</pre></blockquote>
+<p>
+<strong>演習b.</strong>
+各記事ID, 記事タイトルおよび a. でカウントした頻度情報 (JSON形式) を
+入れる SQLテーブルを設計し、SQLiteを使って10000記事ぶんの情報を
+格納したデータベースを作成せよ。
+<p>
+<strong>演習c.</strong>
+上で設計した関数 <code>calcdot()</code> を
+10000×10000のベクトル対に適用し、
+もっとも高い類似度をもつ記事ペアを表示せよ。
+</div>
+
+
+<h2>7. 類似度をもちいたクラスタリングの実装</h2>
+(次回)
+
+<h2>8. Python による決定木の実装</h2>
+(次回)
+
+<h2>9. Python による Naive Bayes の実装</h2>
+(次回)
 
 <hr>
 <address>Yusuke Shinyama</address>
