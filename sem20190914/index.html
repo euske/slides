@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <html>
 <head>
 <title>権藤研 講習会資料 2019/09/14 Python + SQLiteを使った実験データ処理</title>
@@ -129,7 +130,8 @@ historyファイルはときどき消されることがある。
 <blockquote><pre>
 function _prompt_cmd {
     local s=$?
-    echo "`date '+%Y-%m-%d %H:%M:%S'` $HOSTNAME:$$ $PWD ($s) `history 1`" &gt;&gt; $MYHISTFILE
+    echo "`date '+%Y-%m-%d %H:%M:%S'` $HOSTNAME:$$ $PWD ($s) " \
+         "`history 1`" &gt;&gt; $MYHISTFILE
 }
 PROMPT_COMMAND=_prompt_cmd
 </pre></blockquote>
@@ -332,7 +334,7 @@ $ <strong>exp1 -a2 -p3 -k5 input.txt &gt; output_a2_p3_k5.txt</strong>
 (grep/awk 等でのおおまかな統計が簡単にとれる。)
 <ul>
 <li> ×: <code>print("kokodayo", x, y)</code>
-<li> ○: <code>print(n"DEBUG: data read complete: x={x}, y={y}.")</code>
+<li> ○: <code>print(f"DEBUG: data read complete: x={x}, y={y}.")</code>
 </ul>
 
 <h4>長く走らせるスクリプト</h4>
@@ -666,7 +668,7 @@ A = {a<sub>i</sub>}, B = {b<sub>i</sub>}
 </div>
 というデータがあるとき、簡単な方法では:
 <div class=exp>
-Jaccard係数 = (A &cup; B) / (A &cap; B)
+Jaccard係数 = (A &cap; B) / (A &cup; B)
 </div>
 <p>
 VSM はこれをもうちょっと高度にしたもので、
@@ -745,6 +747,9 @@ formulas for primes. The first 500 primes are listed below, followed
 上で設計した関数 <code>calcdot()</code> を
 10000×10000のベクトル対に適用し、
 もっとも高い類似度をもつ記事ペアを表示せよ。
+<p>
+(注意: 一般に、自然言語文の類似度計算には
+各単語の出現頻度だけでなく、単語の重み (IDF) も考慮している)
 </div>
 
 
