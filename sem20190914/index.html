@@ -793,7 +793,7 @@ Pythonの<code>fileinput</code>にオプションを与えると、gzipをその
 <p>
 まずSQLiteのテーブルを作成しよう。
 <blockquote><pre>
-db = sqlite3.connect('data.db')
+db = sqlite3.connect('articles.db')
 cur = db.cursor()
 cur.executescript('''
 CREATE TABLE Article (
@@ -808,6 +808,8 @@ CREATE TABLE Article (
 <blockquote><pre>
 cur.execute('INSERT INTO Article VALUES(?,?,?);',
             (artid, title, json.dumps(wordcount)))
+<span class=comment># 注意: commitしないとデータは書き込まれない。</span>
+db.commit()
 </pre></blockquote>
 
 <div class=q>
@@ -818,6 +820,8 @@ cur.execute('INSERT INTO Article VALUES(?,?,?);',
 </div>
 
 <h4>ヒント</h4>
+<p>
+これは別の Python スクリプトにする。
 <p>
 基本戦略は、すべての記事対 |A| &times; |B| に対して、
 <code>calcdot(a,b)</code> を計算し、最高となる a, b を求めればよい:
@@ -848,9 +852,9 @@ for (i,a) in <mark>enumerate(articles)</mark>:
 毎回 SQLite から記事のベクトルを読み込むことにする。
 
 <blockquote><pre>
-def getarticle(artid):
+def getarticle(cur, artid):
     for (wordcount,) in cur.execute(
-        'SELECT Words FROM Article WHERE ArtId = ?;', (artid,))
+        'SELECT Words FROM Article WHERE ArtId = ?;', (artid,)):
         return json.loads(wordcount)
 
 <span class=comment># すべての Artid のリストを取得。(これは小さい)</span>
@@ -887,12 +891,13 @@ for ...:
 groups = {}
 
 def connect(p, q):
-    if p not in groups and q not in groups:
-        <span class=comment># p, q どちらもグループに含まれていない場合: 新規グループを作成する。</span>
-        g = Group()
-        g.add(p)
-        g.add(q)
-        groups[p] = groups[q] = g
+    if p in groups and q in groups:
+        <span class=comment># p, q 両方が別々のグループに含まれている場合: g[p] と g[q] を統合する。</span>
+        g = groups[p]
+        g.merge(groups[q])
+        <span class=comment># 各要素の所属をつけかえる。</span>
+        for x in g.artids:
+            groups[x] = g
     elif p in groups:
         <span class=comment># p のみがグループに含まれている場合: q を g[p] に追加する。</span>
         groups[p].add(q)
@@ -900,12 +905,11 @@ def connect(p, q):
         <span class=comment># q のみがグループに含まれている場合: p を g[q] に追加する。</span>
         groups[q].add(p)
     else:
-        <span class=comment># p, q 両方がグループに含まれている場合: g[p] と g[q] を統合する。</span>
-        g = groups[p]
-        g.merge(groups[q])
-        <span class=comment># 各要素の所属をつけかえる。</span>
-        for x in g.artids:
-            groups[x] = g
+        <span class=comment># p, q どちらもグループに含まれていない場合: 新規グループを作成する。</span>
+        g = Group()
+        g.add(p)
+        g.add(q)
+        groups[p] = groups[q] = g
 </pre></blockquote>
 <p>
 Group はクラスを使ってこのように定義する。
@@ -936,6 +940,17 @@ class Group:
 <li> もっとも相対エントロピーが高い split を選択する。
 <li> 再帰的に split を繰り返す。
 </ul>
+
+まずエントロピーを計算する関数 calcent(p) を作成する。
+
+<div class=exp>
+E(P) = &Sigma; <em>p</em> &times; log(<em>p</em>)
+</div>
+
+<blockquote><pre>
+def calcent(P):
+    return sum( p*log(p) for p in P )
+</pre></blockquote>
 
 <h2>9. Python による Naive Bayes の実装</h2>
 (次回)
