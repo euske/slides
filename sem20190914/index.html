@@ -16,6 +16,7 @@ em { color: blue; }
 .h { text-align: right; }
 .q { border: 2px solid black; padding: 1em; margin: 1em; }
 .figure { border: 1px solid black; text-align: center; padding: 0.5em; margin: 0.5em; }
+.comment { color: green; }
 .exp { border: 1px solid black; padding: 1em; margin: 1em; }
 pre { border: 1px solid black; padding: 0.3em; }
 --></style>
@@ -717,6 +718,7 @@ print(calcdot(v1, v2))  # 0.47809144373375745
 <ul>
 <li> <a href="enwiki-20140102-10000.txt.gz">Wikipedia英語版の記事データ (10000記事)</a>
 </ul>
+
 <div class=q>
 <strong>演習a.</strong>
 上の記事データをダウンロードし、
@@ -737,27 +739,203 @@ formulas for primes. The first 500 primes are listed below, followed
 ...
 (空行)
 </pre></blockquote>
+</div>
+
+<h4>ヒント</h4>
 <p>
+まず文字列を単語のリストに変換する関数 <code>splitwords</code> を考える。
+とりあえず、正規表現を使って簡単にやる:
+<blockquote><pre>
+import re
+def splitwords(text):
+    return [ w.lower() for w in re.findall(r'\w+', text) ]
+</pre></blockquote>
+<p>
+つぎに上の <code>doit()</code> を改良して、
+読み込みんだデータファイルを解析する:
+<blockquote><pre>
+def doit(args):
+    for line in fileinput.input(args):
+        line = line.strip()
+        if line.startswith('#'):
+            (artid, _, title) = line[2:].partition(' ')
+            artid = int(artid)
+        elif line:
+            <span class=comment># 単語に区切る。</span>
+            words = splitwords(line)
+        else:
+            <span class=comment># この時点で artid, title, words が設定されているはず。</span>
+            print(artid, title, words)
+            <span class=comment># 各単語の頻度情報を格納した辞書 wordcount を求める。</span>
+            wordcount = countwords(words)
+</pre></blockquote>
+<p>
+gzip圧縮されたデータを読み込むには、以下のようにする手もあるが:
+<blockquote><pre>
+$ <strong>gzip -dc enwiki-20140102-10000.txt.gz | python doit.py</strong>
+</pre></blockquote>
+<p>
+Pythonの<code>fileinput</code>にオプションを与えると、gzipをそのまま読み込むことができる。
+(ただし、UTF-8をデコードする必要があるので注意!)
+<blockquote><pre>
+    for line in fileinput.input(args, <mark>openhook=fileinput.hook_compressed</mark>):
+        ...
+</pre></blockquote>
+
+<div class=q>
 <strong>演習b.</strong>
 各記事ID, 記事タイトルおよび a. でカウントした頻度情報 (JSON形式) を
 入れる SQLテーブルを設計し、SQLiteを使って10000記事ぶんの情報を
 格納したデータベースを作成せよ。
+</div>
+
+<h4>ヒント</h4>
 <p>
+まずSQLiteのテーブルを作成しよう。
+<blockquote><pre>
+db = sqlite3.connect('data.db')
+cur = db.cursor()
+cur.executescript('''
+CREATE TABLE Article (
+    ArtId INTEGER PRIMARY KEY,
+    Title TEXT,
+    Words TEXT);
+''')
+</pre></blockquote>
+<p>
+ここに、上で求めた <code>(artid, title, wordcount)</code> を INSERT していく。
+ただし、<code>wordcount</code> は辞書なので、JSONに変換する:
+<blockquote><pre>
+cur.execute('INSERT INTO Article VALUES(?,?,?);',
+            (artid, title, json.dumps(wordcount)))
+</pre></blockquote>
+
+<div class=q>
 <strong>演習c.</strong>
 上で設計した関数 <code>calcdot()</code> を
 10000×10000のベクトル対に適用し、
 もっとも高い類似度をもつ記事ペアを表示せよ。
-<p>
-(注意: 一般に、自然言語文の類似度計算には
-各単語の出現頻度だけでなく、単語の重み (IDF) も考慮している)
 </div>
+
+<h4>ヒント</h4>
+<p>
+基本戦略は、すべての記事対 |A| &times; |B| に対して、
+<code>calcdot(a,b)</code> を計算し、最高となる a, b を求めればよい:
+<blockquote><pre>
+articles = [ ... ]
+maxsim = 0
+maxpair = None
+for a in articles:
+    for b in articles:
+        sim = calcdot(a, b)
+        if maxsim &lt; sim:
+            maxsim = sim
+            maxpair = (a,b)
+</pre></blockquote>
+<p>
+実際には <code>calcdot(a,b) == calcdot(b,a)</code> であることを
+利用して、計算時間を半分にする:
+<blockquote><pre>
+for (i,a) in <mark>enumerate(articles)</mark>:
+    for b in <mark>articles[i+1:]</mark>:
+        sim = calcdot(a, b)
+        ...
+</pre></blockquote>
+<p>
+問題は、<code>articles</code> は巨大で
+一度にメモリに読み込みたくないということである。
+そこで、まず <code>artid</code> の一覧を取得し
+毎回 SQLite から記事のベクトルを読み込むことにする。
+
+<blockquote><pre>
+def getarticle(artid):
+    for (wordcount,) in cur.execute(
+        'SELECT Words FROM Article WHERE ArtId = ?;', (artid,))
+        return json.loads(wordcount)
+
+<span class=comment># すべての Artid のリストを取得。(これは小さい)</span>
+artids = [ artid for (artid,) in cur.execute('SELECT ArtId FROM Article;') ]
+</pre></blockquote>
+
+<p>
+(注意: なお、ここで紹介した方法は完璧ではない。
+一般的には、自然言語文の類似度計算には
+各単語の出現頻度だけでなく、単語の重み (IDF) も考慮している)
 
 
 <h2>7. 類似度をもちいたクラスタリングの実装</h2>
-(次回)
+<p>
+上で求めた類似度の計算を使って、類似記事をグループ化
+(クラスタリング) してみる。ここではもっとも簡単に、
+クラスタ間の最短距離 (半径) でまとめることを考える:
+<blockquote><pre>
+<span class=comment># しきい値</span>
+threshold = 0.9
+
+for ...:
+    a = getarticle(artid1)
+    b = getarticle(artid2)
+    sim = calcdot(a, b)
+    if threshold &lt; sim:
+       <span class=comment># まとめる</span>
+       connect(artid1, artid2)
+</pre></blockquote>
+<p>
+関数 <code>connect(p, q)</code> は、すこし複雑である:
+<blockquote><pre>
+<span class=comment># 各グループの所属を保持する辞書:</span>
+groups = {}
+
+def connect(p, q):
+    if p not in groups and q not in groups:
+        <span class=comment># p, q どちらもグループに含まれていない場合: 新規グループを作成する。</span>
+        g = Group()
+        g.add(p)
+        g.add(q)
+        groups[p] = groups[q] = g
+    elif p in groups:
+        <span class=comment># p のみがグループに含まれている場合: q を g[p] に追加する。</span>
+        groups[p].add(q)
+    elif q in groups:
+        <span class=comment># q のみがグループに含まれている場合: p を g[q] に追加する。</span>
+        groups[q].add(p)
+    else:
+        <span class=comment># p, q 両方がグループに含まれている場合: g[p] と g[q] を統合する。</span>
+        g = groups[p]
+        g.merge(groups[q])
+        <span class=comment># 各要素の所属をつけかえる。</span>
+        for x in g.artids:
+            groups[x] = g
+</pre></blockquote>
+<p>
+Group はクラスを使ってこのように定義する。
+<blockquote><pre>
+class Group:
+
+    def __init__(self):
+        self.artids = []
+        return
+
+    def add(self, artid):
+        self.artids.append(artid)
+        return
+
+    def merge(self, group):
+        self.artids.extend(group.artids)
+        return
+</pre></blockquote>
 
 <h2>8. Python による決定木の実装</h2>
-(次回)
+<ul>
+<li> <a href="picnic.csv">picnic.csv</a>
+</ul>
+<p>
+基本的な手順:
+<ul>
+<li> 使う素性をいっこ選び、その素性を使った 「split」を列挙する。
+<li> もっとも相対エントロピーが高い split を選択する。
+<li> 再帰的に split を繰り返す。
+</ul>
 
 <h2>9. Python による Naive Bayes の実装</h2>
 (次回)
