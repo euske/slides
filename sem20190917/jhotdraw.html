@@ -1,0 +1,3686 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<style>
+h1 { border-bottom: 4px solid black; }
+h2 { color: white; background: black; padding: 4px; }
+h3 { border-bottom: 1px solid black; margin-top: 0.5em; }
+pre { margin: 0 1em 1em 1em; border: 1px solid gray; }
+.support { margin: 1em; padding: 1em; border: 2px solid black; }
+.old { background: #ccccff; }
+.old mark { color: white; background: blue; }
+.new { background: #88ff88; }
+.match { background: #ffcccc; }
+.match mark { color: white; background: red; }
+</style>
+<script>
+function toggle(id) {
+  let e = document.getElementById(id);
+  e.hidden = !e.hidden;
+  return false;
+}
+</script>
+<body>
+<h2>Proposal 0: <code class=old><mark>new</mark></code> / <code class=old><mark>affected</mark></code> / <code class=old><mark>figures</mark></code> &rarr; <code class=new><mark>fe</mark></code> &nbsp; (49.518)</h2>
+<h3><code class=old><mark>newAffectedFigures</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoRedoActivity.java <pre>
+     ...
+
+   82:	
+   83:	public void setAffectedFigures(<mark>FigureEnumeration newAffectedFigures</mark>) {
+   84:		getReversedActivity().setAffectedFigures(<mark>newAffectedFigures</mark>);
+   85:	}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[1, '', ':assign_var:fe']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/FastBufferedUpdateStrategy.java <pre>
+     ...
+
+   72:			Drawing theDrawing = view.drawing();
+   73:			FigureEnumeration <mark>fe = theDrawing.figures(viewClipRectangle2)</mark>;
+   74:
+     ...
+
+   77:			imageGraphics.fillRect(nX1, nY1, nX2-nX1, nY2-nY1);
+   78:			view.draw(imageGraphics, <mark><mark>fe</mark></mark>);
+   79:
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/NullDrawingView.java <pre>
+     ...
+
+  324:	 */
+  325:	public void draw(Graphics g, <mark>FigureEnumeration fe</mark>) {
+  326:		// ignore: do nothing
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_0_0')">[+]</a> Match<br>
+<div id=S_0_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoRedoActivity.java <pre>
+     ...
+
+   83:	public void setAffectedFigures(FigureEnumeration newAffectedFigures) {
+   84:		getReversedActivity().setAffectedFigures(<mark>newAffectedFigures</mark>);
+   85:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AlignCommand.java <pre>
+     ...
+
+  213:
+  214:		public void setAffectedFigures(<mark>FigureEnumeration fe</mark>) {
+  215:			// first make copy of FigureEnumeration in superclass
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[1, '', '#arg0:call:affected']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AlignCommand.java <pre>
+     ...
+
+  213:
+  214:		public void setAffectedFigures(<mark>FigureEnumeration fe</mark>) {
+  215:			// first make copy of FigureEnumeration in superclass
+  216:			<mark>super.setAffectedFigures(<mark><mark>fe</mark></mark>)</mark>;
+  217:			// then get new FigureEnumeration of copy to save aligment
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_0_1')">[+]</a> Match<br>
+<div id=S_0_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoRedoActivity.java <pre>
+     ...
+
+   83:	public void setAffectedFigures(FigureEnumeration newAffectedFigures) {
+   84:		getReversedActivity().setAffectedFigures(<mark>newAffectedFigures</mark>);
+   85:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AlignCommand.java <pre>
+     ...
+
+  213:
+  214:		public void setAffectedFigures(<mark>FigureEnumeration fe</mark>) {
+  215:			// first make copy of FigureEnumeration in superclass
+  216:			<mark>super.setAffectedFigures(<mark>fe</mark>)</mark>;
+  217:			// then get new FigureEnumeration of copy to save aligment
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[1, '', ':assign_var:figures']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/FigureTransferCommand.java <pre>
+     ...
+
+   48:	*/
+   49:	protected void copyFigures(<mark>FigureEnumeration fe</mark>, int figureCount) {
+   50:		Clipboard.getClipboard().setContents(new StandardFigureSelection(<mark><mark>fe</mark></mark>, figureCount));
+   51:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardFigureSelection.java <pre>
+     ...
+
+   41:	 */
+   42:	public StandardFigureSelection(<mark>FigureEnumeration figures</mark>, int figureCount) {
+   43:		// a FigureSelection is represented as a flattened ByteStream
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_0_2')">[+]</a> Match<br>
+<div id=S_0_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoRedoActivity.java <pre>
+     ...
+
+   83:	public void setAffectedFigures(FigureEnumeration newAffectedFigures) {
+   84:		getReversedActivity().setAffectedFigures(<mark>newAffectedFigures</mark>);
+   85:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoableAdapter.java <pre>
+     ...
+
+   69:	
+   70:	public void setAffectedFigures(<mark>FigureEnumeration newAffectedFigures</mark>) {
+   71:		// the enumeration is not reusable therefore a copy is made
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeAttributeCommand.java <pre>
+     ...
+
+  140:
+  141:		public void setAffectedFigures(<mark>FigureEnumeration fe</mark>) {
+  142:			// first make copy of FigureEnumeration in superclass
+  143:			super.setAffectedFigures(<mark>fe</mark>);
+  144:			// then get new FigureEnumeration of copy to save attributes
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 1: <code class=old><mark>f</mark></code> &rarr; <code class=new><mark>figure</mark></code> / <code class=old><mark>f</mark></code> &nbsp; (46.385)</h2>
+<h3><code class=old><mark>f</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeAttributeCommand.java <pre>
+     ...
+
+  102:			while (k.hasMoreElements()) {
+  103:				Figure <mark>f = k.nextFigure()</mark>;
+  104:				if (getBackupValue() != null) {
+  105:					<mark>f</mark>.setAttribute(getAttributeName(), getBackupValue());
+  106:				}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[1, '', 'obj:assign_field:attributes']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/CustomSelectionTool.java <pre>
+     ...
+
+  133:	protected void handlePopupMenu(MouseEvent e, int x, int y) {
+  134:		Figure <mark>figure = drawing().findFigure(e.getX(), e.getY())</mark>;
+  135:		if (<mark>figure</mark> != null) {
+  136:			Object attribute = <mark>figure</mark>.getAttribute(Figure.POPUP_MENU);
+  137:			if (attribute == null) {
+  138:				<mark>figure</mark> = drawing().findFigureInside(e.getX(), e.getY());
+  139:			}
+  140:			if (<mark>figure</mark> != null) {
+  141:				showPopupMenu(<mark><mark>figure</mark></mark>, e.getX(), e.getY(), e.getComponent());
+  142:			}
+     ...
+
+  155:	 */
+  156:	protected void showPopupMenu(<mark>Figure figure</mark>, int x, int y, Component comp) {
+  157:		Object attribute = <mark>figure</mark>.getAttribute(Figure.POPUP_MENU);
+  158:		if ((attribute != null) &amp;&amp; (attribute instanceof JPopupMenu)) {
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/AttributeFigure.java <pre>
+     ...
+
+  112:	private static void initializeAttributes() {
+  113:		<mark>fgDefaultAttributes</mark> = new FigureAttributes();
+  114:		fgDefaultAttributes.set(&quot;FrameColor&quot;, Color.black);
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_1_0')">[+]</a> Match<br>
+<div id=S_1_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeAttributeCommand.java <pre>
+     ...
+
+  104:				if (getBackupValue() != null) {
+  105:					<mark>f</mark>.setAttribute(getAttributeName(), getBackupValue());
+  106:				}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/AttributeFigure.java <pre>
+     ...
+
+  151:		if (fAttributes == null)
+  152:			<mark>fAttributes</mark> = new FigureAttributes();
+  153:		fAttributes.set(name, value);
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[1, '', 'obj:ref_field:attributes']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/CustomSelectionTool.java <pre>
+     ...
+
+  133:	protected void handlePopupMenu(MouseEvent e, int x, int y) {
+  134:		Figure <mark>figure = drawing().findFigure(e.getX(), e.getY())</mark>;
+  135:		if (<mark>figure</mark> != null) {
+  136:			Object attribute = <mark>figure</mark>.getAttribute(Figure.POPUP_MENU);
+  137:			if (attribute == null) {
+  138:				<mark>figure</mark> = drawing().findFigureInside(e.getX(), e.getY());
+  139:			}
+  140:			if (<mark>figure</mark> != null) {
+  141:				showPopupMenu(<mark><mark>figure</mark></mark>, e.getX(), e.getY(), e.getComponent());
+  142:			}
+     ...
+
+  155:	 */
+  156:	protected void showPopupMenu(<mark>Figure figure</mark>, int x, int y, Component comp) {
+  157:		Object attribute = <mark>figure</mark>.getAttribute(Figure.POPUP_MENU);
+  158:		if ((attribute != null) &amp;&amp; (attribute instanceof JPopupMenu)) {
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/AttributeFigure.java <pre>
+     ...
+
+  119:		fgDefaultAttributes.set(&quot;FontSize&quot;,   new Integer(12));
+  120:		<mark>fgDefaultAttributes</mark>.set(&quot;FontStyle&quot;,  new Integer(Font.PLAIN));
+  121:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_1_1')">[+]</a> Match<br>
+<div id=S_1_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeAttributeCommand.java <pre>
+     ...
+
+  104:				if (getBackupValue() != null) {
+  105:					<mark>f</mark>.setAttribute(getAttributeName(), getBackupValue());
+  106:				}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/AttributeFigure.java <pre>
+     ...
+
+  152:			fAttributes = new FigureAttributes();
+  153:		<mark>fAttributes</mark>.set(name, value);
+  154:		changed();
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[1, '', 'obj:ref_field:font']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/CustomSelectionTool.java <pre>
+     ...
+
+  133:	protected void handlePopupMenu(MouseEvent e, int x, int y) {
+  134:		Figure <mark>figure = drawing().findFigure(e.getX(), e.getY())</mark>;
+  135:		if (<mark>figure</mark> != null) {
+  136:			Object attribute = <mark>figure</mark>.getAttribute(Figure.POPUP_MENU);
+  137:			if (attribute == null) {
+  138:				<mark>figure</mark> = drawing().findFigureInside(e.getX(), e.getY());
+  139:			}
+  140:			if (<mark>figure</mark> != null) {
+  141:				showPopupMenu(<mark><mark>figure</mark></mark>, e.getX(), e.getY(), e.getComponent());
+  142:			}
+     ...
+
+  155:	 */
+  156:	protected void showPopupMenu(<mark>Figure figure</mark>, int x, int y, Component comp) {
+  157:		Object attribute = <mark>figure</mark>.getAttribute(Figure.POPUP_MENU);
+  158:		if ((attribute != null) &amp;&amp; (attribute instanceof JPopupMenu)) {
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/TextFigure.java <pre>
+     ...
+
+  111:	public Font getFont() {
+  112:		return <mark>fFont</mark>;
+  113:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_1_2')">[+]</a> Match<br>
+<div id=S_1_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeAttributeCommand.java <pre>
+     ...
+
+  104:				if (getBackupValue() != null) {
+  105:					<mark>f</mark>.setAttribute(getAttributeName(), getBackupValue());
+  106:				}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/TextFigure.java <pre>
+     ...
+
+  111:	public Font getFont() {
+  112:		return <mark>fFont</mark>;
+  113:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 2: <code class=old><mark>text</mark></code> / <code class=old><mark>owner</mark></code> &rarr; <code class=new><mark>figure</mark></code> / <code class=new><mark>f</mark></code> &nbsp; (29.996)</h2>
+<h3><code class=old><mark>textOwner</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/FontSizeHandle.java <pre>
+     ...
+
+   36:	public void invokeStep (int x, int y, int anchorX, int anchorY, DrawingView view) {
+   37:		TextFigure <mark>textOwner = (TextFigure) owner()</mark>;
+   38:
+     ...
+
+   40:		int newSize = activity.getFont().getSize() + y-anchorY;
+   41:		<mark>textOwner</mark>.setFont(new Font(activity.getFont().getName(), activity.getFont().getStyle(), newSize));
+   42:	}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[1, '', '#arg0:new:change']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/DragNDropTool.java <pre>
+     ...
+
+  232:		else {
+  233:			Figure <mark>figure = drawing().findFigure(e.getX(), e.getY())</mark>;
+  234:			if (<mark>figure</mark> != null) {
+  235:				//fChild = createDragTracker(view(), figure);
+  236:				if (e.isShiftDown()) {
+  237:				   view().toggleSelection(<mark>figure</mark>);
+  238:				} else if( !view().selection().contains(<mark>figure</mark>)) {
+  239:					view().clearSelection();
+  240:					view().addToSelection(<mark><mark>figure</mark></mark>);
+  241:				}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  467:	 */
+  468:	public void addToSelection(<mark>Figure figure</mark>) {
+  469:		if (!isFigureSelected(figure) &amp;&amp; drawing().includes(figure)) {
+     ...
+
+  471:			fSelectionHandles = null;
+  472:			<mark>figure</mark>.invalidate();
+  473:			fireSelectionChanged();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+  245:			r.grow(Handle.HANDLESIZE, Handle.HANDLESIZE);
+  246:			fListener.figureInvalidated(<mark>new FigureChangeEvent(<mark>this</mark>, r)</mark>);
+  247:		}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_2_0')">[+]</a> Match<br>
+<div id=S_2_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+  245:			r.grow(Handle.HANDLESIZE, Handle.HANDLESIZE);
+  246:			fListener.figureInvalidated(<mark>new FigureChangeEvent(<mark>this</mark>, r)</mark>);
+  247:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/FontSizeHandle.java <pre>
+     ...
+
+   40:		int newSize = activity.getFont().getSize() + y-anchorY;
+   41:		<mark>textOwner</mark>.setFont(new Font(activity.getFont().getName(), activity.getFont().getStyle(), newSize));
+   42:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[1, '', '#this:call:invalidate']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/DragNDropTool.java <pre>
+     ...
+
+  232:		else {
+  233:			Figure <mark>figure = drawing().findFigure(e.getX(), e.getY())</mark>;
+  234:			if (<mark>figure</mark> != null) {
+  235:				//fChild = createDragTracker(view(), figure);
+  236:				if (e.isShiftDown()) {
+  237:				   view().toggleSelection(<mark>figure</mark>);
+  238:				} else if( !view().selection().contains(<mark>figure</mark>)) {
+  239:					view().clearSelection();
+  240:					view().addToSelection(<mark><mark>figure</mark></mark>);
+  241:				}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  467:	 */
+  468:	public void addToSelection(<mark>Figure figure</mark>) {
+  469:		if (!isFigureSelected(figure) &amp;&amp; drawing().includes(figure)) {
+     ...
+
+  471:			fSelectionHandles = null;
+  472:			<mark><mark>figure</mark>.invalidate()</mark>;
+  473:			fireSelectionChanged();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_2_1')">[+]</a> Match<br>
+<div id=S_2_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+  266:	public void changed() {
+  267:		<mark>invalidate()</mark>;
+  268:		if (fListener != null) {
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/FontSizeHandle.java <pre>
+     ...
+
+   40:		int newSize = activity.getFont().getSize() + y-anchorY;
+   41:		<mark>textOwner</mark>.setFont(new Font(activity.getFont().getName(), activity.getFont().getStyle(), newSize));
+   42:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[1, '', '#arg0:new:event']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/DragNDropTool.java <pre>
+     ...
+
+  232:		else {
+  233:			Figure <mark>figure = drawing().findFigure(e.getX(), e.getY())</mark>;
+  234:			if (<mark>figure</mark> != null) {
+  235:				//fChild = createDragTracker(view(), figure);
+  236:				if (e.isShiftDown()) {
+  237:				   view().toggleSelection(<mark>figure</mark>);
+  238:				} else if( !view().selection().contains(<mark>figure</mark>)) {
+  239:					view().clearSelection();
+  240:					view().addToSelection(<mark><mark>figure</mark></mark>);
+  241:				}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  467:	 */
+  468:	public void addToSelection(<mark>Figure figure</mark>) {
+  469:		if (!isFigureSelected(figure) &amp;&amp; drawing().includes(figure)) {
+     ...
+
+  471:			fSelectionHandles = null;
+  472:			<mark>figure</mark>.invalidate();
+  473:			fireSelectionChanged();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+  245:			r.grow(Handle.HANDLESIZE, Handle.HANDLESIZE);
+  246:			fListener.figureInvalidated(<mark>new FigureChangeEvent(<mark>this</mark>, r)</mark>);
+  247:		}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_2_2')">[+]</a> Match<br>
+<div id=S_2_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+  245:			r.grow(Handle.HANDLESIZE, Handle.HANDLESIZE);
+  246:			fListener.figureInvalidated(<mark>new FigureChangeEvent(<mark>this</mark>, r)</mark>);
+  247:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/FontSizeHandle.java <pre>
+     ...
+
+   40:		int newSize = activity.getFont().getSize() + y-anchorY;
+   41:		<mark>textOwner</mark>.setFont(new Font(activity.getFont().getName(), activity.getFont().getStyle(), newSize));
+   42:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 3: <code class=old><mark>target</mark></code> &rarr; <code class=new><mark>figure</mark></code> &nbsp; (25.052)</h2>
+<h3><code class=old><mark>target</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChopBoxConnector.java <pre>
+     ...
+
+   70:
+   71:	protected Point chop(<mark>Figure target</mark>, Point from) {
+   72:		Rectangle r = <mark>target</mark>.displayBox();
+   73:		return Geom.angleToPoint(r, (Geom.pointToAngle(r, from)));
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[-1, '', ':ref_var:figure']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/CustomSelectionTool.java <pre>
+     ...
+
+  140:			if (figure != null) {
+  141:				showPopupMenu(<mark>figure</mark>, e.getX(), e.getY(), e.getComponent());
+  142:			}
+     ...
+
+  155:	 */
+  156:	protected void showPopupMenu(<mark><mark>Figure figure</mark></mark>, int x, int y, Component comp) {
+  157:		Object attribute = <mark>figure</mark>.getAttribute(Figure.POPUP_MENU);
+  158:		if ((attribute != null) &amp;&amp; (attribute instanceof JPopupMenu)) {
+     ...
+
+  160:			if (popup instanceof PopupMenuFigureSelection) {
+  161:				((PopupMenuFigureSelection)popup).setSelectedFigure(<mark><mark>figure</mark></mark>);
+  162:			}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_3_0')">[+]</a> Match<br>
+<div id=S_3_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChopBoxConnector.java <pre>
+     ...
+
+   67:
+   68:		return chop(<mark>endFigure</mark>, r1c);
+   69:	}
+   70:
+   71:	protected Point chop(<mark>Figure target</mark>, Point from) {
+   72:		Rectangle r = <mark>target</mark>.displayBox();
+   73:		return Geom.angleToPoint(r, (Geom.pointToAngle(r, from)));
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[1, '', '#this:call:decorated']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/CustomSelectionTool.java <pre>
+     ...
+
+  133:	protected void handlePopupMenu(MouseEvent e, int x, int y) {
+  134:		Figure <mark>figure = drawing().findFigure(e.getX(), e.getY())</mark>;
+  135:		if (<mark>figure</mark> != null) {
+  136:			Object attribute = <mark>figure</mark>.getAttribute(Figure.POPUP_MENU);
+  137:			if (attribute == null) {
+  138:				<mark>figure</mark> = drawing().findFigureInside(e.getX(), e.getY());
+  139:			}
+  140:			if (<mark>figure</mark> != null) {
+  141:				showPopupMenu(<mark><mark>figure</mark></mark>, e.getX(), e.getY(), e.getComponent());
+  142:			}
+     ...
+
+  155:	 */
+  156:	protected void showPopupMenu(<mark>Figure figure</mark>, int x, int y, Component comp) {
+  157:		Object attribute = <mark>figure</mark>.getAttribute(Figure.POPUP_MENU);
+  158:		if ((attribute != null) &amp;&amp; (attribute instanceof JPopupMenu)) {
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  237:	public Object getAttribute(String name) {
+  238:		return <mark>getDecoratedFigure()</mark>.getAttribute(name);
+  239:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_3_1')">[+]</a> Match<br>
+<div id=S_3_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChopBoxConnector.java <pre>
+     ...
+
+   71:	protected Point chop(Figure target, Point from) {
+   72:		Rectangle r = <mark>target</mark>.displayBox();
+   73:		return Geom.angleToPoint(r, (Geom.pointToAngle(r, from)));
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/BorderDecorator.java <pre>
+     ...
+
+   83:	public Rectangle displayBox() {
+   84:		Rectangle r = <mark>getDecoratedFigure()</mark>.displayBox();
+   85:		r.grow(getBorderOffset().x, getBorderOffset().y);
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>endFigure</mark></code> &nbsp; (<code>[-1, '', ':call:owner']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/ElbowHandle.java <pre>
+     ...
+
+   88:		Figure startFigure = line.getStartConnector().owner();
+   89:		Figure <mark><mark>endFigure = <mark>line.getEndConnector().owner()</mark></mark></mark>;
+   90:		Rectangle start = startFigure.displayBox();
+   91:		Rectangle end = <mark>endFigure</mark>.displayBox();
+   92:		Insets i1 = startFigure.connectionInsets();
+   93:		Insets i2 = <mark><mark>endFigure</mark></mark>.connectionInsets();
+   94:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_3_2')">[+]</a> Match<br>
+<div id=S_3_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChopBoxConnector.java <pre>
+     ...
+
+   56:	public Point findEnd(ConnectionFigure connection) {
+   57:		Figure <mark>endFigure = <mark>connection.getEndConnector().owner()</mark></mark>;
+   58:		Rectangle r1 = connection.getStartConnector().displayBox();
+     ...
+
+   67:
+   68:		return chop(<mark>endFigure</mark>, r1c);
+   69:	}
+   70:
+   71:	protected Point chop(<mark>Figure target</mark>, Point from) {
+   72:		Rectangle r = <mark>target</mark>.displayBox();
+   73:		return Geom.angleToPoint(r, (Geom.pointToAngle(r, from)));
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 4: <code class=old><mark>f</mark></code> / <code class=old><mark>scribble</mark></code> &rarr; <code class=new><mark>polygon</mark></code> / <code class=old><mark>f</mark></code> &nbsp; (24.634)</h2>
+<h3><code class=old><mark>fScribble</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/ScribbleTool.java <pre>
+     ...
+
+   48:		super.deactivate();
+   49:		if (<mark>fScribble</mark> != null) {
+   50:			if (<mark>fScribble</mark>.size().width &lt; 4 || <mark>fScribble</mark>.size().height &lt; 4) {
+   51:				drawing().remove(<mark>fScribble</mark>);
+   52:				// nothing to undo
+     ...
+
+   54:			}
+   55:			<mark>fScribble</mark> = null;
+   56:		}
+     ...
+
+   59:	private void point(int x, int y) {
+   60:		if (<mark>fScribble</mark> == null) {
+   61:			<mark>fScribble</mark> = new PolyLineFigure(x, y);
+   62:			setAddedFigure(view().add(<mark>fScribble</mark>));
+   63:		}
+   64:		else if (fLastX != x || fLastY != y) {
+   65:			<mark>fScribble</mark>.addPoint(x, y);
+   66:		}
+     ...
+
+   90:	public void mouseDrag(MouseEvent e, int x, int y) {
+   91:		if (<mark>fScribble</mark> != null) {
+   92:			point(e.getX(), e.getY());
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>fPolygon</mark></code> &nbsp; (<code>[2, '#arg0:call:add', '#arg0:call:added']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonTool.java <pre>
+     ...
+
+   45:		super.activate();
+   46:		<mark>fPolygon</mark> = null;
+   47:	}
+     ...
+
+   49:	public void deactivate() {
+   50:		if (<mark>fPolygon</mark> != null) {
+   51:			<mark>fPolygon</mark>.smoothPoints();
+   52:			if (<mark>fPolygon</mark>.pointCount() &lt; 3 ||
+   53:					<mark>fPolygon</mark>.size().width &lt; 4 || <mark>fPolygon</mark>.size().height &lt; 4) {
+   54:				drawing().remove(<mark>fPolygon</mark>);
+   55:				// nothing to undo
+     ...
+
+   58:		}
+   59:		<mark>fPolygon</mark> = null;
+   60:		super.deactivate();
+     ...
+
+   63:	private void addPoint(int x, int y) {
+   64:		if (<mark>fPolygon</mark> == null) {
+   65:			<mark>fPolygon</mark> = new PolygonFigure(x, y);
+   66:			<mark>setAddedFigure(<mark>view().add(<mark>fPolygon</mark>)</mark>)</mark>;
+   67:			<mark>fPolygon</mark>.addPoint(x, y);
+   68:		}
+   69:		else if (fLastX != x || fLastY != y) {
+   70:			<mark>fPolygon</mark>.addPoint(x, y);
+   71:		}
+     ...
+
+   82:		if (e.getClickCount() &gt;= 2) {
+   83:			if (<mark>fPolygon</mark> != null) {
+   84:				<mark>fPolygon</mark>.smoothPoints();
+   85:
+     ...
+
+   93:			}
+   94:			<mark>fPolygon</mark> = null;
+   95:
+     ...
+
+  105:	public void mouseMove(MouseEvent e, int x, int y) {
+  106:		if (<mark>fPolygon</mark> != null) {
+  107:			if (<mark>fPolygon</mark>.pointCount() &gt; 1) {
+  108:				<mark>fPolygon</mark>.setPointAt(new Point(x, y), <mark>fPolygon</mark>.pointCount()-1);
+  109:				view().checkDamage();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_4_0')">[+]</a> Match<br>
+<div id=S_4_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/ScribbleTool.java <pre>
+     ...
+
+   61:			fScribble = new PolyLineFigure(x, y);
+   62:			<mark>setAddedFigure(<mark>view().add(fScribble)</mark>)</mark>;
+   63:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fPolygon</mark></code> &nbsp; (<code>[2, '#arg0:call:add', '#arg0:call:set']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonTool.java <pre>
+     ...
+
+   45:		super.activate();
+   46:		<mark>fPolygon</mark> = null;
+   47:	}
+     ...
+
+   49:	public void deactivate() {
+   50:		if (<mark>fPolygon</mark> != null) {
+   51:			<mark>fPolygon</mark>.smoothPoints();
+   52:			if (<mark>fPolygon</mark>.pointCount() &lt; 3 ||
+   53:					<mark>fPolygon</mark>.size().width &lt; 4 || <mark>fPolygon</mark>.size().height &lt; 4) {
+   54:				drawing().remove(<mark>fPolygon</mark>);
+   55:				// nothing to undo
+     ...
+
+   58:		}
+   59:		<mark>fPolygon</mark> = null;
+   60:		super.deactivate();
+     ...
+
+   63:	private void addPoint(int x, int y) {
+   64:		if (<mark>fPolygon</mark> == null) {
+   65:			<mark>fPolygon</mark> = new PolygonFigure(x, y);
+   66:			<mark>setAddedFigure(<mark>view().add(<mark>fPolygon</mark>)</mark>)</mark>;
+   67:			<mark>fPolygon</mark>.addPoint(x, y);
+   68:		}
+   69:		else if (fLastX != x || fLastY != y) {
+   70:			<mark>fPolygon</mark>.addPoint(x, y);
+   71:		}
+     ...
+
+   82:		if (e.getClickCount() &gt;= 2) {
+   83:			if (<mark>fPolygon</mark> != null) {
+   84:				<mark>fPolygon</mark>.smoothPoints();
+   85:
+     ...
+
+   93:			}
+   94:			<mark>fPolygon</mark> = null;
+   95:
+     ...
+
+  105:	public void mouseMove(MouseEvent e, int x, int y) {
+  106:		if (<mark>fPolygon</mark> != null) {
+  107:			if (<mark>fPolygon</mark>.pointCount() &gt; 1) {
+  108:				<mark>fPolygon</mark>.setPointAt(new Point(x, y), <mark>fPolygon</mark>.pointCount()-1);
+  109:				view().checkDamage();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_4_1')">[+]</a> Match<br>
+<div id=S_4_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/ScribbleTool.java <pre>
+     ...
+
+   61:			fScribble = new PolyLineFigure(x, y);
+   62:			<mark>setAddedFigure(<mark>view().add(fScribble)</mark>)</mark>;
+   63:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fPolygon</mark></code> &nbsp; (<code>[2, '#arg0:call:add', ':assign_var:added']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonTool.java <pre>
+     ...
+
+   45:		super.activate();
+   46:		<mark>fPolygon</mark> = null;
+   47:	}
+     ...
+
+   49:	public void deactivate() {
+   50:		if (<mark>fPolygon</mark> != null) {
+   51:			<mark>fPolygon</mark>.smoothPoints();
+   52:			if (<mark>fPolygon</mark>.pointCount() &lt; 3 ||
+   53:					<mark>fPolygon</mark>.size().width &lt; 4 || <mark>fPolygon</mark>.size().height &lt; 4) {
+   54:				drawing().remove(<mark>fPolygon</mark>);
+   55:				// nothing to undo
+     ...
+
+   58:		}
+   59:		<mark>fPolygon</mark> = null;
+   60:		super.deactivate();
+     ...
+
+   63:	private void addPoint(int x, int y) {
+   64:		if (<mark>fPolygon</mark> == null) {
+   65:			<mark>fPolygon</mark> = new PolygonFigure(x, y);
+   66:			setAddedFigure(<mark>view().add(<mark>fPolygon</mark>)</mark>);
+   67:			<mark>fPolygon</mark>.addPoint(x, y);
+   68:		}
+   69:		else if (fLastX != x || fLastY != y) {
+   70:			<mark>fPolygon</mark>.addPoint(x, y);
+   71:		}
+     ...
+
+   82:		if (e.getClickCount() &gt;= 2) {
+   83:			if (<mark>fPolygon</mark> != null) {
+   84:				<mark>fPolygon</mark>.smoothPoints();
+   85:
+     ...
+
+   93:			}
+   94:			<mark>fPolygon</mark> = null;
+   95:
+     ...
+
+  105:	public void mouseMove(MouseEvent e, int x, int y) {
+  106:		if (<mark>fPolygon</mark> != null) {
+  107:			if (<mark>fPolygon</mark>.pointCount() &gt; 1) {
+  108:				<mark>fPolygon</mark>.setPointAt(new Point(x, y), <mark>fPolygon</mark>.pointCount()-1);
+  109:				view().checkDamage();
+     ...
+
+  131:
+  132:	private void setAddedFigure(<mark>Figure newAddedFigure</mark>) {
+  133:		myAddedFigure = newAddedFigure;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_4_2')">[+]</a> Match<br>
+<div id=S_4_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/ScribbleTool.java <pre>
+     ...
+
+   61:			fScribble = new PolyLineFigure(x, y);
+   62:			setAddedFigure(<mark>view().add(fScribble)</mark>);
+   63:		}
+     ...
+
+  103:
+  104:	private void setAddedFigure(<mark>Figure newAddedFigure</mark>) {
+  105:		myAddedFigure = newAddedFigure;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 5: <code class=old><mark>k</mark></code> &rarr; <code class=new><mark>fe</mark></code> &nbsp; (23.301)</h2>
+<h3><code class=old><mark>k</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/GroupFigure.java <pre>
+     ...
+
+   78:		super.setAttribute(name, value);
+   79:		FigureEnumeration <mark>k = figures()</mark>;
+   80:		while (<mark>k</mark>.hasMoreElements()) {
+   81:			<mark>k</mark>.nextFigure().setAttribute(name, value);
+   82:		}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[1, '', 'obj:assign_field:single']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonHandle.java <pre>
+     ...
+
+   85:		protected boolean movePointToOldLocation() {
+   86:			FigureEnumeration <mark>fe = getAffectedFigures()</mark>;
+   87:			if (!<mark>fe</mark>.hasMoreElements()) {
+   88:				return false;
+     ...
+
+   90:
+   91:			PolygonFigure figure = (PolygonFigure)<mark><mark>fe</mark></mark>.nextFigure();
+   92:			Point backupPoint = figure.pointAt(getPointIndex());
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/SingleFigureEnumerator.java <pre>
+     ...
+
+   57:		Figure returnFigure = (Figure)mySingleFigure;
+   58:		<mark>mySingleFigure</mark> = null;
+   59:		return returnFigure;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_5_0')">[+]</a> Match<br>
+<div id=S_5_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/SingleFigureEnumerator.java <pre>
+     ...
+
+   57:		Figure returnFigure = (Figure)mySingleFigure;
+   58:		<mark>mySingleFigure</mark> = null;
+   59:		return returnFigure;
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/GroupFigure.java <pre>
+     ...
+
+   78:		super.setAttribute(name, value);
+   79:		FigureEnumeration <mark>k = figures()</mark>;
+   80:		while (k.hasMoreElements()) {
+   81:			<mark>k</mark>.nextFigure().setAttribute(name, value);
+   82:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[1, '', 'obj:ref_field:enumeration']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonHandle.java <pre>
+     ...
+
+   85:		protected boolean movePointToOldLocation() {
+   86:			FigureEnumeration <mark>fe = getAffectedFigures()</mark>;
+   87:			if (!<mark>fe</mark>.hasMoreElements()) {
+   88:				return false;
+     ...
+
+   90:
+   91:			PolygonFigure figure = (PolygonFigure)<mark><mark>fe</mark></mark>.nextFigure();
+   92:			Point backupPoint = figure.pointAt(getPointIndex());
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ReverseFigureEnumerator.java <pre>
+     ...
+
+   52:	public Figure nextFigure() {
+   53:		return (Figure)<mark>fEnumeration</mark>.nextElement();
+   54:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_5_1')">[+]</a> Match<br>
+<div id=S_5_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/GroupFigure.java <pre>
+     ...
+
+   78:		super.setAttribute(name, value);
+   79:		FigureEnumeration <mark>k = figures()</mark>;
+   80:		while (k.hasMoreElements()) {
+   81:			<mark>k</mark>.nextFigure().setAttribute(name, value);
+   82:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ReverseFigureEnumerator.java <pre>
+     ...
+
+   52:	public Figure nextFigure() {
+   53:		return (Figure)<mark>fEnumeration</mark>.nextElement();
+   54:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[1, '', 'obj:ref_field:single']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonHandle.java <pre>
+     ...
+
+   85:		protected boolean movePointToOldLocation() {
+   86:			FigureEnumeration <mark>fe = getAffectedFigures()</mark>;
+   87:			if (!<mark>fe</mark>.hasMoreElements()) {
+   88:				return false;
+     ...
+
+   90:
+   91:			PolygonFigure figure = (PolygonFigure)<mark><mark>fe</mark></mark>.nextFigure();
+   92:			Point backupPoint = figure.pointAt(getPointIndex());
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/SingleFigureEnumerator.java <pre>
+     ...
+
+   56:	public Figure nextFigure() {
+   57:		Figure returnFigure = (Figure)<mark>mySingleFigure</mark>;
+   58:		mySingleFigure = null;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_5_2')">[+]</a> Match<br>
+<div id=S_5_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/SingleFigureEnumerator.java <pre>
+     ...
+
+   56:	public Figure nextFigure() {
+   57:		Figure returnFigure = (Figure)<mark>mySingleFigure</mark>;
+   58:		mySingleFigure = null;
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/GroupFigure.java <pre>
+     ...
+
+   78:		super.setAttribute(name, value);
+   79:		FigureEnumeration <mark>k = figures()</mark>;
+   80:		while (k.hasMoreElements()) {
+   81:			<mark>k</mark>.nextFigure().setAttribute(name, value);
+   82:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 6: <code class=old><mark>c</mark></code> &rarr; <code class=new><mark>connector</mark></code> / <code class=new><mark>end</mark></code> &nbsp; (22.061)</h2>
+<h3><code class=old><mark>c</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeConnectionEndHandle.java <pre>
+     ...
+
+   51:	 */
+   52:	protected void connect(<mark>Connector c</mark>) {
+   53:		getConnection().connectEnd(<mark>c</mark>);
+   54:	}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>newEndConnector</mark></code> &nbsp; (<code>[1, '', ':assign_var:connector']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/LineConnection.java <pre>
+     ...
+
+   81:	 */
+   82:	public void connectEnd(<mark>Connector newEndConnector</mark>) {
+   83:		setEndConnector(<mark><mark>newEndConnector</mark></mark>);
+   84:		endFigure().addFigureChangeListener(this);
+     ...
+
+  156:
+  157:	protected void setEndConnector(<mark>Connector newEndConnector</mark>) {
+  158:		myEndConnector = newEndConnector;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_6_0')">[+]</a> Match<br>
+<div id=S_6_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/LineConnection.java <pre>
+     ...
+
+   81:	 */
+   82:	public void connectEnd(<mark>Connector newEndConnector</mark>) {
+   83:		setEndConnector(<mark>newEndConnector</mark>);
+   84:		endFigure().addFigureChangeListener(this);
+     ...
+
+  156:
+  157:	protected void setEndConnector(<mark>Connector newEndConnector</mark>) {
+  158:		myEndConnector = newEndConnector;
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeConnectionEndHandle.java <pre>
+     ...
+
+   52:	protected void connect(Connector c) {
+   53:		getConnection().connectEnd(<mark>c</mark>);
+   54:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fEndConnector</mark></code> &nbsp; (<code>[1, '', '#arg0:call:connect']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  332:					Connector fStartConnector = cf.startFigure().connectorAt(ep.x, ep.y);
+  333:					Connector <mark>fEndConnector = cf.endFigure().connectorAt(sp.x, sp.y)</mark>;
+  334:		
+  335:					if (<mark>fEndConnector</mark> != null &amp;&amp; fStartConnector != null) {
+  336:						cf.connectStart(fStartConnector);
+  337:						<mark>cf.connectEnd(<mark><mark>fEndConnector</mark></mark>)</mark>;
+  338:						cf.updateConnection();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_6_1')">[+]</a> Match<br>
+<div id=S_6_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeConnectionEndHandle.java <pre>
+     ...
+
+   52:	protected void connect(Connector c) {
+   53:		<mark>getConnection().connectEnd(<mark>c</mark>)</mark>;
+   54:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>myEndConnector</mark></code> &nbsp; (<code>[2, '#arg0:call:end', ':call:attribute']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ConnectionTool.java <pre>
+     ...
+
+  360:			myStartConnector = getConnection().getStartConnector();
+  361:			<mark>myEndConnector</mark> = getConnection().getEndConnector();
+  362:	        setUndoable(true);
+     ...
+
+  397:			getConnection().connectStart(myStartConnector);
+  398:			<mark>getConnection().connectEnd(<mark>myEndConnector</mark>)</mark>;
+  399:			getConnection().updateConnection();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  237:	public Object getAttribute(String name) {
+  238:		return <mark>getDecoratedFigure().getAttribute(name)</mark>;
+  239:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_6_2')">[+]</a> Match<br>
+<div id=S_6_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeConnectionHandle.java <pre>
+     ...
+
+  123:		setPoint(x, y);
+  124:		<mark>connect(target)</mark>;
+  125:		getConnection().updateConnection();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeConnectionEndHandle.java <pre>
+     ...
+
+   52:	protected void connect(Connector c) {
+   53:		<mark>getConnection().connectEnd(c)</mark>;
+   54:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  237:	public Object getAttribute(String name) {
+  238:		return <mark>getDecoratedFigure().getAttribute(name)</mark>;
+  239:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 7: <code class=old><mark>evt</mark></code> &rarr; <code class=new><mark>e</mark></code> &nbsp; (20.495)</h2>
+<h3><code class=old><mark>evt</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoableTool.java <pre>
+     ...
+
+   88:	 */
+   89:	public void mouseMove(<mark>MouseEvent evt</mark>, int x, int y) {
+   90:		getWrappedTool().mouseMove(<mark>evt</mark>, x, y);
+   91:	}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>e</mark></code> &nbsp; (<code>[1, '', '#arg0:call:track']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ConnectionTool.java <pre>
+     ...
+
+  127:	 */
+  128:	public void mouseDrag(<mark>MouseEvent e</mark>, int x, int y) {
+  129:		Point p = new Point(<mark>e</mark>.getX(), <mark>e</mark>.getY());
+  130:		if (getConnection() != null) {
+  131:			<mark>trackConnectors(<mark><mark>e</mark></mark>, x, y)</mark>;
+  132:			if (getTargetConnector() != null) {
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_7_0')">[+]</a> Match<br>
+<div id=S_7_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ConnectionTool.java <pre>
+     ...
+
+   86:	 */
+   87:	public void mouseMove(<mark>MouseEvent e</mark>, int x, int y) {
+   88:		<mark>trackConnectors(<mark>e</mark>, x, y)</mark>;
+   89:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoableTool.java <pre>
+     ...
+
+   89:	public void mouseMove(MouseEvent evt, int x, int y) {
+   90:		getWrappedTool().mouseMove(<mark>evt</mark>, x, y);
+   91:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>e</mark></code> &nbsp; (<code>[1, '', ':assign_var:e']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/CustomSelectionTool.java <pre>
+     ...
+
+   51:	 */
+   52:	public void mouseDown(<mark>MouseEvent e</mark>, int x, int y) {
+   53:		// isPopupTrigger() at mouseDown() is only notified at UNIX systems
+   54:		if (<mark>e</mark>.isPopupTrigger()) {
+   55:			handlePopupMenu(<mark>e</mark>, x, y);
+   56:		}
+   57:		else {
+   58:			super.mouseDown(<mark>e</mark>, x, y);
+   59:			handleMouseDown(<mark><mark>e</mark></mark>, x, y);
+   60:		}
+     ...
+
+  104:	 */
+  105:	protected void handleMouseDown(<mark>MouseEvent e</mark>, int x, int y) {
+  106:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_7_1')">[+]</a> Match<br>
+<div id=S_7_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ConnectionTool.java <pre>
+     ...
+
+   86:	 */
+   87:	public void mouseMove(<mark>MouseEvent e</mark>, int x, int y) {
+   88:		trackConnectors(<mark>e</mark>, x, y);
+   89:	}
+     ...
+
+  240:
+  241:	protected void trackConnectors(<mark>MouseEvent e</mark>, int x, int y) {
+  242:		Figure c = null;
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoableTool.java <pre>
+     ...
+
+   89:	public void mouseMove(MouseEvent evt, int x, int y) {
+   90:		getWrappedTool().mouseMove(<mark>evt</mark>, x, y);
+   91:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>e</mark></code> &nbsp; (<code>[1, '', '#arg0:call:mouse']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/CustomSelectionTool.java <pre>
+     ...
+
+   51:	 */
+   52:	public void mouseDown(<mark>MouseEvent e</mark>, int x, int y) {
+   53:		// isPopupTrigger() at mouseDown() is only notified at UNIX systems
+   54:		if (<mark>e</mark>.isPopupTrigger()) {
+   55:			handlePopupMenu(<mark>e</mark>, x, y);
+   56:		}
+   57:		else {
+   58:			super.mouseDown(<mark>e</mark>, x, y);
+   59:			<mark>handleMouseDown(<mark><mark>e</mark></mark>, x, y)</mark>;
+   60:		}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_7_2')">[+]</a> Match<br>
+<div id=S_7_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoableTool.java <pre>
+     ...
+
+   89:	public void mouseMove(MouseEvent evt, int x, int y) {
+   90:		<mark>getWrappedTool().mouseMove(<mark>evt</mark>, x, y)</mark>;
+   91:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 8: <code class=old><mark>redo</mark></code> / <code class=old><mark>stack</mark></code> &rarr; <code class=new><mark>undo</mark></code> &nbsp; (17.624)</h2>
+<h3><code class=old><mark>redoStack</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoManager.java <pre>
+     ...
+
+   46:		undoStack = new Vector(maxStackCapacity);
+   47:		<mark>redoStack</mark> = new Vector(maxStackCapacity);
+   48:	}
+     ...
+
+   70:			if (getRedoSize() &gt;= maxStackCapacity) {
+   71:				<mark>redoStack</mark>.removeElementAt(0);
+   72:			}
+     ...
+
+   76:			if ((getRedoSize() == 0) || (peekRedo() != redoActivity)) {
+   77:				<mark>redoStack</mark>.addElement(redoActivity);
+   78:			}
+     ...
+
+   83:			// last undo activity
+   84:			<mark>redoStack</mark> = new Vector(maxStackCapacity);
+   85:		}
+     ...
+
+   98:		if (getRedoSize() &gt; 0) {
+   99:			return ((Undoable)<mark>redoStack</mark>.lastElement()).isRedoable();
+  100:		}
+     ...
+
+  116:		if (getRedoSize() &gt; 0) {
+  117:			return (Undoable) <mark>redoStack</mark>.lastElement();
+  118:		}
+     ...
+
+  134:	public int getRedoSize() {
+  135:		return <mark>redoStack</mark>.size();
+  136:	}
+     ...
+
+  158:		// Remove it from undo collection
+  159:		<mark>redoStack</mark>.removeElementAt(getRedoSize() - 1);
+  160:
+     ...
+
+  168:	public void clearRedos() {
+  169:		clearStack(<mark>redoStack</mark>);
+  170:	}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>undoStack</mark></code> &nbsp; (<code>[1, '', '#arg0:call:clear']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoManager.java <pre>
+     ...
+
+   45:		maxStackCapacity = newUndoStackSize;
+   46:		<mark>undoStack</mark> = new Vector(maxStackCapacity);
+   47:		redoStack = new Vector(maxStackCapacity);
+     ...
+
+   53:			if (getUndoSize() &gt;= maxStackCapacity) {
+   54:				<mark>undoStack</mark>.removeElementAt(0);
+   55:			}
+   56:		
+   57:			<mark>undoStack</mark>.addElement(undoActivity);
+   58:		}
+     ...
+
+   62:			// last undo activity
+   63:			<mark>undoStack</mark> = new Vector(maxStackCapacity);
+   64:		}
+     ...
+
+   89:		if (getUndoSize() &gt; 0) {
+   90:			return ((Undoable)<mark>undoStack</mark>.lastElement()).isUndoable();
+   91:		}
+     ...
+
+  107:		if (getUndoSize() &gt; 0) {
+  108:			return (Undoable) <mark>undoStack</mark>.lastElement();
+  109:		}
+     ...
+
+  127:	public int getUndoSize() {
+  128:		return <mark>undoStack</mark>.size();
+  129:	}
+     ...
+
+  145:		// Remove it from undo collection
+  146:		<mark>undoStack</mark>.removeElementAt(getUndoSize() - 1);
+  147:		
+     ...
+
+  164:	public void clearUndos() {
+  165:		<mark>clearStack(<mark><mark>undoStack</mark></mark>)</mark>;
+  166:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_8_0')">[+]</a> Match<br>
+<div id=S_8_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoManager.java <pre>
+     ...
+
+  168:	public void clearRedos() {
+  169:		<mark>clearStack(<mark>redoStack</mark>)</mark>;
+  170:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>undoStack</mark></code> &nbsp; (<code>[1, '', '#arg0:call:stack']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoManager.java <pre>
+     ...
+
+   45:		maxStackCapacity = newUndoStackSize;
+   46:		<mark>undoStack</mark> = new Vector(maxStackCapacity);
+   47:		redoStack = new Vector(maxStackCapacity);
+     ...
+
+   53:			if (getUndoSize() &gt;= maxStackCapacity) {
+   54:				<mark>undoStack</mark>.removeElementAt(0);
+   55:			}
+   56:		
+   57:			<mark>undoStack</mark>.addElement(undoActivity);
+   58:		}
+     ...
+
+   62:			// last undo activity
+   63:			<mark>undoStack</mark> = new Vector(maxStackCapacity);
+   64:		}
+     ...
+
+   89:		if (getUndoSize() &gt; 0) {
+   90:			return ((Undoable)<mark>undoStack</mark>.lastElement()).isUndoable();
+   91:		}
+     ...
+
+  107:		if (getUndoSize() &gt; 0) {
+  108:			return (Undoable) <mark>undoStack</mark>.lastElement();
+  109:		}
+     ...
+
+  127:	public int getUndoSize() {
+  128:		return <mark>undoStack</mark>.size();
+  129:	}
+     ...
+
+  145:		// Remove it from undo collection
+  146:		<mark>undoStack</mark>.removeElementAt(getUndoSize() - 1);
+  147:		
+     ...
+
+  164:	public void clearUndos() {
+  165:		<mark>clearStack(<mark><mark>undoStack</mark></mark>)</mark>;
+  166:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_8_1')">[+]</a> Match<br>
+<div id=S_8_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoManager.java <pre>
+     ...
+
+  168:	public void clearRedos() {
+  169:		<mark>clearStack(<mark>redoStack</mark>)</mark>;
+  170:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>undoStack</mark></code> &nbsp; (<code>[1, '', ':assign_var:clear']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoManager.java <pre>
+     ...
+
+   45:		maxStackCapacity = newUndoStackSize;
+   46:		<mark>undoStack</mark> = new Vector(maxStackCapacity);
+   47:		redoStack = new Vector(maxStackCapacity);
+     ...
+
+   53:			if (getUndoSize() &gt;= maxStackCapacity) {
+   54:				<mark>undoStack</mark>.removeElementAt(0);
+   55:			}
+   56:		
+   57:			<mark>undoStack</mark>.addElement(undoActivity);
+   58:		}
+     ...
+
+   62:			// last undo activity
+   63:			<mark>undoStack</mark> = new Vector(maxStackCapacity);
+   64:		}
+     ...
+
+   89:		if (getUndoSize() &gt; 0) {
+   90:			return ((Undoable)<mark>undoStack</mark>.lastElement()).isUndoable();
+   91:		}
+     ...
+
+  107:		if (getUndoSize() &gt; 0) {
+  108:			return (Undoable) <mark>undoStack</mark>.lastElement();
+  109:		}
+     ...
+
+  127:	public int getUndoSize() {
+  128:		return <mark>undoStack</mark>.size();
+  129:	}
+     ...
+
+  145:		// Remove it from undo collection
+  146:		<mark>undoStack</mark>.removeElementAt(getUndoSize() - 1);
+  147:		
+     ...
+
+  164:	public void clearUndos() {
+  165:		clearStack(<mark><mark>undoStack</mark></mark>);
+  166:	}
+     ...
+
+  171:	
+  172:	protected void clearStack(<mark>Vector clearStack</mark>) {
+  173:		clearStack.removeAllElements();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_8_2')">[+]</a> Match<br>
+<div id=S_8_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoManager.java <pre>
+     ...
+
+  168:	public void clearRedos() {
+  169:		clearStack(<mark>redoStack</mark>);
+  170:	}
+  171:	
+  172:	protected void clearStack(<mark>Vector clearStack</mark>) {
+  173:		clearStack.removeAllElements();
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 9: <code class=old><mark>an</mark></code> / <code class=old><mark>object</mark></code> &rarr; <code class=new><mark>f</mark></code> &nbsp; (17.259)</h2>
+<h3><code class=old><mark>anObject</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/QuadTree.java <pre>
+     ...
+
+   52:
+   53:	public void add(<mark>Object anObject</mark>, Rectangle2D absoluteBoundingRectangle2D) {
+   54:		if (_nMaxTreeDepth == 1) {
+   55:			if (absoluteBoundingRectangle2D.intersects(_absoluteBoundingRectangle2D)) {
+   56:				_theHashtable.put(<mark>anObject</mark>, absoluteBoundingRectangle2D);
+   57:			}
+   58:			else {
+   59:				_outsideHashtable.put(<mark>anObject</mark>, absoluteBoundingRectangle2D);
+   60:			}
+     ...
+
+   91:		if (nCount &gt; 1) {
+   92:			_theHashtable.put(<mark>anObject</mark>, absoluteBoundingRectangle2D);
+   93:			return;
+     ...
+
+   95:		if (nCount == 0) {
+   96:			_outsideHashtable.put(<mark>anObject</mark>, absoluteBoundingRectangle2D);
+   97:			return;
+     ...
+
+  100:		if (bNW == true) {
+  101:			_nwQuadTree.add(<mark>anObject</mark>, absoluteBoundingRectangle2D);
+  102:		}
+  103:		if (bNE == true) {
+  104:			_neQuadTree.add(<mark>anObject</mark>, absoluteBoundingRectangle2D);
+  105:		}
+  106:		if (bSW == true) {
+  107:			_swQuadTree.add(<mark>anObject</mark>, absoluteBoundingRectangle2D);
+  108:		}
+  109:		if (bSE == true) {
+  110:			_seQuadTree.add(<mark>anObject</mark>, absoluteBoundingRectangle2D);
+  111:		}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>f</mark></code> &nbsp; (<code>[-1, '', ':ref_var:duration']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/CompositeFigure.java <pre>
+     ...
+
+   68:	 */
+   69:	public Figure add(<mark>Figure figure</mark>) {
+   70:		if (!fFigures.contains(figure)) {
+     ...
+
+   73:			figure.addToContainer(this);
+   74:			_addToQuadTree(<mark>figure</mark>);
+   75:		}
+     ...
+
+  669:
+  670:	private void _addToQuadTree(<mark><mark>Figure f</mark></mark>) {
+  671:		if (_theQuadTree != null) {
+  672:			_theQuadTree.add(<mark>f</mark>, new Bounds(<mark><mark>f</mark></mark>.displayBox()).asRectangle2D());
+  673:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertFigure.java <pre>
+     ...
+
+  170:		duration.setFont(fb);
+  171:		add(<mark>duration</mark>);
+  172:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_9_0')">[+]</a> Match<br>
+<div id=S_9_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/CompositeFigure.java <pre>
+     ...
+
+   68:	 */
+   69:	public Figure add(<mark>Figure figure</mark>) {
+   70:		if (!fFigures.contains(figure)) {
+     ...
+
+   73:			figure.addToContainer(this);
+   74:			_addToQuadTree(<mark>figure</mark>);
+   75:		}
+     ...
+
+  669:
+  670:	private void _addToQuadTree(<mark>Figure f</mark>) {
+  671:		if (_theQuadTree != null) {
+  672:			_theQuadTree.add(<mark>f</mark>, new Bounds(f.displayBox()).asRectangle2D());
+  673:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/QuadTree.java <pre>
+     ...
+
+   52:
+   53:	public void add(<mark>Object anObject</mark>, Rectangle2D absoluteBoundingRectangle2D) {
+   54:		if (_nMaxTreeDepth == 1) {
+     ...
+
+  109:		if (bSE == true) {
+  110:			_seQuadTree.add(<mark>anObject</mark>, absoluteBoundingRectangle2D);
+  111:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertFigure.java <pre>
+     ...
+
+  170:		duration.setFont(fb);
+  171:		add(<mark>duration</mark>);
+  172:
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>f</mark></code> &nbsp; (<code>[-1, '', ':new:text']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/CompositeFigure.java <pre>
+     ...
+
+   68:	 */
+   69:	public Figure add(<mark>Figure figure</mark>) {
+   70:		if (!fFigures.contains(figure)) {
+     ...
+
+   73:			figure.addToContainer(this);
+   74:			_addToQuadTree(<mark>figure</mark>);
+   75:		}
+     ...
+
+  669:
+  670:	private void _addToQuadTree(<mark><mark>Figure f</mark></mark>) {
+  671:		if (_theQuadTree != null) {
+  672:			_theQuadTree.add(<mark>f</mark>, new Bounds(<mark><mark>f</mark></mark>.displayBox()).asRectangle2D());
+  673:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertFigure.java <pre>
+     ...
+
+  172:
+  173:		NumberTextFigure <mark>end = <mark>new NumberTextFigure()</mark></mark>;
+  174:		end.setValue(0);
+     ...
+
+  176:		end.setReadOnly(true);
+  177:		add(<mark>end</mark>);
+  178:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_9_1')">[+]</a> Match<br>
+<div id=S_9_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/CompositeFigure.java <pre>
+     ...
+
+   68:	 */
+   69:	public Figure add(<mark>Figure figure</mark>) {
+   70:		if (!fFigures.contains(figure)) {
+     ...
+
+   73:			figure.addToContainer(this);
+   74:			_addToQuadTree(<mark>figure</mark>);
+   75:		}
+     ...
+
+  669:
+  670:	private void _addToQuadTree(<mark>Figure f</mark>) {
+  671:		if (_theQuadTree != null) {
+  672:			_theQuadTree.add(<mark>f</mark>, new Bounds(f.displayBox()).asRectangle2D());
+  673:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertFigure.java <pre>
+     ...
+
+  172:
+  173:		NumberTextFigure <mark>end = <mark>new NumberTextFigure()</mark></mark>;
+  174:		end.setValue(0);
+     ...
+
+  176:		end.setReadOnly(true);
+  177:		add(<mark>end</mark>);
+  178:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/QuadTree.java <pre>
+     ...
+
+   52:
+   53:	public void add(<mark>Object anObject</mark>, Rectangle2D absoluteBoundingRectangle2D) {
+   54:		if (_nMaxTreeDepth == 1) {
+     ...
+
+  109:		if (bSE == true) {
+  110:			_seQuadTree.add(<mark>anObject</mark>, absoluteBoundingRectangle2D);
+  111:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>f</mark></code> &nbsp; (<code>[-2, ':new:figure', ':assign_field:f']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/CompositeFigure.java <pre>
+     ...
+
+  669:
+  670:	private void _addToQuadTree(<mark>Figure f</mark>) {
+  671:		if (_theQuadTree != null) {
+  672:			_theQuadTree.add(<mark>f</mark>, new Bounds(<mark>f</mark>.displayBox()).asRectangle2D());
+  673:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertFigure.java <pre>
+     ...
+
+  156:		fPreTasks = new Vector();
+  157:		<mark>fDisplayBox</mark> = new Rectangle(0, 0, 0, 0);
+  158:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_9_2')">[+]</a> Match<br>
+<div id=S_9_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertFigure.java <pre>
+     ...
+
+  156:		fPreTasks = new Vector();
+  157:		<mark>fDisplayBox</mark> = new Rectangle(0, 0, 0, 0);
+  158:
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 10: <code class=old><mark>grouped</mark></code> / <code class=old><mark>figures</mark></code> &rarr; <code class=new><mark>fe</mark></code> &nbsp; (16.725)</h2>
+<h3><code class=old><mark>groupedFigures</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/GroupCommand.java <pre>
+     ...
+
+   83:	
+   84:				FigureEnumeration <mark>groupedFigures = currentFigure.figures()</mark>;
+   85:				while (<mark>groupedFigures</mark>.hasMoreElements()) {
+   86:					affectedFigures.addElement(<mark>groupedFigures</mark>.nextFigure());
+   87:				}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[-2, ':call:figures', '#this:call:figure']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/CompositeFigure.java <pre>
+     ...
+
+  557:	protected void basicMoveBy(int x, int y) {
+  558:		FigureEnumeration <mark>fe = figures()</mark>;
+  559:		while (<mark>fe</mark>.hasMoreElements()) {
+  560:			<mark>fe</mark>.nextFigure().moveBy(x,y);
+  561:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  157:	public void moveBy(int x, int y) {
+  158:		<mark>getDecoratedFigure()</mark>.moveBy(x, y);
+  159:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_10_0')">[+]</a> Match<br>
+<div id=S_10_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/GroupCommand.java <pre>
+     ...
+
+   78:			while (fe.hasMoreElements()) {
+   79:				Figure <mark>currentFigure = <mark>fe.nextFigure()</mark></mark>;
+   80:				// add contained figures			
+     ...
+
+   83:	
+   84:				FigureEnumeration groupedFigures = <mark>currentFigure</mark>.figures();
+   85:				while (groupedFigures.hasMoreElements()) {
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[-2, ':call:figures', '#this:ref_var:figure']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/CompositeFigure.java <pre>
+     ...
+
+  557:	protected void basicMoveBy(int x, int y) {
+  558:		FigureEnumeration <mark>fe = figures()</mark>;
+  559:		while (<mark>fe</mark>.hasMoreElements()) {
+  560:			<mark>fe</mark>.nextFigure().moveBy(x,y);
+  561:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  309:			else if (figure != null) {
+  310:				<mark>figure</mark>.moveBy(dx, dy);
+  311:				figure = add(figure);
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_10_1')">[+]</a> Match<br>
+<div id=S_10_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/GroupCommand.java <pre>
+     ...
+
+   83:	
+   84:				FigureEnumeration groupedFigures = <mark>currentFigure</mark>.figures();
+   85:				while (groupedFigures.hasMoreElements()) {
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[1, '', 'obj:assign_field:single']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonHandle.java <pre>
+     ...
+
+   85:		protected boolean movePointToOldLocation() {
+   86:			FigureEnumeration <mark>fe = getAffectedFigures()</mark>;
+   87:			if (!<mark>fe</mark>.hasMoreElements()) {
+   88:				return false;
+     ...
+
+   90:
+   91:			PolygonFigure figure = (PolygonFigure)<mark><mark>fe</mark></mark>.nextFigure();
+   92:			Point backupPoint = figure.pointAt(getPointIndex());
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/SingleFigureEnumerator.java <pre>
+     ...
+
+   57:		Figure returnFigure = (Figure)mySingleFigure;
+   58:		<mark>mySingleFigure</mark> = null;
+   59:		return returnFigure;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_10_2')">[+]</a> Match<br>
+<div id=S_10_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/GroupCommand.java <pre>
+     ...
+
+   85:				while (groupedFigures.hasMoreElements()) {
+   86:					affectedFigures.addElement(<mark>groupedFigures</mark>.nextFigure());
+   87:				}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/SingleFigureEnumerator.java <pre>
+     ...
+
+   57:		Figure returnFigure = (Figure)mySingleFigure;
+   58:		<mark>mySingleFigure</mark> = null;
+   59:		return returnFigure;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 11: <code class=old><mark>name</mark></code> &rarr; <code class=new><mark>new</mark></code> &nbsp; (15.541)</h2>
+<h3><code class=old><mark>name</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ChangeAttributeCommand.java <pre>
+     ...
+
+   36:	 */
+   37:	public ChangeAttributeCommand(<mark>String name</mark>, String attributeName,
+   38:						   Object value, DrawingEditor newDrawingEditor) {
+   39:		super(<mark>name</mark>, newDrawingEditor);
+   40:		fAttribute = attributeName;
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>newName</mark></code> &nbsp; (<code>[-2, ':call:name', '#arg0:end']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractCommand.java <pre>
+     ...
+
+   44:
+   45:	public AbstractCommand(<mark>String newName</mark>, DrawingEditor newDrawingEditor, boolean newIsViewRequired) {
+   46:		setName(<mark>newName</mark>);
+   47:		setDrawingEditor(newDrawingEditor);
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/application/DrawApplication.java <pre>
+     ...
+
+  367:		CommandMenu menu = new CommandMenu(title);
+  368:		<mark>for (int i=0; i&lt;ColorMap.size(); i++)
+  369:			menu.add(
+  370:				new UndoableCommand(
+  371:					new ChangeAttributeCommand(
+  372:						ColorMap.name(<mark>i</mark>),
+  373:						attribute,
+  374:						ColorMap.color(i),
+  375:						this
+  376:					)
+  377:				)
+  378:			);</mark>
+  379:		return menu;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_11_0')">[+]</a> Match<br>
+<div id=S_11_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/application/DrawApplication.java <pre>
+     ...
+
+  367:		CommandMenu menu = new CommandMenu(title);
+  368:		<mark>for (int i=0; i&lt;ColorMap.size(); i++)
+  369:			menu.add(
+  370:				new UndoableCommand(
+  371:					new ChangeAttributeCommand(
+  372:						ColorMap.name(<mark>i</mark>),
+  373:						attribute,
+  374:						ColorMap.color(i),
+  375:						this
+  376:					)
+  377:				)
+  378:			);</mark>
+  379:		return menu;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>newName</mark></code> &nbsp; (<code>[-2, ':call:name', '#arg0:ref_var:i']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractCommand.java <pre>
+     ...
+
+   44:
+   45:	public AbstractCommand(<mark>String newName</mark>, DrawingEditor newDrawingEditor, boolean newIsViewRequired) {
+   46:		setName(<mark>newName</mark>);
+   47:		setDrawingEditor(newDrawingEditor);
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/application/DrawApplication.java <pre>
+     ...
+
+  371:					new ChangeAttributeCommand(
+  372:						ColorMap.name(<mark>i</mark>),
+  373:						attribute,
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_11_1')">[+]</a> Match<br>
+<div id=S_11_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/application/DrawApplication.java <pre>
+     ...
+
+  371:					new ChangeAttributeCommand(
+  372:						ColorMap.name(<mark>i</mark>),
+  373:						attribute,
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>newName</mark></code> &nbsp; (<code>[-2, ':call:string', '#arg0:ref_array:%I']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractCommand.java <pre>
+     ...
+
+   44:
+   45:	public AbstractCommand(<mark>String newName</mark>, DrawingEditor newDrawingEditor, boolean newIsViewRequired) {
+   46:		setName(<mark>newName</mark>);
+   47:		setDrawingEditor(newDrawingEditor);
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/application/DrawApplication.java <pre>
+     ...
+
+  435:					new ChangeAttributeCommand(
+  436:						Integer.toString(<mark>sizes[i]</mark>),
+  437:						&quot;FontSize&quot;,
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_11_2')">[+]</a> Match<br>
+<div id=S_11_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/application/DrawApplication.java <pre>
+     ...
+
+  435:					new ChangeAttributeCommand(
+  436:						Integer.toString(<mark>sizes[i]</mark>),
+  437:						&quot;FontSize&quot;,
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 12: <code class=old><mark>in</mark></code> / <code class=old><mark>figures</mark></code> &rarr; <code class=new><mark>fe</mark></code> &nbsp; (13.968)</h2>
+<h3><code class=old><mark>inFigures</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/NullDrawingView.java <pre>
+     ...
+
+  403:	 */
+  404:	public FigureEnumeration insertFigures(<mark>FigureEnumeration inFigures</mark>, int dx, int dy, boolean bCheck) {
+  405:		return FigureEnumerator.getEmptyEnumeration();
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[-1, '', ':call:affected']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonHandle.java <pre>
+     ...
+
+   85:		protected boolean movePointToOldLocation() {
+   86:			FigureEnumeration <mark><mark>fe = <mark>getAffectedFigures()</mark></mark></mark>;
+   87:			if (!<mark>fe</mark>.hasMoreElements()) {
+   88:				return false;
+     ...
+
+   90:
+   91:			PolygonFigure figure = (PolygonFigure)<mark><mark>fe</mark></mark>.nextFigure();
+   92:			Point backupPoint = figure.pointAt(getPointIndex());
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_12_0')">[+]</a> Match<br>
+<div id=S_12_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ConnectionTool.java <pre>
+     ...
+
+  400:
+  401:			getDrawingView().insertFigures(<mark>getAffectedFigures()</mark>, 0, 0, false);
+  402:
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/NullDrawingView.java <pre>
+     ...
+
+  403:	 */
+  404:	public FigureEnumeration insertFigures(<mark>FigureEnumeration inFigures</mark>, int dx, int dy, boolean bCheck) {
+  405:		return FigureEnumerator.getEmptyEnumeration();
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[-1, '', ':ref_var:fe']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AlignCommand.java <pre>
+     ...
+
+  213:
+  214:		public void setAffectedFigures(<mark><mark>FigureEnumeration fe</mark></mark>) {
+  215:			// first make copy of FigureEnumeration in superclass
+  216:			super.setAffectedFigures(<mark><mark>fe</mark></mark>);
+  217:			// then get new FigureEnumeration of copy to save aligment
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/PasteCommand.java <pre>
+     ...
+
+   55:			FigureEnumeration fe = insertFigures(getUndoActivity().getAffectedFigures(), lastClick.x-r.x, lastClick.y-r.y);
+   56:			getUndoActivity().setAffectedFigures(<mark>fe</mark>);
+   57:			
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_12_1')">[+]</a> Match<br>
+<div id=S_12_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/NullDrawingView.java <pre>
+     ...
+
+  403:	 */
+  404:	public FigureEnumeration insertFigures(<mark>FigureEnumeration inFigures</mark>, int dx, int dy, boolean bCheck) {
+  405:		return FigureEnumerator.getEmptyEnumeration();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/FigureTransferCommand.java <pre>
+     ...
+
+   57:	FigureEnumeration insertFigures(FigureEnumeration fe, int dx, int dy) {
+   58:		return view().insertFigures(<mark>fe</mark>, dx, dy, false);
+   59:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[-2, ':call:figures', '#this:call:reversed']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/ConnectedTextTool.java <pre>
+     ...
+
+  112:
+  113:			FigureEnumeration <mark>fe = getAffectedFigures()</mark>;
+  114:			while (<mark>fe</mark>.hasMoreElements()) {
+  115:				Figure currentFigure = <mark>fe</mark>.nextFigure();
+  116:				if (currentFigure instanceof TextHolder) {
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoRedoActivity.java <pre>
+     ...
+
+   36:		if (isRedoable()) {
+   37:			return <mark>getReversedActivity()</mark>.redo();
+   38:		}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_12_2')">[+]</a> Match<br>
+<div id=S_12_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/util/UndoRedoActivity.java <pre>
+     ...
+
+   36:		if (isRedoable()) {
+   37:			return <mark>getReversedActivity()</mark>.redo();
+   38:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 13: <code class=old><mark>k</mark></code> &rarr; <code class=new><mark>fe</mark></code> &nbsp; (13.851)</h2>
+<h3><code class=old><mark>k</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  267:	public void addAll(Vector figures) {
+  268:		FigureEnumeration <mark>k = new FigureEnumerator(figures)</mark>;
+  269:		while (<mark>k</mark>.hasMoreElements()) {
+  270:			add(<mark>k</mark>.nextFigure());
+  271:		}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[1, '', 'obj:assign_field:single']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonHandle.java <pre>
+     ...
+
+   85:		protected boolean movePointToOldLocation() {
+   86:			FigureEnumeration <mark>fe = getAffectedFigures()</mark>;
+   87:			if (!<mark>fe</mark>.hasMoreElements()) {
+   88:				return false;
+     ...
+
+   90:
+   91:			PolygonFigure figure = (PolygonFigure)<mark><mark>fe</mark></mark>.nextFigure();
+   92:			Point backupPoint = figure.pointAt(getPointIndex());
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/SingleFigureEnumerator.java <pre>
+     ...
+
+   57:		Figure returnFigure = (Figure)mySingleFigure;
+   58:		<mark>mySingleFigure</mark> = null;
+   59:		return returnFigure;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_13_0')">[+]</a> Match<br>
+<div id=S_13_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/SingleFigureEnumerator.java <pre>
+     ...
+
+   57:		Figure returnFigure = (Figure)mySingleFigure;
+   58:		<mark>mySingleFigure</mark> = null;
+   59:		return returnFigure;
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  269:		while (k.hasMoreElements()) {
+  270:			add(<mark>k</mark>.nextFigure());
+  271:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[1, '', 'obj:ref_field:enumeration']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonHandle.java <pre>
+     ...
+
+   85:		protected boolean movePointToOldLocation() {
+   86:			FigureEnumeration <mark>fe = getAffectedFigures()</mark>;
+   87:			if (!<mark>fe</mark>.hasMoreElements()) {
+   88:				return false;
+     ...
+
+   90:
+   91:			PolygonFigure figure = (PolygonFigure)<mark><mark>fe</mark></mark>.nextFigure();
+   92:			Point backupPoint = figure.pointAt(getPointIndex());
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ReverseFigureEnumerator.java <pre>
+     ...
+
+   52:	public Figure nextFigure() {
+   53:		return (Figure)<mark>fEnumeration</mark>.nextElement();
+   54:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_13_1')">[+]</a> Match<br>
+<div id=S_13_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  269:		while (k.hasMoreElements()) {
+  270:			add(<mark>k</mark>.nextFigure());
+  271:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/ReverseFigureEnumerator.java <pre>
+     ...
+
+   52:	public Figure nextFigure() {
+   53:		return (Figure)<mark>fEnumeration</mark>.nextElement();
+   54:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fe</mark></code> &nbsp; (<code>[1, '', 'obj:ref_field:single']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonHandle.java <pre>
+     ...
+
+   85:		protected boolean movePointToOldLocation() {
+   86:			FigureEnumeration <mark>fe = getAffectedFigures()</mark>;
+   87:			if (!<mark>fe</mark>.hasMoreElements()) {
+   88:				return false;
+     ...
+
+   90:
+   91:			PolygonFigure figure = (PolygonFigure)<mark><mark>fe</mark></mark>.nextFigure();
+   92:			Point backupPoint = figure.pointAt(getPointIndex());
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/SingleFigureEnumerator.java <pre>
+     ...
+
+   56:	public Figure nextFigure() {
+   57:		Figure returnFigure = (Figure)<mark>mySingleFigure</mark>;
+   58:		mySingleFigure = null;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_13_2')">[+]</a> Match<br>
+<div id=S_13_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/SingleFigureEnumerator.java <pre>
+     ...
+
+   56:	public Figure nextFigure() {
+   57:		Figure returnFigure = (Figure)<mark>mySingleFigure</mark>;
+   58:		mySingleFigure = null;
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  269:		while (k.hasMoreElements()) {
+  270:			add(<mark>k</mark>.nextFigure());
+  271:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 14: <code class=old><mark>inf</mark></code> &rarr; <code class=new><mark>figure</mark></code> &nbsp; (13.801)</h2>
+<h3><code class=old><mark>inf</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  276:	 */
+  277:	public boolean figureExists(<mark>Figure inf</mark>, FigureEnumeration e) {
+  278:		while(e.hasMoreElements()) {
+     ...
+
+  280:
+  281:			if(figure.includes(<mark>inf</mark>)) {
+  282:				return true;
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[-1, '', ':ref_var:ef']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+  168:	 */
+  169:	public boolean includes(<mark><mark>Figure figure</mark></mark>) {
+  170:		return <mark><mark>figure</mark></mark> == this;
+  171:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  149:	 */
+  150:	public boolean includes(<mark>Figure figure</mark>) {
+  151:		return (super.includes(<mark>figure</mark>) || getDecoratedFigure().includes(figure));
+  152:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  276:	 */
+  277:	public boolean figureExists(<mark>Figure inf</mark>, FigureEnumeration e) {
+  278:		while(e.hasMoreElements()) {
+     ...
+
+  280:
+  281:			if(figure.includes(<mark>inf</mark>)) {
+  282:				return true;
+     ...
+
+  325:			if (figureExists(sf, drawing().figures()) &amp;&amp;
+  326:				figureExists(<mark>ef</mark>, drawing().figures()) &amp;&amp;
+  327:				(!bCheck || cf.canConnect(sf, ef))) {
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_14_0')">[+]</a> Match<br>
+<div id=S_14_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  276:	 */
+  277:	public boolean figureExists(<mark>Figure inf</mark>, FigureEnumeration e) {
+  278:		while(e.hasMoreElements()) {
+     ...
+
+  280:
+  281:			if(figure.includes(<mark>inf</mark>)) {
+  282:				return true;
+     ...
+
+  325:			if (figureExists(sf, drawing().figures()) &amp;&amp;
+  326:				figureExists(<mark>ef</mark>, drawing().figures()) &amp;&amp;
+  327:				(!bCheck || cf.canConnect(sf, ef))) {
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[-1, '', ':ref_var:sf']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+  168:	 */
+  169:	public boolean includes(<mark><mark>Figure figure</mark></mark>) {
+  170:		return <mark><mark>figure</mark></mark> == this;
+  171:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  276:	 */
+  277:	public boolean figureExists(<mark>Figure inf</mark>, FigureEnumeration e) {
+  278:		while(e.hasMoreElements()) {
+     ...
+
+  280:
+  281:			if(figure.includes(<mark>inf</mark>)) {
+  282:				return true;
+     ...
+
+  324:
+  325:			if (figureExists(<mark>sf</mark>, drawing().figures()) &amp;&amp;
+  326:				figureExists(ef, drawing().figures()) &amp;&amp;
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  149:	 */
+  150:	public boolean includes(<mark>Figure figure</mark>) {
+  151:		return (super.includes(<mark>figure</mark>) || getDecoratedFigure().includes(figure));
+  152:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_14_1')">[+]</a> Match<br>
+<div id=S_14_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  276:	 */
+  277:	public boolean figureExists(<mark>Figure inf</mark>, FigureEnumeration e) {
+  278:		while(e.hasMoreElements()) {
+     ...
+
+  280:
+  281:			if(figure.includes(<mark>inf</mark>)) {
+  282:				return true;
+     ...
+
+  324:
+  325:			if (figureExists(<mark>sf</mark>, drawing().figures()) &amp;&amp;
+  326:				figureExists(ef, drawing().figures()) &amp;&amp;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>figure</mark></code> &nbsp; (<code>[1, '', '#arg0:call:includes']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/DragNDropTool.java <pre>
+     ...
+
+  232:		else {
+  233:			Figure <mark>figure = drawing().findFigure(e.getX(), e.getY())</mark>;
+  234:			if (<mark>figure</mark> != null) {
+  235:				//fChild = createDragTracker(view(), figure);
+  236:				if (e.isShiftDown()) {
+  237:				   view().toggleSelection(<mark>figure</mark>);
+  238:				} else if( !view().selection().contains(<mark>figure</mark>)) {
+  239:					view().clearSelection();
+  240:					view().addToSelection(<mark><mark>figure</mark></mark>);
+  241:				}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  467:	 */
+  468:	public void addToSelection(<mark>Figure figure</mark>) {
+  469:		if (!isFigureSelected(figure) &amp;&amp; <mark>drawing().includes(<mark>figure</mark>)</mark>) {
+  470:			fSelection.addElement(figure);
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_14_2')">[+]</a> Match<br>
+<div id=S_14_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  149:	 */
+  150:	public boolean includes(<mark>Figure figure</mark>) {
+  151:		return (super.includes(figure) || getDecoratedFigure().includes(<mark>figure</mark>));
+  152:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/CompositeFigure.java <pre>
+     ...
+
+  535:	 */
+  536:	public boolean includes(<mark>Figure figure</mark>) {
+  537:		if (super.includes(figure)) {
+     ...
+
+  543:			Figure f = fe.nextFigure();
+  544:			if (<mark>f.includes(<mark>figure</mark>)</mark>) {
+  545:				return true;
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  280:
+  281:			if(figure.includes(<mark>inf</mark>)) {
+  282:				return true;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 15: <code class=old><mark>y</mark></code> &rarr; <code class=new><mark>dy</mark></code> / <code class=old><mark>y</mark></code> &nbsp; (13.621)</h2>
+<h3><code class=old><mark>y</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/javadraw/AnimationDecorator.java <pre>
+     ...
+
+   74:
+   75:	public synchronized void basicMoveBy(int x, <mark>int y</mark>) {
+   76:		super.basicMoveBy(x, <mark>y</mark>);
+   77:	}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>dy</mark></code> &nbsp; (<code>[-1, '', ':ref_var:dy']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/GraphicalCompositeFigure.java <pre>
+     ...
+
+  112:	 */
+  113:	protected void basicMoveBy(int dx, <mark><mark>int dy</mark></mark>) {
+  114:		super.basicMoveBy(dx, <mark>dy</mark>);
+  115:		getPresentationFigure().moveBy(dx, <mark><mark>dy</mark></mark>);
+  116:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+   59:	 */
+   60:	public void moveBy(int dx, <mark>int dy</mark>) {
+   61:		willChange();
+   62:		basicMoveBy(dx, <mark>dy</mark>);
+   63:		changed();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_15_0')">[+]</a> Match<br>
+<div id=S_15_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+   59:	 */
+   60:	public void moveBy(int dx, <mark>int dy</mark>) {
+   61:		willChange();
+   62:		basicMoveBy(dx, <mark>dy</mark>);
+   63:		changed();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/javadraw/AnimationDecorator.java <pre>
+     ...
+
+   74:
+   75:	public synchronized void basicMoveBy(int x, <mark>int y</mark>) {
+   76:		super.basicMoveBy(x, <mark>y</mark>);
+   77:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/GraphicalCompositeFigure.java <pre>
+     ...
+
+  114:		super.basicMoveBy(dx, dy);
+  115:		getPresentationFigure().moveBy(dx, <mark>dy</mark>);
+  116:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>dy</mark></code> &nbsp; (<code>[1, '', '#arg1:call:by']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/DragNDropTool.java <pre>
+     ...
+
+  438:					int dx = newP.x - origin.x;  /* distance the mouse has moved */
+  439:					int <mark>dy = newP.y - origin.y</mark>;  /* distance the mouse has moved */
+  440:					while ( itr.hasNext() ) {
+  441:						Figure f = (Figure) itr.next();
+  442:						f.moveBy( dx, <mark><mark>dy</mark></mark> );
+  443:						lView.add( f );
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertFigure.java <pre>
+     ...
+
+   97:
+   98:	protected void basicMoveBy(int x, <mark>int y</mark>) {
+   99:		fDisplayBox.translate(x, y);
+  100:		<mark>super.basicMoveBy(x, <mark>y</mark>)</mark>;
+  101:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  156:	 */
+  157:	public void moveBy(int x, <mark>int y</mark>) {
+  158:		getDecoratedFigure().moveBy(x, <mark>y</mark>);
+  159:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+   59:	 */
+   60:	public void moveBy(int dx, <mark>int dy</mark>) {
+   61:		willChange();
+   62:		basicMoveBy(dx, <mark>dy</mark>);
+   63:		changed();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_15_1')">[+]</a> Match<br>
+<div id=S_15_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/javadraw/AnimationDecorator.java <pre>
+     ...
+
+   75:	public synchronized void basicMoveBy(int x, int y) {
+   76:		<mark>super.basicMoveBy(x, <mark>y</mark>)</mark>;
+   77:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>dy</mark></code> &nbsp; (<code>[1, '', '#arg1:call:move']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/DragNDropTool.java <pre>
+     ...
+
+  438:					int dx = newP.x - origin.x;  /* distance the mouse has moved */
+  439:					int <mark>dy = newP.y - origin.y</mark>;  /* distance the mouse has moved */
+  440:					while ( itr.hasNext() ) {
+  441:						Figure f = (Figure) itr.next();
+  442:						f.moveBy( dx, <mark><mark>dy</mark></mark> );
+  443:						lView.add( f );
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertFigure.java <pre>
+     ...
+
+   97:
+   98:	protected void basicMoveBy(int x, <mark>int y</mark>) {
+   99:		fDisplayBox.translate(x, y);
+  100:		<mark>super.basicMoveBy(x, <mark>y</mark>)</mark>;
+  101:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  156:	 */
+  157:	public void moveBy(int x, <mark>int y</mark>) {
+  158:		getDecoratedFigure().moveBy(x, <mark>y</mark>);
+  159:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+   59:	 */
+   60:	public void moveBy(int dx, <mark>int dy</mark>) {
+   61:		willChange();
+   62:		basicMoveBy(dx, <mark>dy</mark>);
+   63:		changed();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_15_2')">[+]</a> Match<br>
+<div id=S_15_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/javadraw/AnimationDecorator.java <pre>
+     ...
+
+   75:	public synchronized void basicMoveBy(int x, int y) {
+   76:		<mark>super.basicMoveBy(x, <mark>y</mark>)</mark>;
+   77:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 16: <code class=old><mark>f</mark></code> / <code class=old><mark>index</mark></code> &rarr; <code class=new><mark>i</mark></code> &nbsp; (13.470)</h2>
+<h3><code class=old><mark>fIndex</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineHandle.java <pre>
+     ...
+
+   47:	public void invokeStep(int x, int y, int anchorX, int anchorY, DrawingView view) {
+   48:		int <mark>fIndex = ((PolyLineHandle.UndoActivity)getUndoActivity()).getPointIndex()</mark>;
+   49:		myOwner().setPointAt(new Point(x, y), <mark>fIndex</mark>);
+   50:	}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>i</mark></code> &nbsp; (<code>[-2, ':return', ':ref_field:index']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonFigure.java <pre>
+     ...
+
+  288:
+  289:	public Point pointAt(<mark>int i</mark>) {
+  290:		return new Point(getInternalPolygon().xpoints[<mark>i</mark>], 
+  291:						 getInternalPolygon().ypoints[<mark>i</mark>]);
+  292:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineHandle.java <pre>
+     ...
+
+  122:		public int getPointIndex() {
+  123:			return <mark>myPointIndex</mark>;
+  124:		}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_16_0')">[+]</a> Match<br>
+<div id=S_16_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineHandle.java <pre>
+     ...
+
+  122:		public int getPointIndex() {
+  123:			return <mark>myPointIndex</mark>;
+  124:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>i</mark></code> &nbsp; (<code>[1, '', '#arg1:call:element']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/LineConnection.java <pre>
+     ...
+
+  244:	 */
+  245:	public void insertPointAt(Point p, <mark>int i</mark>) {
+  246:		super.insertPointAt(p, <mark><mark>i</mark></mark>);
+  247:		layoutConnection();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineFigure.java <pre>
+     ...
+
+  120:	 */
+  121:	public void insertPointAt(Point p, <mark>int i</mark>) {
+  122:		<mark>fPoints.insertElementAt(p, <mark>i</mark>)</mark>;
+  123:		changed();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_16_1')">[+]</a> Match<br>
+<div id=S_16_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineHandle.java <pre>
+     ...
+
+   48:		int fIndex = ((PolyLineHandle.UndoActivity)getUndoActivity()).getPointIndex();
+   49:		myOwner().setPointAt(new Point(x, y), <mark>fIndex</mark>);
+   50:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/LineConnection.java <pre>
+     ...
+
+  236:	 */
+  237:	public void setPointAt(Point p, <mark>int i</mark>) {
+  238:		super.setPointAt(p, <mark>i</mark>);
+  239:		layoutConnection();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineFigure.java <pre>
+     ...
+
+  111:	 */
+  112:	public void setPointAt(Point p, <mark>int i</mark>) {
+  113:		willChange();
+  114:		<mark>fPoints.setElementAt(p, <mark>i</mark>)</mark>;
+  115:		changed();
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>i</mark></code> &nbsp; (<code>[-2, ':call:index', '#this:op_typecast:Lactivity']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonFigure.java <pre>
+     ...
+
+  151:	 */
+  152:	public void setPointAt(Point p, <mark>int i</mark>) {
+  153:		willChange();
+  154:		getInternalPolygon().xpoints[<mark>i</mark>] = p.x;
+  155:		getInternalPolygon().ypoints[<mark>i</mark>] = p.y;
+  156:		changed();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonHandle.java <pre>
+     ...
+
+   52:	public void invokeStep(int x, int y, int anchorX, int anchorY, DrawingView view) {
+   53:		int index = (<mark>(PolyLineHandle.UndoActivity)getUndoActivity()</mark>).getPointIndex();
+   54:		myOwner().setPointAt(new Point(x, y), index);
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_16_2')">[+]</a> Match<br>
+<div id=S_16_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineHandle.java <pre>
+     ...
+
+   47:	public void invokeStep(int x, int y, int anchorX, int anchorY, DrawingView view) {
+   48:		int fIndex = (<mark>(PolyLineHandle.UndoActivity)getUndoActivity()</mark>).getPointIndex();
+   49:		myOwner().setPointAt(new Point(x, y), fIndex);
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 17: <code class=old><mark>x</mark></code> &rarr; <code class=new><mark>dx</mark></code> / <code class=old><mark>x</mark></code> &nbsp; (13.337)</h2>
+<h3><code class=old><mark>x</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/javadraw/AnimationDecorator.java <pre>
+     ...
+
+   74:
+   75:	public synchronized void basicMoveBy(<mark>int x</mark>, int y) {
+   76:		super.basicMoveBy(<mark>x</mark>, y);
+   77:	}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>dx</mark></code> &nbsp; (<code>[-1, '', ':ref_var:dx']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/GraphicalCompositeFigure.java <pre>
+     ...
+
+  112:	 */
+  113:	protected void basicMoveBy(<mark><mark>int dx</mark></mark>, int dy) {
+  114:		super.basicMoveBy(<mark>dx</mark>, dy);
+  115:		getPresentationFigure().moveBy(<mark><mark>dx</mark></mark>, dy);
+  116:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+   59:	 */
+   60:	public void moveBy(<mark>int dx</mark>, int dy) {
+   61:		willChange();
+   62:		basicMoveBy(<mark>dx</mark>, dy);
+   63:		changed();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_17_0')">[+]</a> Match<br>
+<div id=S_17_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/javadraw/AnimationDecorator.java <pre>
+     ...
+
+   74:
+   75:	public synchronized void basicMoveBy(<mark>int x</mark>, int y) {
+   76:		super.basicMoveBy(<mark>x</mark>, y);
+   77:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+   59:	 */
+   60:	public void moveBy(<mark>int dx</mark>, int dy) {
+   61:		willChange();
+   62:		basicMoveBy(<mark>dx</mark>, dy);
+   63:		changed();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/GraphicalCompositeFigure.java <pre>
+     ...
+
+  114:		super.basicMoveBy(dx, dy);
+  115:		getPresentationFigure().moveBy(<mark>dx</mark>, dy);
+  116:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>dx</mark></code> &nbsp; (<code>[1, '', '#arg0:call:by']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/DragNDropTool.java <pre>
+     ...
+
+  437:
+  438:					int <mark>dx = newP.x - origin.x</mark>;  /* distance the mouse has moved */
+  439:					int dy = newP.y - origin.y;  /* distance the mouse has moved */
+     ...
+
+  441:						Figure f = (Figure) itr.next();
+  442:						f.moveBy( <mark><mark>dx</mark></mark>, dy );
+  443:						lView.add( f );
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertFigure.java <pre>
+     ...
+
+   97:
+   98:	protected void basicMoveBy(<mark>int x</mark>, int y) {
+   99:		fDisplayBox.translate(x, y);
+  100:		<mark>super.basicMoveBy(<mark>x</mark>, y)</mark>;
+  101:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  156:	 */
+  157:	public void moveBy(<mark>int x</mark>, int y) {
+  158:		getDecoratedFigure().moveBy(<mark>x</mark>, y);
+  159:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+   59:	 */
+   60:	public void moveBy(<mark>int dx</mark>, int dy) {
+   61:		willChange();
+   62:		basicMoveBy(<mark>dx</mark>, dy);
+   63:		changed();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_17_1')">[+]</a> Match<br>
+<div id=S_17_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/javadraw/AnimationDecorator.java <pre>
+     ...
+
+   75:	public synchronized void basicMoveBy(int x, int y) {
+   76:		<mark>super.basicMoveBy(<mark>x</mark>, y)</mark>;
+   77:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>dx</mark></code> &nbsp; (<code>[1, '', '#arg0:call:move']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/DragNDropTool.java <pre>
+     ...
+
+  437:
+  438:					int <mark>dx = newP.x - origin.x</mark>;  /* distance the mouse has moved */
+  439:					int dy = newP.y - origin.y;  /* distance the mouse has moved */
+     ...
+
+  441:						Figure f = (Figure) itr.next();
+  442:						f.moveBy( <mark><mark>dx</mark></mark>, dy );
+  443:						lView.add( f );
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertFigure.java <pre>
+     ...
+
+   97:
+   98:	protected void basicMoveBy(<mark>int x</mark>, int y) {
+   99:		fDisplayBox.translate(x, y);
+  100:		<mark>super.basicMoveBy(<mark>x</mark>, y)</mark>;
+  101:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  156:	 */
+  157:	public void moveBy(<mark>int x</mark>, int y) {
+  158:		getDecoratedFigure().moveBy(<mark>x</mark>, y);
+  159:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/AbstractFigure.java <pre>
+     ...
+
+   59:	 */
+   60:	public void moveBy(<mark>int dx</mark>, int dy) {
+   61:		willChange();
+   62:		basicMoveBy(<mark>dx</mark>, dy);
+   63:		changed();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_17_2')">[+]</a> Match<br>
+<div id=S_17_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/javadraw/AnimationDecorator.java <pre>
+     ...
+
+   75:	public synchronized void basicMoveBy(int x, int y) {
+   76:		<mark>super.basicMoveBy(<mark>x</mark>, y)</mark>;
+   77:	}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 18: <code class=old><mark>image</mark></code> / <code class=old><mark>graphics</mark></code> &rarr; <code class=new><mark>g</mark></code> &nbsp; (12.222)</h2>
+<h3><code class=old><mark>imageGraphics</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/FastBufferedUpdateStrategy.java <pre>
+     ...
+
+  109:				d.height, BufferedImage.TYPE_INT_RGB);
+  110:			Graphics <mark>imageGraphics = _scratchPadBufferedImage.getGraphics()</mark>;
+  111:			view.drawBackground(<mark>imageGraphics</mark>);
+  112:			_bRedrawAll = true;
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>g</mark></code> &nbsp; (<code>[1, '', ':assign_var:g']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/GraphicalCompositeFigure.java <pre>
+     ...
+
+  130:	 */
+  131:	public void draw(<mark>Graphics g</mark>) {
+  132:		getPresentationFigure().draw(<mark>g</mark>);
+  133:		super.draw(<mark><mark>g</mark></mark>);
+  134:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/CompositeFigure.java <pre>
+     ...
+
+  339:	 */
+  340:	public void draw(<mark>Graphics g</mark>) {
+  341:		FigureEnumeration fe = figures();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_18_0')">[+]</a> Match<br>
+<div id=S_18_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/NullDrawingView.java <pre>
+     ...
+
+  347:	 */
+  348:	public void drawBackground(<mark>Graphics g</mark>) {
+  349:		// ignore: do nothing
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/FastBufferedUpdateStrategy.java <pre>
+     ...
+
+  110:			Graphics imageGraphics = _scratchPadBufferedImage.getGraphics();
+  111:			view.drawBackground(<mark>imageGraphics</mark>);
+  112:			_bRedrawAll = true;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>g</mark></code> &nbsp; (<code>[1, '', '#this:call:fill']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/DiamondFigure.java <pre>
+     ...
+
+   50:
+   51:	public void draw(<mark>Graphics g</mark>) {
+   52:		Polygon p = getPolygon();
+   53:		<mark>g</mark>.setColor(getFillColor());
+   54:		<mark><mark><mark>g</mark></mark>.fillPolygon(p)</mark>;
+   55:		<mark>g</mark>.setColor(getFrameColor());
+   56:		<mark>g</mark>.drawPolygon(p);
+   57:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_18_1')">[+]</a> Match<br>
+<div id=S_18_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  801:	 */
+  802:	public void drawBackground(<mark>Graphics g</mark>) {
+  803:		g.setColor(getBackground());
+  804:		<mark><mark>g</mark>.fillRect(0, 0, getBounds().width, getBounds().height)</mark>;
+  805:	}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/FastBufferedUpdateStrategy.java <pre>
+     ...
+
+  110:			Graphics imageGraphics = _scratchPadBufferedImage.getGraphics();
+  111:			view.drawBackground(<mark>imageGraphics</mark>);
+  112:			_bRedrawAll = true;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>g</mark></code> &nbsp; (<code>[-1, '', ':call:graphics']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/PolygonScaleHandle.java <pre>
+     ...
+
+  110:	
+  111:	public void draw(<mark><mark>Graphics g</mark></mark>) {
+  112:		Rectangle r = displayBox();
+  113:	
+  114:		<mark>g</mark>.setColor(Color.yellow);
+  115:		<mark>g</mark>.fillOval(r.x, r.y, r.width, r.height);
+  116:	
+  117:		<mark>g</mark>.setColor(Color.black);
+  118:		<mark><mark>g</mark></mark>.drawOval(r.x, r.y, r.width, r.height);
+  119:	
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/StandardDrawingView.java <pre>
+     ...
+
+  743:	 */
+  744:	public void drawAll(<mark>Graphics g</mark>) {
+  745:		boolean isPrinting = g instanceof PrintGraphics;
+     ...
+
+  754:		if (!isPrinting) {
+  755:			drawHandles(<mark>g</mark>);
+  756:		}
+     ...
+
+  782:	 */
+  783:	public void drawHandles(<mark>Graphics g</mark>) {
+  784:		Enumeration k = selectionHandles();
+  785:		while (k.hasMoreElements()) {
+  786:			((Handle) k.nextElement()).draw(<mark>g</mark>);
+  787:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/FastBufferedUpdateStrategy.java <pre>
+     ...
+
+   46:		if (_bRedrawAll == true) {
+   47:			Graphics <mark>imageGraphics = <mark>_doubleBufferedImage.getGraphics()</mark></mark>;
+   48:			view.drawAll(<mark>imageGraphics</mark>);
+   49:		}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_18_2')">[+]</a> Match<br>
+<div id=S_18_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/FastBufferedUpdateStrategy.java <pre>
+     ...
+
+  109:				d.height, BufferedImage.TYPE_INT_RGB);
+  110:			Graphics <mark>imageGraphics = <mark>_scratchPadBufferedImage.getGraphics()</mark></mark>;
+  111:			view.drawBackground(<mark>imageGraphics</mark>);
+  112:			_bRedrawAll = true;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 19: <code class=old><mark>red</mark></code> &rarr; <code class=new><mark>value</mark></code> / <code class=new><mark>url</mark></code> &nbsp; (11.934)</h2>
+<h3><code class=old><mark>red</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertDependency.java <pre>
+     ...
+
+   39:		if (source.hasCycle(target)) {
+   40:			setAttribute(&quot;FrameColor&quot;, <mark>Color.red</mark>);
+   41:		}
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>value</mark></code> &nbsp; (<code>[1, '', ':op_typecast:Lcolor']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/GraphicalCompositeFigure.java <pre>
+     ...
+
+  169:	 */
+  170:	public void setAttribute(String name, <mark>Object value</mark>) {
+  171:		if (getPresentationFigure() != null) {
+  172:			getPresentationFigure().setAttribute(name, <mark><mark>value</mark></mark>);
+  173:		}
+  174:		else {
+  175:			super.setAttribute(name, <mark>value</mark>);
+  176:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineFigure.java <pre>
+     ...
+
+  289:	 */
+  290:	public void setAttribute(String name, <mark>Object value</mark>) {
+  291:		if (name.equals(&quot;FrameColor&quot;)) {
+  292:			setFrameColor(<mark>(Color)<mark>value</mark></mark>);
+  293:			changed();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  229:	 */
+  230:	public void setAttribute(String name, <mark>Object value</mark>) {
+  231:		getDecoratedFigure().setAttribute(name, <mark>value</mark>);
+  232:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_19_0')">[+]</a> Match<br>
+<div id=S_19_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineFigure.java <pre>
+     ...
+
+  289:	 */
+  290:	public void setAttribute(String name, <mark>Object value</mark>) {
+  291:		if (name.equals(&quot;FrameColor&quot;)) {
+  292:			setFrameColor(<mark>(Color)<mark>value</mark></mark>);
+  293:			changed();
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertDependency.java <pre>
+     ...
+
+   39:		if (source.hasCycle(target)) {
+   40:			setAttribute(&quot;FrameColor&quot;, <mark>Color.red</mark>);
+   41:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>value</mark></code> &nbsp; (<code>[1, '', '#arg1:call:attribute']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/GraphicalCompositeFigure.java <pre>
+     ...
+
+  169:	 */
+  170:	public void setAttribute(String name, <mark>Object value</mark>) {
+  171:		if (getPresentationFigure() != null) {
+  172:			getPresentationFigure().setAttribute(name, <mark>value</mark>);
+  173:		}
+  174:		else {
+  175:			<mark>super.setAttribute(name, <mark><mark>value</mark></mark>)</mark>;
+  176:		}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_19_1')">[+]</a> Match<br>
+<div id=S_19_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineFigure.java <pre>
+     ...
+
+  289:	 */
+  290:	public void setAttribute(String name, <mark>Object value</mark>) {
+  291:		if (name.equals(&quot;FrameColor&quot;)) {
+     ...
+
+  314:		else {
+  315:			<mark>super.setAttribute(name, <mark>value</mark>)</mark>;
+  316:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertDependency.java <pre>
+     ...
+
+   39:		if (source.hasCycle(target)) {
+   40:			setAttribute(&quot;FrameColor&quot;, <mark>Color.red</mark>);
+   41:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>value</mark></code> &nbsp; (<code>[1, '', ':op_typecast:Linteger']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/contrib/GraphicalCompositeFigure.java <pre>
+     ...
+
+  169:	 */
+  170:	public void setAttribute(String name, <mark>Object value</mark>) {
+  171:		if (getPresentationFigure() != null) {
+  172:			getPresentationFigure().setAttribute(name, <mark><mark>value</mark></mark>);
+  173:		}
+  174:		else {
+  175:			super.setAttribute(name, <mark>value</mark>);
+  176:		}
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineFigure.java <pre>
+     ...
+
+  289:	 */
+  290:	public void setAttribute(String name, <mark>Object value</mark>) {
+  291:		if (name.equals(&quot;FrameColor&quot;)) {
+     ...
+
+  295:		else if (name.equals(&quot;ArrowMode&quot;)) {
+  296:			Integer intObj = <mark>(Integer) <mark>value</mark></mark>;
+  297:			if (intObj != null) {
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/standard/DecoratorFigure.java <pre>
+     ...
+
+  229:	 */
+  230:	public void setAttribute(String name, <mark>Object value</mark>) {
+  231:		getDecoratedFigure().setAttribute(name, <mark>value</mark>);
+  232:	}
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_19_2')">[+]</a> Match<br>
+<div id=S_19_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-jhotdraw/CH/ifa/draw/figures/PolyLineFigure.java <pre>
+     ...
+
+  289:	 */
+  290:	public void setAttribute(String name, <mark>Object value</mark>) {
+  291:		if (name.equals(&quot;FrameColor&quot;)) {
+     ...
+
+  295:		else if (name.equals(&quot;ArrowMode&quot;)) {
+  296:			Integer intObj = <mark>(Integer) <mark>value</mark></mark>;
+  297:			if (intObj != null) {
+     ...
+
+</pre></div>
+<div>tmp/src-jhotdraw/CH/ifa/draw/samples/pert/PertDependency.java <pre>
+     ...
+
+   39:		if (source.hasCycle(target)) {
+   40:			setAttribute(&quot;FrameColor&quot;, <mark>Color.red</mark>);
+   41:		}
+     ...
+
+</pre></div>
+</div>
+</div></div>

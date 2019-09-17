@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<html>
+<head>
+<title>巨大プロジェクトにおける変数名の一貫性の検査 (権藤研 合宿用資料)</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 0.5em; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+code { font-weight: bold; color: purple; }
+pre { border: 1px solid black; padding: 0.3em; }
+u { font-weight: bold; color: red; }
+body > ul > li { margin-top: 0.5em; }
+.comment { color: green; }
+--></style>
+<script>
+function goofline() {
+    if (document.baseURI.startsWith("file:")) {
+        for (e of document.getElementsByClassName("offline")) {
+            if (e.tagName == "IMG") {
+                let i = e.src.lastIndexOf("/");
+                let src = "./"+e.src.substr(i+1);
+                console.log("offline: "+e.src+" -> "+src);
+                e.src = src;
+            }
+        }
+    }
+}
+</script>
+</head>
+<body>
+
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>巨大プロジェクトにおける変数名の一貫性の検査</h1>
+
+<div class=h>
+権藤研 合宿用資料 2019/09/17<br>
+新山
+</div>
+
+<h2 style="letter-spacing: 0.2em;">SOAPBOX</h2>
+<ul>
+<li> プレゼン資料は<u>軽量かつ可搬な形式</u>で作るべし。
+  <ul>
+    <li> Proprietary かつツールがないと見れない形式を広める理由はない。
+    <li> 起動・終了・変更に 1秒以上かかるなんて信じられない。
+    <li> たかが紙芝居の表示に 1G もメモリを食うなど異常。
+  </ul>
+<li> 学術的な資料は<u>パブリックに公開</u>すべし。
+  <ul>
+    <li> 著作権違反したい人にはおすすめできない。
+    <li> 後でこっそり改竄したい人にはおすすめできない。
+    <li> 公開しない・公開できない = インチキの可能性。
+  </ul>
+<li> <u>情報機器弱者</u>に配慮すべし。
+  <ul>
+    <li> スマートフォンだけでアクセス可能か?
+    <li> 読みやすいフォントの大きさに調整可能か?
+    <li> 視覚障害者でも資料を理解できるか?
+  </ul>
+<li> 現在、<u>HTML</u> が唯一のまともな選択肢である。
+  <ul>
+    <li> 図・音声・動画・外部サイトへのリンクが簡単。
+    <li> CSS で印刷用の制御が可能。
+    <li> JS でちょっとしたオモチャを入れられる。
+  </ul>
+<li> 新山が使っているテンプレート:
+<blockquote><pre>
+&lt;!DOCTYPE html&gt;
+&lt;meta charset="utf-8" /&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+&lt;html&gt;&lt;head&gt;
+&lt;title&gt;タイトル&lt;/title&gt;
+&lt;style&gt;
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px; }
+h2 { border-bottom: solid 2px; }
+h3 { border-bottom: solid 1px; }
+table { border-collapse: collapse; margin: 0.5em; }
+code { font-weight: bold; color: purple; }
+pre { border: 1px solid black; padding: 0.3em; }
+&lt;/style&gt;
+</pre></blockquote>
+<p>
+印刷用の場合、改ページはこうする:
+<blockquote><pre>
+&lt;p style="page-break-before: always;"&gt;
+2ページ目。
+</pre></blockquote>
+</ul>
+
+
+<h2>本題: 巨大なソフトウェアは深刻な問題だ</h2>
+
+<ul>
+<li> ソフトウェア開発コストの大部分 (40〜80%) は、
+  保守によるコストである。
+<li> ソフトウェア保守のうち、多くの時間が
+  ソフトウェアの<u>仕様および構造の理解</u>に費やされている。
+<li> この負担をなるべく減らす研究をしたい。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="200">
+  <defs>
+    <marker id="rarrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="red" stroke="none" />
+    </marker>
+    <marker id="barrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <ellipse stroke="black" fill="#4ff" stroke-width="2"
+           cx="150" cy="100" rx="100" ry="60" />
+  <g text-anchor="middle" fill="black">
+    <text x="25" y="50">言語</text>
+    <text x="100" y="25">ツール</text>
+    <text x="190" y="25">モデル</text>
+    <text x="250" y="50">設計手法</text>
+    <text x="120" y="190" fill="red">ソフトウェア理解支援</text>
+    <text x="150" y="100" dy="-0.2em">ソフトウェア</text>
+    <text x="150" y="100" dy="1.0em">開発の問題</text>
+  </g>
+  <g stroke="black" fill="none"
+     stroke-width="4" marker-end="url(#barrow)">
+    <path d="M50,50 l40,25" />
+    <path d="M100,35 l15,30" />
+    <path d="M190,40 l-15,30" />
+    <path d="M240,60 l-25,25" />
+    <path d="M120,165 l15,-30"
+          stroke="red" stroke-width="5" marker-end="url(#rarrow)"/>
+  </g>
+</svg>
+</div>
+<div style="border: 1px solid; padding: 0.5em; margin: 0.5em;">
+<strong>究極の目標:</strong>
+ソースコードを入れると、自然言語の説明が出力される。
+(例: <a href="https://www.maizure.org/projects/decoded-gnu-coreutils/index.html">GNU coreutils</a>)
+</div>
+</ul>
+
+
+<h2>目標: ソースコード中の一貫しない変数名を指摘する</h2>
+
+<blockquote><pre>
+void printResult(Stream out, String result) {
+  out.writeLine("result:"+result);
+}
+
+void printStat(Stream out, int stat) {
+  out.writeLine("stat:"+stat);
+}
+
+void printInfo(Stream <mark>strm</mark>, String info) {
+  <mark>strm</mark>.writeLine("info:"+info);  <span class=comment>// お前、ここはoutやろ。</span>
+}
+</pre></blockquote>
+
+
+<h2>準備: 変数の「データパス」に着目する</h2>
+
+<p>
+ここでは、ある変数に代入される値が通る一連の処理
+(または関数の引数および返り値が通る処理) を、
+その変数の「<u>データパス</u>」と定義する。
+
+<h3>データパスの例</h3>
+<p>
+問. 以下の例で変数 <code>line</code> に着目する。
+<blockquote><pre>
+private BufferedReader fp;
+
+public String get() {
+    String <mark>line</mark> = fp.readLine();
+    int i = <mark>line</mark>.indexOf(' ');
+    return <mark>line</mark>.substring(0, i);
+}
+</pre></blockquote>
+<p>
+グラフ化するとこうなる:
+<div class=figure>
+<!-- Title: get() Pages: 1 -->
+<svg width="270pt" height="454pt"
+ viewBox="0.00 0.00 270.00 454.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 450)">
+<title>get()</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-450 266,-450 266,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_a</title>
+<polygon fill="none" stroke="#000000" points="8,-65 8,-367 254,-367 254,-65 8,-65"/>
+</g>
+<!-- N1 -->
+<g id="node1" class="node">
+<title>N1</title>
+<ellipse fill="none" stroke="#000000" cx="184" cy="-428" rx="27" ry="18"/>
+<text text-anchor="middle" x="184" y="-424.3" font-family="Times,serif" font-size="14.00" fill="#000000">fp</text>
+</g>
+<!-- N2 -->
+<g id="node2" class="node">
+<title>N2</title>
+<polygon fill="none" stroke="#000000" points="230,-359 138,-359 138,-323 230,-323 230,-359"/>
+<text text-anchor="middle" x="184" y="-337.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">readLine()</text>
+</g>
+<!-- N1&#45;&gt;N2 -->
+<g id="edge1" class="edge">
+<title>N1&#45;&gt;N2</title>
+<path fill="none" stroke="#000000" d="M184,-409.9735C184,-398.1918 184,-382.5607 184,-369.1581"/>
+<polygon fill="#000000" stroke="#000000" points="187.5001,-369.0033 184,-359.0034 180.5001,-369.0034 187.5001,-369.0033"/>
+<text text-anchor="middle" x="203" y="-380.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N4 -->
+<g id="node4" class="node">
+<title>N4</title>
+<polygon fill="none" stroke="#000000" points="172,-234 88,-234 88,-198 172,-198 172,-234"/>
+<text text-anchor="middle" x="130" y="-212.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">indexOf()</text>
+</g>
+<!-- N2&#45;&gt;N4 -->
+<g id="edge2" class="edge">
+<title>N2&#45;&gt;N4</title>
+<path fill="none" stroke="red" stroke-width="3" d="M176.1479,-322.8239C167.1497,-301.9946 152.3056,-267.6333 141.8884,-243.5193"/>
+<polygon fill="red" stroke="red" points="145.0404,-241.99 137.8615,-234.198 138.6144,-244.7661 145.0404,-241.99"/>
+<text text-anchor="middle" x="178" y="-274.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N6 -->
+<g id="node6" class="node">
+<title>N6</title>
+<polygon fill="none" stroke="#000000" points="179.5,-109 80.5,-109 80.5,-73 179.5,-73 179.5,-109"/>
+<text text-anchor="middle" x="130" y="-87.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">substring()</text>
+</g>
+<!-- N2&#45;&gt;N6 -->
+<g id="edge4" class="edge">
+<title>N2&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M195.0166,-322.8274C201.3258,-310.7139 208,-294.1913 208,-278.5 208,-278.5 208,-278.5 208,-153.5 208,-137.118 197.3924,-124.3189 184.0009,-114.6879"/>
+<polygon fill="#000000" stroke="#000000" points="185.6684,-111.5979 175.3729,-109.097 181.8617,-117.4724 185.6684,-111.5979"/>
+<text text-anchor="middle" x="227" y="-212.3" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N3 -->
+<g id="node3" class="node">
+<title>N3</title>
+<polygon fill="none" stroke="#000000" points="104,-359 50,-359 50,-323 104,-323 104,-359"/>
+<text text-anchor="middle" x="77" y="-337.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">&#39; &#39;</text>
+</g>
+<!-- N3&#45;&gt;N4 -->
+<g id="edge3" class="edge">
+<title>N3&#45;&gt;N4</title>
+<path fill="none" stroke="#000000" d="M78.5297,-322.8344C80.2411,-308.3271 83.7865,-287.7294 91,-271 95.3103,-261.0035 101.6359,-251.0116 107.9437,-242.3401"/>
+<polygon fill="#000000" stroke="#000000" points="110.8998,-244.2351 114.1702,-234.1576 105.3292,-239.9961 110.8998,-244.2351"/>
+<text text-anchor="middle" x="110" y="-274.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N4&#45;&gt;N6 -->
+<g id="edge6" class="edge">
+<title>N4&#45;&gt;N6</title>
+<path fill="none" stroke="red" stroke-width="3" d="M130,-197.8239C130,-177.2723 130,-143.5472 130,-119.4893"/>
+<polygon fill="red" stroke="red" points="133.5001,-119.198 130,-109.198 126.5001,-119.198 133.5001,-119.198"/>
+<text text-anchor="middle" x="149" y="-149.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg1</text>
+</g>
+<!-- N5 -->
+<g id="node5" class="node">
+<title>N5</title>
+<polygon fill="none" stroke="#000000" points="70,-234 16,-234 16,-198 70,-198 70,-234"/>
+<text text-anchor="middle" x="43" y="-212.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">0</text>
+</g>
+<!-- N5&#45;&gt;N6 -->
+<g id="edge5" class="edge">
+<title>N5&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M54.0754,-197.8986C62.9531,-183.6074 75.8861,-163.2677 88,-146 94.7619,-136.3613 102.5016,-126.0422 109.4796,-116.9762"/>
+<polygon fill="#000000" stroke="#000000" points="112.2585,-119.1041 115.6239,-109.058 106.7282,-114.8127 112.2585,-119.1041"/>
+<text text-anchor="middle" x="107" y="-149.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N7 -->
+<g id="node7" class="node">
+<title>N7</title>
+<polygon fill="none" stroke="#000000" points="161,-36 99,-36 99,0 161,0 161,-36"/>
+<text text-anchor="middle" x="130" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">return</text>
+</g>
+<!-- N6&#45;&gt;N7 -->
+<g id="edge7" class="edge">
+<title>N6&#45;&gt;N7</title>
+<path fill="none" stroke="red" stroke-width="3" d="M130,-72.9551C130,-64.8828 130,-55.1764 130,-46.1817"/>
+<polygon fill="red" stroke="red" points="133.5001,-46.0903 130,-36.0904 126.5001,-46.0904 133.5001,-46.0903"/>
+</g>
+</g>
+</svg>
+</div>
+<p>
+グラフ中の<u>赤線部分</u>が
+変数 <code>line</code> のデータパスである:
+<ul>
+  <li> <code>fp.readLine()</code> &rarr; <code><mark>line</mark></code> &rarr; <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code>
+</ul>
+<p>
+これは、変数 <code>line</code> になにが代入され、
+それがどのように使われるかを示している。
+
+<h3>Interprocedural 化する</h3>
+<blockquote><pre>
+private BufferedReader fp;
+
+public String get() {
+    String <mark>line</mark> = fp.readLine();
+    int i = <mark>line</mark>.indexOf(' ');
+    return <mark>line</mark>.substring(0, i);
+}
+
+public void show() {
+    String <mark>name</mark> = get();
+    System.out.println(<mark>name</mark>+"!!");
+}
+</pre></blockquote>
+<p>
+<code>get()</code> 中の変数 <code>line</code> (の処理結果) は、
+いまや <code>show()</code> 中では <code>name</code> となっていることに着目。
+<p>
+これをグラフ化するとこうなる:
+<div class=figure>
+<!-- Title: A Pages: 1 -->
+<svg width="301pt" height="797pt"
+ viewBox="0.00 0.00 300.79 797.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 793)">
+<title>A</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-793 296.7947,-793 296.7947,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_a</title>
+<polygon fill="none" stroke="#000000" points="8,-387 8,-712 254,-712 254,-387 8,-387"/>
+<text text-anchor="middle" x="131" y="-696.8" font-family="Times,serif" font-size="14.00" fill="#000000">get()</text>
+</g>
+<g id="clust2" class="cluster">
+<title>cluster_b</title>
+<polygon fill="none" stroke="#000000" points="23,-8 23,-368 165,-368 165,-8 23,-8"/>
+<text text-anchor="middle" x="94" y="-352.8" font-family="Times,serif" font-size="14.00" fill="#000000">show()</text>
+</g>
+<!-- N1 -->
+<g id="node1" class="node">
+<title>N1</title>
+<ellipse fill="none" stroke="#000000" cx="184" cy="-771" rx="27" ry="18"/>
+<text text-anchor="middle" x="184" y="-767.3" font-family="Times,serif" font-size="14.00" fill="#000000">fp</text>
+</g>
+<!-- N2 -->
+<g id="node2" class="node">
+<title>N2</title>
+<polygon fill="none" stroke="#000000" points="230,-681 138,-681 138,-645 230,-645 230,-681"/>
+<text text-anchor="middle" x="184" y="-659.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">readLine()</text>
+</g>
+<!-- N1&#45;&gt;N2 -->
+<g id="edge1" class="edge">
+<title>N1&#45;&gt;N2</title>
+<path fill="none" stroke="#000000" d="M184,-752.6793C184,-735.821 184,-710.5651 184,-691.147"/>
+<polygon fill="#000000" stroke="#000000" points="187.5001,-691.0501 184,-681.0502 180.5001,-691.0502 187.5001,-691.0501"/>
+<text text-anchor="middle" x="203" y="-723.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N4 -->
+<g id="node4" class="node">
+<title>N4</title>
+<polygon fill="none" stroke="#000000" points="172,-556 88,-556 88,-520 172,-520 172,-556"/>
+<text text-anchor="middle" x="130" y="-534.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">indexOf()</text>
+</g>
+<!-- N2&#45;&gt;N4 -->
+<g id="edge2" class="edge">
+<title>N2&#45;&gt;N4</title>
+<path fill="none" stroke="red" stroke-width="3" d="M176.1479,-644.8239C167.1497,-623.9946 152.3056,-589.6333 141.8884,-565.5193"/>
+<polygon fill="red" stroke="red" points="145.0404,-563.99 137.8615,-556.198 138.6144,-566.7661 145.0404,-563.99"/>
+<text text-anchor="middle" x="178" y="-596.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N6 -->
+<g id="node6" class="node">
+<title>N6</title>
+<polygon fill="none" stroke="#000000" points="179.5,-431 80.5,-431 80.5,-395 179.5,-395 179.5,-431"/>
+<text text-anchor="middle" x="130" y="-409.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">substring()</text>
+</g>
+<!-- N2&#45;&gt;N6 -->
+<g id="edge4" class="edge">
+<title>N2&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M195.0166,-644.8274C201.3258,-632.7139 208,-616.1913 208,-600.5 208,-600.5 208,-600.5 208,-475.5 208,-459.118 197.3924,-446.3189 184.0009,-436.6879"/>
+<polygon fill="#000000" stroke="#000000" points="185.6684,-433.5979 175.3729,-431.097 181.8617,-439.4724 185.6684,-433.5979"/>
+<text text-anchor="middle" x="227" y="-534.3" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N3 -->
+<g id="node3" class="node">
+<title>N3</title>
+<polygon fill="none" stroke="#000000" points="104,-681 50,-681 50,-645 104,-645 104,-681"/>
+<text text-anchor="middle" x="77" y="-659.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">&#39; &#39;</text>
+</g>
+<!-- N3&#45;&gt;N4 -->
+<g id="edge3" class="edge">
+<title>N3&#45;&gt;N4</title>
+<path fill="none" stroke="#000000" d="M78.5297,-644.8344C80.2411,-630.3271 83.7865,-609.7294 91,-593 95.3103,-583.0035 101.6359,-573.0116 107.9437,-564.3401"/>
+<polygon fill="#000000" stroke="#000000" points="110.8998,-566.2351 114.1702,-556.1576 105.3292,-561.9961 110.8998,-566.2351"/>
+<text text-anchor="middle" x="110" y="-596.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N4&#45;&gt;N6 -->
+<g id="edge6" class="edge">
+<title>N4&#45;&gt;N6</title>
+<path fill="none" stroke="red" stroke-width="3" d="M130,-519.8239C130,-499.2723 130,-465.5472 130,-441.4893"/>
+<polygon fill="red" stroke="red" points="133.5001,-441.198 130,-431.198 126.5001,-441.198 133.5001,-441.198"/>
+<text text-anchor="middle" x="149" y="-471.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg1</text>
+</g>
+<!-- N5 -->
+<g id="node5" class="node">
+<title>N5</title>
+<polygon fill="none" stroke="#000000" points="70,-556 16,-556 16,-520 70,-520 70,-556"/>
+<text text-anchor="middle" x="43" y="-534.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">0</text>
+</g>
+<!-- N5&#45;&gt;N6 -->
+<g id="edge5" class="edge">
+<title>N5&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M54.0754,-519.8986C62.9531,-505.6074 75.8861,-485.2677 88,-468 94.7619,-458.3613 102.5016,-448.0422 109.4796,-438.9762"/>
+<polygon fill="#000000" stroke="#000000" points="112.2585,-441.1041 115.6239,-431.058 106.7282,-436.8127 112.2585,-441.1041"/>
+<text text-anchor="middle" x="107" y="-471.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N9 -->
+<g id="node7" class="node">
+<title>N9</title>
+<polygon fill="none" stroke="#000000" points="157,-337 103,-337 103,-301 157,-301 157,-337"/>
+<text text-anchor="middle" x="130" y="-315.3" font-family="Courier,monospace" font-size="14.00" fill="gray">name</text>
+</g>
+<!-- N6&#45;&gt;N9 -->
+<g id="edge7" class="edge">
+<title>N6&#45;&gt;N9</title>
+<path fill="none" stroke="red" stroke-width="3" d="M130,-394.8759C130,-381.3516 130,-362.6192 130,-347.1514"/>
+<polygon fill="red" stroke="red" points="133.5001,-347.0685 130,-337.0685 126.5001,-347.0685 133.5001,-347.0685"/>
+</g>
+<!-- N11 -->
+<g id="node10" class="node">
+<title>N11</title>
+<polygon fill="none" stroke="#000000" points="142,-212 88,-212 88,-176 142,-176 142,-212"/>
+<text text-anchor="middle" x="115" y="-190.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">+</text>
+</g>
+<!-- N9&#45;&gt;N11 -->
+<g id="edge8" class="edge">
+<title>N9&#45;&gt;N11</title>
+<path fill="none" stroke="red" stroke-width="3" d="M127.8189,-300.8239C125.3416,-280.1798 121.2692,-246.2431 118.3798,-222.1648"/>
+<polygon fill="red" stroke="red" points="121.8504,-221.7097 117.1838,-212.198 114.9002,-222.5438 121.8504,-221.7097"/>
+<text text-anchor="middle" x="127" y="-252.8" font-family="Times,serif" font-size="14.00" fill="#000000">L</text>
+</g>
+<!-- N8 -->
+<g id="node8" class="node">
+<title>N8</title>
+<ellipse fill="none" stroke="#000000" cx="233" cy="-121" rx="59.5901" ry="18"/>
+<text text-anchor="middle" x="233" y="-117.3" font-family="Times,serif" font-size="14.00" fill="#000000">System.out</text>
+</g>
+<!-- N12 -->
+<g id="node11" class="node">
+<title>N12</title>
+<polygon fill="none" stroke="#000000" points="157,-52 73,-52 73,-16 157,-16 157,-52"/>
+<text text-anchor="middle" x="115" y="-30.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">println()</text>
+</g>
+<!-- N8&#45;&gt;N12 -->
+<g id="edge11" class="edge">
+<title>N8&#45;&gt;N12</title>
+<path fill="none" stroke="#000000" d="M210.2484,-104.2255C192.5512,-91.1776 167.7499,-72.8919 147.8916,-58.2506"/>
+<polygon fill="#000000" stroke="#000000" points="149.8446,-55.3421 139.7187,-52.2248 145.6905,-60.9763 149.8446,-55.3421"/>
+<text text-anchor="middle" x="200" y="-73.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N10 -->
+<g id="node9" class="node">
+<title>N10</title>
+<polygon fill="none" stroke="#000000" points="85,-337 31,-337 31,-301 85,-301 85,-337"/>
+<text text-anchor="middle" x="58" y="-315.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">!!</text>
+</g>
+<!-- N10&#45;&gt;N11 -->
+<g id="edge9" class="edge">
+<title>N10&#45;&gt;N11</title>
+<path fill="none" stroke="#000000" d="M66.2883,-300.8239C75.7865,-279.9946 91.4552,-245.6333 102.4512,-221.5193"/>
+<polygon fill="#000000" stroke="#000000" points="105.7372,-222.7489 106.7017,-212.198 99.3681,-219.8445 105.7372,-222.7489"/>
+<text text-anchor="middle" x="93" y="-252.8" font-family="Times,serif" font-size="14.00" fill="#000000">R</text>
+</g>
+<!-- N11&#45;&gt;N12 -->
+<g id="edge10" class="edge">
+<title>N11&#45;&gt;N12</title>
+<path fill="none" stroke="red" stroke-width="3" d="M115,-175.957C115,-148.3487 115,-95.3746 115,-62.5255"/>
+<polygon fill="red" stroke="red" points="118.5001,-62.2225 115,-52.2226 111.5001,-62.2226 118.5001,-62.2225"/>
+<text text-anchor="middle" x="134" y="-117.3" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+</g>
+</svg>
+</div>
+<p>
+最終的に、
+変数 <code>line</code> のデータパスは:
+<ul>
+  <li> <code>fp.readLine()</code> &rarr; <code><mark>line</mark></code> &rarr; <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code> &rarr; <code>assign:name</code> &rarr; <code>L:+</code> &rarr; <code>#arg0:println()</code>
+</ul>
+となる。
+この順列が、本プログラムにおける「変数 <code>line</code> の使われ方」を表すことになる。
+<p>
+単純化のため、いまのところパスの分岐は考慮しない。
+
+
+<h2>手法: 学習と予測</h2>
+<p>
+以上のようなデータパスを、
+プログラム中のすべての変数に対して (interprocedural で) 抽出し、
+変数名との相関を学習する。
+ここでは「データパスを与えると、変数名を予測する」ようなモデルを学習する。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="620" height="110">
+  <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g stroke="black" fill="none"
+     stroke-width="2" stroke-dasharray="4,6" marker-end="url(#arrow)">
+    <path d="M60,50 q20,-50,80,-20" />
+    <path d="M300,50 q-20,30,-80,20" />
+    <path d="M430,50 q-60,60,-220,25" />
+    <path d="M560,50 q-200,80,-360,30" />
+  </g>
+  <g stroke="black" fill="white" stroke-width="1">
+    <ellipse cx="60" cy="50" rx="50" ry="20" />
+    <rect x="150" y="35" width="60" height="30" fill="yellow" />
+    <ellipse cx="300" cy="50" rx="50" ry="20" />
+    <ellipse cx="430" cy="50" rx="50" ry="20" />
+    <ellipse cx="560" cy="50" rx="50" ry="20" />
+  </g>
+  <g stroke="black" fill="none" stroke-width="1">
+    <path d="M110,50 l40,0" />
+    <path d="M210,50 l40,0" />
+    <path d="M350,50 l30,0" />
+    <path d="M480,50 l30,0" />
+  </g>
+  <g text-anchor="middle" style="font-family: monospace; font-size: 80%;">
+    <text x="60" y="50" dy="0.4em">fp.readline()</text>
+    <text x="180" y="50" dy="0.4em">line</text>
+    <text x="300" y="50" dy="0.4em">#this:indexOf()</text>
+    <text x="430" y="50" dy="0.4em">#arg1:substring()</text>
+    <text x="560" y="50" dy="0.4em">assign:name</text>
+  </g>
+</svg>
+</div>
+<p>
+つまり、以下のようなデータパスが出てきたら:
+<ul>
+  <li> <code>fp.readLine()</code> &rarr; <code><kbd>???</kbd></code> &rarr; <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code> &rarr; <code>assign:name</code> &rarr; <code>L:+</code> &rarr; <code>#arg0:println()</code>
+</ul>
+<p>
+ここでの <code><kbd>???</kbd></code> = <code>line</code> ではないか、
+と予測するということである。もしここで <code>line</code> 以外の名前が使われていたら、
+その変数名は (この使われ方に対しては) 一貫していない、ということになる。
+<p>
+以上の技術を、巨大な Java コードベースに対して行えば
+(これがチョー大変!!) 完了。
+
+<h3>抽象的な記述</h3>
+<ol>
+<li> すべての変数 <em>v</em> &isin; V に対して、
+<em>v</em>.feature, <em>v</em>.name を収集。
+<li> 特定の変数 v<sub>1</sub> に対し、
+「v<sub>1</sub> を除いたすべての <em>v</em> &isin; V
+(<em>v</em> &ne; v<sub>1</sub>)」に対して
+G(<em>v</em>.feature) = <em>v</em>.name を予測する関数 G を学習する。
+<li> G(v<sub>1</sub>.feature) を求め、
+それが v<sub>1</sub>.name と一致すれば一貫性あり。
+</ol>
+
+<h2>結果</h2>
+<ul>
+<li> 適用例1: <a href="xz.html">XZ</a> (6.8 kloc)
+<li> 適用例2: <a href="jhotdraw.html">JHotDraw</a> (15 kloc)
+<li> 実験中: Xerces (114kloc), Apache Tomcat (235kloc), Weka (324kloc)
+</ul>
+
+<h2>本研究の貢献</h2>
+<p>
+「コード中の変数名を予測・提案する」という研究は以前からある [1] が、
+本研究が新しいのは:
+<ul>
+<li> 外部的な知識を使わず、単一のプロジェクトから一貫性を学習したこと。
+<li> ヒューリスティクスを使わず、純粋なデータパスの分析のみを用いたこと。
+</ul>
+である。
+<ol>
+<li> <a href="https://www.sri.inf.ethz.ch/publications/raychev2015predicting">
+Raychev, Veselin and Vechev, Martin and Krause, Andreas,
+<em>Predicting Program Properties from "Big Code"</em>, 2015.</a>
+</ol>
+
+<hr>
+<address>Yusuke Shinyama</address>

@@ -1,0 +1,3678 @@
+<!DOCTYPE html>
+<meta charset="UTF-8" />
+<style>
+h1 { border-bottom: 4px solid black; }
+h2 { color: white; background: black; padding: 4px; }
+h3 { border-bottom: 1px solid black; margin-top: 0.5em; }
+pre { margin: 0 1em 1em 1em; border: 1px solid gray; }
+.support { margin: 1em; padding: 1em; border: 2px solid black; }
+.old { background: #ccccff; }
+.old mark { color: white; background: blue; }
+.new { background: #88ff88; }
+.match { background: #ffcccc; }
+.match mark { color: white; background: red; }
+</style>
+<script>
+function toggle(id) {
+  let e = document.getElementById(id);
+  e.hidden = !e.hidden;
+  return false;
+}
+</script>
+<body>
+<h2>Proposal 0: <code class=old><mark>forward</mark></code> &rarr; <code class=new><mark>len</mark></code> &nbsp; (12.938)</h2>
+<h3><code class=old><mark>forward</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  323:     */
+  324:    public int getByte(<mark>int forward</mark>, int backward) {
+  325:        return buf[readPos + <mark>forward</mark> - backward] &amp; 0xFF;
+  326:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>niceLen</mark></code> &nbsp; (<code>[-1, '', ':call:len']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/BT4.java <pre>
+     ...
+
+   29:    BT4(int dictSize, int beforeSizeMin, int readAheadMax,
+   30:            <mark><mark>int niceLen</mark></mark>, int matchLenMax, int depthLimit,
+   31:            ArrayCache arrayCache) {
+   32:        super(dictSize, beforeSizeMin, readAheadMax, <mark>niceLen</mark>, matchLenMax,
+   33:              arrayCache);
+     ...
+
+   43:        // space for one-byte matches.
+   44:        matches = new Matches(<mark>niceLen</mark> - 1);
+   45:
+   46:        this.depthLimit = depthLimit &gt; 0 ? depthLimit : 16 + <mark><mark>niceLen</mark></mark> / 2;
+   47:    }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  121:            int dictSize, int extraSizeBefore, int extraSizeAfter,
+  122:            <mark>int niceLen</mark>, int matchLenMax, int mf, int depthLimit,
+  123:            ArrayCache arrayCache) {
+     ...
+
+  130:                return new BT4(dictSize, extraSizeBefore, extraSizeAfter,
+  131:                               <mark>niceLen</mark>, matchLenMax, depthLimit, arrayCache);
+  132:        }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/LZMAOutputStream.java <pre>
+     ...
+
+   67:                options.getMode(),
+   68:                dictSize, 0, <mark>options.getNiceLen()</mark>,
+   69:                options.getMatchFinder(), options.getDepthLimit(),
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+   94:                int dictSize, int extraSizeBefore,
+   95:                <mark>int niceLen</mark>, int mf, int depthLimit,
+   96:                ArrayCache arrayCache) {
+     ...
+
+  100:                                           dictSize, extraSizeBefore,
+  101:                                           <mark>niceLen</mark>, mf, depthLimit,
+  102:                                           arrayCache);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoderFast.java <pre>
+     ...
+
+   31:                           int dictSize, int extraSizeBefore,
+   32:                           <mark>int niceLen</mark>, int mf, int depthLimit,
+   33:                           ArrayCache arrayCache) {
+     ...
+
+   37:                                        EXTRA_SIZE_AFTER,
+   38:                                        <mark>niceLen</mark>, MATCH_LEN_MAX,
+   39:                                        mf, depthLimit, arrayCache),
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_0_0')">[+]</a> Match<br>
+<div id=S_0_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoderNormal.java <pre>
+     ...
+
+  434:        for (int rep = 0; rep &lt; REPS; ++rep) {
+  435:            int <mark>len = <mark>lz.getMatchLen(opts[optCur].reps[rep], lenLimit)</mark></mark>;
+  436:            if (len &lt; MATCH_LEN_MIN)
+     ...
+
+  466:                // Literal
+  467:                int curByte = lz.getByte(<mark>len</mark>, 0);
+  468:                int matchByte = lz.getByte(0); // lz.getByte(len, len)
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  323:     */
+  324:    public int getByte(<mark>int forward</mark>, int backward) {
+  325:        return buf[readPos + <mark>forward</mark> - backward] &amp; 0xFF;
+  326:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>len</mark></code> &nbsp; (<code>[-1, '', ':ref_var:len']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  206:
+  207:    public int read(byte[] buf, int off, <mark><mark>int len</mark></mark>) throws IOException {
+  208:        if (endReached)
+     ...
+
+  210:
+  211:        int ret = filterChain.read(buf, off, <mark>len</mark>);
+  212:
+     ...
+
+  234:            //     let it read end of payload marker(s).
+  235:            if (ret &lt; <mark><mark>len</mark></mark> || uncompressedSize == uncompressedSizeInHeader) {
+  236:                if (filterChain.read() != -1)
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/SeekableXZInputStream.java <pre>
+     ...
+
+  825:
+  826:                int ret = blockDecoder.read(buf, off, <mark>len</mark>);
+  827:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_0_1')">[+]</a> Match<br>
+<div id=S_0_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  323:     */
+  324:    public int getByte(<mark>int forward</mark>, int backward) {
+  325:        return buf[readPos + <mark>forward</mark> - backward] &amp; 0xFF;
+  326:    }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoderNormal.java <pre>
+     ...
+
+  543:                int matchByte = lz.getByte(0); // lz.getByte(len, len)
+  544:                int prevByte = lz.getByte(<mark>len</mark>, 1);
+  545:                int price = matchAndLenPrice
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>len</mark></code> &nbsp; (<code>[-2, ':call:len', '#this:ref_field:lz']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  712:
+  713:        int getPrice(<mark>int len</mark>, int posState) {
+  714:            return prices[posState][<mark>len</mark> - MATCH_LEN_MIN];
+  715:        }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoderNormal.java <pre>
+     ...
+
+  534:            int len2Limit = Math.min(niceLen, avail - len - 1);
+  535:            int len2 = <mark>lz</mark>.getMatchLen(len + 1, dist, len2Limit);
+  536:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_0_2')">[+]</a> Match<br>
+<div id=S_0_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoderNormal.java <pre>
+     ...
+
+  434:        for (int rep = 0; rep &lt; REPS; ++rep) {
+  435:            int len = <mark>lz</mark>.getMatchLen(opts[optCur].reps[rep], lenLimit);
+  436:            if (len &lt; MATCH_LEN_MIN)
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 1: <code class=old><mark>in</mark></code> &rarr; <code class=new><mark>buf</mark></code> &nbsp; (5.189)</h2>
+<h3><code class=old><mark>in</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/delta/DeltaEncoder.java <pre>
+     ...
+
+   16:
+   17:    public void encode(<mark>byte[] in</mark>, int in_off, int len, byte[] out) {
+   18:        for (int i = 0; i &lt; len; ++i) {
+   19:            byte tmp = history[(distance + pos) &amp; DISTANCE_MASK];
+   20:            history[pos-- &amp; DISTANCE_MASK] = <mark>in</mark>[in_off + i];
+   21:            out[i] = (byte)(<mark>in</mark>[in_off + i] - tmp);
+   22:        }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[-1, '', ':ref_field:temp']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  206:
+  207:    public int read(<mark><mark>byte[] buf</mark></mark>, int off, int len) throws IOException {
+  208:        if (endReached)
+     ...
+
+  210:
+  211:        int ret = filterChain.read(<mark>buf</mark>, off, len);
+  212:
+     ...
+
+  214:            if (verifyCheck)
+  215:                check.update(<mark><mark>buf</mark></mark>, off, ret);
+  216:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/SeekableXZInputStream.java <pre>
+     ...
+
+  762:    public int read() throws IOException {
+  763:        return read(<mark>tempBuf</mark>, 0, 1) == -1 ? -1 : (tempBuf[0] &amp; 0xFF);
+  764:    }
+     ...
+
+  796:     */
+  797:    public int read(<mark>byte[] buf</mark>, int off, int len) throws IOException {
+  798:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+  825:
+  826:                int ret = blockDecoder.read(<mark>buf</mark>, off, len);
+  827:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_1_0')">[+]</a> Match<br>
+<div id=S_1_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/DeltaOutputStream.java <pre>
+     ...
+
+   37:        tempBuf[0] = (byte)b;
+   38:        write(<mark>tempBuf</mark>, 0, 1);
+   39:    }
+   40:
+   41:    public void write(<mark>byte[] buf</mark>, int off, int len) throws IOException {
+   42:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+   58:
+   59:            delta.encode(<mark>buf</mark>, off, len, filterBuf);
+   60:            out.write(filterBuf, 0, len);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/delta/DeltaEncoder.java <pre>
+     ...
+
+   16:
+   17:    public void encode(<mark>byte[] in</mark>, int in_off, int len, byte[] out) {
+   18:        for (int i = 0; i &lt; len; ++i) {
+     ...
+
+   20:            history[pos-- &amp; DISTANCE_MASK] = in[in_off + i];
+   21:            out[i] = (byte)(<mark>in</mark>[in_off + i] - tmp);
+   22:        }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[-1, '', ':ref_var:buf']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  206:
+  207:    public int read(<mark><mark>byte[] buf</mark></mark>, int off, int len) throws IOException {
+  208:        if (endReached)
+     ...
+
+  210:
+  211:        int ret = filterChain.read(<mark>buf</mark>, off, len);
+  212:
+     ...
+
+  214:            if (verifyCheck)
+  215:                check.update(<mark><mark>buf</mark></mark>, off, ret);
+  216:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/XZSeekEncDemo.java <pre>
+     ...
+
+   52:        while (true) {
+   53:            int size = System.in.read(<mark>buf</mark>, 0, Math.min(buf.length, left));
+   54:            if (size == -1)
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_1_1')">[+]</a> Match<br>
+<div id=S_1_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/DeltaOutputStream.java <pre>
+     ...
+
+   52:            while (len &gt; FILTER_BUF_SIZE) {
+   53:                delta.encode(<mark>buf</mark>, off, FILTER_BUF_SIZE, filterBuf);
+   54:                out.write(filterBuf);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/delta/DeltaEncoder.java <pre>
+     ...
+
+   16:
+   17:    public void encode(<mark>byte[] in</mark>, int in_off, int len, byte[] out) {
+   18:        for (int i = 0; i &lt; len; ++i) {
+     ...
+
+   20:            history[pos-- &amp; DISTANCE_MASK] = in[in_off + i];
+   21:            out[i] = (byte)(<mark>in</mark>[in_off + i] - tmp);
+   22:        }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[-1, '', ':ref_field:buf']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  206:
+  207:    public int read(<mark><mark>byte[] buf</mark></mark>, int off, int len) throws IOException {
+  208:        if (endReached)
+     ...
+
+  210:
+  211:        int ret = filterChain.read(<mark>buf</mark>, off, len);
+  212:
+     ...
+
+  214:            if (verifyCheck)
+  215:                check.update(<mark><mark>buf</mark></mark>, off, ret);
+  216:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/SeekableXZInputStream.java <pre>
+     ...
+
+  762:    public int read() throws IOException {
+  763:        return read(<mark>tempBuf</mark>, 0, 1) == -1 ? -1 : (tempBuf[0] &amp; 0xFF);
+  764:    }
+     ...
+
+  796:     */
+  797:    public int read(<mark>byte[] buf</mark>, int off, int len) throws IOException {
+  798:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+  825:
+  826:                int ret = blockDecoder.read(<mark>buf</mark>, off, len);
+  827:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_1_2')">[+]</a> Match<br>
+<div id=S_1_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/DeltaOutputStream.java <pre>
+     ...
+
+   37:        tempBuf[0] = (byte)b;
+   38:        write(<mark>tempBuf</mark>, 0, 1);
+   39:    }
+   40:
+   41:    public void write(<mark>byte[] buf</mark>, int off, int len) throws IOException {
+   42:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+   58:
+   59:            delta.encode(<mark>buf</mark>, off, len, filterBuf);
+   60:            out.write(filterBuf, 0, len);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/delta/DeltaEncoder.java <pre>
+     ...
+
+   16:
+   17:    public void encode(<mark>byte[] in</mark>, int in_off, int len, byte[] out) {
+   18:        for (int i = 0; i &lt; len; ++i) {
+     ...
+
+   20:            history[pos-- &amp; DISTANCE_MASK] = in[in_off + i];
+   21:            out[i] = (byte)(<mark>in</mark>[in_off + i] - tmp);
+   22:        }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 2: <code class=old><mark>in</mark></code> &rarr; <code class=new><mark>buf</mark></code> &nbsp; (4.519)</h2>
+<h3><code class=old><mark>in</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  196:     */
+  197:    public int fillWindow(<mark>byte[] in</mark>, int off, int len) {
+  198:        assert !finishing;
+     ...
+
+  208:
+  209:        System.arraycopy(<mark>in</mark>, off, buf, writePos, len);
+  210:        writePos += len;
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[-1, '', ':ref_field:temp']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  206:
+  207:    public int read(<mark><mark>byte[] buf</mark></mark>, int off, int len) throws IOException {
+  208:        if (endReached)
+     ...
+
+  210:
+  211:        int ret = filterChain.read(<mark>buf</mark>, off, len);
+  212:
+     ...
+
+  214:            if (verifyCheck)
+  215:                check.update(<mark><mark>buf</mark></mark>, off, ret);
+  216:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/SeekableXZInputStream.java <pre>
+     ...
+
+  762:    public int read() throws IOException {
+  763:        return read(<mark>tempBuf</mark>, 0, 1) == -1 ? -1 : (tempBuf[0] &amp; 0xFF);
+  764:    }
+     ...
+
+  796:     */
+  797:    public int read(<mark>byte[] buf</mark>, int off, int len) throws IOException {
+  798:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+  825:
+  826:                int ret = blockDecoder.read(<mark>buf</mark>, off, len);
+  827:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_2_0')">[+]</a> Match<br>
+<div id=S_2_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMAOutputStream.java <pre>
+     ...
+
+  232:        tempBuf[0] = (byte)b;
+  233:        write(<mark>tempBuf</mark>, 0, 1);
+  234:    }
+  235:
+  236:    public void write(<mark>byte[] buf</mark>, int off, int len) throws IOException {
+  237:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+  254:            while (len &gt; 0) {
+  255:                int used = lz.fillWindow(<mark>buf</mark>, off, len);
+  256:                off += used;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  196:     */
+  197:    public int fillWindow(<mark>byte[] in</mark>, int off, int len) {
+  198:        assert !finishing;
+     ...
+
+  208:
+  209:        System.arraycopy(<mark>in</mark>, off, buf, writePos, len);
+  210:        writePos += len;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[-1, '', ':ref_var:buf']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  206:
+  207:    public int read(<mark><mark>byte[] buf</mark></mark>, int off, int len) throws IOException {
+  208:        if (endReached)
+     ...
+
+  210:
+  211:        int ret = filterChain.read(<mark>buf</mark>, off, len);
+  212:
+     ...
+
+  214:            if (verifyCheck)
+  215:                check.update(<mark><mark>buf</mark></mark>, off, ret);
+  216:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/XZSeekEncDemo.java <pre>
+     ...
+
+   52:        while (true) {
+   53:            int size = System.in.read(<mark>buf</mark>, 0, Math.min(buf.length, left));
+   54:            if (size == -1)
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_2_1')">[+]</a> Match<br>
+<div id=S_2_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/LZMAEncDemo.java <pre>
+     ...
+
+   51:        while ((size = System.in.read(buf)) != -1)
+   52:            encoder.write(<mark>buf</mark>, 0, size);
+   53:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/LZMAOutputStream.java <pre>
+     ...
+
+  235:
+  236:    public void write(<mark>byte[] buf</mark>, int off, int len) throws IOException {
+  237:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+  254:            while (len &gt; 0) {
+  255:                int used = lz.fillWindow(<mark>buf</mark>, off, len);
+  256:                off += used;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  196:     */
+  197:    public int fillWindow(<mark>byte[] in</mark>, int off, int len) {
+  198:        assert !finishing;
+     ...
+
+  208:
+  209:        System.arraycopy(<mark>in</mark>, off, buf, writePos, len);
+  210:        writePos += len;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[-1, '', ':ref_field:buf']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  206:
+  207:    public int read(<mark><mark>byte[] buf</mark></mark>, int off, int len) throws IOException {
+  208:        if (endReached)
+     ...
+
+  210:
+  211:        int ret = filterChain.read(<mark>buf</mark>, off, len);
+  212:
+     ...
+
+  214:            if (verifyCheck)
+  215:                check.update(<mark><mark>buf</mark></mark>, off, ret);
+  216:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/SeekableXZInputStream.java <pre>
+     ...
+
+  762:    public int read() throws IOException {
+  763:        return read(<mark>tempBuf</mark>, 0, 1) == -1 ? -1 : (tempBuf[0] &amp; 0xFF);
+  764:    }
+     ...
+
+  796:     */
+  797:    public int read(<mark>byte[] buf</mark>, int off, int len) throws IOException {
+  798:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+  825:
+  826:                int ret = blockDecoder.read(<mark>buf</mark>, off, len);
+  827:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_2_2')">[+]</a> Match<br>
+<div id=S_2_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMAOutputStream.java <pre>
+     ...
+
+  232:        tempBuf[0] = (byte)b;
+  233:        write(<mark>tempBuf</mark>, 0, 1);
+  234:    }
+  235:
+  236:    public void write(<mark>byte[] buf</mark>, int off, int len) throws IOException {
+  237:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+  254:            while (len &gt; 0) {
+  255:                int used = lz.fillWindow(<mark>buf</mark>, off, len);
+  256:                off += used;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  196:     */
+  197:    public int fillWindow(<mark>byte[] in</mark>, int off, int len) {
+  198:        assert !finishing;
+     ...
+
+  208:
+  209:        System.arraycopy(<mark>in</mark>, off, buf, writePos, len);
+  210:        writePos += len;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 3: <code class=old><mark>file</mark></code> &rarr; <code class=new><mark>name</mark></code> &nbsp; (4.477)</h2>
+<h3><code class=old><mark>file</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/SeekableFileInputStream.java <pre>
+     ...
+
+   30:     */
+   31:    public SeekableFileInputStream(<mark>File file</mark>) throws FileNotFoundException {
+   32:        randomAccessFile = new RandomAccessFile(<mark>file</mark>, &quot;r&quot;);
+   33:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>name</mark></code> &nbsp; (<code>[1, '', '#arg0:new:file']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/LZMADecDemo.java <pre>
+     ...
+
+   22:        byte[] buf = new byte[8192];
+   23:        String <mark>name = null</mark>;
+   24:
+     ...
+
+   26:            if (args.length == 0) {
+   27:                <mark>name</mark> = &quot;standard input&quot;;
+   28:
+     ...
+
+   39:                for (int i = 0; i &lt; args.length; ++i) {
+   40:                    <mark>name</mark> = args[i];
+   41:                    InputStream in = <mark>new FileInputStream(<mark><mark>name</mark></mark>)</mark>;
+   42:
+     ...
+
+   64:        } catch (FileNotFoundException e) {
+   65:            System.err.println(&quot;LZMADecDemo: Cannot open &quot; + <mark>name</mark> + &quot;: &quot;
+   66:                               + e.getMessage());
+     ...
+
+   70:            System.err.println(&quot;LZMADecDemo: Unexpected end of input on &quot;
+   71:                               + <mark>name</mark>);
+   72:            System.exit(1);
+     ...
+
+   75:            System.err.println(&quot;LZMADecDemo: Error decompressing from &quot;
+   76:                               + <mark>name</mark> + &quot;: &quot; + e.getMessage());
+   77:            System.exit(1);
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_3_0')">[+]</a> Match<br>
+<div id=S_3_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/SeekableFileInputStream.java <pre>
+     ...
+
+   31:    public SeekableFileInputStream(File file) throws FileNotFoundException {
+   32:        randomAccessFile = <mark>new RandomAccessFile(<mark>file</mark>, &quot;r&quot;)</mark>;
+   33:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>name</mark></code> &nbsp; (<code>[1, '', '#arg0:new:access']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/SeekableFileInputStream.java <pre>
+     ...
+
+   38:     */
+   39:    public SeekableFileInputStream(<mark>String name</mark>) throws FileNotFoundException {
+   40:        randomAccessFile = <mark>new RandomAccessFile(<mark><mark>name</mark></mark>, &quot;r&quot;)</mark>;
+   41:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_3_1')">[+]</a> Match<br>
+<div id=S_3_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/SeekableFileInputStream.java <pre>
+     ...
+
+   31:    public SeekableFileInputStream(File file) throws FileNotFoundException {
+   32:        randomAccessFile = <mark>new RandomAccessFile(<mark>file</mark>, &quot;r&quot;)</mark>;
+   33:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>name</mark></code> &nbsp; (<code>[2, '#arg0:new:file', 'R:op_assign:=']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/SeekableFileInputStream.java <pre>
+     ...
+
+   38:     */
+   39:    public SeekableFileInputStream(<mark>String name</mark>) throws FileNotFoundException {
+   40:        <mark>randomAccessFile = <mark>new RandomAccessFile(<mark>name</mark>, &quot;r&quot;)</mark></mark>;
+   41:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_3_2')">[+]</a> Match<br>
+<div id=S_3_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/SeekableFileInputStream.java <pre>
+     ...
+
+   31:    public SeekableFileInputStream(File file) throws FileNotFoundException {
+   32:        <mark>randomAccessFile = <mark>new RandomAccessFile(file, &quot;r&quot;)</mark></mark>;
+   33:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 4: <code class=old><mark>in</mark></code> &rarr; <code class=new><mark>data</mark></code> / <code class=old><mark>in</mark></code> &nbsp; (3.514)</h2>
+<h3><code class=old><mark>in</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   34:
+   35:    public void prepareInputBuffer(<mark>DataInputStream in</mark>, int len)
+   36:            throws IOException {
+     ...
+
+   39:
+   40:        if (<mark>in</mark>.readUnsignedByte() != 0x00)
+   41:            throw new CorruptedInputException();
+   42:
+   43:        code = <mark>in</mark>.readInt();
+   44:        range = 0xFFFFFFFF;
+     ...
+
+   51:        pos = buf.length - len;
+   52:        <mark>in</mark>.readFully(buf, pos, len);
+   53:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>inData</mark></code> &nbsp; (<code>[1, '', '#this:call:fully']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/SeekableXZInputStream.java <pre>
+     ...
+
+  452:        this.in = in;
+  453:        DataInputStream <mark>inData = new DataInputStream(in)</mark>;
+  454:
+     ...
+
+  458:            byte[] buf = new byte[XZ.HEADER_MAGIC.length];
+  459:            <mark>inData</mark>.readFully(buf);
+  460:            if (!Arrays.equals(buf, XZ.HEADER_MAGIC))
+     ...
+
+  479:            in.seek(pos - DecoderUtil.STREAM_HEADER_SIZE);
+  480:            <mark>inData</mark>.readFully(buf);
+  481:
+     ...
+
+  548:            // Decode the Stream Header.
+  549:            <mark><mark><mark>inData</mark></mark>.readFully(buf)</mark>;
+  550:            StreamFlags streamHeader = DecoderUtil.decodeStreamHeader(buf);
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_4_0')">[+]</a> Match<br>
+<div id=S_4_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   51:        pos = buf.length - len;
+   52:        <mark><mark>in</mark>.readFully(buf, pos, len)</mark>;
+   53:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>inData</mark></code> &nbsp; (<code>[1, '', '#this:call:unsigned']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMAInputStream.java <pre>
+     ...
+
+  295:                           ArrayCache arrayCache) throws IOException {
+  296:        DataInputStream <mark>inData = new DataInputStream(in)</mark>;
+  297:
+  298:        // Properties byte (lc, lp, and pb)
+  299:        byte propsByte = <mark>inData</mark>.readByte();
+  300:
+     ...
+
+  303:        for (int i = 0; i &lt; 4; ++i)
+  304:            dictSize |= <mark>inData</mark>.readUnsignedByte() &lt;&lt; (8 * i);
+  305:
+     ...
+
+  311:        for (int i = 0; i &lt; 8; ++i)
+  312:            uncompSize |= (long)<mark><mark><mark>inData</mark></mark>.readUnsignedByte()</mark> &lt;&lt; (8 * i);
+  313:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_4_1')">[+]</a> Match<br>
+<div id=S_4_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   39:
+   40:        if (<mark><mark>in</mark>.readUnsignedByte()</mark> != 0x00)
+   41:            throw new CorruptedInputException();
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>inData</mark></code> &nbsp; (<code>[-2, ':ref_field:in', ':catchjoin']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/LZDecoder.java <pre>
+     ...
+
+  112:
+  113:    public void copyUncompressed(<mark>DataInputStream inData</mark>, int len)
+  114:            throws IOException {
+  115:        int copySize = Math.min(bufSize - pos, len);
+  116:        <mark>inData</mark>.readFully(buf, pos, copySize);
+  117:        pos += copySize;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  210:
+  211:        int ret = <mark>filterChain.read(buf, off, len)</mark>;
+  212:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_4_2')">[+]</a> Match<br>
+<div id=S_4_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  210:
+  211:        int ret = <mark>filterChain.read(buf, off, len)</mark>;
+  212:
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 5: <code class=old><mark>ret</mark></code> &rarr; <code class=new><mark>size</mark></code> &nbsp; (3.338)</h2>
+<h3><code class=old><mark>ret</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/CountingInputStream.java <pre>
+     ...
+
+   36:    public int read(byte[] b, int off, int len) throws IOException {
+   37:        int <mark>ret = in.read(b, off, len)</mark>;
+   38:        if (<mark>ret</mark> &gt; 0 &amp;&amp; size &gt;= 0)
+   39:            size += <mark>ret</mark>;
+   40:
+   41:        return <mark>ret</mark>;
+   42:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>size</mark></code> &nbsp; (<code>[1, '', 'R:op_assign:+=']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/LZMAEncDemo.java <pre>
+     ...
+
+   50:        int size;
+   51:        while ((<mark>size</mark> = System.in.read(buf)) != -1)
+   52:            encoder.write(buf, 0, <mark><mark>size</mark></mark>);
+   53:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/LZMAOutputStream.java <pre>
+     ...
+
+  235:
+  236:    public void write(byte[] buf, int off, <mark>int len</mark>) throws IOException {
+  237:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+  250:
+  251:        <mark>currentUncompressedSize += <mark>len</mark></mark>;
+  252:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_5_0')">[+]</a> Match<br>
+<div id=S_5_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/CountingInputStream.java <pre>
+     ...
+
+   38:        if (ret &gt; 0 &amp;&amp; size &gt;= 0)
+   39:            <mark>size += <mark>ret</mark></mark>;
+   40:
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>size</mark></code> &nbsp; (<code>[-2, ':call:read', '#arg0:ref_var:b']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/CountingInputStream.java <pre>
+     ...
+
+   29:        int ret = in.read();
+   30:        if (ret != -1 &amp;&amp; <mark>size</mark> &gt;= 0)
+   31:            ++<mark>size</mark>;
+   32:
+     ...
+
+   36:    public int read(byte[] b, int off, int len) throws IOException {
+   37:        int ret = in.read(<mark>b</mark>, off, len);
+   38:        if (ret &gt; 0 &amp;&amp; <mark>size</mark> &gt;= 0)
+   39:            <mark>size</mark> += ret;
+   40:
+     ...
+
+   44:    public long getSize() {
+   45:        return <mark>size</mark>;
+   46:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_5_1')">[+]</a> Match<br>
+<div id=S_5_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/CountingInputStream.java <pre>
+     ...
+
+   36:    public int read(byte[] b, int off, int len) throws IOException {
+   37:        int ret = in.read(<mark>b</mark>, off, len);
+   38:        if (ret &gt; 0 &amp;&amp; size &gt;= 0)
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>size</mark></code> &nbsp; (<code>[-2, ':call:read', '#arg1:ref_var:off']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/CountingInputStream.java <pre>
+     ...
+
+   29:        int ret = in.read();
+   30:        if (ret != -1 &amp;&amp; <mark>size</mark> &gt;= 0)
+   31:            ++<mark>size</mark>;
+   32:
+     ...
+
+   36:    public int read(byte[] b, int off, int len) throws IOException {
+   37:        int ret = in.read(b, <mark>off</mark>, len);
+   38:        if (ret &gt; 0 &amp;&amp; <mark>size</mark> &gt;= 0)
+   39:            <mark>size</mark> += ret;
+   40:
+     ...
+
+   44:    public long getSize() {
+   45:        return <mark>size</mark>;
+   46:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_5_2')">[+]</a> Match<br>
+<div id=S_5_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/CountingInputStream.java <pre>
+     ...
+
+   36:    public int read(byte[] b, int off, int len) throws IOException {
+   37:        int ret = in.read(b, <mark>off</mark>, len);
+   38:        if (ret &gt; 0 &amp;&amp; size &gt;= 0)
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 6: <code class=old><mark>is</mark></code> / <code class=old><mark>rep</mark></code> / <code class=old><mark>long</mark></code> &rarr; <code class=new><mark>match</mark></code> &nbsp; (3.213)</h2>
+<h3><code class=old><mark>isRep0Long</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+  102:        if (rc.decodeBit(isRep0, state.get()) == 0) {
+  103:            if (rc.decodeBit(<mark>isRep0Long</mark>[state.get()], posState) == 0) {
+  104:                state.updateShortRep();
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  355:            rc.encodeBit(isRep0, state.get(), 0);
+  356:            rc.encodeBit(<mark>isRep0Long</mark>[state.get()], posState, len == 1 ? 0 : 1);
+  357:        } else {
+     ...
+
+  423:                     + RangeEncoder.getBitPrice(
+  424:                       <mark>isRep0Long</mark>[state.get()][posState], 1);
+  425:        } else {
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMACoder.java <pre>
+     ...
+
+   78:
+   79:        for (int i = 0; i &lt; <mark>isRep0Long</mark>.length; ++i)
+   80:            RangeCoder.initProbs(<mark>isRep0Long</mark>[i]);
+   81:
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>isMatch</mark></code> &nbsp; (<code>[1, '', 'array:ref_array:%[S']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  233:        int posState = (lz.getPos() - readAhead) &amp; posMask;
+  234:        rc.encodeBit(<mark>isMatch</mark>[state.get()], posState, 1);
+  235:        rc.encodeBit(isRep, state.get(), 0);
+     ...
+
+  269:        skip(1);
+  270:        rc.encodeBit(<mark>isMatch</mark>[state.get()], 0, 0);
+  271:        literalEncoder.encodeInit();
+     ...
+
+  293:            assert len == 1;
+  294:            rc.encodeBit(<mark>isMatch</mark>[state.get()], posState, 0);
+  295:            literalEncoder.encode();
+     ...
+
+  297:            // Some type of match
+  298:            rc.encodeBit(<mark>isMatch</mark>[state.get()], posState, 1);
+  299:            if (back &lt; REPS) {
+     ...
+
+  397:    int getAnyMatchPrice(State state, int posState) {
+  398:        return RangeEncoder.getBitPrice(<mark>isMatch</mark>[state.get()][posState], 1);
+  399:    }
+     ...
+
+  568:            int price = RangeEncoder.getBitPrice(
+  569:                    <mark>isMatch</mark>[state.get()][pos &amp; posMask], 0);
+  570:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMACoder.java <pre>
+     ...
+
+   70:
+   71:        for (int i = 0; i &lt; <mark>isMatch</mark>.length; ++i)
+   72:            RangeCoder.initProbs(<mark><mark><mark>isMatch</mark></mark>[i]</mark>);
+   73:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+   54:
+   55:            if (rc.decodeBit(<mark>isMatch</mark>[state.get()], posState) == 0) {
+   56:                literalDecoder.decode();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_6_0')">[+]</a> Match<br>
+<div id=S_6_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMACoder.java <pre>
+     ...
+
+   79:        for (int i = 0; i &lt; isRep0Long.length; ++i)
+   80:            RangeCoder.initProbs(<mark><mark>isRep0Long</mark>[i]</mark>);
+   81:
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>isMatch</mark></code> &nbsp; (<code>[3, '#arg0:call:bit', 'L:op_infix:==']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  233:        int posState = (lz.getPos() - readAhead) &amp; posMask;
+  234:        rc.encodeBit(<mark>isMatch</mark>[state.get()], posState, 1);
+  235:        rc.encodeBit(isRep, state.get(), 0);
+     ...
+
+  269:        skip(1);
+  270:        rc.encodeBit(<mark>isMatch</mark>[state.get()], 0, 0);
+  271:        literalEncoder.encodeInit();
+     ...
+
+  293:            assert len == 1;
+  294:            rc.encodeBit(<mark>isMatch</mark>[state.get()], posState, 0);
+  295:            literalEncoder.encode();
+     ...
+
+  297:            // Some type of match
+  298:            rc.encodeBit(<mark>isMatch</mark>[state.get()], posState, 1);
+  299:            if (back &lt; REPS) {
+     ...
+
+  397:    int getAnyMatchPrice(State state, int posState) {
+  398:        return RangeEncoder.getBitPrice(<mark>isMatch</mark>[state.get()][posState], 1);
+  399:    }
+     ...
+
+  568:            int price = RangeEncoder.getBitPrice(
+  569:                    <mark>isMatch</mark>[state.get()][pos &amp; posMask], 0);
+  570:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMACoder.java <pre>
+     ...
+
+   70:
+   71:        for (int i = 0; i &lt; <mark>isMatch</mark>.length; ++i)
+   72:            RangeCoder.initProbs(<mark>isMatch</mark>[i]);
+   73:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+   54:
+   55:            if (<mark><mark>rc.decodeBit(<mark>isMatch</mark>[state.get()], posState)</mark> == 0</mark>) {
+   56:                literalDecoder.decode();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_6_1')">[+]</a> Match<br>
+<div id=S_6_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+  102:        if (rc.decodeBit(isRep0, state.get()) == 0) {
+  103:            if (<mark><mark>rc.decodeBit(isRep0Long[state.get()], posState)</mark> == 0</mark>) {
+  104:                state.updateShortRep();
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>MATCH_LEN_MIN</mark></code> &nbsp; (<code>[-1, '', 'obj:ref_field:len']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoderNormal.java <pre>
+     ...
+
+  123:        int avail = Math.min(lz.getAvail(), MATCH_LEN_MAX);
+  124:        if (avail &lt; <mark>MATCH_LEN_MIN</mark>)
+  125:            return 1;
+     ...
+
+  131:
+  132:            if (repLens[rep] &lt; <mark>MATCH_LEN_MIN</mark>) {
+  133:                repLens[rep] = 0;
+     ...
+
+  169:        // to have the byte encoded as a literal.
+  170:        if (mainLen &lt; <mark>MATCH_LEN_MIN</mark> &amp;&amp; curByte != matchByte
+  171:                &amp;&amp; repLens[repBest] &lt; <mark>MATCH_LEN_MIN</mark>)
+  172:            return 1;
+     ...
+
+  200:        optEnd = Math.max(mainLen, repLens[repBest]);
+  201:        if (optEnd &lt; <mark>MATCH_LEN_MIN</mark>) {
+  202:            assert optEnd == 0 : optEnd;
+     ...
+
+  219:        // Initialize the prices for latter opts that will be used below.
+  220:        for (int i = optEnd; i &gt;= <mark>MATCH_LEN_MIN</mark>; --i)
+  221:            opts[i].reset();
+     ...
+
+  225:            int repLen = repLens[rep];
+  226:            if (repLen &lt; <mark>MATCH_LEN_MIN</mark>)
+  227:                continue;
+     ...
+
+  235:                    opts[repLen].set1(price, 0, rep);
+  236:            } while (--repLen &gt;= <mark>MATCH_LEN_MIN</mark>);
+  237:        }
+     ...
+
+  240:        {
+  241:            int len = Math.max(repLens[0] + 1, <mark>MATCH_LEN_MIN</mark>);
+  242:            if (len &lt;= mainLen) {
+     ...
+
+  290:
+  291:            if (avail &gt;= <mark>MATCH_LEN_MIN</mark>) {
+  292:                int startLen = calcLongRepPrices(pos, posState,
+     ...
+
+  403:        // try literal + long rep0.
+  404:        if (!nextIsByte &amp;&amp; matchByte != curByte &amp;&amp; avail &gt; <mark>MATCH_LEN_MIN</mark>) {
+  405:            int lenLimit = Math.min(niceLen, avail - 1);
+     ...
+
+  407:
+  408:            if (len &gt;= <mark>MATCH_LEN_MIN</mark>) {
+  409:                nextState.set(opts[optCur].state);
+     ...
+
+  430:                                  int avail, int anyRepPrice) {
+  431:        int startLen = <mark>MATCH_LEN_MIN</mark>;
+  432:        int lenLimit = Math.min(avail, niceLen);
+     ...
+
+  435:            int len = lz.getMatchLen(opts[optCur].reps[rep], lenLimit);
+  436:            if (len &lt; <mark>MATCH_LEN_MIN</mark>)
+  437:                continue;
+     ...
+
+  444:
+  445:            for (int i = len; i &gt;= <mark>MATCH_LEN_MIN</mark>; --i) {
+  446:                int price = longRepPrice
+     ...
+
+  458:
+  459:            if (len2 &gt;= <mark>MATCH_LEN_MIN</mark>) {
+  460:                // Rep
+  461:                int price = longRepPrice
+  462:                            + <mark>repLenEncoder</mark>.getPrice(len, posState);
+  463:                nextState.set(opts[optCur].state);
+     ...
+
+  536:
+  537:            if (len2 &gt;= <mark>MATCH_LEN_MIN</mark>) {
+  538:                nextState.set(opts[optCur].state);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+  188:            if (rc.decodeBit(choice, 0) == 0)
+  189:                return rc.decodeBitTree(low[posState]) + <mark>MATCH_LEN_MIN</mark>;
+  190:
+     ...
+
+  192:                return rc.decodeBitTree(mid[posState])
+  193:                       + <mark>MATCH_LEN_MIN</mark> + LOW_SYMBOLS;
+  194:
+  195:            return rc.decodeBitTree(high)
+  196:                   + <mark>MATCH_LEN_MIN</mark> + LOW_SYMBOLS + MID_SYMBOLS;
+  197:        }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoderFast.java <pre>
+     ...
+
+   60:        int avail = Math.min(lz.getAvail(), MATCH_LEN_MAX);
+   61:        if (avail &lt; <mark>MATCH_LEN_MIN</mark>)
+   62:            return 1;
+     ...
+
+   68:            int len = lz.getMatchLen(reps[rep], avail);
+   69:            if (len &lt; <mark>MATCH_LEN_MIN</mark>)
+   70:                continue;
+     ...
+
+  108:
+  109:            if (mainLen == <mark>MATCH_LEN_MIN</mark> &amp;&amp; mainDist &gt;= 0x80)
+  110:                mainLen = 1;
+     ...
+
+  112:
+  113:        if (bestRepLen &gt;= <mark>MATCH_LEN_MIN</mark>) {
+  114:            if (bestRepLen + 1 &gt;= mainLen
+     ...
+
+  122:
+  123:        if (mainLen &lt; <mark>MATCH_LEN_MIN</mark> || avail &lt;= <mark>MATCH_LEN_MIN</mark>)
+  124:            return 1;
+     ...
+
+  138:                    || (newLen + 1 &gt;= mainLen
+  139:                        &amp;&amp; mainLen &gt;= <mark>MATCH_LEN_MIN</mark> + 1
+  140:                        &amp;&amp; changePair(newDist, mainDist)))
+     ...
+
+  143:
+  144:        int limit = Math.max(mainLen - 1, <mark>MATCH_LEN_MIN</mark>);
+  145:        for (int rep = 0; rep &lt; REPS; ++rep)
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMACoder.java <pre>
+     ...
+
+   54:    static final int getDistState(int len) {
+   55:        return len &lt; DIST_STATES + <mark>MATCH_LEN_MIN</mark>
+   56:               ? len - <mark>MATCH_LEN_MIN</mark>
+   57:               : DIST_STATES - 1;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  235:        rc.encodeBit(isRep, state.get(), 0);
+  236:        encodeMatch(-1, <mark>MATCH_LEN_MIN</mark>, posState);
+  237:    }
+     ...
+
+  676:            // usually needed anyway if niceLen &lt; 18.
+  677:            int lenSymbols = Math.max(niceLen - <mark>MATCH_LEN_MIN</mark> + 1,
+  678:                                      LOW_SYMBOLS + MID_SYMBOLS);
+     ...
+
+  691:        void encode(int len, int posState) throws IOException {
+  692:            len -= <mark>MATCH_LEN_MIN</mark>;
+  693:
+     ...
+
+  713:        int getPrice(int len, int posState) {
+  714:            return prices[posState][len - <mark><mark>MATCH_LEN_MIN</mark></mark>];
+  715:        }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_6_2')">[+]</a> Match<br>
+<div id=S_6_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+   34:        literalDecoder.reset();
+   35:        <mark>matchLenDecoder</mark>.reset();
+   36:        repLenDecoder.reset();
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMACoder.java <pre>
+     ...
+
+   79:        for (int i = 0; i &lt; isRep0Long.length; ++i)
+   80:            RangeCoder.initProbs(<mark>isRep0Long</mark>[i]);
+   81:
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 7: <code class=old><mark>required</mark></code> / <code class=old><mark>for</mark></code> / <code class=old><mark>flushing</mark></code> &rarr; <code class=new><mark>len</mark></code> &nbsp; (2.933)</h2>
+<h3><code class=old><mark>requiredForFlushing</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  402:     */
+  403:    int movePos(<mark>int requiredForFlushing</mark>, int requiredForFinishing) {
+  404:        assert requiredForFlushing &gt;= requiredForFinishing;
+     ...
+
+  408:
+  409:        if (avail &lt; <mark>requiredForFlushing</mark>) {
+  410:            if (avail &lt; requiredForFinishing || !finishing) {
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>matchLenMax</mark></code> &nbsp; (<code>[-1, '', ':ref_field:len']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/BT4.java <pre>
+     ...
+
+   29:    BT4(int dictSize, int beforeSizeMin, int readAheadMax,
+   30:            int niceLen, <mark><mark>int matchLenMax</mark></mark>, int depthLimit,
+   31:            ArrayCache arrayCache) {
+   32:        super(dictSize, beforeSizeMin, readAheadMax, niceLen, <mark><mark>matchLenMax</mark></mark>,
+   33:              arrayCache);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  121:            int dictSize, int extraSizeBefore, int extraSizeAfter,
+  122:            int niceLen, <mark>int matchLenMax</mark>, int mf, int depthLimit,
+  123:            ArrayCache arrayCache) {
+     ...
+
+  130:                return new BT4(dictSize, extraSizeBefore, extraSizeAfter,
+  131:                               niceLen, <mark>matchLenMax</mark>, depthLimit, arrayCache);
+  132:        }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoderNormal.java <pre>
+     ...
+
+   49:                                        EXTRA_SIZE_AFTER,
+   50:                                        niceLen, <mark>MATCH_LEN_MAX</mark>,
+   51:                                        mf, depthLimit, arrayCache),
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_7_0')">[+]</a> Match<br>
+<div id=S_7_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  402:     */
+  403:    int movePos(<mark>int requiredForFlushing</mark>, int requiredForFinishing) {
+  404:        assert requiredForFlushing &gt;= requiredForFinishing;
+     ...
+
+  408:
+  409:        if (avail &lt; <mark>requiredForFlushing</mark>) {
+  410:            if (avail &lt; requiredForFinishing || !finishing) {
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/BT4.java <pre>
+     ...
+
+   55:    private int movePos() {
+   56:        int avail = movePos(<mark>niceLen</mark>, 4);
+   57:
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>niceLenLimit</mark></code> &nbsp; (<code>[-1, '', ':ref_field:nice']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/BT4.java <pre>
+     ...
+
+   76:        int matchLenLimit = matchLenMax;
+   77:        int <mark><mark>niceLenLimit = <mark>niceLen</mark></mark></mark>;
+   78:        int avail = movePos();
+     ...
+
+   84:            matchLenLimit = avail;
+   85:            if (<mark><mark>niceLenLimit</mark></mark> &gt; avail)
+   86:                <mark>niceLenLimit</mark> = avail;
+   87:        }
+     ...
+
+  128:            // the dictionary).
+  129:            if (lenBest &gt;= <mark>niceLenLimit</mark>) {
+  130:                skip(<mark>niceLenLimit</mark>, currentMatch);
+  131:                return matches;
+     ...
+
+  173:
+  174:                    if (len &gt;= <mark>niceLenLimit</mark>) {
+  175:                        tree[ptr1] = tree[pair];
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_7_1')">[+]</a> Match<br>
+<div id=S_7_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  402:     */
+  403:    int movePos(<mark>int requiredForFlushing</mark>, int requiredForFinishing) {
+  404:        assert requiredForFlushing &gt;= requiredForFinishing;
+     ...
+
+  408:
+  409:        if (avail &lt; <mark>requiredForFlushing</mark>) {
+  410:            if (avail &lt; requiredForFinishing || !finishing) {
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/BT4.java <pre>
+     ...
+
+   55:    private int movePos() {
+   56:        int avail = movePos(<mark>niceLen</mark>, 4);
+   57:
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>niceLenLimit</mark></code> &nbsp; (<code>[-2, ':ref_field:len', 'obj:ref_field:lz']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/BT4.java <pre>
+     ...
+
+   76:        int matchLenLimit = matchLenMax;
+   77:        int <mark>niceLenLimit = niceLen</mark>;
+   78:        int avail = movePos();
+     ...
+
+   84:            matchLenLimit = avail;
+   85:            if (<mark>niceLenLimit</mark> &gt; avail)
+   86:                <mark>niceLenLimit</mark> = avail;
+   87:        }
+     ...
+
+  128:            // the dictionary).
+  129:            if (lenBest &gt;= <mark>niceLenLimit</mark>) {
+  130:                skip(<mark>niceLenLimit</mark>, currentMatch);
+  131:                return matches;
+     ...
+
+  173:
+  174:                    if (len &gt;= <mark>niceLenLimit</mark>) {
+  175:                        tree[ptr1] = tree[pair];
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  386:        ++readAhead;
+  387:        Matches matches = <mark>lz</mark>.getMatches();
+  388:        assert lz.verifyMatches(matches);
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_7_2')">[+]</a> Match<br>
+<div id=S_7_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  393:        readAhead += len;
+  394:        <mark>lz</mark>.skip(len);
+  395:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 8: <code class=old><mark>empty</mark></code> &rarr; <code class=new><mark>buf</mark></code> &nbsp; (2.476)</h2>
+<h3><code class=old><mark>empty</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/check/None.java <pre>
+     ...
+
+   20:    public byte[] finish() {
+   21:        byte[] <mark>empty = new byte[0]</mark>;
+   22:        return <mark>empty</mark>;
+   23:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[2, ':return', '#arg0:call:equals']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/check/CRC32.java <pre>
+     ...
+
+   25:        long value = state.getValue();
+   26:        byte[] <mark>buf = { (byte)(value),
+   27:                       (byte)(value &gt;&gt;&gt; 8),
+   28:                       (byte)(value &gt;&gt;&gt; 16),
+   29:                       (byte)(value &gt;&gt;&gt; 24) }</mark>;
+   30:        state.reset();
+   31:        return <mark>buf</mark>;
+   32:    }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/index/IndexHash.java <pre>
+     ...
+
+   82:                || stored.indexListSize != indexListSize
+   83:                || !<mark>Arrays.equals(<mark>stored.hash.finish()</mark>, hash.finish())</mark>)
+   84:            throw new CorruptedInputException(&quot;XZ Index is corrupt&quot;);
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_8_0')">[+]</a> Match<br>
+<div id=S_8_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/index/IndexHash.java <pre>
+     ...
+
+   82:                || stored.indexListSize != indexListSize
+   83:                || !<mark>Arrays.equals(<mark>stored.hash.finish()</mark>, hash.finish())</mark>)
+   84:            throw new CorruptedInputException(&quot;XZ Index is corrupt&quot;);
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[2, ':return', '#arg1:call:equals']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/check/CRC32.java <pre>
+     ...
+
+   25:        long value = state.getValue();
+   26:        byte[] <mark>buf = { (byte)(value),
+   27:                       (byte)(value &gt;&gt;&gt; 8),
+   28:                       (byte)(value &gt;&gt;&gt; 16),
+   29:                       (byte)(value &gt;&gt;&gt; 24) }</mark>;
+   30:        state.reset();
+   31:        return <mark>buf</mark>;
+   32:    }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/index/IndexHash.java <pre>
+     ...
+
+   82:                || stored.indexListSize != indexListSize
+   83:                || !<mark>Arrays.equals(stored.hash.finish(), <mark>hash.finish()</mark>)</mark>)
+   84:            throw new CorruptedInputException(&quot;XZ Index is corrupt&quot;);
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_8_1')">[+]</a> Match<br>
+<div id=S_8_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/index/IndexHash.java <pre>
+     ...
+
+   82:                || stored.indexListSize != indexListSize
+   83:                || !<mark>Arrays.equals(stored.hash.finish(), <mark>hash.finish()</mark>)</mark>)
+   84:            throw new CorruptedInputException(&quot;XZ Index is corrupt&quot;);
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[-1, '', ':valueset:0']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/LZMADecDemo.java <pre>
+     ...
+
+   21:    public static void main(String[] args) {
+   22:        byte[] <mark><mark>buf = <mark>new byte[8192]</mark></mark></mark>;
+   23:        String name = null;
+     ...
+
+   33:                int size;
+   34:                while ((size = in.read(<mark>buf</mark>)) != -1)
+   35:                    System.out.write(<mark>buf</mark>, 0, size);
+   36:
+     ...
+
+   53:                        int size;
+   54:                        while ((size = in.read(<mark>buf</mark>)) != -1)
+   55:                            System.out.write(<mark><mark>buf</mark></mark>, 0, size);
+   56:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_8_2')">[+]</a> Match<br>
+<div id=S_8_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/check/None.java <pre>
+     ...
+
+   20:    public byte[] finish() {
+   21:        byte[] <mark>empty = <mark>new byte[0]</mark></mark>;
+   22:        return <mark>empty</mark>;
+   23:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 9: <code class=old><mark>outbuf</mark></code> &rarr; <code class=new><mark>buf</mark></code> / <code class=new><mark>filter</mark></code> &nbsp; (1.824)</h2>
+<h3><code class=old><mark>outbuf</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/TestAllocSpeed.java <pre>
+     ...
+
+   60:                testdata, 0, testdataSize);
+   61:        byte[] <mark>outbuf = new byte[8192]</mark>;
+   62:
+     ...
+
+   65:            XZInputStream in = new XZInputStream(byteStream);
+   66:            while (in.read(<mark>outbuf</mark>) &gt; 0) {}
+   67:        }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[-1, '', ':valueset:0']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/LZMADecDemo.java <pre>
+     ...
+
+   21:    public static void main(String[] args) {
+   22:        byte[] <mark><mark>buf = <mark>new byte[8192]</mark></mark></mark>;
+   23:        String name = null;
+     ...
+
+   33:                int size;
+   34:                while ((size = in.read(<mark>buf</mark>)) != -1)
+   35:                    System.out.write(<mark>buf</mark>, 0, size);
+   36:
+     ...
+
+   53:                        int size;
+   54:                        while ((size = in.read(<mark>buf</mark>)) != -1)
+   55:                            System.out.write(<mark><mark>buf</mark></mark>, 0, size);
+   56:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_9_0')">[+]</a> Match<br>
+<div id=S_9_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/TestAllocSpeed.java <pre>
+     ...
+
+   60:                testdata, 0, testdataSize);
+   61:        byte[] <mark>outbuf = <mark>new byte[8192]</mark></mark>;
+   62:
+     ...
+
+   65:            XZInputStream in = new XZInputStream(byteStream);
+   66:            while (in.read(<mark>outbuf</mark>) &gt; 0) {}
+   67:        }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[1, '', '#arg0:call:read']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/LZMADecDemo.java <pre>
+     ...
+
+   21:    public static void main(String[] args) {
+   22:        byte[] <mark>buf = new byte[8192]</mark>;
+   23:        String name = null;
+     ...
+
+   33:                int size;
+   34:                while ((size = in.read(<mark>buf</mark>)) != -1)
+   35:                    System.out.write(<mark>buf</mark>, 0, size);
+   36:
+     ...
+
+   53:                        int size;
+   54:                        while ((size = <mark>in.read(<mark><mark>buf</mark></mark>)</mark>) != -1)
+   55:                            System.out.write(<mark>buf</mark>, 0, size);
+   56:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_9_1')">[+]</a> Match<br>
+<div id=S_9_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/TestAllocSpeed.java <pre>
+     ...
+
+   65:            XZInputStream in = new XZInputStream(byteStream);
+   66:            while (<mark>in.read(<mark>outbuf</mark>)</mark> &gt; 0) {}
+   67:        }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>buf</mark></code> &nbsp; (<code>[2, '#arg0:call:read', 'L:op_infix:>']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/XZSeekDecDemo.java <pre>
+     ...
+
+   47:
+   48:        byte[] <mark>buf = new byte[8192]</mark>;
+   49:        if (args.length == 1) {
+   50:            int size;
+   51:            while ((size = in.read(<mark>buf</mark>)) != -1)
+   52:                System.out.write(<mark>buf</mark>, 0, size);
+   53:        } else {
+     ...
+
+   60:                while (len &gt; 0) {
+   61:                    int size = Math.min(len, <mark>buf</mark>.length);
+   62:                    size = in.read(<mark>buf</mark>, 0, size);
+   63:
+     ...
+
+   68:
+   69:                    System.out.write(<mark>buf</mark>, 0, size);
+   70:                    len -= size;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/SingleXZInputStream.java <pre>
+     ...
+
+  430:
+  431:                int <mark>ret = <mark>blockDecoder.read(buf, off, len)</mark></mark>;
+  432:
+  433:                if (<mark><mark>ret</mark> &gt; 0</mark>) {
+  434:                    size += ret;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_9_2')">[+]</a> Match<br>
+<div id=S_9_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/TestAllocSpeed.java <pre>
+     ...
+
+   65:            XZInputStream in = new XZInputStream(byteStream);
+   66:            while (<mark><mark>in.read(outbuf)</mark> &gt; 0</mark>) {}
+   67:        }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 10: <code class=old><mark>backward</mark></code> &rarr; <code class=new><mark>uncompressed</mark></code> / <code class=new><mark>size</mark></code> &nbsp; (1.801)</h2>
+<h3><code class=old><mark>backward</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  280:
+  281:    public void copyUncompressed(OutputStream out, <mark>int backward</mark>, int len)
+  282:            throws IOException {
+  283:        out.write(buf, readPos + 1 - <mark>backward</mark>, len);
+  284:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>uncompressedSize</mark></code> &nbsp; (<code>[-1, '', ':ref_var:uncompressed']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMA2OutputStream.java <pre>
+     ...
+
+  126:        if (compressedSize + 2 &lt; uncompressedSize) {
+  127:            writeLZMA(<mark>uncompressedSize</mark>, compressedSize);
+  128:        } else {
+     ...
+
+  139:
+  140:    private void writeLZMA(<mark><mark>int uncompressedSize</mark></mark>, int compressedSize)
+  141:            throws IOException {
+     ...
+
+  155:
+  156:        control |= (<mark>uncompressedSize</mark> - 1) &gt;&gt;&gt; 16;
+  157:        outData.writeByte(control);
+  158:
+  159:        outData.writeShort(<mark><mark>uncompressedSize</mark></mark> - 1);
+  160:        outData.writeShort(compressedSize - 1);
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_10_0')">[+]</a> Match<br>
+<div id=S_10_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMA2OutputStream.java <pre>
+     ...
+
+  176:            outData.writeShort(chunkSize - 1);
+  177:            lz.copyUncompressed(out, <mark>uncompressedSize</mark>, chunkSize);
+  178:            uncompressedSize -= chunkSize;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  280:
+  281:    public void copyUncompressed(OutputStream out, <mark>int backward</mark>, int len)
+  282:            throws IOException {
+  283:        out.write(buf, readPos + 1 - <mark>backward</mark>, len);
+  284:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>uncompressedSize</mark></code> &nbsp; (<code>[2, 'R:op_infix:-', '#arg1:call:write']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMA2OutputStream.java <pre>
+     ...
+
+  171:
+  172:    private void writeUncompressed(<mark>int uncompressedSize</mark>) throws IOException {
+  173:        while (<mark>uncompressedSize</mark> &gt; 0) {
+  174:            int chunkSize = Math.min(<mark>uncompressedSize</mark>, COMPRESSED_SIZE_MAX);
+  175:            outData.writeByte(dictResetNeeded ? 0x01 : 0x02);
+  176:            outData.writeShort(chunkSize - 1);
+  177:            lz.copyUncompressed(out, <mark>uncompressedSize</mark>, chunkSize);
+  178:            <mark>uncompressedSize</mark> -= chunkSize;
+  179:            dictResetNeeded = false;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  282:            throws IOException {
+  283:        <mark>out.write(buf, readPos + 1 - backward, len)</mark>;
+  284:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_10_1')">[+]</a> Match<br>
+<div id=S_10_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lz/LZEncoder.java <pre>
+     ...
+
+  282:            throws IOException {
+  283:        <mark>out.write(buf, readPos + 1 - backward, len)</mark>;
+  284:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>uncompressedSize</mark></code> &nbsp; (<code>[-3, ':begin', 'init:ref_var:uncompressed']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMA2OutputStream.java <pre>
+     ...
+
+  131:            assert uncompressedSize &gt; 0 : uncompressedSize;
+  132:            writeUncompressed(<mark>uncompressedSize</mark>);
+  133:        }
+     ...
+
+  171:
+  172:    private void writeUncompressed(<mark><mark>int uncompressedSize</mark></mark>) throws IOException {
+  173:        while (<mark>uncompressedSize</mark> &gt; 0) {
+  174:            int chunkSize = Math.min(<mark>uncompressedSize</mark>, COMPRESSED_SIZE_MAX);
+  175:            outData.writeByte(dictResetNeeded ? 0x01 : 0x02);
+  176:            outData.writeShort(chunkSize - 1);
+  177:            lz.copyUncompressed(out, <mark>uncompressedSize</mark>, chunkSize);
+  178:            <mark>uncompressedSize</mark> -= chunkSize;
+  179:            dictResetNeeded = false;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_10_2')">[+]</a> Match<br>
+<div id=S_10_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMA2OutputStream.java <pre>
+     ...
+
+  131:            assert uncompressedSize &gt; 0 : uncompressedSize;
+  132:            writeUncompressed(<mark>uncompressedSize</mark>);
+  133:        }
+     ...
+
+  171:
+  172:    private void writeUncompressed(<mark>int uncompressedSize</mark>) throws IOException {
+  173:        while (uncompressedSize &gt; 0) {
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 11: <code class=old><mark>full</mark></code> / <code class=old><mark>distances</mark></code> &rarr; <code class=new><mark>dist</mark></code> / <code class=new><mark>price</mark></code> &nbsp; (1.770)</h2>
+<h3><code class=old><mark>FULL_DISTANCES</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  451:
+  452:        if (dist &lt; <mark>FULL_DISTANCES</mark>) {
+  453:            price += fullDistPrices[distState][dist];
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>DIST_MODEL_END</mark></code> &nbsp; (<code>[-1, '', 'obj:ref_field:lzma']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  331:
+  332:            if (distSlot &lt; <mark>DIST_MODEL_END</mark>) {
+  333:                rc.encodeReverseBitTree(
+     ...
+
+  473:
+  474:            for (int distSlot = <mark>DIST_MODEL_END</mark>; distSlot &lt; distSlotPricesSize;
+  475:                    ++distSlot) {
+     ...
+
+  486:        int dist = DIST_MODEL_START;
+  487:        for (int distSlot = DIST_MODEL_START; distSlot &lt; <mark><mark>DIST_MODEL_END</mark></mark>;
+  488:                ++distSlot) {
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+   87:
+   88:            if (distSlot &lt; <mark>DIST_MODEL_END</mark>) {
+   89:                reps[0] |= rc.decodeReverseBitTree(
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/LZMA2OutputStream.java <pre>
+     ...
+
+  224:            while (pendingSize &gt; 0) {
+  225:                <mark>lzma</mark>.encodeForLZMA2();
+  226:                writeChunk();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_11_0')">[+]</a> Match<br>
+<div id=S_11_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMA2OutputStream.java <pre>
+     ...
+
+  224:            while (pendingSize &gt; 0) {
+  225:                <mark>lzma</mark>.encodeForLZMA2();
+  226:                writeChunk();
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  451:
+  452:        if (dist &lt; <mark>FULL_DISTANCES</mark>) {
+  453:            price += fullDistPrices[distState][dist];
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>DIST_MODEL_END</mark></code> &nbsp; (<code>[-2, 'obj:ref_field:lzma', ':call:lzma']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  331:
+  332:            if (distSlot &lt; <mark>DIST_MODEL_END</mark>) {
+  333:                rc.encodeReverseBitTree(
+     ...
+
+  473:
+  474:            for (int distSlot = <mark>DIST_MODEL_END</mark>; distSlot &lt; distSlotPricesSize;
+  475:                    ++distSlot) {
+     ...
+
+  486:        int dist = DIST_MODEL_START;
+  487:        for (int distSlot = DIST_MODEL_START; distSlot &lt; <mark>DIST_MODEL_END</mark>;
+  488:                ++distSlot) {
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+   87:
+   88:            if (distSlot &lt; <mark>DIST_MODEL_END</mark>) {
+   89:                reps[0] |= rc.decodeReverseBitTree(
+     ...
+
+</pre></div>
+<div>tmp/src-xz/LZMAEncDemo.java <pre>
+     ...
+
+   45:        OutputStream out = new BufferedOutputStream(System.out);
+   46:        LZMAOutputStream encoder = <mark>new LZMAOutputStream(out, options,
+   47:                                                        inputSize)</mark>;
+   48:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/LZMAOutputStream.java <pre>
+     ...
+
+  129:            throws IOException {
+  130:        <mark>this(out, options, inputSize, ArrayCache.getDefaultCache());</mark>
+  131:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_11_1')">[+]</a> Match<br>
+<div id=S_11_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/LZMAEncDemo.java <pre>
+     ...
+
+   45:        OutputStream out = new BufferedOutputStream(System.out);
+   46:        LZMAOutputStream encoder = <mark>new LZMAOutputStream(out, options,
+   47:                                                        inputSize)</mark>;
+   48:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/LZMAOutputStream.java <pre>
+     ...
+
+  129:            throws IOException {
+  130:        <mark>this(out, options, inputSize, ArrayCache.getDefaultCache());</mark>
+  131:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>DIST_MODEL_END</mark></code> &nbsp; (<code>[-2, 'obj:ref_field:lzma', ':call:output']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMAEncoder.java <pre>
+     ...
+
+  331:
+  332:            if (distSlot &lt; <mark>DIST_MODEL_END</mark>) {
+  333:                rc.encodeReverseBitTree(
+     ...
+
+  473:
+  474:            for (int distSlot = <mark>DIST_MODEL_END</mark>; distSlot &lt; distSlotPricesSize;
+  475:                    ++distSlot) {
+     ...
+
+  486:        int dist = DIST_MODEL_START;
+  487:        for (int distSlot = DIST_MODEL_START; distSlot &lt; <mark>DIST_MODEL_END</mark>;
+  488:                ++distSlot) {
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+   87:
+   88:            if (distSlot &lt; <mark>DIST_MODEL_END</mark>) {
+   89:                reps[0] |= rc.decodeReverseBitTree(
+     ...
+
+</pre></div>
+<div>tmp/src-xz/LZMAEncDemo.java <pre>
+     ...
+
+   45:        OutputStream out = new BufferedOutputStream(System.out);
+   46:        LZMAOutputStream encoder = <mark>new LZMAOutputStream(out, options,
+   47:                                                        inputSize)</mark>;
+   48:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/LZMAOutputStream.java <pre>
+     ...
+
+  129:            throws IOException {
+  130:        <mark>this(out, options, inputSize, ArrayCache.getDefaultCache());</mark>
+  131:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_11_2')">[+]</a> Match<br>
+<div id=S_11_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/LZMAEncDemo.java <pre>
+     ...
+
+   45:        OutputStream out = new BufferedOutputStream(System.out);
+   46:        LZMAOutputStream encoder = <mark>new LZMAOutputStream(out, options,
+   47:                                                        inputSize)</mark>;
+   48:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/LZMAOutputStream.java <pre>
+     ...
+
+  129:            throws IOException {
+  130:        <mark>this(out, options, inputSize, ArrayCache.getDefaultCache());</mark>
+  131:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 12: <code class=old><mark>top</mark></code> / <code class=old><mark>mask</mark></code> &rarr; <code class=new><mark>range</mark></code> &nbsp; (1.653)</h2>
+<h3><code class=old><mark>TOP_MASK</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeEncoder.java <pre>
+     ...
+
+  114:
+  115:        if ((range &amp; <mark>TOP_MASK</mark>) == 0) {
+  116:            range &lt;&lt;= SHIFT_BITS;
+     ...
+
+  189:
+  190:            if ((range &amp; <mark>TOP_MASK</mark>) == 0) {
+  191:                range &lt;&lt;= SHIFT_BITS;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   59:    public void normalize() throws IOException {
+   60:        if ((range &amp; <mark>TOP_MASK</mark>) == 0) {
+   61:            try {
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromStream.java <pre>
+     ...
+
+   35:    public void normalize() throws IOException {
+   36:        if ((range &amp; <mark>TOP_MASK</mark>) == 0) {
+   37:            code = (code &lt;&lt; SHIFT_BITS) | inData.readUnsignedByte();
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>range</mark></code> &nbsp; (<code>[-1, '', 'obj:ref_field:rc']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoder.java <pre>
+     ...
+
+   25:        int prob = probs[index];
+   26:        int bound = (<mark>range</mark> &gt;&gt;&gt; BIT_MODEL_TOTAL_BITS) * prob;
+   27:        int bit;
+     ...
+
+   30:        if ((code ^ 0x80000000) &lt; (bound ^ 0x80000000)) {
+   31:            <mark>range</mark> = bound;
+   32:            probs[index] = (short)(
+     ...
+
+   35:        } else {
+   36:            <mark>range</mark> -= bound;
+   37:            code -= bound;
+     ...
+
+   74:
+   75:            <mark>range</mark> &gt;&gt;&gt;= 1;
+   76:            int t = (code - <mark>range</mark>) &gt;&gt;&gt; 31;
+   77:            code -= <mark>range</mark> &amp; (t - 1);
+   78:            result = (result &lt;&lt; 1) | (1 - t);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromStream.java <pre>
+     ...
+
+   27:        code = inData.readInt();
+   28:        <mark>range</mark> = 0xFFFFFFFF;
+   29:    }
+     ...
+
+   35:    public void normalize() throws IOException {
+   36:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   37:            code = (code &lt;&lt; SHIFT_BITS) | inData.readUnsignedByte();
+   38:            <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   39:        }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   43:        code = in.readInt();
+   44:        <mark>range</mark> = 0xFFFFFFFF;
+   45:
+     ...
+
+   59:    public void normalize() throws IOException {
+   60:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   61:            try {
+     ...
+
+   64:                code = (code &lt;&lt; SHIFT_BITS) | (buf[pos++] &amp; 0xFF);
+   65:                <mark><mark>range</mark></mark> &lt;&lt;= SHIFT_BITS;
+   66:            } catch (ArrayIndexOutOfBoundsException e) {
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+   91:            } else {
+   92:                reps[0] |= <mark>rc</mark>.decodeDirectBits(limit - ALIGN_BITS)
+   93:                           &lt;&lt; ALIGN_BITS;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_12_0')">[+]</a> Match<br>
+<div id=S_12_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/lzma/LZMADecoder.java <pre>
+     ...
+
+   91:            } else {
+   92:                reps[0] |= <mark>rc</mark>.decodeDirectBits(limit - ALIGN_BITS)
+   93:                           &lt;&lt; ALIGN_BITS;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   59:    public void normalize() throws IOException {
+   60:        if ((range &amp; <mark>TOP_MASK</mark>) == 0) {
+   61:            try {
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>range</mark></code> &nbsp; (<code>[4, 'cond:join', ':ref_field:code']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoder.java <pre>
+     ...
+
+   25:        int prob = probs[index];
+   26:        int bound = (<mark>range</mark> &gt;&gt;&gt; BIT_MODEL_TOTAL_BITS) * prob;
+   27:        int bit;
+     ...
+
+   30:        if ((code ^ 0x80000000) &lt; (bound ^ 0x80000000)) {
+   31:            <mark>range</mark> = bound;
+   32:            probs[index] = (short)(
+     ...
+
+   35:        } else {
+   36:            <mark>range</mark> -= bound;
+   37:            code -= bound;
+     ...
+
+   72:        do {
+   73:            <mark>normalize()</mark>;
+   74:
+   75:            <mark>range</mark> &gt;&gt;&gt;= 1;
+   76:            int t = (<mark>code</mark> - <mark>range</mark>) &gt;&gt;&gt; 31;
+   77:            code -= <mark>range</mark> &amp; (t - 1);
+   78:            result = (result &lt;&lt; 1) | (1 - t);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromStream.java <pre>
+     ...
+
+   27:        code = inData.readInt();
+   28:        <mark>range</mark> = 0xFFFFFFFF;
+   29:    }
+     ...
+
+   35:    public void normalize() throws IOException {
+   36:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   37:            code = (code &lt;&lt; SHIFT_BITS) | inData.readUnsignedByte();
+   38:            <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   39:        }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   43:        code = in.readInt();
+   44:        <mark>range</mark> = 0xFFFFFFFF;
+   45:
+     ...
+
+   59:    public void normalize() throws IOException {
+   60:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   61:            try {
+     ...
+
+   64:                code = (code &lt;&lt; SHIFT_BITS) | (buf[pos++] &amp; 0xFF);
+   65:                <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   66:            } catch (ArrayIndexOutOfBoundsException e) {
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_12_1')">[+]</a> Match<br>
+<div id=S_12_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoder.java <pre>
+     ...
+
+   72:        do {
+   73:            <mark>normalize()</mark>;
+   74:
+   75:            range &gt;&gt;&gt;= 1;
+   76:            int t = (<mark>code</mark> - range) &gt;&gt;&gt; 31;
+   77:            code -= range &amp; (t - 1);
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>range</mark></code> &nbsp; (<code>[4, 'cond:join', 'L:op_assign:>>>=']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoder.java <pre>
+     ...
+
+   25:        int prob = probs[index];
+   26:        int bound = (<mark>range</mark> &gt;&gt;&gt; BIT_MODEL_TOTAL_BITS) * prob;
+   27:        int bit;
+     ...
+
+   30:        if ((code ^ 0x80000000) &lt; (bound ^ 0x80000000)) {
+   31:            <mark>range</mark> = bound;
+   32:            probs[index] = (short)(
+     ...
+
+   35:        } else {
+   36:            <mark>range</mark> -= bound;
+   37:            code -= bound;
+     ...
+
+   72:        do {
+   73:            <mark>normalize()</mark>;
+   74:
+   75:            <mark><mark>range</mark> &gt;&gt;&gt;= 1</mark>;
+   76:            int t = (code - <mark>range</mark>) &gt;&gt;&gt; 31;
+   77:            code -= <mark>range</mark> &amp; (t - 1);
+   78:            result = (result &lt;&lt; 1) | (1 - t);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromStream.java <pre>
+     ...
+
+   27:        code = inData.readInt();
+   28:        <mark>range</mark> = 0xFFFFFFFF;
+   29:    }
+     ...
+
+   35:    public void normalize() throws IOException {
+   36:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   37:            code = (code &lt;&lt; SHIFT_BITS) | inData.readUnsignedByte();
+   38:            <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   39:        }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   43:        code = in.readInt();
+   44:        <mark>range</mark> = 0xFFFFFFFF;
+   45:
+     ...
+
+   59:    public void normalize() throws IOException {
+   60:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   61:            try {
+     ...
+
+   64:                code = (code &lt;&lt; SHIFT_BITS) | (buf[pos++] &amp; 0xFF);
+   65:                <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   66:            } catch (ArrayIndexOutOfBoundsException e) {
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_12_2')">[+]</a> Match<br>
+<div id=S_12_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoder.java <pre>
+     ...
+
+   72:        do {
+   73:            <mark>normalize()</mark>;
+   74:
+   75:            <mark>range &gt;&gt;&gt;= 1</mark>;
+   76:            int t = (code - range) &gt;&gt;&gt; 31;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 13: <code class=old><mark>bit</mark></code> / <code class=old><mark>model</mark></code> / <code class=old><mark>total</mark></code> / <code class=old><mark>bits</mark></code> &rarr; <code class=new><mark>range</mark></code> &nbsp; (1.634)</h2>
+<h3><code class=old><mark>BIT_MODEL_TOTAL_BITS</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoder.java <pre>
+     ...
+
+   25:        int prob = probs[index];
+   26:        int bound = (range &gt;&gt;&gt; <mark>BIT_MODEL_TOTAL_BITS</mark>) * prob;
+   27:        int bit;
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeEncoder.java <pre>
+     ...
+
+  101:        int prob = probs[index];
+  102:        int bound = (range &gt;&gt;&gt; <mark>BIT_MODEL_TOTAL_BITS</mark>) * prob;
+  103:
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>range</mark></code> &nbsp; (<code>[3, 'L:op_infix:*', ':assign_var:bound']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoder.java <pre>
+     ...
+
+   25:        int prob = probs[index];
+   26:        int <mark>bound = (<mark>range</mark> &gt;&gt;&gt; BIT_MODEL_TOTAL_BITS) * prob</mark>;
+   27:        int bit;
+     ...
+
+   30:        if ((code ^ 0x80000000) &lt; (bound ^ 0x80000000)) {
+   31:            <mark>range</mark> = bound;
+   32:            probs[index] = (short)(
+     ...
+
+   35:        } else {
+   36:            <mark>range</mark> -= bound;
+   37:            code -= bound;
+     ...
+
+   74:
+   75:            <mark>range</mark> &gt;&gt;&gt;= 1;
+   76:            int t = (code - <mark>range</mark>) &gt;&gt;&gt; 31;
+   77:            code -= <mark>range</mark> &amp; (t - 1);
+   78:            result = (result &lt;&lt; 1) | (1 - t);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromStream.java <pre>
+     ...
+
+   27:        code = inData.readInt();
+   28:        <mark>range</mark> = 0xFFFFFFFF;
+   29:    }
+     ...
+
+   35:    public void normalize() throws IOException {
+   36:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   37:            code = (code &lt;&lt; SHIFT_BITS) | inData.readUnsignedByte();
+   38:            <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   39:        }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   43:        code = in.readInt();
+   44:        <mark>range</mark> = 0xFFFFFFFF;
+   45:
+     ...
+
+   59:    public void normalize() throws IOException {
+   60:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   61:            try {
+     ...
+
+   64:                code = (code &lt;&lt; SHIFT_BITS) | (buf[pos++] &amp; 0xFF);
+   65:                <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   66:            } catch (ArrayIndexOutOfBoundsException e) {
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_13_0')">[+]</a> Match<br>
+<div id=S_13_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeEncoder.java <pre>
+     ...
+
+  101:        int prob = probs[index];
+  102:        int <mark>bound = (range &gt;&gt;&gt; BIT_MODEL_TOTAL_BITS) * prob</mark>;
+  103:
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>range</mark></code> &nbsp; (<code>[3, 'L:op_infix:*', 'R:op_assign:=']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoder.java <pre>
+     ...
+
+   25:        int prob = probs[index];
+   26:        int <mark>bound = (<mark>range</mark> &gt;&gt;&gt; BIT_MODEL_TOTAL_BITS) * prob</mark>;
+   27:        int bit;
+     ...
+
+   30:        if ((code ^ 0x80000000) &lt; (bound ^ 0x80000000)) {
+   31:            <mark><mark>range</mark> = <mark>bound</mark></mark>;
+   32:            probs[index] = (short)(
+     ...
+
+   35:        } else {
+   36:            <mark>range</mark> -= bound;
+   37:            code -= bound;
+     ...
+
+   74:
+   75:            <mark>range</mark> &gt;&gt;&gt;= 1;
+   76:            int t = (code - <mark>range</mark>) &gt;&gt;&gt; 31;
+   77:            code -= <mark>range</mark> &amp; (t - 1);
+   78:            result = (result &lt;&lt; 1) | (1 - t);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromStream.java <pre>
+     ...
+
+   27:        code = inData.readInt();
+   28:        <mark>range</mark> = 0xFFFFFFFF;
+   29:    }
+     ...
+
+   35:    public void normalize() throws IOException {
+   36:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   37:            code = (code &lt;&lt; SHIFT_BITS) | inData.readUnsignedByte();
+   38:            <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   39:        }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   43:        code = in.readInt();
+   44:        <mark>range</mark> = 0xFFFFFFFF;
+   45:
+     ...
+
+   59:    public void normalize() throws IOException {
+   60:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   61:            try {
+     ...
+
+   64:                code = (code &lt;&lt; SHIFT_BITS) | (buf[pos++] &amp; 0xFF);
+   65:                <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   66:            } catch (ArrayIndexOutOfBoundsException e) {
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_13_1')">[+]</a> Match<br>
+<div id=S_13_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeEncoder.java <pre>
+     ...
+
+  101:        int prob = probs[index];
+  102:        int <mark>bound = (range &gt;&gt;&gt; BIT_MODEL_TOTAL_BITS) * prob</mark>;
+  103:
+     ...
+
+  105:        if (bit == 0) {
+  106:            <mark>range = <mark>bound</mark></mark>;
+  107:            probs[index] = (short)(
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>range</mark></code> &nbsp; (<code>[3, 'L:op_infix:*', 'R:op_assign:-=']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoder.java <pre>
+     ...
+
+   25:        int prob = probs[index];
+   26:        int <mark>bound = (<mark>range</mark> &gt;&gt;&gt; BIT_MODEL_TOTAL_BITS) * prob</mark>;
+   27:        int bit;
+     ...
+
+   30:        if ((code ^ 0x80000000) &lt; (bound ^ 0x80000000)) {
+   31:            <mark>range</mark> = bound;
+   32:            probs[index] = (short)(
+     ...
+
+   35:        } else {
+   36:            <mark>range</mark> -= bound;
+   37:            <mark>code -= <mark>bound</mark></mark>;
+   38:            probs[index] = (short)(prob - (prob &gt;&gt;&gt; MOVE_BITS));
+     ...
+
+   74:
+   75:            <mark>range</mark> &gt;&gt;&gt;= 1;
+   76:            int t = (code - <mark>range</mark>) &gt;&gt;&gt; 31;
+   77:            code -= <mark>range</mark> &amp; (t - 1);
+   78:            result = (result &lt;&lt; 1) | (1 - t);
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromStream.java <pre>
+     ...
+
+   27:        code = inData.readInt();
+   28:        <mark>range</mark> = 0xFFFFFFFF;
+   29:    }
+     ...
+
+   35:    public void normalize() throws IOException {
+   36:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   37:            code = (code &lt;&lt; SHIFT_BITS) | inData.readUnsignedByte();
+   38:            <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   39:        }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   43:        code = in.readInt();
+   44:        <mark>range</mark> = 0xFFFFFFFF;
+   45:
+     ...
+
+   59:    public void normalize() throws IOException {
+   60:        if ((<mark>range</mark> &amp; TOP_MASK) == 0) {
+   61:            try {
+     ...
+
+   64:                code = (code &lt;&lt; SHIFT_BITS) | (buf[pos++] &amp; 0xFF);
+   65:                <mark>range</mark> &lt;&lt;= SHIFT_BITS;
+   66:            } catch (ArrayIndexOutOfBoundsException e) {
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_13_2')">[+]</a> Match<br>
+<div id=S_13_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeEncoder.java <pre>
+     ...
+
+  101:        int prob = probs[index];
+  102:        int <mark>bound = (range &gt;&gt;&gt; BIT_MODEL_TOTAL_BITS) * prob</mark>;
+  103:
+     ...
+
+  110:            low += bound &amp; 0xFFFFFFFFL;
+  111:            <mark>range -= <mark>bound</mark></mark>;
+  112:            probs[index] = (short)(prob - (prob &gt;&gt;&gt; MOVE_BITS));
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 14: <code class=old><mark>len</mark></code> &rarr; <code class=new><mark>size</mark></code> &nbsp; (1.466)</h2>
+<h3><code class=old><mark>len</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/CountingOutputStream.java <pre>
+     ...
+
+   36:
+   37:    public void write(byte[] b, int off, <mark>int len</mark>) throws IOException {
+   38:        out.write(b, off, <mark>len</mark>);
+   39:        if (size &gt;= 0)
+   40:            size += <mark>len</mark>;
+   41:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>size</mark></code> &nbsp; (<code>[1, '', '#arg2:call:write']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/LZMADecDemo.java <pre>
+     ...
+
+   53:                        int size;
+   54:                        while ((<mark>size</mark> = in.read(buf)) != -1)
+   55:                            <mark>System.out.write(buf, 0, <mark><mark>size</mark></mark>)</mark>;
+   56:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_14_0')">[+]</a> Match<br>
+<div id=S_14_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/CountingOutputStream.java <pre>
+     ...
+
+   37:    public void write(byte[] b, int off, int len) throws IOException {
+   38:        <mark>out.write(b, off, <mark>len</mark>)</mark>;
+   39:        if (size &gt;= 0)
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>size</mark></code> &nbsp; (<code>[1, '', 'R:op_assign:+=']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/LZMAEncDemo.java <pre>
+     ...
+
+   50:        int size;
+   51:        while ((<mark>size</mark> = System.in.read(buf)) != -1)
+   52:            encoder.write(buf, 0, <mark><mark>size</mark></mark>);
+   53:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/LZMAOutputStream.java <pre>
+     ...
+
+  235:
+  236:    public void write(byte[] buf, int off, <mark>int len</mark>) throws IOException {
+  237:        if (off &lt; 0 || len &lt; 0 || off + len &lt; 0 || off + len &gt; buf.length)
+     ...
+
+  250:
+  251:        <mark>currentUncompressedSize += <mark>len</mark></mark>;
+  252:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_14_1')">[+]</a> Match<br>
+<div id=S_14_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/CountingOutputStream.java <pre>
+     ...
+
+   39:        if (size &gt;= 0)
+   40:            <mark>size += <mark>len</mark></mark>;
+   41:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>size</mark></code> &nbsp; (<code>[2, 'R:op_assign:+=', ':assign_field:size']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/XZEncDemo.java <pre>
+     ...
+
+   35:        int size;
+   36:        while ((<mark>size</mark> = System.in.read(buf)) != -1)
+   37:            out.write(buf, 0, <mark>size</mark>);
+   38:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/BlockOutputStream.java <pre>
+     ...
+
+   95:        check.update(buf, off, len);
+   96:        <mark>uncompressedSize</mark> += len;
+   97:        validate();
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_14_2')">[+]</a> Match<br>
+<div id=S_14_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/CountingOutputStream.java <pre>
+     ...
+
+   39:        if (size &gt;= 0)
+   40:            <mark>size</mark> += len;
+   41:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 15: <code class=old><mark>prob</mark></code> / <code class=old><mark>init</mark></code> &rarr; <code class=new><mark>off</mark></code> &nbsp; (1.179)</h2>
+<h3><code class=old><mark>PROB_INIT</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeCoder.java <pre>
+     ...
+
+   23:    public static final void initProbs(short[] probs) {
+   24:        Arrays.fill(probs, <mark>PROB_INIT</mark>);
+   25:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>off</mark></code> &nbsp; (<code>[1, '', '#arg1:call:fill']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMA2OutputStream.java <pre>
+     ...
+
+   90:
+   91:    public void write(byte[] buf, <mark>int off</mark>, int len) throws IOException {
+   92:        if (<mark>off</mark> &lt; 0 || len &lt; 0 || <mark>off</mark> + len &lt; 0 || <mark>off</mark> + len &gt; buf.length)
+   93:            throw new IndexOutOfBoundsException();
+     ...
+
+  102:            while (len &gt; 0) {
+  103:                int used = <mark>lz.fillWindow(buf, <mark><mark>off</mark></mark>, len)</mark>;
+  104:                <mark>off</mark> += used;
+  105:                len -= used;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_15_0')">[+]</a> Match<br>
+<div id=S_15_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeCoder.java <pre>
+     ...
+
+   23:    public static final void initProbs(short[] probs) {
+   24:        <mark>Arrays.fill(probs, <mark>PROB_INIT</mark>)</mark>;
+   25:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 16: <code class=old><mark>len</mark></code> &rarr; <code class=new><mark>size</mark></code> / <code class=old><mark>len</mark></code> &nbsp; (0.723)</h2>
+<h3><code class=old><mark>len</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/FinishableWrapperOutputStream.java <pre>
+     ...
+
+   52:     */
+   53:    public void write(byte[] buf, int off, <mark>int len</mark>) throws IOException {
+   54:        out.write(buf, off, <mark>len</mark>);
+   55:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>size</mark></code> &nbsp; (<code>[1, '', '#arg2:call:write']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/LZMADecDemo.java <pre>
+     ...
+
+   53:                        int size;
+   54:                        while ((<mark>size</mark> = in.read(buf)) != -1)
+   55:                            <mark>System.out.write(buf, 0, <mark><mark>size</mark></mark>)</mark>;
+   56:
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_16_0')">[+]</a> Match<br>
+<div id=S_16_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/FinishableWrapperOutputStream.java <pre>
+     ...
+
+   53:    public void write(byte[] buf, int off, int len) throws IOException {
+   54:        <mark>out.write(buf, off, <mark>len</mark>)</mark>;
+   55:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 17: <code class=old><mark>in</mark></code> &rarr; <code class=new><mark>chain</mark></code> / <code class=new><mark>filter</mark></code> &nbsp; (0.561)</h2>
+<h3><code class=old><mark>in</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/FilterOptions.java <pre>
+     ...
+
+   89:     */
+   90:    public InputStream getInputStream(<mark>InputStream in</mark>) throws IOException {
+   91:        return getInputStream(<mark>in</mark>, ArrayCache.getDefaultCache());
+   92:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>filterChain</mark></code> &nbsp; (<code>[1, '', '#arg0:new:lzma']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  197:        // Initialize the filter chain.
+  198:        <mark>filterChain</mark> = inCounted;
+  199:        for (int i = filters.length - 1; i &gt;= 0; --i)
+  200:            <mark>filterChain</mark> = filters[i].getInputStream(<mark><mark>filterChain</mark></mark>, arrayCache);
+  201:    }
+     ...
+
+  210:
+  211:        int ret = <mark>filterChain</mark>.read(buf, off, len);
+  212:
+     ...
+
+  235:            if (ret &lt; len || uncompressedSize == uncompressedSizeInHeader) {
+  236:                if (<mark>filterChain</mark>.read() != -1)
+  237:                    throw new CorruptedInputException();
+     ...
+
+  274:    public int available() throws IOException {
+  275:        return <mark>filterChain</mark>.available();
+  276:    }
+     ...
+
+  284:        try {
+  285:            <mark>filterChain</mark>.close();
+  286:        } catch (IOException e) {
+     ...
+
+  294:
+  295:        <mark>filterChain</mark> = null;
+  296:    }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/LZMA2Decoder.java <pre>
+     ...
+
+   31:
+   32:    public InputStream getInputStream(<mark>InputStream in</mark>, ArrayCache arrayCache) {
+   33:        return <mark>new LZMA2InputStream(<mark>in</mark>, dictSize, null, arrayCache)</mark>;
+   34:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_17_0')">[+]</a> Match<br>
+<div id=S_17_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMA2Options.java <pre>
+     ...
+
+  565:
+  566:    public InputStream getInputStream(<mark>InputStream in</mark>, ArrayCache arrayCache)
+  567:            throws IOException {
+  568:        return <mark>new LZMA2InputStream(<mark>in</mark>, dictSize, presetDict, arrayCache)</mark>;
+  569:    }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/FilterOptions.java <pre>
+     ...
+
+   90:    public InputStream getInputStream(InputStream in) throws IOException {
+   91:        return getInputStream(<mark>in</mark>, ArrayCache.getDefaultCache());
+   92:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>filterChain</mark></code> &nbsp; (<code>[2, '#arg0:call:stream', ':return']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockOutputStream.java <pre>
+     ...
+
+   37:        outCounted = new CountingOutputStream(out);
+   38:        <mark>filterChain</mark> = outCounted;
+   39:        for (int i = filters.length - 1; i &gt;= 0; --i)
+   40:            <mark>filterChain</mark> = filters[i].getOutputStream(<mark>filterChain</mark>, arrayCache);
+   41:
+     ...
+
+   93:    public void write(byte[] buf, int off, int len) throws IOException {
+   94:        <mark>filterChain</mark>.write(buf, off, len);
+   95:        check.update(buf, off, len);
+     ...
+
+  100:    public void flush() throws IOException {
+  101:        <mark>filterChain</mark>.flush();
+  102:        validate();
+     ...
+
+  106:        // Finish the Compressed Data field.
+  107:        <mark>filterChain</mark>.finish();
+  108:        validate();
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/DeltaEncoder.java <pre>
+     ...
+
+   34:                                                  ArrayCache arrayCache) {
+   35:        <mark>return <mark>options.getOutputStream(out, arrayCache)</mark>;</mark>
+   36:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_17_1')">[+]</a> Match<br>
+<div id=S_17_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/FilterOptions.java <pre>
+     ...
+
+   90:    public InputStream getInputStream(InputStream in) throws IOException {
+   91:        <mark>return <mark>getInputStream(in, ArrayCache.getDefaultCache())</mark>;</mark>
+   92:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>filterChain</mark></code> &nbsp; (<code>[2, '#arg0:new:stream', ':return']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  197:        // Initialize the filter chain.
+  198:        <mark>filterChain</mark> = inCounted;
+  199:        for (int i = filters.length - 1; i &gt;= 0; --i)
+  200:            <mark>filterChain</mark> = filters[i].getInputStream(<mark>filterChain</mark>, arrayCache);
+  201:    }
+     ...
+
+  210:
+  211:        int ret = <mark>filterChain</mark>.read(buf, off, len);
+  212:
+     ...
+
+  235:            if (ret &lt; len || uncompressedSize == uncompressedSizeInHeader) {
+  236:                if (<mark>filterChain</mark>.read() != -1)
+  237:                    throw new CorruptedInputException();
+     ...
+
+  274:    public int available() throws IOException {
+  275:        return <mark>filterChain</mark>.available();
+  276:    }
+     ...
+
+  284:        try {
+  285:            <mark>filterChain</mark>.close();
+  286:        } catch (IOException e) {
+     ...
+
+  294:
+  295:        <mark>filterChain</mark> = null;
+  296:    }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/BCJDecoder.java <pre>
+     ...
+
+   59:
+   60:        <mark>return <mark>new SimpleInputStream(in, simpleFilter)</mark>;</mark>
+   61:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_17_2')">[+]</a> Match<br>
+<div id=S_17_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/LZMA2Options.java <pre>
+     ...
+
+  567:            throws IOException {
+  568:        <mark>return <mark>new LZMA2InputStream(in, dictSize, presetDict, arrayCache)</mark>;</mark>
+  569:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 18: <code class=old><mark>in</mark></code> &rarr; <code class=new><mark>chain</mark></code> / <code class=old><mark>in</mark></code> &nbsp; (0.417)</h2>
+<h3><code class=old><mark>in</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/DeltaOptions.java <pre>
+     ...
+
+   86:
+   87:    public InputStream getInputStream(<mark>InputStream in</mark>, ArrayCache arrayCache) {
+   88:        return new DeltaInputStream(<mark>in</mark>, distance);
+   89:    }
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>filterChain</mark></code> &nbsp; (<code>[1, '', '#arg0:new:delta']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  197:        // Initialize the filter chain.
+  198:        <mark>filterChain</mark> = inCounted;
+  199:        for (int i = filters.length - 1; i &gt;= 0; --i)
+  200:            <mark>filterChain</mark> = filters[i].getInputStream(<mark><mark>filterChain</mark></mark>, arrayCache);
+  201:    }
+     ...
+
+  210:
+  211:        int ret = <mark>filterChain</mark>.read(buf, off, len);
+  212:
+     ...
+
+  235:            if (ret &lt; len || uncompressedSize == uncompressedSizeInHeader) {
+  236:                if (<mark>filterChain</mark>.read() != -1)
+  237:                    throw new CorruptedInputException();
+     ...
+
+  274:    public int available() throws IOException {
+  275:        return <mark>filterChain</mark>.available();
+  276:    }
+     ...
+
+  284:        try {
+  285:            <mark>filterChain</mark>.close();
+  286:        } catch (IOException e) {
+     ...
+
+  294:
+  295:        <mark>filterChain</mark> = null;
+  296:    }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/DeltaDecoder.java <pre>
+     ...
+
+   28:
+   29:    public InputStream getInputStream(<mark>InputStream in</mark>, ArrayCache arrayCache) {
+   30:        return <mark>new DeltaInputStream(<mark>in</mark>, distance)</mark>;
+   31:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_18_0')">[+]</a> Match<br>
+<div id=S_18_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/DeltaOptions.java <pre>
+     ...
+
+   87:    public InputStream getInputStream(InputStream in, ArrayCache arrayCache) {
+   88:        return <mark>new DeltaInputStream(<mark>in</mark>, distance)</mark>;
+   89:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>filterChain</mark></code> &nbsp; (<code>[2, '#arg0:new:stream', ':return']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  197:        // Initialize the filter chain.
+  198:        <mark>filterChain</mark> = inCounted;
+  199:        for (int i = filters.length - 1; i &gt;= 0; --i)
+  200:            <mark>filterChain</mark> = filters[i].getInputStream(<mark>filterChain</mark>, arrayCache);
+  201:    }
+     ...
+
+  210:
+  211:        int ret = <mark>filterChain</mark>.read(buf, off, len);
+  212:
+     ...
+
+  235:            if (ret &lt; len || uncompressedSize == uncompressedSizeInHeader) {
+  236:                if (<mark>filterChain</mark>.read() != -1)
+  237:                    throw new CorruptedInputException();
+     ...
+
+  274:    public int available() throws IOException {
+  275:        return <mark>filterChain</mark>.available();
+  276:    }
+     ...
+
+  284:        try {
+  285:            <mark>filterChain</mark>.close();
+  286:        } catch (IOException e) {
+     ...
+
+  294:
+  295:        <mark>filterChain</mark> = null;
+  296:    }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/BCJDecoder.java <pre>
+     ...
+
+   59:
+   60:        <mark>return <mark>new SimpleInputStream(in, simpleFilter)</mark>;</mark>
+   61:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_18_1')">[+]</a> Match<br>
+<div id=S_18_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/DeltaOptions.java <pre>
+     ...
+
+   87:    public InputStream getInputStream(InputStream in, ArrayCache arrayCache) {
+   88:        <mark>return <mark>new DeltaInputStream(in, distance)</mark>;</mark>
+   89:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>filterChain</mark></code> &nbsp; (<code>[1, '', '#arg0:new:stream']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/BlockInputStream.java <pre>
+     ...
+
+  197:        // Initialize the filter chain.
+  198:        <mark>filterChain</mark> = inCounted;
+  199:        for (int i = filters.length - 1; i &gt;= 0; --i)
+  200:            <mark>filterChain</mark> = filters[i].getInputStream(<mark><mark>filterChain</mark></mark>, arrayCache);
+  201:    }
+     ...
+
+  210:
+  211:        int ret = <mark>filterChain</mark>.read(buf, off, len);
+  212:
+     ...
+
+  235:            if (ret &lt; len || uncompressedSize == uncompressedSizeInHeader) {
+  236:                if (<mark>filterChain</mark>.read() != -1)
+  237:                    throw new CorruptedInputException();
+     ...
+
+  274:    public int available() throws IOException {
+  275:        return <mark>filterChain</mark>.available();
+  276:    }
+     ...
+
+  284:        try {
+  285:            <mark>filterChain</mark>.close();
+  286:        } catch (IOException e) {
+     ...
+
+  294:
+  295:        <mark>filterChain</mark> = null;
+  296:    }
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/BCJDecoder.java <pre>
+     ...
+
+   41:
+   42:    public InputStream getInputStream(<mark>InputStream in</mark>, ArrayCache arrayCache) {
+   43:        SimpleFilter simpleFilter = null;
+     ...
+
+   59:
+   60:        return <mark>new SimpleInputStream(<mark>in</mark>, simpleFilter)</mark>;
+   61:    }
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_18_2')">[+]</a> Match<br>
+<div id=S_18_2 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/DeltaOptions.java <pre>
+     ...
+
+   87:    public InputStream getInputStream(InputStream in, ArrayCache arrayCache) {
+   88:        return <mark>new DeltaInputStream(<mark>in</mark>, distance)</mark>;
+   89:    }
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<h2>Proposal 19: <code class=old><mark>close</mark></code> / <code class=old><mark>input</mark></code> &rarr; <code class=new><mark>zeros</mark></code> / <code class=new><mark>with</mark></code> / <code class=new><mark>fill</mark></code> &nbsp; (0.402)</h2>
+<h3><code class=old><mark>closeInput</mark></code></h3><div class=old style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/SingleXZInputStream.java <pre>
+     ...
+
+  519:     */
+  520:    public void close(<mark>boolean closeInput</mark>) throws IOException {
+  521:        if (in != null) {
+     ...
+
+  527:            try {
+  528:                if (<mark>closeInput</mark>)
+  529:                    in.close();
+     ...
+
+</pre></div>
+</div>
+<div class=support>
+<h3><code class=new><mark>fillWithZeros</mark></code> &nbsp; (<code>[-1, '', ':value:false']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/ArrayCache.java <pre>
+     ...
+
+  133:     */
+  134:    public byte[] getByteArray(int size, <mark><mark>boolean fillWithZeros</mark></mark>) {
+  135:        return new byte[size];
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/ResettableArrayCache.java <pre>
+     ...
+
+   45:
+   46:    public byte[] getByteArray(int size, <mark>boolean fillWithZeros</mark>) {
+   47:        byte[] array = arrayCache.getByteArray(size, <mark>fillWithZeros</mark>);
+   48:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/rangecoder/RangeDecoderFromBuffer.java <pre>
+     ...
+
+   26:        // a bigger-than-requested array, we still want to use buf.length.
+   27:        buf = arrayCache.getByteArray(inputSizeMax - INIT_SIZE, <mark>false</mark>);
+   28:        pos = buf.length;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_19_0')">[+]</a> Match<br>
+<div id=S_19_0 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/SingleXZInputStream.java <pre>
+     ...
+
+  519:     */
+  520:    public void close(<mark>boolean closeInput</mark>) throws IOException {
+  521:        if (in != null) {
+     ...
+
+  527:            try {
+  528:                if (<mark>closeInput</mark>)
+  529:                    in.close();
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/XZInputStream.java <pre>
+     ...
+
+  514:            if (xzIn != null) {
+  515:                xzIn.close(<mark>false</mark>);
+  516:                xzIn = null;
+     ...
+
+</pre></div>
+</div>
+</div></div>
+<div class=support>
+<h3><code class=new><mark>fillWithZeros</mark></code> &nbsp; (<code>[-1, '', ':value:true']</code>)</h3>
+<div class=new style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/ArrayCache.java <pre>
+     ...
+
+  160:     */
+  161:    public int[] getIntArray(int size, <mark><mark>boolean fillWithZeros</mark></mark>) {
+  162:        return new int[size];
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/ResettableArrayCache.java <pre>
+     ...
+
+   71:
+   72:    public int[] getIntArray(int size, <mark>boolean fillWithZeros</mark>) {
+   73:        int[] array = arrayCache.getIntArray(size, <mark>fillWithZeros</mark>);
+   74:
+     ...
+
+</pre></div>
+<div>tmp/src-xz/org/tukaani/xz/lz/Hash234.java <pre>
+     ...
+
+   57:        hash4Size = getHash4Size(dictSize);
+   58:        hash4Table = arrayCache.getIntArray(hash4Size, <mark>true</mark>);
+   59:        hash4Mask = hash4Size - 1;
+     ...
+
+</pre></div>
+</div>
+<a href="javascript:void(0)" onclick="toggle('S_19_1')">[+]</a> Match<br>
+<div id=S_19_1 hidden>
+<div class=match style="margin: 1em;">
+<div>tmp/src-xz/org/tukaani/xz/SingleXZInputStream.java <pre>
+     ...
+
+  493:    public void close() throws IOException {
+  494:        close(<mark>true</mark>);
+  495:    }
+     ...
+
+  519:     */
+  520:    public void close(<mark>boolean closeInput</mark>) throws IOException {
+  521:        if (in != null) {
+     ...
+
+  527:            try {
+  528:                if (<mark>closeInput</mark>)
+  529:                    in.close();
+     ...
+
+</pre></div>
+</div>
+</div></div>
