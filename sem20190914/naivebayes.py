@@ -30,7 +30,7 @@ class NaiveBayes:
         for (k,fc) in self.fcount.items():
             # P(k)・P(f_i | k) を計算する。
             pk = log(fc['ALL'])
-            p = (pk + sum( (log(fc.get(f,1)) - pk) for f in feats ))
+            p = (pk + sum( (log(fc.get(f,0)+1) - pk) for f in feats ))
             klass.append((p, k))
         # クラスの一覧を確率の大きい順にソートする。
         klass.sort(reverse=True)

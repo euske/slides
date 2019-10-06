@@ -1431,7 +1431,7 @@ for obj in objs:
 <span class=comment># 使用前</span>
 p = (pk + sum( (log(fc[f]) - pk) for f in feats ))
 <span class=comment># 使用後</span>
-p = (pk + sum( (log(<mark>fc.get(f,1)</mark>) - pk) for f in feats ))
+p = (pk + sum( (log(<mark>fc.get(f,0)+1</mark>) - pk) for f in feats ))
 </pre></blockquote>
 
 <hr>
