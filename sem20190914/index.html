@@ -43,7 +43,7 @@ function doit() {
 <h1>Python + SQLiteを使った実験データ処理</h1>
 
 <div class=h>
-権藤研 講習会資料 2019/09/14<br>
+権藤研 講習会資料 2019/09/14, 09/16, 10/07<br>
 新山
 </div>
 
@@ -866,6 +866,10 @@ artids = [ artid for (artid,) in cur.execute('SELECT ArtId FROM Article;') ]
 一般的には、自然言語文の類似度計算には
 各単語の出現頻度だけでなく、単語の重み (IDF) も考慮している)
 
+<p>
+新山による実装:
+<a href="https://github.com/euske/python3-toys/blob/master/vsm.py">https://github.com/euske/python3-toys/blob/master/vsm.py</a>
+
 
 <h2>7. 類似度をもちいたクラスタリングの実装</h2>
 <p>
@@ -929,31 +933,506 @@ class Group:
         return
 </pre></blockquote>
 
-<h2>8. Python による決定木の実装</h2>
+<h2 id="warmup2">7.99. ウォームアップその2</h2>
+<p>
+CSV ファイルを以下のような JSON 形式に変換する
+スクリプト <code>csv2json.py</code> を書け。
 <ul>
 <li> <a href="picnic.csv">picnic.csv</a>
+<li> <a href="picnic.json">picnic.json</a>
 </ul>
+
+<h2>8. Python による決定木の実装</h2>
 <p>
-基本的な手順:
+決定木は、少数の素性 (〜1000個程度) のみからなる
+データを学習したいときに有用である。
+<h4>利点</h4>
 <ul>
+<li> 誰でも実装できる。
+<li> 一度学習してしまえばメチャクチャ高速。
+</ul>
+<h4>欠点</h4>
+<ul>
+<li> 過学習しやすい。
+<li> 確からしさを出したいときには使えない。
+</ul>
+
+<h4>基本的な手順</h4>
+<ol>
 <li> 使う素性をいっこ選び、その素性を使った 「split」を列挙する。
 <li> もっとも相対エントロピーが高い split を選択する。
 <li> 再帰的に split を繰り返す。
-</ul>
+</ol>
 
-まずエントロピーを計算する関数 calcent(p) を作成する。
-
-<div class=exp>
-E(P) = &Sigma; <em>p</em> &times; log(<em>p</em>)
-</div>
+<h3>8.1. 準備</h3>
+<p>
+まず、学習する対象のモノ (オブジェクト) を
+Python でどのように表すかを決定する。
+オブジェクトは基本的に素性の集合なので、
+ここでは単に Python の辞書を使う。
 
 <blockquote><pre>
-def calcent(P):
-    return sum( p*log(p) for p in P )
+obj = {'Temperature': 'High', 'Wind': 'Strong' }
 </pre></blockquote>
 
+つぎに <code>Feature</code> (素性) クラスを設計する:
+<blockquote><pre>
+class Feature:
+
+    def __init__(self, attr):
+        self.attr = attr
+        return
+
+    <span class=comment># 与えられたオブジェクトから素性を取り出す。</span>
+    def ident(self, obj):
+        return obj[self.attr]
+
+    <span class=comment># 与えられたオブジェクト列をこの素性で分割する。</span>
+    def split(self, objs):
+        raise NotImplementedError  <span class=comment># 未実装</span>
+</pre></blockquote>
+
+<p>
+こうすると何が嬉しいかというと、
+「素性」というものを抽象的に定義することで、
+あとあと別のタイプの素性 (連続的な量を表す素性など) に
+拡張できるためである。
+
+<blockquote><pre>
+&gt;&gt;&gt; f = Feature('Temperature')  <span class=comment># 素性 Temperature を定義する。</span>
+&gt;&gt;&gt; f.ident(obj)                <span class=comment># obj からその素性を取り出す。</span>
+'High'
+</pre></blockquote>
+
+<p>
+つぎに、作成する決定木をあらわす抽象クラス <code>Node</code> を設計する:
+
+<blockquote><pre>
+class Node:
+
+    <span class=comment># 与えられたオブジェクトに対する判定結果を返す。</span>
+    def test(self, obj):
+        raise NotImplementedError  <span class=comment># 未実装</span>
+</pre></blockquote>
+
+<p>
+実際には、決定木は再帰的な構造をもっていて、
+これは <code>Branch</code> と <code>Leaf</code> に分けられる。
+それぞれを実装する:
+
+<blockquote><pre>
+class Leaf(Node):
+
+    def __init__(self, answer):
+        self.answer = answer
+        return
+
+    <span class=comment># 与えられたオブジェクトに対する判定結果を返す。</span>
+    def test(self, obj):
+        <span class=comment># これは木の終端なので、すでに答えは決まっている。</span>
+        return self.answer
+
+class Branch(Node):
+
+    def __init__(self, feature, children):
+        self.feature = feature
+        self.children = children
+        return
+
+    <span class=comment># 与えられたオブジェクトに対する判定結果を返す。</span>
+    def test(self, obj):
+        <span class=comment># 決められた素性を使って、子ノードのいずれかを選ぶ。</span>
+        v = self.feature.ident(obj)
+        branch = self.children[v]
+        <span class=comment># 子ノードにオブジェクトを渡して予測させる。</span>
+        return branch.test(obj)
+</pre></blockquote>
+
+<p>
+ひとつのオブジェクト obj はルート <code>Branch</code> から始まって、
+次々に <code>test(obj)</code> に渡されていく。
+木を下るにしたがって、いずれ <code>Leaf</code> ノードに到達する。
+<code>Leaf</code> ノードはつねに決まった値を返すので、
+この時点で判定結果が決まることになる。
+
+<p>
+ここで先ほどの抽象的な <code>Feature</code> クラスを継承し、
+離散的な素性を扱うための <code>DiscreteFeature</code>
+クラスを実装する:
+<blockquote><pre>
+class DiscreteFeature(Feature):
+
+    <span class=comment># 与えられたオブジェクト列をこの素性で分割する。</span>
+    def split(self, objs):
+        assert 2 &lt;= len(objs)
+        <span class=comment># 自分の素性に従って objs を分割する。</span>
+        d = {}
+        for obj in objs:
+            v = self.ident(obj)
+            if v in d:
+                a = d[v]
+            else:
+                a = d[v] = []
+            a.append(obj)
+        <span class=comment># この時点で</span>
+        <span class=comment># d = { 値1: [オブジェクト, オブジェクト, ...],</span>
+        <span class=comment>#       値2: [オブジェクト, オブジェクト, ...],</span>
+        <span class=comment>#       ... }</span>
+        <span class=comment># 各項目の平均エントロピーを計算する。</span>
+        n = len(objs)
+        ent = sum( len(a) * calcent(a) for a in d.values() ) / n
+        <span class=comment># 平均エントロピーと分割結果を返す。</span>
+        return (ent, d)
+</pre></blockquote>
+
+<h3>8.2. エントロピーの計算</h3>
+<p>
+ある分布をもつ確率変数 P のエントロピーは次の式で表される:
+<div class=exp>
+E(P) = &Sigma; -<em>p</em> &times; log(<em>p</em>)
+</div>
+
+<p>
+ここで、与えられたオブジェクト列に対するエントロピーを
+計算する関数 <code>calcent(objs)</code> を作成する。
+ここでいう「オブジェクト列に対するエントロピー」とは、
+実際には<strong>判定結果のエントロピー</strong>のことであるので、
+まず学習データの各オブジェクトのどこに判定結果が入っているかを
+あらかじめ決めておく。
+ここでは <code>obj['answer']</code> に入っているとしよう。
+(なお log の底は自然対数でもよいが、2 を使うほうがわかりやすい)
+
+<blockquote><pre>
+<span class=comment># 与えられた学習データ objs のエントロピーを計算する。</span>
+def calcent(objs):
+    answers = [ obj['answer'] for obj in objs ]
+    probs = []
+    ...
+    return sum( -p*log2(p) for p in probs )
+</pre></blockquote>
+
+<div class=q>
+<strong>演習.</strong>
+上の関数 <code>calcent()</code> を完成させよ。
+</div>
+
+<h3>8.3. 決定木の構築</h3>
+<p>
+以上の準備ができたら、実際に
+与えられた素性 <code>feats</code> と学習データ <code>objs</code> から
+決定木を構築する関数 <code>buildtree</code> を作成する。
+<blockquote><pre>
+<span class=comment># buildtree:</span>
+<span class=comment>#   素性の集合 feats を使って、オブジェクト列 objs を分類する決定木を返す。</span>
+def buildtree(feats, objs):
+    <span class=comment># これ以上分岐しても意味がない場合は Leaf を返す。</span>
+    if calcent(objs) &lt; EPSILON:
+        return Leaf(getbest(objs))
+    <span class=comment># objs をもっともよく分割するような素性を探す。</span>
+    minent = 9999
+    minfeat = None
+    minsplit = None
+    for feat in feats:
+        (ent, split) = feat.split(objs)
+        if ent &lt; minent:
+            <span class=comment># もっともエントロピーが少ない時の feat と split を記録。</span>
+            minent = ent
+            minfeat = feat
+            minsplit = split
+    assert minsplit is not None
+    <span class=comment># split の各結果に対してさらに部分木を構築する。</span>
+    children = {}
+    for (v,a) in minsplit.items():
+        children[v] = buildtree(feats, a)
+    return Branch(minfeat, children)
+</pre></blockquote>
+<p>
+変数 feats にはあらかじめ定義した <code>Feature</code> の列を与える。
+picnic.csv の場合、これは "Outlook", "Temp", "Humidity", "Wind" の
+4種類を与えればよい。
+<blockquote><pre>
+Day,Outlook,Temp,Humidity,Wind,Decision
+1,Sunny,Hot,High,Weak,No
+2,Sunny,Hot,High,Strong,No
+3,Overcast,Hot,High,Weak,Yes
+...
+</pre></blockquote>
+
+<blockquote><pre>
+feats = [
+    DiscreteFeature('Outlook'),
+    DiscreteFeature('Temp'),
+    DiscreteFeature('Humidity'),
+    DiscreteFeature('Wind')
+]
+tree = buildtree(feats, objs)
+</pre></blockquote>
+
+<h3>8.4. 決定木を使う</h3>
+<p>
+完成した決定木を使うには、トップの
+<code>Node.test()</code> メソッドに判定したい
+オブジェクト (素性の集合) を渡せばよい。
+子ノードの <code>test()</code> が再帰的に呼ばれ、
+解が決定される。
+<blockquote><pre>
+obj = {'Outlook': 'Sunny', 'Temp': 'Hot', 'Humidity': 'High', 'Wind': 'Weak'}
+print(tree.test(obj))
+</pre></blockquote>
+
+<div class=q>
+<strong>演習.</strong>
+<code>picnic.csv </code> のデータを使って決定木を学習し、
+実際に適用せよ。
+</div>
+
+<p>
+実際には、学習した <code>Leaf</code> / <code>Branch</code> オブジェクトを
+ファイルに保存しておき、あとで使うといった工夫が必要になる。
+
+<p>
+新山による実装:
+<a href="https://github.com/euske/python3-toys/blob/master/dtree.py">https://github.com/euske/python3-toys/blob/master/dtree.py</a>
+
+
 <h2>9. Python による Naive Bayes の実装</h2>
-(次回)
+<p>
+Naive Bayes 法は、離散的な少数の素性 (〜1000個程度)
+のみからなるデータを学習したいときに有用である。
+<h4>利点</h4>
+<ul>
+<li> 学習が簡単 (数えるだけ)。
+<li> 確率の異なる複数の結果を返せる。
+</ul>
+<h4>欠点</h4>
+<ul>
+<li> 複雑な相関関係をもつデータには不向き。
+<li> 一度も学習データに表れなかった素性があるとつねに「確率ゼロ」になってしまう。
+</ul>
+
+<h3>9.1. 原理</h3>
+<ol>
+<li> 学習: 素性の集合 <em>F</em> = {<em>f<sub>i</sub></em>} とクラス <em>k</em> に対して、
+条件つき確率
+P(<em>k</em> | <em>f<sub>1</sub></em>, <em>f<sub>2</sub></em>, ..., <em>f<sub>n</sub></em>) を計算する。
+<li> 予測: <em>F</em> が与えられたら、
+argmax<em><sub>k</sub></em> P(<em>k</em> | <em>F</em>) となるような <em>k</em> を求める。
+</ol>
+<p>
+で、どうやって P(<em>k</em> | <em>F</em>)
+を計算するのか? 以下の式を使う。
+(Naive <u>Bayes</u> といわれるゆえんである。)
+<div class=exp>
+P(<em>k</em> | <em>F</em>) = P(<em>k</em>)・P(<em>F</em>|<em>k</em>) / P(<em>F</em>)
+</div>
+ここで <em>F</em> はあらかじめ与えられているので P(<em>F</em>) は無視できて
+<div class=exp>
+argmax<em><sub>k</sub></em> P(<em>k</em> | <em>F</em>) =
+argmax<em><sub>k</sub></em> P(<em>k</em>)・P(<em>F</em> | <em>k</em>)
+</div>
+さらに、各素性 <em>f<sub>i</sub></em> と <em>k</em> は相関しているが、
+各素性
+<em>f<sub>1</sub></em>,  <em>f<sub>2</sub></em>, ...  <em>f<sub>n</sub></em> どうしは
+それぞれ <u>独立</u> (independent) して現れると仮定する。つまり
+<div class=exp>
+P(<em>f<sub>1</sub></em> | <em>f<sub>2</sub></em>) =
+P(<em>f<sub>1</sub></em> | <em>f<sub>3</sub></em>) =
+...
+P(<em>f<sub>1</sub></em> | <em>f<sub>n</sub></em>) =
+P(<em>f<sub>1</sub></em>)
+</div>
+<p>
+実際には、この仮定は正しくない。
+(<u>Naive</u> Bayes といわれるゆえんである。)
+しかしこの仮定により、
+<div class=exp>
+P(<em>F</em> | <em>k</em>) =
+P(<em>f<sub>1</sub></em>, <em>f<sub>2</sub></em>, ..., <em>f<sub>n</sub></em> | <em>k</em>) =
+P(<em>f<sub>1</sub></em> | <em>k</em>) ×
+P(<em>f<sub>2</sub></em> | <em>k</em>) ×
+... ×
+P(<em>f<sub>n</sub></em> | <em>k</em>)
+</div>
+と近似することができる。
+P(<em>f<sub>i</sub></em> | <em>k</em>) を求めるのは簡単である。
+学習データを見て、各素性 <em>f<sub>i</sub></em> と
+それに対応するクラス <em>k</em> が同時に現れる回数をただ数えればよい。
+このように、 Naive Bayes では素性と応答の数をただかぞえるだけで
+学習が可能である。
+
+<h3>9.2. Python における実装</h3>
+<p>
+Naive Bayes を実装するには
+<ol type=a>
+<li> 各クラス <em>k</em> が学習データ中に何回現れたか。
+<li> 各クラスと素性の対 (<em>f<sub>i</sub></em>, <em>k</em>) が
+  学習データ中に何回現れたか。
+</ol>
+を記録しておく必要がある。
+a. は簡単である。いっぽう b. は、以下のように格納しておくと便利である:
+<blockquote><pre>
+fcount = {
+  クラス1: { 素性a: 回数, 素性b: 回数, ... }
+  クラス2: { 素性a: 回数, 素性b: 回数, ... }
+  ...
+}
+</pre></blockquote>
+さらに <em>k</em> が現れた回数は、
+それ自体をひとつの特殊な素性 <code>ALL</code> とみなせるので
+<blockquote><pre>
+fcount = {
+  クラス1: { ALL: 回数, 素性a: 回数, 素性b: 回数, ... }
+  クラス2: { ALL: 回数, 素性a: 回数, 素性b: 回数, ... }
+  ...
+}
+</pre></blockquote>
+のようにできる。
+
+<p>
+これをふまえて、
+<code>NaiveBayes</code> クラスを定義する:
+
+<blockquote><pre>
+class NaiveBayes:
+
+    def __init__(self):
+        self.fcount = {}  <span class=comment># 素性 (k,f) の出現回数。</span>
+        return
+
+    <span class=comment># 素性とクラスの相関をひとつ学習する。</span>
+    def learn(self, k, feats):
+        <span class=comment># クラス k と同時に現れた素性一覧をとりだす。</span>
+        if k in self.fcount:
+            fc = self.fcount[k]
+        else:
+            fc = self.fcount[k] = {}
+        <span class=comment># k の数を数える。</span>
+        if 'ALL' not in fc:
+            fc['ALL'] = 0
+        fc['ALL'] += 1
+        <span class=comment># (f,k) の数を数える。</span>
+        for f in feats:
+            if f not in fc:
+                fc[f] = 0
+            fc[f] += 1
+        return
+</pre></blockquote>
+
+<h3>9.3. 予測する</h3>
+<p>
+モデルが学習できたら、予測である。
+素性の集合 <code>feats</code> が与えられたら、
+各 <em>k</em> に対して
+<div class=exp>
+P(<em>k</em>)・&Pi; P(<em>f<sub>i</sub></em> | <em>k</em>) =
+P(<em>k</em>)・&Pi; {P(<em>f<sub>i</sub></em>, <em>k</em>) / P(<em>k</em>)}
+</div>
+を計算すればよいのであるが、実際には
+母数 <code>N</code> が同じなのでこれは確率である必要がない。
+<pre class=exp>
+fcount[k]['ALL'] * &Pi; (fcount[k][f] / fconut[k]['ALL'])
+</pre>
+だけで済んでしまう。
+さらに、あらかじめ <code>kcount</code> と <code>fcount</code> の log を記録しておき
+<pre class=exp>
+log(fcount[k]['ALL']) + &Sigma; (log(fcount[k][f]) - log(fconut[k]['ALL']))
+</pre>
+のようにすれば加減算だけでよくなる。
+これをふまえて、メソッド <code>predict()</code> を設計する:
+<blockquote><pre>
+class NaiveBayes:
+    ...
+
+    <span class=comment># 与えられた素性から推定される各クラスの確率を返す。</span>
+    def predict(self, feats):
+        klass = []
+        for (k,fc) in self.fcount.items():
+            <span class=comment># P(<em>k</em>)・P(<em>f<sub>i</sub></em> | <em>k</em>) を計算する。</span>
+            pk = log(fc['ALL'])
+            p = (pk + sum( (log(fc[f]) - pk) for f in feats ))
+            klass.append((p, k))
+        <span class=comment># クラスの一覧を確率の大きい順にソートする。</span>
+        klass.sort(reverse=True)
+        return klass
+</pre></blockquote>
+
+<p>
+この方法がよいのは、結果が確率 (のlog) つきで
+返されるということである。
+もっとも確実な予想だけを知りたければ <code>klass[0]</code> を使えばよいし、
+第2候補も欲しければ <code>klass[1]</code> も見ればよい。
+複数の候補が返されるのは Naive Bayes の大きな利点である。
+
+<h4>注意点</h3>
+<p>
+決定木における「素性」とは、何がしかの値を持つものであったが、
+Naive Bayes における「素性」は、実際には「存在するか否か」
+という二値的なものであることに注意。
+したがって、 <code>picnic.csv</code> のようなデータを使うには、
+各素性を "<code>Outlook=Sunny</code>" のように
+まるごと文字列として表してやる必要がある。
+つまり「素性 <code>Outlook</code> の値が
+"<code>Sunny</code>" / "<code>Overcast</code>" / "<code>Rain</code>" のどれかだ」と
+考えるのではなく、
+「"<code>Outlook=Sunny</code>"、
+"<code>Outlook=Overcast</code>"、
+"<code>Outlook=Rain</code>" という別々の素性が存在する」
+と考えるのである。
+当然、<code>Outlook</code> の値が排他的だという情報は
+Naive Bayes にはわからない。したがって Naive Bayes は
+「"<code>Outlook=Sunny</code>" かつ "<code>Outlook=Overcast</code>"」
+というありえない状況も排除しない。
+これは独立性の仮定を置いたことによる帰結で、
+Naive Bayes 法の限界である。
+
+<div class=q>
+<strong>演習.</strong>
+同じく、上で示した
+<code>picnic.csv </code> のデータを今度は
+<code>NaiveBayes</code> クラスに適用し、結果を観察せよ。
+
+<blockquote><pre>
+nb = NaiveBayes()
+FEATS = ( 'Outlook', 'Temp', 'Humidity', 'Wind' )
+for obj in objs:
+    <span class=comment># オブジェクトの各素性の値を、二値的な素性に変換する。</span>
+    feats = [ f'{k}={obj[k]}' for k in FEATS ]
+    <span class=comment># Decision の値と各素性との相関を学習する。</span>
+    nb.learn(obj['Decision'], feats)
+</pre></blockquote>
+</div>
+
+<p>
+新山による実装:
+<a href="https://github.com/euske/python3-toys/blob/master/naivebayes.py">https://github.com/euske/python3-toys/blob/master/naivebayes.py</a>
+
+<h3>9.4. スムージング</h3>
+<p>
+実際に上の例を実行してみると、
+3番目のオブジェクトのあたりで
+「"<code>Outlook=Overcast</code>" という素性が存在しない」
+という <code>KeyError</code>例外が発生してしまう。
+これは P(<code>No</code> | <code>Outlook=Overcast</code>) の
+確率を計算しようとしたことによる。
+(<code>fcount['No']</code> の <code>fc</code> 中には
+<code>Outlook=Overcast</code> というキーが存在しない。)
+これは Naive Bayes を使うさいによく現れる問題で、
+このような学習データが存在しなかったのであるから、
+そもそも確率を計算できないのである。
+<p>
+このような場合、逃げの一種として
+「どんな素性も最低1回だけは現れた」と仮定する方法がある。
+いわゆる "<a href="https://en.wikipedia.org/wiki/Additive_smoothing">Laplace smoothing</a>" である。
+これは Python のコード上では、
+<code>fc[f]</code> でキーが存在しなかったときに
+<code>1</code> を返すように実装するだけである。
+
+<blockquote><pre>
+<span class=comment># 使用前</span>
+p = (pk + sum( (log(fc[f]) - pk) for f in feats ))
+<span class=comment># 使用後</span>
+p = (pk + sum( (log(<mark>fc.get(f,1)</mark>) - pk) for f in feats ))
+</pre></blockquote>
 
 <hr>
 <address>Yusuke Shinyama</address>
