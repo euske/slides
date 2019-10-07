@@ -47,6 +47,20 @@ function doit() {
 新山
 </div>
 
+<ul>
+<li> <a href="#warmup">0. ウォームアップ問題</a>
+<li> <a href="#shellscript">1. UNIXスクリプト処理の基本</a>
+<li> <a href="#datamgmt">2. 実験データの管理</a>
+<li> <a href="#bigdata">3. 大量のデータを蓄積・処理する場合のTips</a>
+<li> <a href="#serialization">4. データのSerializationについて</a>
+<li> <a href="#python">5. Python から CSV/JSON/SQLite を使う</a>
+<li> <a href="#vsm">6. Vector Space Model を使った類似度計算</a>
+<li> <a href="#clustering">7. 類似度をもちいたクラスタリングの実装</a>
+<li> <a href="#warmup2">7.99. ウォームアップ問題 (その2)</a>
+<li> <a href="#dtree">8. Python による決定木の実装</a>
+<li> <a href="#naivebayes">9. Python による Naive Bayes の実装</a>
+</ul>
+
 
 <h2 id="warmup">0. ウォームアップ問題</h2>
 <p>
@@ -87,7 +101,7 @@ baa,1
 </ol>
 
 
-<h2>1. UNIXスクリプト処理の基本</h2>
+<h2 id="shellscript">1. UNIXスクリプト処理の基本</h2>
 
 <h3>1.1. シェルの基本</h3>
 
@@ -315,7 +329,7 @@ $ <em>コマンド</em> [<em>オプション</em>] <em>入力ファイル1</em> 
 <p>
 こうしておくと
 <blockquote><pre>
-$ <strong>find ... | <em>コマンド</em> [<em>オプション</em>]</strong>
+$ <strong>find ... | xargs <em>コマンド</em> [<em>オプション</em>]</strong>
 </pre></blockquote>
 のようにできる。
 <p>
@@ -419,7 +433,7 @@ $ <strong>test.py -p 4 input.txt</strong>
 </div>
 
 
-<h2>2. 実験データの管理</h2>
+<h2 id="datamgmt">2. 実験データの管理</h2>
 
 <h3>2.1. ファイル名のつけ方</h3>
 <p>
@@ -468,7 +482,7 @@ $ <strong>test.py -p 4 input.txt</strong>
 </ol>
 
 
-<h2>3. 大量のデータを蓄積・処理する場合のTips</h2>
+<h2 id="bigdata">3. 大量のデータを蓄積・処理する場合のTips</h2>
 <p>
 可能なかぎり stream可能にする (データ形式が重要)。
 <p>
@@ -487,7 +501,7 @@ $ <strong>test.py -p 4 input.txt</strong>
 <li> 計算を後回しにする/先にやっておく。(キャッシュ・lookup tableの使用)
 </ul>
 
-<h2>4. データのSerializationについて</h2>
+<h2 id="serialization">4. データのSerializationについて</h2>
 
 <h3>4.1. 考慮する要素</h3>
 <ul>
@@ -598,7 +612,7 @@ ProtocolBuffer, HDF, MongoDB, ...
 導入に手間がかかりすぎて、個人でやる実験には向かない。
 
 
-<h2>5. Python から CSV/JSON/SQLite を使う</h2>
+<h2 id="python">5. Python から CSV/JSON/SQLite を使う</h2>
 
 <h3>5.1. CSV</h3>
 <h4>書き込み</h4>
@@ -660,7 +674,7 @@ for row in cur.execute('SELECT Name,Id FROM Student;'):
     (name,id) = row
 </pre></blockquote>
 
-<h2>6. Vector Space Model を使った類似度計算</h2>
+<h2 id="vsm">6. Vector Space Model を使った類似度計算</h2>
 <p>
 Vector Space Model (VSM) とは離散的な素性からなる
 データの類似度を計算する簡単な方法である。
@@ -871,7 +885,7 @@ artids = [ artid for (artid,) in cur.execute('SELECT ArtId FROM Article;') ]
 <a href="https://github.com/euske/python3-toys/blob/master/vsm.py">https://github.com/euske/python3-toys/blob/master/vsm.py</a>
 
 
-<h2>7. 類似度をもちいたクラスタリングの実装</h2>
+<h2 id="clustering">7. 類似度をもちいたクラスタリングの実装</h2>
 <p>
 上で求めた類似度の計算を使って、類似記事をグループ化
 (クラスタリング) してみる。ここではもっとも簡単に、
@@ -933,7 +947,7 @@ class Group:
         return
 </pre></blockquote>
 
-<h2 id="warmup2">7.99. ウォームアップその2</h2>
+<h2 id="warmup2">7.99. ウォームアップ問題 (その2)</h2>
 <p>
 CSV ファイルを以下のような JSON 形式に変換する
 スクリプト <code>csv2json.py</code> を書け。
@@ -942,7 +956,7 @@ CSV ファイルを以下のような JSON 形式に変換する
 <li> <a href="picnic.json">picnic.json</a>
 </ul>
 
-<h2>8. Python による決定木の実装</h2>
+<h2 id="dtree">8. Python による決定木の実装</h2>
 <p>
 決定木は、少数の素性 (〜1000個程度) のみからなる
 データを学習したいときに有用である。
@@ -1195,7 +1209,7 @@ print(tree.test(obj))
 <a href="https://github.com/euske/python3-toys/blob/master/dtree.py">https://github.com/euske/python3-toys/blob/master/dtree.py</a>
 
 
-<h2>9. Python による Naive Bayes の実装</h2>
+<h2 id="naivebayes">9. Python による Naive Bayes の実装</h2>
 <p>
 Naive Bayes 法は、離散的な少数の素性 (〜1000個程度)
 のみからなるデータを学習したいときに有用である。
@@ -1277,7 +1291,7 @@ fcount = {
   ...
 }
 </pre></blockquote>
-さらに <em>k</em> が現れた回数は、
+さらに (素性と関係なく) <em>k</em> が現れた回数は、
 それ自体をひとつの特殊な素性 <code>ALL</code> とみなせるので
 <blockquote><pre>
 fcount = {
@@ -1421,7 +1435,7 @@ for obj in objs:
 そもそも確率を計算できないのである。
 <p>
 このような場合、逃げの一種として
-「どんな素性も最低1回だけは現れた」と仮定する方法がある。
+「素性の各出現回数に 1 を出す」という方法がある。
 いわゆる "<a href="https://en.wikipedia.org/wiki/Additive_smoothing">Laplace smoothing</a>" である。
 これは Python のコード上では、
 <code>fc[f]</code> でキーが存在しなかったときに
