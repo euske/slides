@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<html>
+<head>
+<title>巨大プロジェクトにおける変数名の一貫性の検査 (権藤研 冬ゼミ資料)</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 0.5em; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+code { font-weight: bold; color: purple; }
+pre { border: 1px solid black; padding: 0.3em; }
+u { font-weight: bold; color: red; }
+body > ul > li { margin-top: 0.5em; }
+.comment { color: green; }
+--></style>
+<script>
+function goofline() {
+    if (document.baseURI.startsWith("file:")) {
+        for (e of document.getElementsByClassName("offline")) {
+            if (e.tagName == "IMG") {
+                let i = e.src.lastIndexOf("/");
+                let src = "./"+e.src.substr(i+1);
+                console.log("offline: "+e.src+" -> "+src);
+                e.src = src;
+            }
+        }
+    }
+}
+</script>
+</head>
+<body>
+
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>巨大プロジェクトにおける変数名の一貫性の検査</h1>
+
+<div class=h>
+権藤研 冬ゼミ資料 2019/12/27<br>
+新山
+</div>
+
+
+<h2>0. 夏ゼミ時との違い</h2>
+<ul>
+<li> 基本的なテーマは同じ。
+<li> 論文のプロトタイプとして議論を展開する。
+<li> 実験結果を説明する。
+</ul>
+
+
+<h2>1. 背景: 一貫性は巨大ソフトウェアプロジェクトを保守するのに重要である</h2>
+<ul>
+<li> 巨大なプロジェクトは複数の人間からなるチームによって開発される。
+  <ul>
+    <li> 1人の人間が長期間にわたって開発する場合も、時がたてば別の人間となる。
+  </ul>
+<li> 各参加者が協力しやすいように、ふつう何らかの指針 (ガイドライン) が決められる。
+  <ul>
+    <li> ソースコードの「スタイルガイド」はよく知られている:
+      <ul>
+	<li> <a href="https://google.github.io/styleguide/jsguide.html">Google JavaScript Style Guide</a>
+	<li> <a href="https://github.com/nytimes/objective-c-style-guide/blob/master/README_ja-JP.md">NYTimes Objective-C スタイルガイド</a>
+      </ul>
+    <li> いっぽうで、識別子 (変数名・関数名) のガイドラインはあまり存在しない。
+      <code>CamelCase</code> / <code>snake_case</code> の使い分け程度。
+      <ul>
+        <li> <a href="https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/general-naming-conventions">Microsoft General Naming Conventions</a>
+      </ul>
+  </ul>
+<li> だが、識別子はプログラム理解にとってきわめて重要:
+  <ul>
+    <li> プログラマは名前の意味に頼っている。
+      <a href="https://ieeexplore.ieee.org/document/1631100">[Lawrie, 06]</a>
+    <li> 名前が悪いとコード品質が下がる。
+      <a href="https://ieeexplore.ieee.org/document/7961504">[Avidan, 17]</a>
+    <li> GitHub Issues で "<code>wrong name</code>" 等を検索すると、
+      <a href="https://github.com/search?q=wrong+name&amp;type=Issues">100万以上の結果が返される</a>。
+    <li> 名前の重要性は、
+      書籍 ("Code Complete", "The Practice of Programming" 等) でも強調されている。
+  </ul>
+</ul>
+
+
+<h2>2. 目標: ソースコード中の一貫しない変数名を指摘する</h2>
+
+<blockquote><pre>
+void printResult(Stream out, String result) {
+  out.writeLine("result:"+result);
+}
+
+void printStat(Stream out, int stat) {
+  out.writeLine("stat:"+stat);
+}
+
+void printInfo(Stream <mark>strm</mark>, String info) {
+  <mark>strm</mark>.writeLine("info:"+info);  <span class=comment>// お前、ここはoutやろ。</span>
+}
+</pre></blockquote>
+
+<h3>2.1. 既存研究に対する立ち位置</h3>
+<ul>
+<li> 識別子の問題に対処するために、これまで多くの試みがなされている。
+  <ul>
+    <li> メソッド名の妥当性を検査する:
+      <a href="https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.232.9803">[H&oslash;st, 09]</a>
+    <li> コードからコメントを生成する:
+      <a href="https://dl.acm.org/citation.cfm?id=2521973">[Sridhara, 12]</a>
+    <li> コードからメソッド名を提案する:
+      <a href="https://miltos.allamanis.com/publications/2015suggesting/">[Allamanis, 15]</a>
+    <li> 難読化されたJavaScriptコードからもとの変数名・型を推測する:
+      <a href="https://www.sri.inf.ethz.ch/publications/raychev2015predicting">[Raychev, 15]</a>
+    <li> コードから単語ベクトルを抽出する (code2vec):
+      <a href="https://arxiv.org/abs/1803.09473">[Alon, 18]</a>
+  </ul>
+<li> みんなメソッド名ばかりやっているが、変数名も重要だと思う。
+  <ul>
+    <li> 変数名はおもにアプリケーションが扱う「モノ」の名前がつけられており、名詞である。
+    <li> メソッド名に使われる動詞に比べると、名詞はずっと数が多く、
+      アプリケーションの意味に関係が深い。
+<div class=figure>
+<table border>
+<tr><th>プロジェクト</th><th>名詞トップ5</th><th>動詞トップ5</th></tr>
+<tr><td>ant (ビルドツール)</td>
+<td>file, name, function, class, output</td>
+<td>set, get, add, create, execute</td></tr>
+<tr><td>antlr4 (構文解析)</td>
+<td>string, rule, token, code, name</td>
+<td>get, set, add, remove, visit</td></tr>
+<tr><td>bcel (バイトコード解析)</td>
+<td>constant, class, string, type, value</td>
+<td>visit, get, accept, set, dump</td></tr>
+<tr><td>compress (データ圧縮)</td>
+<td>stream, entry, archive, data, input</td>
+<td>get, set, read, write, close</td></tr>
+<tr><td>jedit (テキストエディタ)</td>
+<td>jj, action, line, string, buffer</td>
+<td>get, set, add, run, remove</td></tr>
+<tr><td>jhotdraw (図形描画)</td>
+<td>action, figure, color, name, property</td>
+<td>get, set, create, add, read</td></tr>
+<tr><td>junit (ユニットテスト)</td>
+<td>test, class, method, failure, runner</td>
+<td>get, assert, run, test, validate</td></tr>
+<tr><td>lucene (文書検索)</td>
+<td>doc, next, string, value, bytes</td>
+<td>get, set, compare, add, read</td></tr>
+<tr><td>tomcat (Webサーバ)</td>
+<td>name, string, session, max, class</td>
+<td>get, set, add, remove, create</td></tr>
+<tr><td>weka (機械学習)</td>
+<td>text, tip, options, action, string</td>
+<td>get, set, add, create, remove</td></tr>
+<tr><td>xerces (XMLパーサ)</td>
+<td>element, name, decl, type, impl</td>
+<td>get, set, create, add, start</td></tr>
+<tr><td>xz (データ圧縮)</td>
+<td>stream, input, size, output, memory</td>
+<td>get, write, read, close, set</td></tr>
+</table>
+</div>
+  </ul>
+<li> 既存研究をそのまま変数名に適用するのはあまり好きではない、なぜなら:
+  <ul>
+    <li> 辞書やヒューリスティクスなどの外部的な制約をなるべく使いたくない。
+      (保守が大変 + バイアスを避けるため)
+    <li> 汎用のシステムを目指すのではなく、
+      <u>プロジェクトごとに</u>調整可能なシステムを作るべき。<br>
+      なぜなら、識別子に使われている単語の意味はプロジェクトによって異なるから:
+      <ul>
+	<li> GUIアプリにおける "<code>view</code>"
+	<li> SQLエンジンにおける "<code>view</code>"
+      </ul>
+    <li> システムは、ブラックボックスによって得られた結果を
+      提示するだけではだめで、ユーザ (プログラマ) がレビューできる論拠を示す
+      (つまり、結果に対する説明責任を負う) べきである。
+  </ul>
+</ul>
+
+
+<h2>3. 理論: そもそも「一貫性 (consistency)」とは何か?</h2>
+
+<h3>3.1. 一般論</h3>
+<ul>
+<li> A → B が予測される。この法則 (知識) を K としよう。
+<li> A が成り立っている。
+<li> B が成り立っていれば、「B は K に対して consistent である」
+<li> &not; B が成り立っていれば、「B は K に対して consistent でない」
+</ul>
+
+<h4>例1.</h4>
+<ul>
+<li> K &equiv; A → B: 「Aさんはマックに行くと必ずポテトを買う」
+<li> A: 「Aさんがマックに行った」
+<li> B: 「Aさんがポテトを買ってきた」  (一貫性あり)
+</ul>
+
+<h4>例2.</h4>
+<ul>
+<li> A:「桜を見る会に反社会勢力などいない (7月)」 → B:「桜を見る会に反社会勢力などいない (12月)」
+<li> A:「桜を見る会に反社会勢力などいない (7月)」
+<li> B:「いたかも。でも誰も証明できんだろう (12月)」。 (一貫性なし)
+</ul>
+
+<h3>3.2. プログラムの変数名に適用する</h3>
+<p>
+変数名の使い方に着目する:
+<ul>
+<li> A「ある変数が <code>open()</code> の返り値を受けとり、<code>write()</code> の第1引数に渡される」 → B「その変数名が <code>out</code> である」
+<blockquote><pre>
+<mark>out</mark> = open(...);
+write(<mark>out</mark>, ...);
+</pre></blockquote>
+<li> A「別の変数が <code>open()</code> の返り値を受けとり、<code>write()</code> の第1引数に渡される」
+<blockquote><pre>
+<mark>???</mark> = open(...);
+write(<mark>???</mark>, ...);
+</pre></blockquote>
+<li> B: 変数名 <code>???</code> が <code>out</code> ならば一貫性あり。
+</ul>
+
+<h3>3.3. ベイズ化する</h3>
+<p>
+一般には、ある規則がつねに 100% 成り立つということはあまりない。
+そこで、確率的に成り立つ規則を導入する。
+<ul>
+<li> A → B の成り立つ可能性が高い &equiv; 確率 P(B | A) が高い。
+<li> P(B | A) が高く、なおかつ P(A) も高いにもかかわらず、
+  P(B) が低い → 一貫性なし。
+</ul>
+
+
+<h2>4. 準備: 変数の「データパス」に着目する</h2>
+
+<p>
+ここでは、ある変数に代入される値が通る一連の処理
+(または関数の引数および返り値が通るデータフロー) を、
+その変数の「使い方」と定義する。
+ここではこのデータフローを「<u>データパス</u>」と呼ぶ。
+
+<h3>4.1. データパスの例</h3>
+<p>
+問. 以下の例で変数 <code>line</code> に着目する。
+<blockquote><pre>
+private BufferedReader fp;
+
+public String get() {
+    String <mark>line</mark> = fp.readLine();
+    int i = <mark>line</mark>.indexOf(' ');
+    return <mark>line</mark>.substring(0, i);
+}
+</pre></blockquote>
+<p>
+グラフ化するとこうなる:
+<div class=figure>
+<!-- Title: get() Pages: 1 -->
+<svg width="270pt" height="454pt"
+ viewBox="0.00 0.00 270.00 454.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 450)">
+<title>get()</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-450 266,-450 266,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_a</title>
+<polygon fill="none" stroke="#000000" points="8,-65 8,-367 254,-367 254,-65 8,-65"/>
+</g>
+<!-- N1 -->
+<g id="node1" class="node">
+<title>N1</title>
+<ellipse fill="none" stroke="#000000" cx="184" cy="-428" rx="27" ry="18"/>
+<text text-anchor="middle" x="184" y="-424.3" font-family="Times,serif" font-size="14.00" fill="#000000">fp</text>
+</g>
+<!-- N2 -->
+<g id="node2" class="node">
+<title>N2</title>
+<polygon fill="none" stroke="#000000" points="230,-359 138,-359 138,-323 230,-323 230,-359"/>
+<text text-anchor="middle" x="184" y="-337.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">readLine()</text>
+</g>
+<!-- N1&#45;&gt;N2 -->
+<g id="edge1" class="edge">
+<title>N1&#45;&gt;N2</title>
+<path fill="none" stroke="#000000" d="M184,-409.9735C184,-398.1918 184,-382.5607 184,-369.1581"/>
+<polygon fill="#000000" stroke="#000000" points="187.5001,-369.0033 184,-359.0034 180.5001,-369.0034 187.5001,-369.0033"/>
+<text text-anchor="middle" x="203" y="-380.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N4 -->
+<g id="node4" class="node">
+<title>N4</title>
+<polygon fill="none" stroke="#000000" points="172,-234 88,-234 88,-198 172,-198 172,-234"/>
+<text text-anchor="middle" x="130" y="-212.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">indexOf()</text>
+</g>
+<!-- N2&#45;&gt;N4 -->
+<g id="edge2" class="edge">
+<title>N2&#45;&gt;N4</title>
+<path fill="none" stroke="red" stroke-width="3" d="M176.1479,-322.8239C167.1497,-301.9946 152.3056,-267.6333 141.8884,-243.5193"/>
+<polygon fill="red" stroke="red" points="145.0404,-241.99 137.8615,-234.198 138.6144,-244.7661 145.0404,-241.99"/>
+<text text-anchor="middle" x="178" y="-274.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N6 -->
+<g id="node6" class="node">
+<title>N6</title>
+<polygon fill="none" stroke="#000000" points="179.5,-109 80.5,-109 80.5,-73 179.5,-73 179.5,-109"/>
+<text text-anchor="middle" x="130" y="-87.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">substring()</text>
+</g>
+<!-- N2&#45;&gt;N6 -->
+<g id="edge4" class="edge">
+<title>N2&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M195.0166,-322.8274C201.3258,-310.7139 208,-294.1913 208,-278.5 208,-278.5 208,-278.5 208,-153.5 208,-137.118 197.3924,-124.3189 184.0009,-114.6879"/>
+<polygon fill="#000000" stroke="#000000" points="185.6684,-111.5979 175.3729,-109.097 181.8617,-117.4724 185.6684,-111.5979"/>
+<text text-anchor="middle" x="227" y="-212.3" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N3 -->
+<g id="node3" class="node">
+<title>N3</title>
+<polygon fill="none" stroke="#000000" points="104,-359 50,-359 50,-323 104,-323 104,-359"/>
+<text text-anchor="middle" x="77" y="-337.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">&#39; &#39;</text>
+</g>
+<!-- N3&#45;&gt;N4 -->
+<g id="edge3" class="edge">
+<title>N3&#45;&gt;N4</title>
+<path fill="none" stroke="#000000" d="M78.5297,-322.8344C80.2411,-308.3271 83.7865,-287.7294 91,-271 95.3103,-261.0035 101.6359,-251.0116 107.9437,-242.3401"/>
+<polygon fill="#000000" stroke="#000000" points="110.8998,-244.2351 114.1702,-234.1576 105.3292,-239.9961 110.8998,-244.2351"/>
+<text text-anchor="middle" x="110" y="-274.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N4&#45;&gt;N6 -->
+<g id="edge6" class="edge">
+<title>N4&#45;&gt;N6</title>
+<path fill="none" stroke="red" stroke-width="3" d="M130,-197.8239C130,-177.2723 130,-143.5472 130,-119.4893"/>
+<polygon fill="red" stroke="red" points="133.5001,-119.198 130,-109.198 126.5001,-119.198 133.5001,-119.198"/>
+<text text-anchor="middle" x="149" y="-149.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg1</text>
+</g>
+<!-- N5 -->
+<g id="node5" class="node">
+<title>N5</title>
+<polygon fill="none" stroke="#000000" points="70,-234 16,-234 16,-198 70,-198 70,-234"/>
+<text text-anchor="middle" x="43" y="-212.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">0</text>
+</g>
+<!-- N5&#45;&gt;N6 -->
+<g id="edge5" class="edge">
+<title>N5&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M54.0754,-197.8986C62.9531,-183.6074 75.8861,-163.2677 88,-146 94.7619,-136.3613 102.5016,-126.0422 109.4796,-116.9762"/>
+<polygon fill="#000000" stroke="#000000" points="112.2585,-119.1041 115.6239,-109.058 106.7282,-114.8127 112.2585,-119.1041"/>
+<text text-anchor="middle" x="107" y="-149.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N7 -->
+<g id="node7" class="node">
+<title>N7</title>
+<polygon fill="none" stroke="#000000" points="161,-36 99,-36 99,0 161,0 161,-36"/>
+<text text-anchor="middle" x="130" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">return</text>
+</g>
+<!-- N6&#45;&gt;N7 -->
+<g id="edge7" class="edge">
+<title>N6&#45;&gt;N7</title>
+<path fill="none" stroke="red" stroke-width="3" d="M130,-72.9551C130,-64.8828 130,-55.1764 130,-46.1817"/>
+<polygon fill="red" stroke="red" points="133.5001,-46.0903 130,-36.0904 126.5001,-46.0904 133.5001,-46.0903"/>
+</g>
+</g>
+</svg>
+</div>
+<p>
+グラフ中の<u>赤線部分</u>が
+変数 <code>line</code> のデータパスである:
+<ul>
+  <li> <code>fp.readLine()</code> &rarr; <code><mark>line</mark></code> &rarr; <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code>
+</ul>
+<p>
+これは、変数 <code>line</code> になにが代入され、
+それがどのように使われるかを示している。
+
+<h3>4.2. Interprocedural 化する</h3>
+<blockquote><pre>
+private BufferedReader fp;
+
+public String get() {
+    String <mark>line</mark> = fp.readLine();
+    int i = <mark>line</mark>.indexOf(' ');
+    return <mark>line</mark>.substring(0, i);
+}
+
+public void show() {
+    String <mark>name</mark> = get();
+    System.out.println(<mark>name</mark>+"!!");
+}
+</pre></blockquote>
+<p>
+<code>get()</code> 中の変数 <code>line</code> (の処理結果) は、
+いまや <code>show()</code> 中では <code>name</code> となっていることに着目。
+<p>
+これをグラフ化するとこうなる:
+<div class=figure>
+<!-- Title: A Pages: 1 -->
+<svg width="301pt" height="797pt"
+ viewBox="0.00 0.00 300.79 797.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 793)">
+<title>A</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-793 296.7947,-793 296.7947,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_a</title>
+<polygon fill="none" stroke="#000000" points="8,-387 8,-712 254,-712 254,-387 8,-387"/>
+<text text-anchor="middle" x="131" y="-696.8" font-family="Times,serif" font-size="14.00" fill="#000000">get()</text>
+</g>
+<g id="clust2" class="cluster">
+<title>cluster_b</title>
+<polygon fill="none" stroke="#000000" points="23,-8 23,-368 165,-368 165,-8 23,-8"/>
+<text text-anchor="middle" x="94" y="-352.8" font-family="Times,serif" font-size="14.00" fill="#000000">show()</text>
+</g>
+<!-- N1 -->
+<g id="node1" class="node">
+<title>N1</title>
+<ellipse fill="none" stroke="#000000" cx="184" cy="-771" rx="27" ry="18"/>
+<text text-anchor="middle" x="184" y="-767.3" font-family="Times,serif" font-size="14.00" fill="#000000">fp</text>
+</g>
+<!-- N2 -->
+<g id="node2" class="node">
+<title>N2</title>
+<polygon fill="none" stroke="#000000" points="230,-681 138,-681 138,-645 230,-645 230,-681"/>
+<text text-anchor="middle" x="184" y="-659.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">readLine()</text>
+</g>
+<!-- N1&#45;&gt;N2 -->
+<g id="edge1" class="edge">
+<title>N1&#45;&gt;N2</title>
+<path fill="none" stroke="#000000" d="M184,-752.6793C184,-735.821 184,-710.5651 184,-691.147"/>
+<polygon fill="#000000" stroke="#000000" points="187.5001,-691.0501 184,-681.0502 180.5001,-691.0502 187.5001,-691.0501"/>
+<text text-anchor="middle" x="203" y="-723.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N4 -->
+<g id="node4" class="node">
+<title>N4</title>
+<polygon fill="none" stroke="#000000" points="172,-556 88,-556 88,-520 172,-520 172,-556"/>
+<text text-anchor="middle" x="130" y="-534.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">indexOf()</text>
+</g>
+<!-- N2&#45;&gt;N4 -->
+<g id="edge2" class="edge">
+<title>N2&#45;&gt;N4</title>
+<path fill="none" stroke="red" stroke-width="3" d="M176.1479,-644.8239C167.1497,-623.9946 152.3056,-589.6333 141.8884,-565.5193"/>
+<polygon fill="red" stroke="red" points="145.0404,-563.99 137.8615,-556.198 138.6144,-566.7661 145.0404,-563.99"/>
+<text text-anchor="middle" x="178" y="-596.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N6 -->
+<g id="node6" class="node">
+<title>N6</title>
+<polygon fill="none" stroke="#000000" points="179.5,-431 80.5,-431 80.5,-395 179.5,-395 179.5,-431"/>
+<text text-anchor="middle" x="130" y="-409.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">substring()</text>
+</g>
+<!-- N2&#45;&gt;N6 -->
+<g id="edge4" class="edge">
+<title>N2&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M195.0166,-644.8274C201.3258,-632.7139 208,-616.1913 208,-600.5 208,-600.5 208,-600.5 208,-475.5 208,-459.118 197.3924,-446.3189 184.0009,-436.6879"/>
+<polygon fill="#000000" stroke="#000000" points="185.6684,-433.5979 175.3729,-431.097 181.8617,-439.4724 185.6684,-433.5979"/>
+<text text-anchor="middle" x="227" y="-534.3" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N3 -->
+<g id="node3" class="node">
+<title>N3</title>
+<polygon fill="none" stroke="#000000" points="104,-681 50,-681 50,-645 104,-645 104,-681"/>
+<text text-anchor="middle" x="77" y="-659.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">&#39; &#39;</text>
+</g>
+<!-- N3&#45;&gt;N4 -->
+<g id="edge3" class="edge">
+<title>N3&#45;&gt;N4</title>
+<path fill="none" stroke="#000000" d="M78.5297,-644.8344C80.2411,-630.3271 83.7865,-609.7294 91,-593 95.3103,-583.0035 101.6359,-573.0116 107.9437,-564.3401"/>
+<polygon fill="#000000" stroke="#000000" points="110.8998,-566.2351 114.1702,-556.1576 105.3292,-561.9961 110.8998,-566.2351"/>
+<text text-anchor="middle" x="110" y="-596.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N4&#45;&gt;N6 -->
+<g id="edge6" class="edge">
+<title>N4&#45;&gt;N6</title>
+<path fill="none" stroke="red" stroke-width="3" d="M130,-519.8239C130,-499.2723 130,-465.5472 130,-441.4893"/>
+<polygon fill="red" stroke="red" points="133.5001,-441.198 130,-431.198 126.5001,-441.198 133.5001,-441.198"/>
+<text text-anchor="middle" x="149" y="-471.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg1</text>
+</g>
+<!-- N5 -->
+<g id="node5" class="node">
+<title>N5</title>
+<polygon fill="none" stroke="#000000" points="70,-556 16,-556 16,-520 70,-520 70,-556"/>
+<text text-anchor="middle" x="43" y="-534.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">0</text>
+</g>
+<!-- N5&#45;&gt;N6 -->
+<g id="edge5" class="edge">
+<title>N5&#45;&gt;N6</title>
+<path fill="none" stroke="#000000" d="M54.0754,-519.8986C62.9531,-505.6074 75.8861,-485.2677 88,-468 94.7619,-458.3613 102.5016,-448.0422 109.4796,-438.9762"/>
+<polygon fill="#000000" stroke="#000000" points="112.2585,-441.1041 115.6239,-431.058 106.7282,-436.8127 112.2585,-441.1041"/>
+<text text-anchor="middle" x="107" y="-471.8" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+<!-- N9 -->
+<g id="node7" class="node">
+<title>N9</title>
+<polygon fill="none" stroke="#000000" points="157,-337 103,-337 103,-301 157,-301 157,-337"/>
+<text text-anchor="middle" x="130" y="-315.3" font-family="Courier,monospace" font-size="14.00" fill="gray">name</text>
+</g>
+<!-- N6&#45;&gt;N9 -->
+<g id="edge7" class="edge">
+<title>N6&#45;&gt;N9</title>
+<path fill="none" stroke="red" stroke-width="3" d="M130,-394.8759C130,-381.3516 130,-362.6192 130,-347.1514"/>
+<polygon fill="red" stroke="red" points="133.5001,-347.0685 130,-337.0685 126.5001,-347.0685 133.5001,-347.0685"/>
+</g>
+<!-- N11 -->
+<g id="node10" class="node">
+<title>N11</title>
+<polygon fill="none" stroke="#000000" points="142,-212 88,-212 88,-176 142,-176 142,-212"/>
+<text text-anchor="middle" x="115" y="-190.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">+</text>
+</g>
+<!-- N9&#45;&gt;N11 -->
+<g id="edge8" class="edge">
+<title>N9&#45;&gt;N11</title>
+<path fill="none" stroke="red" stroke-width="3" d="M127.8189,-300.8239C125.3416,-280.1798 121.2692,-246.2431 118.3798,-222.1648"/>
+<polygon fill="red" stroke="red" points="121.8504,-221.7097 117.1838,-212.198 114.9002,-222.5438 121.8504,-221.7097"/>
+<text text-anchor="middle" x="127" y="-252.8" font-family="Times,serif" font-size="14.00" fill="#000000">L</text>
+</g>
+<!-- N8 -->
+<g id="node8" class="node">
+<title>N8</title>
+<ellipse fill="none" stroke="#000000" cx="233" cy="-121" rx="59.5901" ry="18"/>
+<text text-anchor="middle" x="233" y="-117.3" font-family="Times,serif" font-size="14.00" fill="#000000">System.out</text>
+</g>
+<!-- N12 -->
+<g id="node11" class="node">
+<title>N12</title>
+<polygon fill="none" stroke="#000000" points="157,-52 73,-52 73,-16 157,-16 157,-52"/>
+<text text-anchor="middle" x="115" y="-30.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">println()</text>
+</g>
+<!-- N8&#45;&gt;N12 -->
+<g id="edge11" class="edge">
+<title>N8&#45;&gt;N12</title>
+<path fill="none" stroke="#000000" d="M210.2484,-104.2255C192.5512,-91.1776 167.7499,-72.8919 147.8916,-58.2506"/>
+<polygon fill="#000000" stroke="#000000" points="149.8446,-55.3421 139.7187,-52.2248 145.6905,-60.9763 149.8446,-55.3421"/>
+<text text-anchor="middle" x="200" y="-73.8" font-family="Times,serif" font-size="14.00" fill="#000000">#this</text>
+</g>
+<!-- N10 -->
+<g id="node9" class="node">
+<title>N10</title>
+<polygon fill="none" stroke="#000000" points="85,-337 31,-337 31,-301 85,-301 85,-337"/>
+<text text-anchor="middle" x="58" y="-315.3" font-family="Courier,monospace" font-size="14.00" fill="#000000">!!</text>
+</g>
+<!-- N10&#45;&gt;N11 -->
+<g id="edge9" class="edge">
+<title>N10&#45;&gt;N11</title>
+<path fill="none" stroke="#000000" d="M66.2883,-300.8239C75.7865,-279.9946 91.4552,-245.6333 102.4512,-221.5193"/>
+<polygon fill="#000000" stroke="#000000" points="105.7372,-222.7489 106.7017,-212.198 99.3681,-219.8445 105.7372,-222.7489"/>
+<text text-anchor="middle" x="93" y="-252.8" font-family="Times,serif" font-size="14.00" fill="#000000">R</text>
+</g>
+<!-- N11&#45;&gt;N12 -->
+<g id="edge10" class="edge">
+<title>N11&#45;&gt;N12</title>
+<path fill="none" stroke="red" stroke-width="3" d="M115,-175.957C115,-148.3487 115,-95.3746 115,-62.5255"/>
+<polygon fill="red" stroke="red" points="118.5001,-62.2225 115,-52.2226 111.5001,-62.2226 118.5001,-62.2225"/>
+<text text-anchor="middle" x="134" y="-117.3" font-family="Times,serif" font-size="14.00" fill="#000000">#arg0</text>
+</g>
+</g>
+</svg>
+</div>
+<p>
+最終的に、
+変数 <code>line</code> のデータパスは:
+<ul>
+  <li> <code>fp.readLine()</code> &rarr; <code><mark>line</mark></code> &rarr; <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code> &rarr; <code>assign:name</code> &rarr; <code>L:+</code> &rarr; <code>#arg0:println()</code>
+</ul>
+となる。
+この順列が、本プログラムにおける「変数 <code>line</code> の使われ方」を表すことになる。
+<p>
+単純化のため、いまのところパスの分岐は考慮しない。
+
+
+<h2>5. 手法: 学習と予測</h2>
+<p>
+以上のようなデータパスを、
+プログラム中のすべての変数に対して (interprocedural で) 抽出し、
+変数名との相関を学習する。
+ここでは「データパスを与えると、変数名を予測する」ようなモデルを学習する。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="620" height="110">
+  <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g stroke="black" fill="none"
+     stroke-width="2" stroke-dasharray="4,6" marker-end="url(#arrow)">
+    <path d="M60,50 q20,-50,80,-20" />
+    <path d="M300,50 q-20,30,-80,20" />
+    <path d="M430,50 q-60,60,-220,25" />
+    <path d="M560,50 q-200,80,-360,30" />
+  </g>
+  <g stroke="black" fill="white" stroke-width="1">
+    <ellipse cx="60" cy="50" rx="50" ry="20" />
+    <rect x="150" y="35" width="60" height="30" fill="yellow" />
+    <ellipse cx="300" cy="50" rx="50" ry="20" />
+    <ellipse cx="430" cy="50" rx="50" ry="20" />
+    <ellipse cx="560" cy="50" rx="50" ry="20" />
+  </g>
+  <g stroke="black" fill="none" stroke-width="1">
+    <path d="M110,50 l40,0" />
+    <path d="M210,50 l40,0" />
+    <path d="M350,50 l30,0" />
+    <path d="M480,50 l30,0" />
+  </g>
+  <g text-anchor="middle" style="font-family: monospace; font-size: 80%;">
+    <text x="60" y="50" dy="0.4em">fp.readline()</text>
+    <text x="180" y="50" dy="0.4em">line</text>
+    <text x="300" y="50" dy="0.4em">#this:indexOf()</text>
+    <text x="430" y="50" dy="0.4em">#arg1:substring()</text>
+    <text x="560" y="50" dy="0.4em">assign:name</text>
+  </g>
+</svg>
+</div>
+<p>
+たとえば、以下のようなデータパスが出てきたら:
+<ul>
+  <li> <code>fp.readLine()</code> &rarr; <code><kbd>???</kbd></code> &rarr; <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code> &rarr; <code>assign:name</code> &rarr; <code>L:+</code> &rarr; <code>#arg0:println()</code>
+</ul>
+<p>
+ここでの <code><kbd>???</kbd></code> = <code>line</code> ではないか、
+と予測するということである。もしここで <code>line</code> 以外の名前が使われていたら、
+その変数名は (この使われ方に対しては) 一貫していない、ということになる。
+<p>
+具体的には、
+<ul>
+<li> すべての変数の集合を V とする。
+<li> For each v<sub>1</sub> &isin; V に対し、
+<ol>
+<li> 「v<sub>1</sub> を除いたすべての <em>v</em> &isin; V
+(<em>v</em> &ne; v<sub>1</sub>)」に対して
+  P(<em>v</em>の変数名 | <em>v</em>のデータパス) を求める。
+<li> argmax P(変数名 | <em>v1</em>のデータパス) となるような
+  変数名 n を求める。
+<li> n = v<sub>1</sub>の変数名であれば一貫性がある。
+  そうでなければ、n を変数 v<sub>1</sub> に対する
+  「よりふさわしい名前」として提案する。
+</ol>
+<li> 学習器には Naive Bayes classifier を使う。
+  すべての変数に対して異なる母集団を使って P(名前 | データパス) を学習する必要があるが、
+  Naive Bayes における学習は単なる個数カウントなので、
+  訓練データから特定のケースだけを「キャンセル」した学習結果が簡単につくれる。
+  (足した個数を引くだけ)
+<li> 実際の素性は「名前」ではなく「名前を構成する単語の集合」である。<br>
+  つまり、<code>データパス</code> → <code>outputBufferName</code> ではなく
+  <ul>
+    <li> → <code>output</code>
+    <li> → <code>buffer</code>
+    <li> → <code>name</code>
+  </ul>
+  (単語は <code>CamelCase</code> あるいは <code>snake_case</code> で区切られる)
+<li> 実際の素性は「データパス」ではなく「パスを構成するエッジの集合」である。
+  (組み合わせ爆発を防ぐため)<br>
+  例: <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code> &rarr; <code>assign:name</code> というデータパスは、
+  <ul>
+    <li> <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code>
+    <li> <code>#arg1:substring()</code> &rarr; <code>assign:name</code>
+  </ul>
+  という2つの素性に分解される。
+</ul>
+</ul>
+
+<h2>6. 実験と評価方法</h2>
+<p>
+以下のプロジェクトに対して検証をおこなった:
+(実際には #エッジ &lt; #データパス)
+<div class=figure>
+<table border>
+<tr><th>プロジェクト</th><th align=right>KLOC</th><th align=right>#変数</th>
+<th align=right>#ノード</th><th align=right>#エッジ</th></tr>
+<tr><td>ant (ビルドツール)</td><td align=right>112k</td><td align=right>23,971</td>
+<td align=right>350k</td><td align=right>5,211k</td></tr>
+<tr><td>antlr4 (構文解析)</td><td align=right>31k</td><td align=right>7,131</td>
+<td align=right>74k</td><td align=right>1,103k</td></tr>
+<tr><td>bcel (バイトコード解析)</td><td align=right>31k</td><td align=right>6,583</td>
+<td align=right>80k</td><td align=right>1,190k</td></tr>
+<tr><td>compress (データ圧縮)</td><td align=right>24k</td><td align=right>5,896</td>
+<td align=right>69k</td><td align=right>929k</td></tr>
+<tr><td>jedit (テキストエディタ)</td><td align=right>115k</td><td align=right>21,977</td>
+<td align=right>294k</td><td align=right>6,106k</td></tr>
+<tr><td>jhotdraw (図形描画)</td><td align=right>80k</td><td align=right>17,367</td>
+<td align=right>235k</td><td align=right>2,351k</td></tr>
+<tr><td>junit (ユニットテスト)</td><td align=right>9k</td><td align=right>2,384</td>
+<td align=right>21k</td><td align=right>280k</td></tr>
+<tr><td>lucene (文書検索)</td><td align=right>109k</td><td align=right>30,341</td>
+<td align=right>414k</td><td align=right>7,146k</td></tr>
+<tr><td>tomcat (Webサーバ)</td><td align=right>238k</td><td align=right>49,275</td>
+<td align=right>649k</td><td align=right>11,799k</td></tr>
+<tr><td>weka (機械学習)</td><td align=right>324k</td><td align=right>59,274</td>
+<td align=right>943k</td><td align=right>13,224k</td></tr>
+<tr><td>xerces (XMLパーサ)</td><td align=right>114k</td><td align=right>21,852</td>
+<td align=right>314k</td><td align=right>7,017k</td></tr>
+<tr><td>xz (データ圧縮)</td><td align=right>7k</td><td align=right>1,825</td>
+<td align=right>23k</td><td align=right>299k</td></tr>
+</table>
+</div>
+<p>
+(疑問: 論文では数値の詳細を略すのは悪印象か?)
+<p>
+被験者: 著者3人 + 大学院生6人 = 計9人
+
+<h3>RQ1. データパスは変数名の「使われ方」を表現するのに適切なのか?</h3>
+<p>
+まず予備実験として、データパスを本手法に使うことの妥当性を判断する。
+もしデータパスが変数名の「使われ方」をうまく表現できていれば、
+「同じデータパス」をもつ異なる変数は「同じ使われ方」をしているはずである。
+
+<h4>実験1. データパスを使って同じ役割をもつ変数を判定する</h4>
+<p>
+各プロジェクトから同じデータパスの類似度が高い (cosine &gt; 0.90)
+変数の組を選び、(もとの変数名は隠して) それらが表れているコードを
+人間に見せて、同じ変数名にすべきかどうかを判定させる。
+
+<ol type=a>
+<li> 2つの変数名は同じであるべきだ。
+<li> 2つの変数名は同じでもよい。
+<li> 2つの変数名は違っているべきだ。
+<li> わからない。
+</ol>
+<p>
+全12プロジェクト × 各プロジェクト5問 × 9人 = 計540問の結果:
+<div class=figure>
+<table border>
+<tr><th>プロジェクト</th><th align=right>#a</th><th align=right>#b</th><th align=right>#c</th><th align=right>#d</th><th align=right>#全体</th></tr>
+<tr><td>ant</td><td align=right>23</td><td align=right>17</td><td align=right>5</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>antlr4</td><td align=right>13</td><td align=right>22</td><td align=right>9</td><td align=right>1</td><td align=right>45</td></tr>
+<tr><td>bcel</td><td align=right>3</td><td align=right>11</td><td align=right>31</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>compress</td><td align=right>10</td><td align=right>9</td><td align=right>24</td><td align=right>2</td><td align=right>45</td></tr>
+<tr><td>jedit</td><td align=right>7</td><td align=right>25</td><td align=right>9</td><td align=right>4</td><td align=right>45</td></tr>
+<tr><td>jhotdraw</td><td align=right>15</td><td align=right>17</td><td align=right>12</td><td align=right>1</td><td align=right>45</td></tr>
+<tr><td>junit</td><td align=right>14</td><td align=right>21</td><td align=right>10</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>lucene</td><td align=right>18</td><td align=right>21</td><td align=right>6</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>tomcat</td><td align=right>11</td><td align=right>27</td><td align=right>6</td><td align=right>1</td><td align=right>45</td></tr>
+<tr><td>weka</td><td align=right>4</td><td align=right>28</td><td align=right>12</td><td align=right>1</td><td align=right>45</td></tr>
+<tr><td>xerces</td><td align=right>12</td><td align=right>22</td><td align=right>9</td><td align=right>2</td><td align=right>45</td></tr>
+<tr><td>xz</td><td align=right>4</td><td align=right>15</td><td align=right>26</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>計</td><td align=right>134</td><td align=right>235</td><td align=right>159</td><td align=right>12</td><td align=right>540</td></tr>
+</table>
+</div>
+<p>
+#a + #b の割合が全体の 68% (369/540) を占めている。
+したがって、データパスが類似している変数は同じ名前をもつ可能性が高い。
+<p>
+なお、被験者は各組の cosine を知らされていないが、
+もともと 0.90 以上の対のみに絞ってしまったので、
+あまり blind test とは言えなくなくなってしまった。
+(#a + #b の平均 cosine は 0.980, #c の平均 cosing は 0.976 である)
+
+<h3>RQ2. うまく一貫性のある変数名を予測できたか?</h3>
+
+<h4>実験2-1. 提案した名前がよいものかどうか判定する</h4>
+<p>
+For each 変数 について、(名前は隠して)
+それが使われている部分を見せ
+<ol type=a>
+<li> オリジナルの変数名
+<li> 本手法によって提案された変数名
+<li> ベースライン手法によって提案された変数名 (型のみによって変数名を決定する、
+たとえば <code>int</code>型ならば変数名はつねに <code>i</code>)
+</ol>
+<p>
+の中から選ばせる (blind test)。
+なお、各プロジェクトごとに、
+提案されたスコアが高いものから 10個を選んだ。
+<p>
+全12プロジェクト × 各プロジェクト10問 × 9人 = 計1080問のうち、
+本手法の提案した変数名を選んだ人の割合は以下のようになる:
+<div class=figure>
+<table border>
+<tr><th>プロジェクト</th><th align=right>#本手法</th><th align=right>#全体</th></tr>
+<tr><td>ant</td><td align=right>39</td><td align=right>90</td></tr>
+<tr><td>antlr4</td><td align=right>34</td><td align=right>90</td></tr>
+<tr><td>bcel</td><td align=right>48</td><td align=right>90</td></tr>
+<tr><td>compress</td><td align=right>53</td><td align=right>90</td></tr>
+<tr><td>jedit</td><td align=right>24</td><td align=right>90</td></tr>
+<tr><td>jhotdraw</td><td align=right>4</td><td align=right>90</td></tr>
+<tr><td>junit</td><td align=right>34</td><td align=right>90</td></tr>
+<tr><td>lucene</td><td align=right>40</td><td align=right>90</td></tr>
+<tr><td>tomcat</td><td align=right>34</td><td align=right>90</td></tr>
+<tr><td>weka</td><td align=right>29</td><td align=right>90</td></tr>
+<tr><td>xerces</td><td align=right>31</td><td align=right>90</td></tr>
+<tr><td>xz</td><td align=right>46</td><td align=right>90</td></tr>
+<tr><td>計</td><td align=right>416 (39%)</td><td align=right>1080</td></tr>
+</table>
+</div>
+<p>
+なお、9人の被験者による合意度 (<a href="https://en.wikipedia.org/wiki/Cohen%27s_kappa#Fleiss'_kappa">Fleiss' Kappa</a>) は 0.45 (Moderate) であった。
+<p>
+ちなみに、データパスから素性を生成するとき、
+異なるアルゴリズムを使った場合の実験結果は以下のようであった。
+<div class=figure>
+<table border>
+<tr><th>Methods</th><th>Interproc.</th><th>Name</th><th>Type</th><th>Length</th><th align=right>%</th></tr>
+<tr><td>5</td><td>+</td><td>+</td><td>+</td><td>5</td><td align=right>39%</td></tr>
+<tr><td>5</td><td>+</td><td>+</td><td>+</td><td>3</td><td align=right>14%</td></tr>
+<tr><td>5</td><td>+</td><td>+</td><td>+</td><td>1</td><td align=right>7%</td></tr>
+<tr><td>5</td><td>+</td><td>-</td><td>-</td><td>5</td><td align=right>6%</td></tr>
+<tr><td>5</td><td>+</td><td>+</td><td>-</td><td>5</td><td align=right>10%</td></tr>
+<tr><td>5</td><td>+</td><td>-</td><td>+</td><td>5</td><td align=right>8%</td></tr>
+<tr><td>5</td><td>-</td><td>+</td><td>+</td><td>5</td><td align=right>10%</td></tr>
+<tr><td>1</td><td>+</td><td>+</td><td>+</td><td>5</td><td align=right>16%</td></tr>
+</table>
+</div>
+
+<h4>実験2-2.
+システムの出力をもとに各プロジェクト用の修正パッチを作成し、作者のもとに送る</h4>
+<p>
+各プロジェクトに対して計12個のパッチを作成。
+<blockquote style="border: 1px solid black; padding: 0.3em;">
+Hello, we're developing an automated system that detects inconsistent
+variable names in a large software project. Our system checks if each
+variable name is consistent with other variables in the project in its
+usage pattern, and proposes correct candidates if inconsistency is
+detected. This is a part of academic research that we hope to publish
+soon, but as a part of the evaluation, we applied our systems to your
+projects and got a few interesting results. We carefully reviewed our
+system output and manually created a patch to correct a few variable
+names. We would be delighted if this patch is found to be useful. If
+you have a question or suggestion regarding this patch, we'd happily
+answer. Thank you.
+</blockquote>
+<ul>
+<li> 3プロジェクトで採用された。
+<li> 2プロジェクトで議論中。
+<li> 1プロジェクトから「それほど優先度高くない」と返答。
+</ul>
+
+<h3>RQ3. 変数名の予測には説得力があったか?</h3>
+
+<h4>実験3-1. 提案した名前とその論拠を表示し、説得力があるかどうかを判定する</h4>
+<p>
+各プロジェクトごとに
+本手法で提案されたスコアが高いものから低いものまで 5個を選び、
+証拠とともに評価させる:
+<ol type=a>
+<li> 提案した名前を支持する確固たる説得力がある。
+<li> 提案した名前がそれなりに正しそうな証拠である。
+<li> 提案した名前が正しそうという確信はもてない。
+<li> わからない。
+</ol>
+<p>
+全12プロジェクト × 各プロジェクト5問 × 9人 = 計540問の結果:
+<div class=figure>
+<table border>
+<tr><th>プロジェクト</th><th align=right>#a</th><th align=right>#b</th><th align=right>#c</th><th align=right>#d</th><th align=right>#全体</th></tr>
+<tr><td>ant</td><td align=right>7</td><td align=right>8</td><td align=right>30</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>antlr4</td><td align=right>8</td><td align=right>8</td><td align=right>29</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>bcel</td><td align=right>10</td><td align=right>15</td><td align=right>20</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>compress</td><td align=right>5</td><td align=right>5</td><td align=right>34</td><td align=right>1</td><td align=right>45</td></tr>
+<tr><td>jedit</td><td align=right>6</td><td align=right>6</td><td align=right>33</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>jhotdraw</td><td align=right>4</td><td align=right>5</td><td align=right>36</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>junit</td><td align=right>2</td><td align=right>7</td><td align=right>36</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>lucene</td><td align=right>3</td><td align=right>14</td><td align=right>27</td><td align=right>1</td><td align=right>45</td></tr>
+<tr><td>tomcat</td><td align=right>7</td><td align=right>7</td><td align=right>31</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>weka</td><td align=right>1</td><td align=right>10</td><td align=right>34</td><td align=right>0</td><td align=right>45</td></tr>
+<tr><td>xerces</td><td align=right>6</td><td align=right>10</td><td align=right>28</td><td align=right>1</td><td align=right>45</td></tr>
+<tr><td>xz</td><td align=right>1</td><td align=right>7</td><td align=right>35</td><td align=right>2</td><td align=right>45</td></tr>
+<tr><td>計</td><td align=right>60</td><td align=right>102</td><td align=right>373</td><td align=right>5</td><td align=right>540</td></tr>
+</table>
+</div>
+<p>
+#a + #b の割合が全体の 30% (162/540) しかないが、
+#a + #b がついた変数は (生成時の) 平均スコアが高めであり (上位36%)、
+#c はやや低い (上位42%)。
+しかしこれは本手法によるスコアの妥当性を示しているにすぎず、
+全体としては論拠の有用性は示せなかった。
+<p>
+(そもそもどうすれば有用性を示せたのか、いまとなっては謎である)
+
+<h2>7. ディスかっしょん</h2>
+<p>
+本実験の結果から…
+<ol>
+<li> データパスは変数の使われ方を表現するのにある程度有効。
+<li> 実際のプロジェクトで、39% の確率でもとの開発者よりもよい名前を提案できた。
+<li> 各提案で人間に納得できる論拠がきちんと示せたかどうかは証明できなかった。
+</ol>
+
+<h3>7.1. Threat to Validity</h3>
+
+
+<h2>よい論文とは?</h2>
+<ul>
+<li> 重要な問題を扱っている。
+<li> 主張および定義が明確である。
+<li> 証拠が十分にある。
+</ul>
+
+
+<hr>
+<address>Yusuke Shinyama</address>
