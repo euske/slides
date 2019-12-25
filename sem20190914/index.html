@@ -556,6 +556,9 @@ for line in fp:
 <p>
 簡単なデータだけならいいかも
 (たとえば 32ビット列の羅列ひたすら1G個とか)。
+<p>
+<a href="https://www.percona.com/sites/default/files/hipp%20sqlite%20percona-raleigh-20150212.pdf">「SQLite は <code>fopen()</code> に対抗するために作られた」</a>
+
 
 <h3>4.4. よく知られている形式 (おすすめ)</h3>
 
@@ -698,14 +701,25 @@ VSM はこれをもうちょっと高度にしたもので、
 </div>
 <p>
 これがなぜうまくいくのかは、次の例を考えてみるとわかる。
+<div class=figure><table>
+<tr><th>素性が揃っているとき</th><th>素性が揃ってないとき</th></tr>
+<tr><td>
+<svg height="120" version="1.1" width="220" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g fill="none" stroke="black" stroke-width="2"><line x1="10" x2="10" y1="110" y2="10" /><line x1="10" x2="210" y1="110" y2="110" /><polyline points="15,105 35,85 55,25 75,15 95,75 115,85 135,95 155,105 175,95 195,105" stroke="green" /><polyline points="15,95 35,95 55,25 75,35 95,85 115,95 135,105 155,95 175,105 195,105" stroke="red" /></g></svg>
+</td><td>
+<svg height="120" version="1.1" width="220" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g fill="none" stroke="black" stroke-width="2"><line x1="10" x2="10" y1="110" y2="10" /><line x1="10" x2="210" y1="110" y2="110" /><polyline points="15,105 35,85 55,25 75,15 95,75 115,85 135,95 155,105 175,95 195,105" stroke="green" /><polyline points="15,95 35,105 55,105 75,85 95,95 115,75 135,35 155,25 175,85 195,65" stroke="red" /></g></svg>
+</td></tr>
+<tr><td>類似度: 高い</td><td>類似度: 低い</td></tr>
+</table></div>
 <p>
-(揃っているときの図)
+さらに、次のようなケースもカバーできる:
 <p>
-(揃ってないときの図)
-<p>
-さらに、次のようなケースもある:
-<p>
-(高さが違うときの図)
+<div class=figure><table>
+<tr><th>高さが違うが形は似ているとき</th></tr>
+<tr><td>
+<svg height="120" version="1.1" width="220" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g fill="none" stroke="black" stroke-width="2"><line x1="10" x2="10" y1="110" y2="10" /><line x1="10" x2="210" y1="110" y2="110" /><polyline points="15,105 35,85 55,25 75,15 95,75 115,85 135,95 155,105 175,95 195,105" stroke="green" /><polyline points="15,105 35,95 55,65 75,55 95,95 115,95 135,105 155,105 175,105 195,105" stroke="red" /></g></svg>
+</td></tr>
+<tr><td>類似度: 高い</td></tr>
+</table></div>
 
 <h3>6.1. Pythonによる実装</h3>
 <p>
