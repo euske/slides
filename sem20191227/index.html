@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <html>
 <head>
-<title>巨大プロジェクトにおける変数名の一貫性の検査 (権藤研 冬ゼミ資料)</title>
+<title>研究進捗報告: 巨大プロジェクトにおける変数名の一貫性の検査 (権藤研 冬ゼミ資料)</title>
 <style><!--
 body { line-height: 1.5; }
 h1 { border-bottom: solid 4px #000080; }
@@ -37,7 +37,7 @@ function goofline() {
 <div class=nav>
 <a href="../index.html">&lt; もどる</a>
 </div>
-<h1>巨大プロジェクトにおける変数名の一貫性の検査</h1>
+<h1>研究進捗報告: 巨大プロジェクトにおける変数名の一貫性の検査</h1>
 
 <div class=h>
 権藤研 冬ゼミ資料 2019/12/27<br>
@@ -626,7 +626,7 @@ public void show() {
 <li> 「v<sub>1</sub> を除いたすべての <em>v</em> &isin; V
 (<em>v</em> &ne; v<sub>1</sub>)」に対して
   P(<em>v</em>の変数名 | <em>v</em>のデータパス) を求める。
-<li> argmax P(変数名 | <em>v1</em>のデータパス) となるような
+<li> argmax P(変数名 | <em>v<sub>1</sub></em>のデータパス) となるような
   変数名 n を求める。
 <li> n = v<sub>1</sub>の変数名であれば一貫性がある。
   そうでなければ、n を変数 v<sub>1</sub> に対する
@@ -740,7 +740,7 @@ public void show() {
 なお、被験者は各組の cosine を知らされていないが、
 もともと 0.90 以上の対のみに絞ってしまったので、
 あまり blind test とは言えなくなくなってしまった。
-(#a + #b の平均 cosine は 0.980, #c の平均 cosing は 0.976 である)
+(#a + #b の平均 cosine は 0.980, #c の平均 cosine は 0.976 である)
 
 <h3>RQ2. うまく一貫性のある変数名を予測できたか?</h3>
 
@@ -795,6 +795,26 @@ For each 変数 について、(名前は隠して)
 <tr><td>5</td><td>+</td><td>-</td><td>+</td><td>5</td><td align=right>8%</td></tr>
 <tr><td>5</td><td>-</td><td>+</td><td>+</td><td>5</td><td align=right>10%</td></tr>
 <tr><td>1</td><td>+</td><td>+</td><td>+</td><td>5</td><td align=right>16%</td></tr>
+</table>
+</div>
+
+<p>
+また、各プロジェクトごとに生成された提案の数とそのスコア内訳は以下のようである:
+<div class=figure>
+<table border>
+<tr><th>プロジェクト</th><th>90%</th><th>80%</th><th>70%</th><th>60%</th><th>50%</th><th>40%</th><th>30%</th><th>20%</th><th>10%</th><th>10%</th><th>計</th></tr>
+<tr><td>ant</td><td align=right>2</td><td align=right>15</td><td align=right>61</td><td align=right>144</td><td align=right>302</td><td align=right>637</td><td align=right>1031</td><td align=right>1985</td><td align=right>3061</td><td align=right>5784</td><td align=right>13022</td></tr>
+<tr><td>antlr4</td><td align=right>7</td><td align=right>9</td><td align=right>41</td><td align=right>74</td><td align=right>144</td><td align=right>217</td><td align=right>344</td><td align=right>453</td><td align=right>658</td><td align=right>965</td><td align=right>2912</td></tr>
+<tr><td>bcel</td><td align=right>3</td><td align=right>5</td><td align=right>12</td><td align=right>55</td><td align=right>103</td><td align=right>203</td><td align=right>294</td><td align=right>501</td><td align=right>644</td><td align=right>1042</td><td align=right>2862</td></tr>
+<tr><td>compress</td><td align=right>4</td><td align=right>6</td><td align=right>16</td><td align=right>45</td><td align=right>98</td><td align=right>214</td><td align=right>276</td><td align=right>504</td><td align=right>822</td><td align=right>1012</td><td align=right>2997</td></tr>
+<tr><td>jedit</td><td align=right>7</td><td align=right>14</td><td align=right>58</td><td align=right>199</td><td align=right>345</td><td align=right>606</td><td align=right>965</td><td align=right>1621</td><td align=right>2349</td><td align=right>3837</td><td align=right>10001</td></tr>
+<tr><td>jhotdraw</td><td align=right>12</td><td align=right>22</td><td align=right>68</td><td align=right>150</td><td align=right>251</td><td align=right>441</td><td align=right>648</td><td align=right>895</td><td align=right>1284</td><td align=right>1695</td><td align=right>5466</td></tr>
+<tr><td>junit</td><td align=right>6</td><td align=right>12</td><td align=right>27</td><td align=right>40</td><td align=right>89</td><td align=right>89</td><td align=right>89</td><td align=right>149</td><td align=right>182</td><td align=right>135</td><td align=right>818</td></tr>
+<tr><td>lucene</td><td align=right>9</td><td align=right>18</td><td align=right>48</td><td align=right>137</td><td align=right>292</td><td align=right>567</td><td align=right>945</td><td align=right>1735</td><td align=right>2913</td><td align=right>4546</td><td align=right>11210</td></tr>
+<tr><td>tomcat</td><td align=right>13</td><td align=right>42</td><td align=right>112</td><td align=right>264</td><td align=right>544</td><td align=right>1165</td><td align=right>1729</td><td align=right>3038</td><td align=right>4897</td><td align=right>8422</td><td align=right>20226</td></tr>
+<tr><td>weka</td><td align=right>9</td><td align=right>22</td><td align=right>63</td><td align=right>200</td><td align=right>407</td><td align=right>970</td><td align=right>2054</td><td align=right>3468</td><td align=right>6905</td><td align=right>10672</td><td align=right>24770</td></tr>
+<tr><td>xerces</td><td align=right>5</td><td align=right>27</td><td align=right>49</td><td align=right>131</td><td align=right>289</td><td align=right>435</td><td align=right>756</td><td align=right>1263</td><td align=right>1924</td><td align=right>3371</td><td align=right>8250</td></tr>
+<tr><td>xz</td><td align=right>3</td><td align=right>9</td><td align=right>8</td><td align=right>14</td><td align=right>24</td><td align=right>33</td><td align=right>74</td><td align=right>86</td><td align=right>157</td><td align=right>111</td><td align=right>519</td></tr>
 </table>
 </div>
 
@@ -863,7 +883,7 @@ answer. Thank you.
 <p>
 (そもそもどうすれば有用性を示せたのか、いまとなっては謎である)
 
-<h2>7. ディスかっしょん</h2>
+<h2>7. Discussion</h2>
 <p>
 本実験の結果から…
 <ol>
@@ -872,8 +892,28 @@ answer. Thank you.
 <li> 各提案で人間に納得できる論拠がきちんと示せたかどうかは証明できなかった。
 </ol>
 
-<h3>7.1. Threat to Validity</h3>
-
+<h3>7.1. Threats to Validity</h3>
+<h4>Internal Validity (実験はRQに答えているか?)</h4>
+<ol type=a>
+<li> 被験者のプログラミング能力に左右されている。<br>
+  → しかし、もし被験者がランダムに選んでいるとしたら
+  Kappa = 0 になるはずなので、被験者9人は
+  ある程度の一般的な基準を有しているといえる。
+<li> 被験者が評価コードに対する前提知識があるかもしれない。<br>
+  → 今回のケースではない。
+<li> Precision のみで Recall が測定できていない。<br>
+  → 「完璧なソースコード」を取得することが不可能なので、
+  Recall は無理。
+</ol>
+<h4>External Validity (一般化可能か?)</h4>
+<ol type=a>
+<li> 実験プロジェクトおよび被験者の数が充分でない。
+<li> データパスの取得方法が完璧でない。
+  (実装上のミス、機能の欠損)
+<li> 動的ディスパッチ、variable aliasing を全部追えていない。
+<li> データパス全体を比較せず、エッジを比較するだけの判定では不十分である。
+<li> Naive Bayes classifier の性能が不十分である。
+</ol>
 
 <h2>よい論文とは?</h2>
 <ul>
