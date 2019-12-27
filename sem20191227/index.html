@@ -174,6 +174,7 @@ void printInfo(Stream <mark>strm</mark>, String info) {
       <ul>
 	<li> GUIアプリにおける "<code>view</code>"
 	<li> SQLエンジンにおける "<code>view</code>"
+	<li> 異なる略記法: <code>message</code> と <code>msg</code> など
       </ul>
     <li> システムは、ブラックボックスによって得られた結果を
       提示するだけではだめで、ユーザ (プログラマ) がレビューできる論拠を示す
@@ -882,6 +883,50 @@ answer. Thank you.
 全体としては論拠の有用性は示せなかった。
 <p>
 (そもそもどうすれば有用性を示せたのか、いまとなっては謎である)
+
+<h3>Anecdotal Examples</h3>
+<ul>
+<li> Make the name more task oriented:
+<pre>
+org/apache/bcel/Const.java:
+-  public static short getNoOfOperands(final int index) {
+-      return NO_OF_OPERANDS[index];
++  public static short getNoOfOperands(final int <mark>opcode</mark>) {
++      return NO_OF_OPERANDS[<mark>opcode</mark>];
+</pre>
+
+<li> Use the conventional abbreviation for the project.
+<pre>
+gjt/sp/jedit/bsh/classpath/BshClassPath.java:
+-	void errorWhileMapping( String s ) {
++	void errorWhileMapping( String <mark>msg</mark> ) {
+...
+</pre>
+<pre>
+org/apache/jasper/compiler/Generator.java
+-            String pkgName = className.substring(0, lastIndex);
+-            genPreamblePackage(pkgName);
++            String <mark>packageName</mark> = className.substring(0, lastIndex);
++            genPreamblePackage(<mark>packageName</mark>);
+</pre>
+
+<li> Use a synonym which aligns better with the other parts of the project.
+<pre>
+org/apache/xerces/impl/xpath/regex/RegexParser.java
+-        ReferencePosition(int n, int pos) {
++        ReferencePosition(int n, int <mark>offset</mark>) {
+</pre>
+
+<li> Correct typos:
+<pre>
+src/org/tukaani/xz/lz/Hash234.java
+-    void normalize(int normalizeOffset) {
+-        LZEncoder.normalize(hash2Table, HASH_2_SIZE, normalizeOffset);
++    void normalize(int <mark>normalizationOffset</mark>) {
++        LZEncoder.normalize(hash2Table, HASH_2_SIZE, <mark>normalizationOffset</mark>);
+...
+</pre>
+</ul>
 
 <h2>7. Discussion</h2>
 <p>
