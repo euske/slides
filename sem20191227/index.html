@@ -44,8 +44,18 @@ function goofline() {
 新山
 </div>
 
+<ul>
+<li> <a href="#progress">0. 夏ゼミ時との違い</a>
+<li> <a href="#background">1. 背景: 一貫性は巨大ソフトウェアプロジェクトを保守するのに重要である</a>
+<li> <a href="#objective">2. 目標: ソースコード中の一貫しない変数名を指摘する</a>
+<li> <a href="#consistency">3. 理論: そもそも「一貫性 (consistency)」とは何か?</a>
+<li> <a href="#datapath">4. 準備: 変数の「データパス」に着目する</a>
+<li> <a href="#learning">5. 手法: 学習と予測</a>
+<li> <a href="#evaluation">6. 実験と評価方法</a>
+<li> <a href="#discussion">7. Discussion</a>
+</ul>
 
-<h2>0. 夏ゼミ時との違い</h2>
+<h2 id="progress">0. 夏ゼミ時との違い</h2>
 <ul>
 <li> 基本的なテーマは同じ。
 <li> 論文のプロトタイプとして議論を展開する。
@@ -53,7 +63,7 @@ function goofline() {
 </ul>
 
 
-<h2>1. 背景: 一貫性は巨大ソフトウェアプロジェクトを保守するのに重要である</h2>
+<h2 id="background">1. 背景: 一貫性は巨大ソフトウェアプロジェクトを保守するのに重要である</h2>
 <ul>
 <li> 巨大なプロジェクトは複数の人間からなるチームによって開発される。
   <ul>
@@ -86,7 +96,7 @@ function goofline() {
 </ul>
 
 
-<h2>2. 目標: ソースコード中の一貫しない変数名を指摘する</h2>
+<h2 id="objective">2. 目標: ソースコード中の一貫しない変数名を指摘する</h2>
 
 <blockquote><pre>
 void printResult(Stream out, String result) {
@@ -183,7 +193,7 @@ void printInfo(Stream <mark>strm</mark>, String info) {
 </ul>
 
 
-<h2>3. 理論: そもそも「一貫性 (consistency)」とは何か?</h2>
+<h2 id="consistency">3. 理論: そもそも「一貫性 (consistency)」とは何か?</h2>
 
 <h3>3.1. 一般論</h3>
 <ul>
@@ -235,7 +245,7 @@ write(<mark>???</mark>, ...);
 </ul>
 
 
-<h2>4. 準備: 変数の「データパス」に着目する</h2>
+<h2 id="datapath">4. 準備: 変数の「データパス」に着目する</h2>
 
 <p>
 ここでは、ある変数に代入される値が通る一連の処理
@@ -565,7 +575,7 @@ public void show() {
 単純化のため、いまのところパスの分岐は考慮しない。
 
 
-<h2>5. 手法: 学習と予測</h2>
+<h2 id="learning">5. 手法: 学習と予測</h2>
 <p>
 以上のようなデータパスを、
 プログラム中のすべての変数に対して (interprocedural で) 抽出し、
@@ -657,7 +667,7 @@ public void show() {
 </ul>
 </ul>
 
-<h2>6. 実験と評価方法</h2>
+<h2 id="evaluation">6. 実験と評価方法</h2>
 <p>
 以下のプロジェクトに対して検証をおこなった:
 (実際には #エッジ &lt; #データパス)
@@ -941,7 +951,8 @@ src/org/tukaani/xz/lz/Hash234.java
 </pre>
 </ul>
 
-<h2>7. Discussion</h2>
+
+<h2 id="discussion">7. Discussion</h2>
 <p>
 本実験の結果から…
 <ol>
@@ -965,6 +976,7 @@ src/org/tukaani/xz/lz/Hash234.java
 </ol>
 <h4>External Validity (一般化可能か?)</h4>
 <ol type=a>
+<li> 現状では、プログラミング言語は Java のみ。
 <li> 実験プロジェクトおよび被験者の数が充分でない。
 <li> データパスの取得方法が完璧でない。
   (実装上のミス、機能の欠損)
