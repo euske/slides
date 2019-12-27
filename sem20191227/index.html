@@ -803,7 +803,7 @@ For each 変数 について、(名前は隠して)
 また、各プロジェクトごとに生成された提案の数とそのスコア内訳は以下のようである:
 <div class=figure>
 <table border>
-<tr><th>プロジェクト</th><th>90%</th><th>80%</th><th>70%</th><th>60%</th><th>50%</th><th>40%</th><th>30%</th><th>20%</th><th>10%</th><th>10%</th><th>計</th></tr>
+<tr><th>プロジェクト</th><th>90%</th><th>80%</th><th>70%</th><th>60%</th><th>50%</th><th>40%</th><th>30%</th><th>20%</th><th>10%</th><th>0%</th><th>計</th></tr>
 <tr><td>ant</td><td align=right>2</td><td align=right>15</td><td align=right>61</td><td align=right>144</td><td align=right>302</td><td align=right>637</td><td align=right>1031</td><td align=right>1985</td><td align=right>3061</td><td align=right>5784</td><td align=right>13022</td></tr>
 <tr><td>antlr4</td><td align=right>7</td><td align=right>9</td><td align=right>41</td><td align=right>74</td><td align=right>144</td><td align=right>217</td><td align=right>344</td><td align=right>453</td><td align=right>658</td><td align=right>965</td><td align=right>2912</td></tr>
 <tr><td>bcel</td><td align=right>3</td><td align=right>5</td><td align=right>12</td><td align=right>55</td><td align=right>103</td><td align=right>203</td><td align=right>294</td><td align=right>501</td><td align=right>644</td><td align=right>1042</td><td align=right>2862</td></tr>
@@ -875,13 +875,26 @@ answer. Thank you.
 <tr><td>計</td><td align=right>60</td><td align=right>102</td><td align=right>373</td><td align=right>5</td><td align=right>540</td></tr>
 </table>
 </div>
+
 <p>
 #a + #b の割合が全体の 30% (162/540) しかないが、
-#a + #b がついた変数は (生成時の) 平均スコアが高めであり (上位36%)、
-#c はやや低い (上位42%)。
+以下に示すように、スコアが高い提案は #a + #b の評価になる
+割合が高く、スコアが低いものは #c になる割合が高い:
+
+<div class=figure>
+<table border>
+<tr><th>%score</th><th>#total</th><th>#a+#b</th><th>#c</th></tr>
+<tr><td>&gt; 80%</td><td>207</td><td>71 (34%)</td><td> 133 (64%)</td></tr>
+<tr><td>&gt; 60%</td><td>108</td><td>40 (37%)</td><td>66 (61%)</td></tr>
+<tr><td>&gt; 40%</td><td>108</td><td>20 (19%)</td><td>88 (81%)</td></tr>
+<tr><td>&gt; 20%</td><td>108</td><td>24 (22%)</td><td>84 (78%)</td></tr>
+<tr><td>&gt; 0%</td><td>9</td><td>7 (78%)</td><td>2 (22%)</td></tr>
+</table>
+</div>
+
+<p>
 しかしこれは本手法によるスコアの妥当性を示しているにすぎず、
 全体としては論拠の有用性は示せなかった。
-<p>
 (そもそもどうすれば有用性を示せたのか、いまとなっては謎である)
 
 <h3>Anecdotal Examples</h3>
