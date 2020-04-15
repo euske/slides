@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<html>
+<head>
+<title>権藤研 講習会資料 2020/04/16 UNIX基礎演習</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 0.5em; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+code { font-weight: bold; color: purple; }
+em { color: blue; }
+.h { text-align: right; }
+.q { border: 2px solid black; padding: 1em; margin: 1em; }
+.figure { border: 1px solid black; text-align: center; padding: 0.5em; margin: 0.5em; }
+.comment { color: green; }
+.exp { border: 1px solid black; padding: 1em; margin: 1em; }
+pre { border: 1px solid black; padding: 0.3em; }
+--></style>
+<script>
+function doit() {
+    if (document.baseURI.startsWith("file:")) {
+        for (e of document.getElementsByClassName("offline")) {
+            if (e.tagName == "IMG") {
+                let i = e.src.lastIndexOf("/");
+                let src = "./"+e.src.substr(i+1);
+                console.log("offline: "+e.src+" -> "+src);
+                e.src = src;
+            }
+        }
+    }
+}
+</script>
+</head>
+<body>
+
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>UNIX基礎演習</h1>
+
+<div class=h>
+権藤研 UNIX基礎演習 2020/04/16<br>
+新山
+</div>
+
+<ul>
+<li> <a href="#warmup">0. ウォームアップ問題</a>
+<li> <a href="#shellscript">1. UNIXスクリプト処理の基本</a>
+<li> <a href="#datamgmt">2. 実験データの管理</a>
+<li> <a href="#bigdata">3. 大量のデータを蓄積・処理する場合のTips</a>
+<li> <a href="#serialization">4. データのSerializationについて</a>
+<li> <a href="#python">5. Python から CSV/JSON/SQLite を使う</a>
+</ul>
+
+
+<h2 id="warmup">0. ウォームアップ問題</h2>
+<p>
+ここでは、以下の常識をチェックします:
+<ul>
+<li> Python で簡単なプログラムが書けること。
+<li> SQL が書けること。
+<li> UNIXシェルの簡単な使い方を理解していること。
+</ul>
+<p>
+( ) 内はおおまかな目安時間です。
+<ol>
+<li> <a href="https://www.python.org/downloads/">Python 3.8</a> をインストールせよ。3.7でもよい。(5分)
+<li> 以下のようなCSVファイルから単語と出現回数を読み込み、
+回数が多い順にソートして表示するプログラムを書け。
+なお、同じ単語が複数回出てきた場合は、それらの合計を使用するものとする: (15分)
+<pre>
+foo,3
+baa,1
+john,5
+foo,1
+</pre>
+出力例:
+<pre>
+john,5
+foo,4
+baa,1
+</pre>
+<li> <a href="https://www.sqlite.org/download.html">SQLite3</a> をインストールせよ。(5分)
+<li> 以下の表を作成し値を入力する <a href="https://www.sqlite.org/lang.html">SQL</a> を書け。(10分)
+<table border>
+<tr><th>Id</th><th>Name</th><th>Score</th></tr>
+<tr><td>1</td><td>Alcie</td><td>100</td></tr>
+<tr><td>2</td><td>Bob</td><td>50</td></tr>
+<tr><td>3</td><td>Carol</td><td>75</td></tr>
+</table>
+<li> 上の表から、Scoreが50点であるような行を表示する SQL を書け。(5分)
+<li> <code>a001.txt</code>, <code>a002.txt</code>, ... という名前のついた
+複数のファイルがあるとする。これらの名前を一括して
+<code>a001.html</code>, <code>a002.html</code>, ... に変更するような
+シェルスクリプトを書け。 (5分)
+<li> 上のスクリプトで、ファイル名の一覧があらかじめ決まっておらず、
+あるテキストファイル <code>files.txt</code> 中に一行ずつ書かれている場合は
+スクリプトをどう変更すべきか。(5分)
+</ol>
+
+
+<h2 id="shellscript">1. UNIXスクリプト処理の基本</h2>
+
+<h3>1.1. シェルの基本</h3>
+
+<p>
+特殊な記号 (<kbd>{</kbd>, <kbd>}</kbd>, <kbd>$</kbd>, <kbd>*</kbd>, <kbd>;</kbd>) を
+引数に渡す場合は <kbd>'〜'</kbd> で囲む。
+
+<div class=q>
+<strong>演習.</strong>
+カレントディレクトリの中にある「<code>-t</code>」というファイル中から
+<code>*</code> という文字列を検索する <code>grep</code> コマンドを書け。
+</div>
+
+<h3>1.2. 変数の活用</h3>
+
+<blockquote><pre>
+a="foo"
+echo "$a"
+b="$a $a"
+c='$a $a'
+d='$a '"$a"
+</pre></blockquote>
+
+<div class=q>
+<strong>演習.</strong>
+シェル変数と環境変数の違いは何か?
+</div>
+
+<h3>1.3. Historyを活用する</h3>
+<p>
+「こんなコマンドを実行したはずなんだけど、なんだっけ」
+
+<blockquote><pre>
+$ <strong>history | grep <em>なんか</em></strong>
+</pre></blockquote>
+<p>
+<strong>注意:</strong>
+historyファイルはときどき消されることがある。
+
+<h4>過去のコマンドラインをすべて記録しておく</h4>
+<blockquote><pre>
+function _prompt_cmd {
+    local s=$?
+    echo "`date '+%Y-%m-%d %H:%M:%S'` $HOSTNAME:$$ $PWD ($s) " \
+         "`history 1`" &gt;&gt; $MYHISTFILE
+}
+PROMPT_COMMAND=_prompt_cmd
+</pre></blockquote>
+<p>
+コマンドラインの記録は、そのまま実験ノートにもなる。
+あとで実験手順を再現したいときに参考になる。
+
+<h3>1.4. パイプの使い方</h3>
+
+<div class=q>
+<strong>演習.</strong>
+以下のコマンドラインを順に実行し、
+つぎの表現が何をするか予測せよ。
+</div>
+
+<blockquote><pre>
+$ <strong>ls -l</strong>
+$ <strong>ls -l | wc</strong>
+$ <strong>ls -l | sort</strong>
+$ <strong>ls -l | sort -k4</strong>
+$ <strong>ls -l | sort -k4 -r</strong>
+$ <strong>ls -l | sort -k4 -r -n</strong>
+$ <strong>ls -l | awk '{print $5;}'</strong>
+$ <strong>ls -l | awk '{a+=$5;}'</strong>
+$ <strong>ls -l | awk 'BEGIN{a=0;} {a+=$5;} END{print(a);}'</strong>
+$ <strong>ls -l | awk '/euske/ {print $4;}' | uniq</strong>
+$ <strong>ls -l | awk '/euske/ {print $4;}' | uniq -c</strong>
+$ <strong>ls -l | awk '/euske/ {print $4;}' | uniq -c | wc</strong>
+</pre></blockquote>
+
+<blockquote><pre>
+$ <strong>find ~</strong>
+$ <strong>find ~ -type f</strong>
+$ <strong>find ~ -type f | grep test</strong>
+$ <strong>find ~ -type f | grep -i test</strong>
+$ <strong>find ~ -type f | grep -i test | wc</strong>
+$ <strong>find ~ -type f -name '*test*'</strong>
+$ <strong>find ~ -type d -ctime -3</strong>
+$ <strong>find ~ -type d -mtime +3</strong>
+$ <strong>find ~ -type d -mtime +3</strong>
+</pre></blockquote>
+
+<h3>1.5. shスクリプトの基本</h3>
+
+<p>
+shスクリプトはこの行から始める。
+<blockquote><pre>
+#!/bin/sh
+  または
+#!/bin/bash
+</pre></blockquote>
+
+<blockquote><pre>
+$ <strong>chmod 755 foo.sh</strong>
+</pre></blockquote>
+
+<h4>コマンドライン引数の扱い</h4>
+
+<blockquote><pre>
+echo "$0"
+a=$1
+shift
+b=$1
+c="$@"
+</pre></blockquote>
+
+<h4>あるプロセスの標準出力を値として使う</h4>
+
+<blockquote><pre>
+`<em>コマンド</em>`
+  または
+$(<em>コマンド</em>)
+</pre></blockquote>
+
+<h4>よく使う制御構造</h4>
+
+<blockquote><pre>
+if <em>式</em>; then ...; else ...; fi
+</pre></blockquote>
+
+<blockquote><pre>
+if <em>式</em>; then
+    ...
+else
+    ...
+fi
+</pre></blockquote>
+
+<blockquote><pre>
+for <em>変数</em> in <em>式</em>; do
+    ...
+done
+</pre></blockquote>
+
+<div class=q>
+<strong>演習.</strong>
+与えられた引数を1行ずつ表示するシェルスクリプトを書け。
+ただし、その行が <kbd>foo</kbd> であるときのみ、
+<kbd>bar</kbd> と表示すること。
+</div>
+
+<blockquote><pre>
+while read <em>変数</em>; do
+    ...
+done
+</pre></blockquote>
+
+<blockquote><pre>
+case <em>式</em> in
+<em>パターン1</em>)
+    ...
+    ;;
+<em>パターン2</em>)
+    ...
+    ;;
+*)
+    ...
+    ;;
+esac
+</pre></blockquote>
+
+<h3>1.6. xargs を使う</h3>
+
+<blockquote><pre>
+$ <strong>cat files.txt</strong>
+a.txt
+b.txt
+c.txt
+$ <strong>cat files.txt | xargs echo</strong>
+$ <strong>cat files.txt | xargs cat</strong>
+$ <strong>find -type d | xargs ls</strong>
+</pre></blockquote>
+
+<h3>1.7. 実験パイプラインの設計</h3>
+
+<p>
+UNIXプログラムのお約束:
+<ul>
+<li> 出力は、標準出力に。
+<li> ログは、標準エラー出力に。
+</ul>
+
+<ul>
+<li> できるだけ各コマンドが
+<strong>ひとつだけ</strong>のことをするように設計する。
+<li> できるだけ標準入力から入力を受けとり、標準出力に結果を表示する:
+<blockquote><pre>
+$ <strong>cmd1 input.txt | cmd2 | cmd3 &gt; output.txt</strong>
+</pre></blockquote>
+<li> 途中結果を確認したい場合:
+<blockquote><pre>
+$ <strong>cmd1 input.txt</strong>
+</pre></blockquote>
+<li> 途中結果を保存しておき、後で続きをやりたい場合:
+<blockquote><pre>
+$ <strong>cmd1 input.txt &gt; temp.txt</strong>
+$ <strong>cmd2 &lt; temp.txt | cmd3 &gt; output.txt</strong>
+</pre></blockquote>
+<li> 途中結果をモニタしたい場合:
+<blockquote><pre>
+$ <strong>cmd1 input.txt | tee temp.txt | cmd2 | cmd3 &gt; output.txt</strong>
+</pre></blockquote>
+</ul>
+
+<h4>a. フィルタとして設計する場合</h4>
+<blockquote><pre>
+$ <em>コマンド</em> [<em>オプション</em>] &lt; <em>入力ファイル</em> &gt; <em>出力ファイル</em>
+</pre></blockquote>
+
+<h4>b. 1つのファイルを入力する場合</h4>
+<blockquote><pre>
+$ <em>コマンド</em> [<em>オプション</em>] <em>入力ファイル</em>
+</pre></blockquote>
+
+<h4>c. 可変個のファイルを入力する場合 (理想形)</h4>
+<blockquote><pre>
+$ <em>コマンド</em> [<em>オプション</em>] <em>入力ファイル1</em> <em>入力ファイル2</em> ...
+</pre></blockquote>
+ファイル名が与えられない場合は標準入力を使用する。
+<p>
+こうしておくと
+<blockquote><pre>
+$ <strong>find ... | xargs <em>コマンド</em> [<em>オプション</em>]</strong>
+</pre></blockquote>
+のようにできる。
+<p>
+また、実験パラメータの変更はコードをじかに変更するのではなく、
+コマンドラインオプションとして処理すること。
+<h4>例</h4>
+<blockquote><pre>
+$ <strong>exp1 -a1 -p2 -k0 input.txt &gt; output_a1_p2_k0.txt</strong>
+$ <strong>exp1 -a2 -p3 -k5 input.txt &gt; output_a2_p3_k5.txt</strong>
+...
+</pre></blockquote>
+
+<h4>ログに関する注意</h4>
+<p>
+ログは、たとえ人間が読む場合でも、
+なるべく機械的に処理できるようにしておくこと。
+(grep/awk 等でのおおまかな統計が簡単にとれる。)
+<ul>
+<li> ×: <code>print("kokodayo", x, y)</code>
+<li> ○: <code>print(f"DEBUG: data read complete: x={x}, y={y}.")</code>
+</ul>
+
+<h4>長く走らせるスクリプト</h4>
+
+<blockquote><pre>
+#!/bin/sh
+exec &lt;/dev/null
+exec &gt;log
+exec 2&gt;&amp;1
+renice +20 -p $$
+
+echo "*** START `date` ***"
+/usr/bin/time -v <em>実際のコマンド</em>
+echo "*** END `date` ***"
+</pre></blockquote>
+
+<h3>1.8. Pythonスクリプトの定石</h3>
+<p>
+Pythonスクリプトは慣例によりこの行から始める。
+<blockquote><pre>
+#!/usr/bin/env python
+</pre></blockquote>
+<p>
+だいたい以下のようなパターンで書くと、
+上に示した「お約束」に沿ったコマンドになる。
+<blockquote><pre>
+import sys
+import fileinput
+
+def doit(args):
+    for line in fileinput.input(args):
+        print(line)
+    return
+
+def main(argv):
+    import getopt
+    def usage():
+        print('usage: %s [-d] [-o output] [file ...]' % argv[0])
+        return 100
+    try:
+        (opts, args) = getopt.getopt(argv[1:], 'do:')
+    except getopt.GetoptError:
+        return usage()
+    debug = 0
+    output = None
+    for (k, v) in opts:
+        if k == '-d': debug += 1
+        elif k == '-o': output = v
+    return doit(args)
+
+if __name__ == '__main__': sys.exit(main(sys.argv))
+</pre></blockquote>
+
+<ul>
+<li> <code>sys.argv</code> でコマンドライン引数を取得。
+<li> <code>getopt</code> でオプションを取得。
+<li> <code>main()</code> 関数はコマンドラインの解析のみをおこない
+  実際の処理は <code>doit()</code> 関数に正式なパラメータを渡してやらせる。
+  (これにより、他モジュールから利用することが可能)
+</ul>
+
+<blockquote><pre>
+$ <strong>python test.py input.txt</strong>
+  または
+$ <strong>test.py input.txt</strong>
+  または
+$ <strong>cat input.txt | test.py</strong>
+</pre></blockquote>
+
+<div class=q>
+<strong>演習.</strong>
+<ol>
+<li> 上のプログラムを書き換え、
+  変数 <code>debug</code> により <code>doit()</code> 内の
+  なんらかの挙動が変わるようにせよ。
+<li> 引数をとる <code>-p</code> オプションを追加せよ:
+<blockquote><pre>
+$ <strong>test.py -p 4 input.txt</strong>
+</pre></blockquote>
+</ol>
+</div>
+
+
+<h2 id="datamgmt">2. 実験データの管理</h2>
+
+<h3>2.1. ファイル名のつけ方</h3>
+<p>
+基本戦略は、シェルのワイルドカード (<kbd>*</kbd>) で
+ある条件をもったファイルだけを簡単に指定できるようにすることである。
+<ul>
+<li> <strong>名前</strong>は重要である。できるだけ意味がわかる名前にすること。
+  (さもないと、あとでワケわかんなくなる)
+<li> 規則的にする。(日付・条件・用途によって予測可能にする)
+<ul>
+  <li> <code>src_exp1_ver2.csv</code>
+  <li> <code>result-v4-20190803-temp.txt</code>
+  <li> <code>out.3cddd4d137ad4f794a8ccf0763b4d5a6450934b5</code>
+</ul>
+<li> 一定の prefix をつける。
+<ul>
+  <li> ×: <code>jikken</code>, <code>jiken2</code>, ..., <code>kekka3</code>
+  <li> ○: <code>jikken_1</code>, <code>jikken_2</code>, ..., <code>jikken_3</code>
+</ul>
+<li> データの種類・用途によって拡張子を変える。
+  <ul>
+    <li> <code>jikken_2.input</code>
+    <li> <code>jikken_2.output</code>
+    <li> <code>jikken_2.graph</code>
+    <li> <code>jikken_2.graph.svg</code>
+  </ul>
+<li> 数値が入る場合は、桁数を揃える。
+<ul>
+  <li> ×: <code>f1</code>, <code>f2</code>, ..., <code>f443</code>
+  <li> ○: <code>f0001</code>, <code>f0002</code>, ..., <code>f0443</code>
+</ul>
+</ul>
+
+<h3>2.2. ディレクトリ構造</h3>
+<p>
+基本的にUNIXのファイル名は<strong>逐次探索</strong>である。
+したがって、あまり1個のディレクトリに沢山のファイルを置くと遅くなる
+(せいぜい1000個程度)。
+<p>
+それからパス名が長くなりすぎると見にくいし、入力も大変。
+<ol>
+<li> データの種類・用途ごとにまとめる (<code>input/</code>, <code>output/</code>)
+<li> 日付ごとにまとめる (<code>s201909121012/</code>, ...)
+<li> 実験条件ごとにまとめる (<code>data_seg01_p3_q4/</code>, ...)
+<li> 1., 2., 3. の混合 (<code>data_201909121012_seg01_p3_input</code>, ...)
+</ol>
+
+
+<h2 id="bigdata">3. 大量のデータを蓄積・処理する場合のTips</h2>
+<p>
+可能なかぎり stream可能にする (データ形式が重要)。
+<p>
+なるべく高速に parse できる形式にする。
+(しかし自己流バイナリ形式はおすすめしない)
+<p>
+変更頻度が少ないものはディスク上に置いてもよい。
+<p>
+参照頻度が多くても、シーク可能ならディスク上に置けるかもしれない。
+(OSがキャッシュするので)
+
+<h4>高速化のためのよくある手段</h4>
+<ul>
+<li> 計算をサボる。(事前条件の強化)
+<li> 計算をごまかす。(近似値の使用)
+<li> 計算を後回しにする/先にやっておく。(キャッシュ・lookup tableの使用)
+</ul>
+
+<h2 id="serialization">4. データのSerializationについて</h2>
+
+<h3>4.1. 考慮する要素</h3>
+<ul>
+<li> 複雑さ (数値、テキスト、構造体)
+<li> データ量 (オンメモリ, 10GBytes, 1TBytes)
+<li> 変更する頻度 (0回 / 1回以上)
+<li> 参照パターン (シークの要・不要)
+<li> 共有度 (複数のプロセス、タスク、マシン間で?)
+<li> キャッシュ可能性
+<li> 堅牢性 (データの一部が崩れても全体に影響を与えないか?)
+</ul>
+<p>
+<strong>重要:</strong>
+できるだけ既存のツール・ライブラリで処理できるようにする。
+
+<h3>4.2. テキストファイル (自分フォーマット)</h3>
+<p>
+おすすめしない。
+もしやるとしたら、parseが簡単にできるようにすること。
+
+<h4>新山がときどき使っているフォーマット</h4>
+<blockquote><pre>
+# コメント
++キー1 バリュー1
++キー2 バリュー2
+(空行がレコード区切り)
+</pre></blockquote>
+
+<ul>
+<li> 利点: 特定のフィールドが grep で簡単に見れる。データに注釈が入れられる。
+Pythonで簡単に解析可能。エディタで修正が簡単。
+<li> 欠点: 自己流。
+1行 = 1レコードではない。
+</ul>
+
+<blockquote><pre>
+rec = {}
+for line in fp:
+    line = line.strip()
+    if line.startswith('#'): continue
+    if line.startswith('+'):
+        (k,_,v) = line.partition(' ')
+        rec[k] = v
+    elif not line:
+        yield rec
+        rec = {}
+</pre></blockquote>
+
+<h3>4.3. バイナリファイル (自分フォーマット)</h3>
+<p>
+<strong>超</strong>おすすめしない。
+<p>
+簡単なデータだけならいいかも
+(たとえば 32ビット列の羅列ひたすら1G個とか)。
+<p>
+<a href="https://www.percona.com/sites/default/files/hipp%20sqlite%20percona-raleigh-20150212.pdf">「SQLite は <code>fopen()</code> に対抗するために作られた」</a>
+
+
+<h3>4.4. よく知られている形式 (おすすめ)</h3>
+
+<h4>CSV</h4>
+<ul>
+<li> 利点:
+簡単。テキスト。
+Excelで編集できる。
+<li> 欠点:
+微妙に仕様が標準化されていない。
+(とくに <kbd>&quot;</kbd> や <kbd>,</kbd> が入ったセルの場合)
+巨大なデータには向かない。シーク不可。書き換え不可。
+</ul>
+
+<h4>JSON</h4>
+<ul>
+<li> 利点:
+簡単。テキスト。言語非依存。
+ストリーム可。
+<li> 欠点:
+巨大になるとエディタでは見にくい。
+シーク不可。書き換え不可。
+</ul>
+
+<h4>XML</h4>
+<ul>
+<li> 利点:
+複雑な階層構造をもったデータ向け。テキスト。言語非依存。
+<li> 欠点:
+巨大になるとエディタでは見にくい。
+シーク不可。書き換え不可。
+</ul>
+
+<h4>SQLite</h4>
+<ul>
+<li> 利点:
+型が決まっているデータ向け。
+言語非依存。
+4Gぐらいのデータまでなら余裕。
+シーク可。書き換え可。堅牢。
+<li> 欠点:
+あらかじめテーブルの設計が必要。
+ツールを使わないと見れない。
+</ul>
+
+<h4>SQLite + JSON</h4>
+<p>
+複雑な構造 × 膨大な数があるときに使う方法。
+
+<h3>4.5. もっと高度な方法</h3>
+<p>
+ProtocolBuffer, HDF, MongoDB, ...
+<p>
+導入に手間がかかりすぎて、個人でやる実験には向かない。
+
+
+<h2 id="python">5. Python から CSV/JSON/SQLite を使う</h2>
+
+<h3>5.1. CSV</h3>
+<h4>書き込み</h4>
+<blockquote><pre>
+import csv
+with open('output.csv', 'w') as fp:
+    writer = csv.writer(fp)
+    writer.writerow(['a', 'b', 'ccc'])
+</pre></blockquote>
+
+<h4>読み込み</h4>
+<blockquote><pre>
+import csv
+with open('input.csv') as fp:
+    for row in csv.reader(fp):
+        print(row)
+</pre></blockquote>
+
+<h3>5.2. JSON</h3>
+<h4>書き込み</h4>
+<blockquote><pre>
+import json
+with open(output.json') as fp:
+    data = {'a':123, b:['x','y']}
+    fp.write(json.dumps(data))
+</pre></blockquote>
+
+<h4>読み込み</h4>
+<blockquote><pre>
+import json
+with open('input.json') as fp:
+    for line in fp:
+        data = json.loads(line)
+</pre></blockquote>
+
+<h3>5.3. SQLite</h3>
+
+<h4>書き込み</h4>
+<blockquote><pre>
+import sqlite3
+db = sqlite3.connect('data.db')
+cur = db.cursor()
+cur.executescript('''
+CREATE TABLE Student (
+    Id INTEGER PRIMARY KEY,
+    Name TEXT,
+    Score INTEGER);
+''')
+for (name,id,score) in scores:
+    cur.execute('INSERT INTO Student VALUES (?, ?, ?);', name, id, score)
+</pre></blockquote>
+
+<h4>読み込み</h4>
+<blockquote><pre>
+import sqlite3
+db = sqlite3.connect('data.db')
+cur = db.cursor()
+for row in cur.execute('SELECT Name,Id FROM Student;'):
+    (name,id) = row
+</pre></blockquote>
+
+<hr>
+<address>Yusuke Shinyama</address>
