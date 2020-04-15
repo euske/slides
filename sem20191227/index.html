@@ -53,6 +53,7 @@ function goofline() {
 <li> <a href="#learning">5. 手法: 学習と予測</a>
 <li> <a href="#evaluation">6. 実験と評価方法</a>
 <li> <a href="#discussion">7. Discussion</a>
+<li> <a href="#contribution">8. 本論文の貢献</a>
 </ul>
 
 <h2 id="progress">0. 夏ゼミ時との違い</h2>
@@ -86,8 +87,11 @@ function goofline() {
   <ul>
     <li> プログラマは名前の意味に頼っている。
       <a href="https://ieeexplore.ieee.org/document/1631100">[Lawrie, 06]</a>
-    <li> 名前が悪いとコード品質が下がる。
+    <li> 名前が悪いとプログラム理解の妨げになり、結果としてコード品質が下がる。
       <a href="https://ieeexplore.ieee.org/document/7961504">[Avidan, 17]</a>
+    <li> 「このクラス・メソッドはどこで使われているのか?」は、
+      プログラマが尋く頻度がもっとも高い質問。
+      <a href="https://ieeexplore.ieee.org/document/4497212">[Sillito, 08]</a>
     <li> GitHub Issues で "<code>wrong name</code>" 等を検索すると、
       <a href="https://github.com/search?q=wrong+name&amp;type=Issues">100万以上の結果が返される</a>。
     <li> 名前の重要性は、
@@ -181,6 +185,7 @@ void printInfo(Stream <mark>strm</mark>, String info) {
     <li> 汎用のシステムを目指すのではなく、
       <u>プロジェクトごとに</u>調整可能なシステムを作るべき。<br>
       なぜなら、識別子に使われている単語の意味はプロジェクトによって異なるから:
+      (One size doesn't fit all.)
       <ul>
 	<li> GUIアプリにおける "<code>view</code>"
 	<li> SQLエンジンにおける "<code>view</code>"
@@ -984,6 +989,14 @@ src/org/tukaani/xz/lz/Hash234.java
 <li> データパス全体を比較せず、エッジを比較するだけの判定では不十分である。
 <li> Naive Bayes classifier の性能が不十分である。
 </ol>
+
+<h2 id="contribution">8. 本論文の貢献</h2>
+<ul>
+<li> 一貫性を検査するための一般的な枠組みを提案した。
+<li> 変数の使い方を表現するためのデータパスという形式を提案した。
+<li> 上の手法を使って、変数名の一貫性を検査・修正することができた。
+</ul>
+
 
 <h2>よい論文とは?</h2>
 <ul>
