@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<html>
+<head>
+<title>大学教員のための Microsoft Teams 入門</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 0.5em; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+pre { border: 1px solid black; padding: 0.3em; }
+u { font-weight: bold; }
+.h { text-align: right; }
+.figure { border: 1px solid black; text-align: center; padding: 0.5em; margin: 0.5em; }
+--></style>
+</head>
+<body>
+
+<h1>大学教員のための Microsoft Teams 入門</h1>
+
+<div class=h>
+2020/04/15<br>
+新山 祐介<br>
+東京工業大学 超スマート社会卓越教育院<br>
+</div>
+
+<p>
+<strong>概要:</strong>
+この文書では、大学教員が
+Microsoft Teams を使うための手順を説明する。
+最初に Microsoft Teams のおもな用途を紹介し、
+つぎに各場面ごとの利用方法を説明する。
+
+<ul>
+<li> <a href="#why">1. Microsoft Teams で何ができるのか?</a>
+<li> <a href="#setup">2. 使用にあたっての準備</a>
+<li> <a href="#channel">3. 利用方法: グループ連絡と会議</a>
+<li> <a href="#editing">4. 利用方法: 文書の共同作成</a>
+<li> <a href="#individuals">5. 利用方法: 個人間の連絡・打ち合わせ</a>
+<li> <a href="#planner">6. 応用編: 進捗管理アプリ (Planner) の利用</a>
+<li> <a href="#groupworks">7. 応用編: 学生にグループ課題を与える</a>
+</ul>
+
+<h2 id="why">1. Microsoft Teams で何ができるのか?</h2>
+<p>
+Microsoft Teams (以下 Teams) は、
+以下のような用途に適している:
+<ol type=a>
+<li> グループ連絡と会議
+  <ul>
+    <li> 事前資料の作成、回覧
+    <li> ビデオ会議
+    <li> 議事録の作成、回覧、コメント
+  </ul>
+<li> Word, Excel文書の共同作成
+<li> 個人間の連絡・打ち合わせ
+</ol>
+<p>
+Teams は、以下のツールにとって代わるものと考えればよい:
+<ul>
+<li> Slack/電子メール (連絡、書類の送付)
+<li> Zoom/Skype (ビデオ会議)
+<li> DropBox (ファイル共有)
+<li> Google Docs (文書の共同編集)
+</ul>
+<p>
+従来のツールと比較すると、Teams には以下のような利点がある:
+<ul>
+<li> ファイル添付・URLをやりとりする煩雑さがない。
+  (チャットの中に添付したファイルをじかに変更できる)
+<li> 複数のプロジェクトを把握しやすい。
+  (異なる話題が分けて表示され、時系列を追うことができる)
+<li> ひとつのアプリ内で完結できる。
+  (複数のアプリを使いわける必要がない)
+<li> リアルタイム性がある。
+</ul>
+
+
+<h2 id="setup">2. 使用にあたっての準備</h2>
+<p>
+Teams の利用には、Office 365 アカウントの作成が必要である。
+(注意: これは個人で利用している "Microsoft アカウント" とは別物)
+<p>
+アカウント作成後、Webブラウザから
+<div align=center>
+<a href="https://teams.microsoft.com/">https://teams.microsoft.com/</a>
+</div>
+にアクセスすれば使用可能となる。
+(注意: macOS Safari ではうまく動かないので、別のブラウザを使うか、
+デスクトップ版をインストールすること)
+<div class=figure>
+<a href="images/web1.png"><img src="images/web1.png" width="489" height="368"></a>
+</div>
+<p>
+ほとんどの機能は Webブラウザからも利用可能だが、
+独立したアプリであるデスクトップ版のほうが便利であるため、
+デスクトップ版のインストールを推奨する。
+画面左下のアイコンをクリックすると、ダウンロードを開始する。
+
+<h3 id="settings">設定変更</h3>
+<p>
+設定を変更する場合は、右上のアイコンをクリックする。
+<div class=figure>
+<a href="images/settings.png"><img src="images/settings.png" width="506" height="381"></a>
+</div>
+
+<h2 id="channel">3. 利用方法: グループ連絡と会議</h2>
+<p>
+Teams の基本形態は <u>チャネル</u> (channel、チャンネル) である。
+まず画面左のアイコンから「チーム」を選び、
+つぎに各チームに所属する「チャネル」を選択する。
+<div class=figure>
+<a href="images/channel.png"><img src="images/channel.png" width="506" height="381"></a>
+</div>
+チャネルとは、ある用途・目的ごとのチャットであり、メーリングリストのようなものである。
+たとえば会議の参加メンバーは、ひとつのチャネルを構成すると考えればよい。
+「一般 (General)」チャネルは、そのチームのメンバー全員が所属するチャネルである。
+チャネルを選んだら、チャットにメッセージを入力する。
+<p>
+注意: メッセージは通常 1行しか入力できないので、
+長い文章を入力する場合は以下のボタンを押す:
+<div class=figure>
+<a href="images/textbox.png"><img src="images/textbox.png" width="511" height="352"></a>
+</div>
+<p>
+メッセージにはファイルを添付することもできる。
+この場合、そのファイルに対してさらにコメントを追加したり、
+別のメンバーにファイルを編集させることができる。
+(<a href="#editing">後述</a>)
+<p>
+また、各チャネルはビデオ会議の会場でもある
+(この意味では、テレビのチャネルに似ている)。
+「ビデオ会議開始」ボタンを押すと、そのチャネルでビデオ会議をすぐに開始できる。
+チャネルには会議中である旨が表示され、そのチャネルのメンバーは
+「参加」ボタンを押すと会議に参加できる。
+<div class=figure>
+<a href="images/meeting1.png"><img src="images/meeting1.png" width="506" height="159"></a>
+</div>
+<p>
+なお、ビデオ会議中もチャットは可能であり、
+その内容はチャネルに投稿される。
+
+
+<h2 id="editing">4. 利用方法: 文書の共同作成</h2>
+<p>
+チャネル上のメッセージに添付したファイルは、
+基本的にそのチャネルのメンバーが誰でも変更できるようになっている。
+添付されたファイルをクリックすると、Teams内で編集が可能となる。
+<div class=figure>
+<a href="images/editing.png"><img src="images/editing.png" width="506" height="375"></a>
+</div>
+<p>
+チャネルに投稿されたファイルの一覧は、
+画面上部の「ファイル」タブをクリックしても表示される。
+<div class=figure>
+<a href="images/files.png"><img src="images/files.png" width="506" height="375"></a>
+</div>
+<p>
+内部的には、投稿されたファイルは、
+チャネルごとに別々のフォルダに格納されている。
+たとえば「一般 (General)」チャネルに投稿されたファイルは、
+"General" フォルダに格納されているといった具合である。
+この内部構造は、SharePoint を使ってフォルダに
+直にアクセスしたときに目にすることができる。
+(SharePoint についてはここでは触れない)
+
+
+<h2 id="individuals">5. 利用方法: 個人間の連絡・打ち合わせ</h2>
+<p>
+Teams では個人間の連絡も同様に行うことができる。
+画面左の「チャット」アイコンをクリックし、
+連絡したい相手 (複数可) を指定する。
+<div class=figure>
+<a href="images/chat3.png"><img src="images/chat3.png" width="506" height="375"></a>
+</div>
+<p>
+個人間でのチャットは、一時的なチャネルと考えればよい。
+通常のチャネルと同様、ビデオ会議やファイルの共有も可能である。
+
+
+<h2 id="planner">6. 応用編: 進捗管理アプリ (Planner) の利用</h2>
+<p>
+各チャネルには、チャット以外の機能を追加することもできる
+(その具体的な方法はここでは割愛する)。
+代表的な例が進捗管理アプリ (Planner) で、
+やることの一覧を「カード (PostItのようなもの)」として貼りつけ、
+優先順位をつけて管理することができる。
+<div class=figure>
+<a href="images/planner.png"><img src="images/planner.png" width="506" height="381"></a>
+</div>
+各カードには内容、担当者、現在までの進捗等を書きこむことができ、
+ファイルも添付できる。
+
+
+<h2 id="groupworks">7. 応用編: 学生にグループ課題を与える</h2>
+<p>
+学生に Teams を使ってグループ課題を与えるときの手順は以下のようになる:
+<ol>
+  <li> 学生に Office 365 アカウントを与える。
+  <li> クラス全員が所属するチームをひとつ作成する。
+  <li> 各グループごとにチャネルを作成し、グループの学生を所属させる。
+</ol>
+<p>
+(本当は Teams にはクラス課題用の機能もあるのだが、著者の学習不足のため割愛)
+
+
+<hr>
+<address>Yusuke Shinyama</address>
