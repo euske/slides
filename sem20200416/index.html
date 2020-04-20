@@ -17,6 +17,8 @@ em { color: blue; }
 .q { border: 2px solid black; padding: 1em; margin: 1em; }
 .figure { border: 1px solid black; text-align: center; padding: 0.5em; margin: 0.5em; }
 .comment { color: green; }
+.file { outline: 1px solid black; margin: 1em; padding: 4px; }
+.file > pre { margin: 0; outline: 2px solid black; padding: 1em; }
 .exp { border: 1px solid black; padding: 1em; margin: 1em; }
 pre { border: 1px solid black; padding: 0.3em; }
 --></style>
@@ -48,14 +50,35 @@ function doit() {
 </div>
 
 <ul>
+<li> <a href="#selfintro">自我介紹</a>
 <li> <a href="#warmup">0. ウォームアップ問題</a>
 <li> <a href="#shellscript">1. UNIXスクリプト処理の基本</a>
 <li> <a href="#datamgmt">2. 実験データの管理</a>
 <li> <a href="#bigdata">3. 大量のデータを蓄積・処理する場合のTips</a>
 <li> <a href="#serialization">4. データのSerializationについて</a>
 <li> <a href="#python">5. Python から CSV/JSON/SQLite を使う</a>
+<li> <a href="#svg">6. (おまけ) SVG形式とは</a>
 </ul>
 
+
+<h2 id="selfintro">自我介紹</h2>
+<ul>
+  <li> 名前: 新山 祐介 (しんやま ゆうすけ)
+  <li> 出身: 長野県
+  <li> 略歴:
+    <ul>
+      <li> 1994年: 東工大 第5類入学。
+      <li> 1996年: 情報工学実験第三で片山研助手 (当時) の方のお世話になる。
+      <li> 1997年: 田中・徳永研究室に所属。テーマ: 自然言語を理解する仮想ロボット。
+      <li> 2001年: <a href="https://cs.nyu.edu/">NYU</a>に留学。(9.11テロの2週間前)<br>
+        テーマ: 新聞記事からの事実関係の教示なし学習。
+      <li> 2007年: PhD取得。帰国して視覚障害者の支援機器の開発に従事。<br>
+        (自然言語処理に嫌気が差した)
+      <li> 2017年: 東工大に社会人博士として再入学。<br>
+        テーマ: 大規模ソースコードの分析。
+      <li> 2020年: 現在に至る。
+    </ul>
+</ul>
 
 <h2 id="warmup">0. ウォームアップ問題</h2>
 <p>
@@ -243,13 +266,6 @@ for <em>変数</em> in <em>式</em>; do
 done
 </pre></blockquote>
 
-<div class=q>
-<strong>演習.</strong>
-与えられた引数を1行ずつ表示するシェルスクリプトを書け。
-ただし、その行が <kbd>foo</kbd> であるときのみ、
-<kbd>bar</kbd> と表示すること。
-</div>
-
 <blockquote><pre>
 while read <em>変数</em>; do
     ...
@@ -281,6 +297,13 @@ $ <strong>cat files.txt | xargs echo</strong>
 $ <strong>cat files.txt | xargs cat</strong>
 $ <strong>find -type d | xargs ls</strong>
 </pre></blockquote>
+
+<div class=q>
+<strong>ウォームアップ演習.</strong>
+与えられた引数を1行ずつ表示するシェルスクリプトを書け。
+ただし、その行が <kbd>foo</kbd> であるときのみ、
+<kbd>bar</kbd> と表示すること。
+</div>
 
 <h3>1.7. 実験パイプラインの設計</h3>
 
@@ -678,6 +701,231 @@ cur = db.cursor()
 for row in cur.execute('SELECT Name,Id FROM Student;'):
     (name,id) = row
 </pre></blockquote>
+
+
+<h2 id="svg">6. (おまけ) SVG形式とは</h2>
+<p>
+SVG (Scalable Vector Graphics) 形式とは、テキスト形式の一種で、
+図形を文字によって記述する。
+<ul>
+  <li> HTML内に埋め込めるし、画像ファイルとしても使用可能。
+  <li> ベクタ画像なので拡大してもギザギザしない。
+  <li> ただのXMLなので、プログラムで簡単に生成可能。
+</ul>
+<div class=file>
+first.svg
+<pre>
+&lt;svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='300' height='200'&gt;
+&lt;rect x='10' y='10' width='200' height='100' stroke='#000000' fill='#ff0000' /&gt;
+&lt;circle cx='200' cy='100' r='50' stroke='#000000' fill='#0000ff' /&gt;
+&lt;/svg&gt;
+</pre></div>
+<p>
+作成したファイル <code>first.svg</code> は、ブラウザで開くことができる。
+すると、以下のような図が表示される:
+<div class=figure>
+<svg xmlns='http://www.w3.org/2000/svg' version='1.1' width='300' height='200'>
+<rect x='0' y='0' width='300' height='200' fill='#eeeeee' />
+<rect x='10' y='10' width='200' height='100' stroke='#000000' fill='#ff0000' />
+<circle cx='200' cy='100' r='50' stroke='#000000' fill='#0000ff' />
+</svg>
+</div>
+<p>
+上の SVG は、以下のような情報を表している:
+<ul>
+<li> 図形全体の大きさは幅 (width) 300 × 高さ (height) 200。
+<li> 座標 (10, 10) の位置に、幅 200 × 高さ 100 の矩形を描画する。
+  線の色は <code>#000000</code> (黒) で、内部の塗りは <code style="color:#ff0000;">#ff0000</code> (赤)。
+<li> 中心座標 (200, 100) の位置に、半径 50 の円を描画する。
+  線の色は <code>#000000</code> (黒) で、内部の塗りは <code style="color:#0000ff;">#0000ff</code> (青)。
+</ul>
+<p>
+単位はすべてピクセルである。また、色は <code>#<span style="color:#ff0000;">RR</span><span style="color:#00ff00;">GG</span><span style="color:#0000ff;">BB</span></code> のように
+赤 (R)、緑 (G)、青 (B) の各原色が
+16進数 <code>00</code> (0) 〜 <code>ff</code> (255) で表されている。
+つまり、黒は <code>#000000</code> であり、白は <code>#ffffff</code> となる。
+座標のような数値は <code>'〜'</code> または <code>"〜"</code> で囲む。
+
+<div class=q>
+<strong>演習.</strong>
+<ol type=a>
+<li> 上の <code>first.svg</code> を実際に入力し画面に描画せよ。
+<li> ファイルを変更し、長方形を黄色で、円をグレーで表示するようにせよ。
+  色の指定 (<code>#…</code>) にはどのような値を指定すればよいか?
+<li> 各座標を変更し、矩形と円の位置を入れ換えて表示するようにせよ。
+</ol>
+</div>
+
+<h3>6.1. SVG形式の基本構造</h3>
+<p>
+SVG の基本構造は以下のようになっている。
+まず <code>&lt;svg&gt;</code> 〜 <code>&lt;/svg&gt;</code> で
+囲まれる文字列があり、その中に描画コマンドが並んでいる。
+<code>&lt;svg&gt;</code> のような文字列を <u>タグ</u> (tag) という。
+最初の <code>&lt;svg&gt;</code> タグでは、図形全体の幅と高さをピクセル単位で指定する。
+「<code>xmlns='http://www.w3.org/2000/svg' version='1.1'</code>」の部分は固定である。
+<blockquote><pre>
+&lt;svg <span class=fixed>xmlns='http://www.w3.org/2000/svg' version='1.1'</span> width='<mark>幅</mark>' height='<mark>高さ</mark>'&gt;
+...描画コマンド...
+&lt;/svg&gt;
+</pre></blockquote>
+
+<h4>SVGの描画コマンド</h4>
+<dl>
+
+<dt> 矩形 (<code>rect</code>)
+<dd> <pre>
+&lt;rect x='<mark>10</mark>' y='<mark>10</mark>' width='<mark>100</mark>' height='<mark>80</mark>' fill='<mark>none</mark>' stroke='<mark>#000000</mark>' stroke-width='<mark>2</mark>' /&gt;
+&lt;rect x='<mark>80</mark>' y='<mark>60</mark>' width='<mark>50</mark>' height='<mark>40</mark>' fill='<mark>#ffcc00</mark>' stroke='<mark>#0000ff</mark>' stroke-width='<mark>4</mark>' /&gt;
+</pre>
+<div class=sample>
+  <svg xmlns='http://www.w3.org/2000/svg'
+       xmlns:xlink='http://www.w3.org/1999/xlink'
+       version='1.1' width='300' height='110'>
+    <rect x='10' y='10' width='100' height='80' fill='none' stroke='#000000' stroke-width='2' />
+    <rect x='80' y='60' width='50' height='40' fill='#ffcc00' stroke='#0000ff' stroke-width='4' />
+  </svg>
+</div>
+<ul>
+<li> <strong>[必須]</strong> <code>x</code>、<code>y</code> に左上の座標を指定する。
+<li> <strong>[必須]</strong> <code>width</code>、<code>height</code> に幅と高さを指定する。
+<li> <code>fill</code> には塗る色を指定する。(塗らない場合は <code>none</code>)
+<li> <code>stroke</code> には線の色を指定する。(線がない場合は <code>none</code>)
+<li> <code>stroke-width</code> には線の幅を指定する。(省略した場合は 1)
+<li> <code>&lt;rect ...</code> の最後に必ず <code>/&gt;</code> をつけること。
+<li> 書かれた順に描画される (つまり、先に描かれたものが奥になる)。
+</ul>
+
+<dt> 直線 (<code>line</code>)
+<dd> <pre>
+&lt;line x1='<mark>10</mark>' y1='<mark>10</mark>' x2='<mark>100</mark>' y2='<mark>80</mark>' stroke='<mark>#000000</mark>' stroke-width='<mark>2</mark>' /&gt;
+</pre>
+<div class=sample>
+  <svg xmlns='http://www.w3.org/2000/svg'
+       xmlns:xlink='http://www.w3.org/1999/xlink'
+       version='1.1' width='300' height='100'>
+    <line x1='10' y1='10' x2='100' y2='80' stroke='#000000' stroke-width='2' />
+  </svg>
+</div>
+<ul>
+<li> <strong>[必須]</strong> <code>x1</code>、<code>y1</code> に始点の座標を指定する。
+<li> <strong>[必須]</strong> <code>x2</code>、<code>y2</code> に終点の座標を指定する。
+<li> <code>stroke</code>, <code>stroke-width</code> は同じ。
+</ul>
+
+<dt> 多角形 (<code>polygon</code>)
+<dd> <pre>
+&lt;polygon points='<mark>10,90 50,10 90,90</mark>' fill='<mark>#00ff00</mark>' stroke='<mark>#000000</mark>' stroke-width='<mark>2</mark>' /&gt;
+</pre>
+<div class=sample>
+  <svg xmlns='http://www.w3.org/2000/svg'
+       xmlns:xlink='http://www.w3.org/1999/xlink'
+       version='1.1' width='300' height='100'>
+    <polygon points='10,90 50,10 90,90' fill='#00ff00' stroke='#000000' stroke-width='2' />
+  </svg>
+</div>
+<ul>
+<li> <strong>[必須]</strong> <code>points</code> に点の座標列を指定する。<br>
+座標列は、<code>x,y x,y ...</code> のように 2個ずつ区切って記述する。
+(カンマなしで <code>x y x y ...</code> と書いてもよい)
+<li> <code>fill</code>、<code>stroke</code>、<code>stroke-width</code> は同じ。
+</ul>
+
+<dt> 円と楕円 (<code>circle</code>, <code>ellipse</code>)
+<dd> <pre>
+&lt;circle cx='<mark>50</mark>' cy='<mark>50</mark>' r='<mark>40</mark>' fill='<mark>none</mark>' stroke='<mark>#000000</mark>' stroke-width='<mark>2</mark>' /&gt;
+&lt;ellipse cx='<mark>200</mark>' cy='<mark>50</mark>' rx='<mark>80</mark>' ry='<mark>40</mark>' fill='<mark>#ff00ff</mark>' stroke='<mark>#000000</mark>' stroke-width='<mark>2</mark>' /&gt;
+</pre>
+<div class=sample>
+  <svg xmlns='http://www.w3.org/2000/svg'
+       xmlns:xlink='http://www.w3.org/1999/xlink'
+       version='1.1' width='400' height='100'>
+    <circle cx='50' cy='50' r='40' fill='none' stroke='#000000' stroke-width='2' />
+    <ellipse cx='200' cy='50' rx='80' ry='40' fill='#ff00ff' stroke='#000000' stroke-width='2' />
+  </svg>
+</div>
+<ul>
+<li> <strong>[必須]</strong> <code>cx</code>、<code>cy</code> に中心座標を指定する。
+<li> <strong>[必須]</strong> <code>r</code> (円の場合) または <code>rx</code>、<code>ry</code> (楕円の場合) に半径を指定する。
+<li> <code>fill</code>、<code>stroke</code>、<code>stroke-width</code> は同じ。
+</ul>
+
+<dt> 文字 (<code>text</code>)
+<dd> <pre>
+&lt;rect x='10' y='10' width='200' height='80' fill='none' stroke='#000000' /&gt;
+&lt;text x='<mark>10</mark>' y='<mark>40</mark>' text-anchor='<mark>start</mark>'&gt;<mark>左寄せ</mark>&lt;/text&gt;
+&lt;text x='<mark>110</mark>' y='<mark>60</mark>' fill='<mark>red</mark>' text-anchor='<mark>middle</mark>'&gt;<mark>中央寄せ</mark>&lt;/text&gt;
+&lt;text x='<mark>210</mark>' y='<mark>80</mark>' fill='<mark>white</mark>' stroke='<mark>#000000</mark>' text-anchor='<mark>end</mark>'&gt;<mark>右寄せ</mark>&lt;/text&gt;
+</pre>
+<blockquote>
+  <svg xmlns='http://www.w3.org/2000/svg'
+       xmlns:xlink='http://www.w3.org/1999/xlink'
+       version='1.1' width='300' height='100'>
+    <rect x='10' y='10' width='200' height='80' fill='none' stroke='#000000' />
+    <text x='10' y='40' text-anchor='start'>左寄せ</text>
+    <text x='110' y='60' fill='red' text-anchor='middle'>中央寄せ</text>
+    <text x='210' y='80' fill='white' stroke='#000000' text-anchor='end'>右寄せ</text>
+  </svg>
+</blockquote>
+<ul>
+<li> <strong>[必須]</strong> <code>x</code>、<code>y</code> に起点の座標を指定する。
+<li> <code>text-anchor</code> に起点の方法
+  (<code>start</code>、<code>middle</code>、<code>end</code> のいずれか) を指定する。<br>
+  注意: <code>left</code>、<code>center</code>、<code>right</code> ではない。
+<li> <code>&lt;text&gt;</code>タグはやや特殊で、
+  表示したい文字列を <code>&lt;text&gt;</code> 〜 <code>&lt;/text&gt;</code> で囲む。
+  なお、複数行にわたる文字は一度に書けない。
+<li> 文字の色は <code>fill</code> で指定する。
+<li> <code>stroke</code> は文字の縁取り色として使われるので、
+  通常は <code>none</code> にしておく。
+</ul>
+
+</dl>
+
+<h4>グループ化</h4>
+<p>
+すべての描画コマンドにいちいち <code>stroke</code> や <code>fill</code> を
+書くのは面倒くさいので、このような場合は <code>&lt;g&gt;</code> タグによるグループ化を使う。
+<code>&lt;g&gt;</code> 〜 <code>&lt;/g&gt;</code> で囲んだ部分には、
+同じ色・線幅が適用される。
+<blockquote><pre>
+&lt;g fill='<mark>none</mark>' stroke='<mark>#0000ff</mark>' stroke-width='<mark>2</mark>'&gt;
+  &lt;rect x='10' y='10' width='50' height='30' /&gt;
+  &lt;line x1='35' y1='25' x2='100' y2='50' /&gt;
+  &lt;circle cx='100' cy='50' r='30' /&gt;
+&lt;/g&gt;
+</pre></blockquote>
+<div class=sample>
+  <svg xmlns='http://www.w3.org/2000/svg'
+       xmlns:xlink='http://www.w3.org/1999/xlink'
+       version='1.1' width='200' height='100'>
+    <g fill='none' stroke='#0000ff' stroke-width='2'>
+      <rect x='10' y='10' width='50' height='30' />
+      <line x1='35' y1='25' x2='100' y2='50' />
+      <circle cx='100' cy='50' r='30' />
+    </g>
+  </svg>
+</div>
+
+<h3>6.2. 応用例</h3>
+<ul>
+<li> <a href="http://graphviz.org/">Graphviz</a> 出力を SVG で。
+<blockquote><pre>
+$ <strong>cat foo.gv</strong>
+digraph G {
+  Nfoo [label="foo"];
+  Nbar [label="bar"];
+  Nbaz [label="baz"];
+  Nfoo -&gt; Nbar;
+  Nbar -&gt; Nbaz;
+  Nfoo -&gt; Nbaz;
+}
+$ <strong>dot -Tsvg foo.gv &gt; foo.svg</strong>
+</pre></blockquote>
+<li> 新山は (matplotlibが使いづらいので)
+<a href="https://github.com/euske/python3-toys/blob/master/svg.py">自前ライブラリ</a>で
+実験結果をグラフ化している。
+</ul>
 
 <hr>
 <address>Yusuke Shinyama</address>
