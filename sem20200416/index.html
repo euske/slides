@@ -389,7 +389,7 @@ def doit(args):
 def main(argv):
     import getopt
     def usage():
-        print('usage: %s [-d] [-o output] [file ...]' % argv[0])
+        print(f'usage: {argv[0]} [-d] [-o output] [file ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'do:')
@@ -407,7 +407,8 @@ if __name__ == '__main__': sys.exit(main(sys.argv))
 
 <ul>
 <li> <code>sys.argv</code> でコマンドライン引数を取得。
-<li> <code>getopt</code> でオプションを取得。
+<li> <code>getopt.getopt</code> でオプションを取得。
+<li> コマンドラインが解析できない場合は <code>usage()</code> でヘルプを表示。
 <li> <code>main()</code> 関数はコマンドラインの解析のみをおこない
   実際の処理は <code>doit()</code> 関数に正式なパラメータを渡してやらせる。
   (これにより、他モジュールから利用することが可能)
@@ -416,9 +417,11 @@ if __name__ == '__main__': sys.exit(main(sys.argv))
 <blockquote><pre>
 $ <strong>python test.py input.txt</strong>
   または
-$ <strong>test.py input.txt</strong>
+$ <strong>./test.py input.txt</strong>
   または
 $ <strong>cat input.txt | test.py</strong>
+  または
+$ <strong>cat files.txt | xargs test.py</strong>
 </pre></blockquote>
 
 <div class=q>
@@ -436,6 +439,11 @@ $ <strong>test.py -p 4 input.txt</strong>
 
 
 <h2 id="datamgmt">2. 実験データの管理</h2>
+<p>
+たいていの研究では、複数の対象を異なる条件で実験する。
+このような実験条件・実験対象はよく記録し忘れるため、
+実験プロセス全体をシェルスクリプトにし、さらにそれを git で管理するのがおすすめ。
+(スクリプトとその履歴が実験ノートになる)
 
 <h3>2.1. ファイル名のつけ方</h3>
 <p>
@@ -485,16 +493,15 @@ $ <strong>test.py -p 4 input.txt</strong>
 
 
 <h2 id="bigdata">3. 大量のデータを蓄積・処理する場合のTips</h2>
-<p>
-可能なかぎり stream可能にする (データ形式が重要)。
-<p>
-なるべく高速に parse できる形式にする。
+<ol type=a>
+<li> 可能なかぎりストリーム処理を可能にする (データ形式が重要)。
+  たとえば「1行に1項目」
+<li> なるべく高速に parse できる形式にする。
 (しかし自己流バイナリ形式はおすすめしない)
-<p>
-変更頻度が少ないものはディスク上に置いてもよい。
-<p>
-参照頻度が多くても、シーク可能ならディスク上に置けるかもしれない。
-(OSがキャッシュするので)
+<li> 変更頻度が少ないものはディスク上に置いてもよい。
+<li> 参照頻度が多くても、シーク可能なら (OSが自動的にメモリ上にキャッシュするので)
+ディスク上に置けるかもしれない。
+</ol>
 
 <h4>高速化のためのよくある手段</h4>
 <ul>
@@ -504,6 +511,10 @@ $ <strong>test.py -p 4 input.txt</strong>
 </ul>
 
 <h2 id="serialization">4. データのSerializationについて</h2>
+<p>
+実験結果は、たいていの場合あとで解析可能な形式で記録しておく必要がある。
+実験に時間がかかる場合・実験が複数のステージに分かれている場合などは、
+その中間的な状態を記録しておく必要がある。
 
 <h3>4.1. 考慮する要素</h3>
 <ul>
@@ -654,6 +665,10 @@ with open('input.json') as fp:
 </pre></blockquote>
 
 <h3>5.3. SQLite</h3>
+<p>
+C から SQLite を使う場合は
+<a href="https://www.sqlite.org/cintro.html">SQLite C/C++ Interface</a>
+を参照。
 
 <h4>書き込み</h4>
 <blockquote><pre>
