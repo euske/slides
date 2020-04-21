@@ -50,7 +50,6 @@ function doit() {
 </div>
 
 <ul>
-<li> <a href="#selfintro">自我介紹</a>
 <li> <a href="#warmup">0. ウォームアップ問題</a>
 <li> <a href="#shellscript">1. UNIXスクリプト処理の基本</a>
 <li> <a href="#datamgmt">2. 実験データの管理</a>
@@ -60,25 +59,6 @@ function doit() {
 <li> <a href="#svg">6. (おまけ) SVG形式とは</a>
 </ul>
 
-
-<h2 id="selfintro">自我介紹</h2>
-<ul>
-  <li> 名前: 新山 祐介 (しんやま ゆうすけ)
-  <li> 出身: 長野県
-  <li> 略歴:
-    <ul>
-      <li> 1994年: 東工大 第5類入学。
-      <li> 1996年: 情報工学実験第三で片山研助手 (当時) の方のお世話になる。
-      <li> 1997年: 田中・徳永研究室に所属。テーマ: 自然言語を理解する仮想ロボット。
-      <li> 2001年: <a href="https://cs.nyu.edu/">NYU</a>に留学。(9.11テロの2週間前)<br>
-        テーマ: 新聞記事からの事実関係の教示なし学習。
-      <li> 2007年: PhD取得。帰国して視覚障害者の支援機器の開発に従事。<br>
-        (自然言語処理に嫌気が差した)
-      <li> 2017年: 東工大に社会人博士として再入学。<br>
-        テーマ: 大規模ソースコードの分析。
-      <li> 2020年: 現在に至る。
-    </ul>
-</ul>
 
 <h2 id="warmup">0. ウォームアップ問題</h2>
 <p>
@@ -935,10 +915,11 @@ digraph G {
   Nbar -&gt; Nbaz;
   Nfoo -&gt; Nbaz;
 }
-$ <strong>dot -Tsvg foo.gv &gt; foo.svg</strong>
+$ <strong>dot -Tsvg foo.gv &gt; foo.svg</strong>  (GV → SVGに変換)
+$ <strong>rsvg-convert -f pdf -o foo.pdf foo.svg</strong>  (SVG → PDFに変換)
 </pre></blockquote>
 <li> 新山は (matplotlibが使いづらいので)
-<a href="https://github.com/euske/python3-toys/blob/master/svg.py">自前ライブラリ</a>で
+<a href="https://github.com/euske/python3-toys/blob/master/svg.py">自前SVG生成器</a>で
 実験結果をグラフ化している。
 </ul>
 
