@@ -654,7 +654,7 @@ with open('input.csv') as fp:
 <h4>書き込み</h4>
 <blockquote><pre>
 import json
-with open(output.json') as fp:
+with open('output.json', 'w') as fp:
     data = {'a':123, b:['x','y']}
     fp.write(json.dumps(data))
 </pre></blockquote>
@@ -685,7 +685,7 @@ CREATE TABLE Student (
     Score INTEGER);
 ''')
 for (name,id,score) in scores:
-    cur.execute('INSERT INTO Student VALUES (?, ?, ?);', name, id, score)
+    cur.execute('INSERT INTO Student VALUES (?, ?, ?);', (id, name, score))
 </pre></blockquote>
 
 <h4>読み込み</h4>
