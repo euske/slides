@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<html>
+<head>
+<title>権藤研 講習会資料 2020/04/23 データ処理の基礎</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 0.5em; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+code { font-weight: bold; color: purple; }
+em { color: blue; }
+.h { text-align: right; }
+.q { border: 2px solid black; padding: 1em; margin: 1em; }
+.figure { border: 1px solid black; text-align: center; padding: 0.5em; margin: 0.5em; }
+.comment { color: green; }
+.file { outline: 1px solid black; margin: 1em; padding: 4px; }
+.file > pre { margin: 0; outline: 2px solid black; padding: 1em; }
+.exp { border: 1px solid black; padding: 1em; margin: 1em; }
+pre { border: 1px solid black; padding: 0.3em; }
+--></style>
+<script>
+function doit() {
+    if (document.baseURI.startsWith("file:")) {
+        for (e of document.getElementsByClassName("offline")) {
+            if (e.tagName == "IMG") {
+                let i = e.src.lastIndexOf("/");
+                let src = "./"+e.src.substr(i+1);
+                console.log("offline: "+e.src+" -> "+src);
+                e.src = src;
+            }
+        }
+    }
+}
+</script>
+</head>
+<body>
+
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>データ処理の基礎</h1>
+
+<div class=h>
+権藤研 全体ゼミ 2020/04/23<br>
+新山
+</div>
+
+<ul>
+<li> <a href="#identity">1. 類似度の判定</a>
+<ul>
+<li> <a href="#sets">1.1. 集合の場合 (Jaccard Index, F-measure)</a>
+<li> <a href="#vector">1.2. ベクトルの場合 (Vector Space Model)</a>
+<li> <a href="#sequence">1.3. 文字列の場合 (Levenshtein Distance)</a>
+<li> <a href="#experiment">1.4. 実際のデータへの適用</a>
+</ul>
+<li> <a href="#mlintro">2. 機械学習の超基本 (学部1年生向け)</a>
+<ul>
+<li> <a href="#ai">2.1. 典型的な人工知能</a>
+<li> <a href="#ml">2.2. 機械学習とは何か?</a>
+<li> <a href="#mlprob">2.3. 機械学習の問題点</a>
+</ul>
+<li> <a href="#naivebayes">3. Python による Naive Bayes の実装</a>
+<ul>
+<li> <a href="#prin">3.1. 原理</a>
+<li> <a href="#impl">3.2. Python における実装</a>
+<li> <a href="#exp">3.3. 予測する</a>
+<li> <a href="#smoothing">3.4. スムージング</a>
+</ul>
+</ul>
+
+
+<h2 id="identity">1. 類似度の判定</h2>
+<p>
+実験などで、あるプログラムの出力が「正しい (等しい)」かどうかを
+判定するのは実は簡単ではない。
+出力が 1つしかない場合や、「完全一致かどうか」だけしか考慮しない場合は
+簡単だが、難しいのは:
+<ol>
+  <li> 結果が複雑であり
+  <li> しかも可変長
+</ol>
+<p>
+であるような場合である。
+ここでは離散的なデータのみを扱う。
+
+<h3 id="sets">1.1. 集合の場合 (Jaccard Index, F-measure)</h3>
+<p>
+離散的な集合
+<div class=exp>
+A = {a<sub>i</sub>}, B = {b<sub>i</sub>}
+</div>
+があるとき、
+A と B の「重なり」を調べる式には次のものがある:
+<div class=exp>
+<a href="https://en.wikipedia.org/wiki/Jaccard_index">Jaccard Index</a> =
+(A &cap; B) / (A &cup; B)
+</div>
+
+<div class=exp>
+<a href="https://en.wikipedia.org/wiki/F1_score">F-measure</a> =
+2 × (precision ・ recall) / (precision + recall)
+</div>
+
+<h3 id="vector">1.2. ベクトルの場合 (Vector Space Model)</h3>
+<p>
+A, B がベクトル
+<div class=exp>
+A = {a<sub>i</sub>}, B = {b<sub>i</sub>}
+</div>
+であり、各要素が「重み (頻度)」であるようなとき、
+この 2つの類似度を計算する <strong>Vector Space Model (VSM)</strong> と
+呼ばれる方法がある。
+<p>
+これはようするに
+{a<sub>i</sub>}, {b<sub>i</sub>} の各要素を並べ、これを
+ベクトルとしてみたときの cosine距離である:
+<div class=exp>
+類似度 = &Sigma; (a<sub>i</sub> &times; b<sub>i</sub>) /
+&radic; (&Sigma; |a<sub>i</sub>|<sup>2</sup>) &times;
+&radic; (&Sigma; |b<sub>i</sub>|<sup>2</sup>)
+</div>
+<p>
+これがなぜうまくいくのかは、次の例を考えてみるとわかる。
+<div class=figure><table>
+<tr><th>素性が揃っているとき</th><th>素性が揃ってないとき</th></tr>
+<tr><td>
+<svg height="120" version="1.1" width="220" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g fill="none" stroke="black" stroke-width="2"><line x1="10" x2="10" y1="110" y2="10" /><line x1="10" x2="210" y1="110" y2="110" /><polyline points="15,105 35,85 55,25 75,15 95,75 115,85 135,95 155,105 175,95 195,105" stroke="green" /><polyline points="15,95 35,95 55,25 75,35 95,85 115,95 135,105 155,95 175,105 195,105" stroke="red" /></g></svg>
+</td><td>
+<svg height="120" version="1.1" width="220" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g fill="none" stroke="black" stroke-width="2"><line x1="10" x2="10" y1="110" y2="10" /><line x1="10" x2="210" y1="110" y2="110" /><polyline points="15,105 35,85 55,25 75,15 95,75 115,85 135,95 155,105 175,95 195,105" stroke="green" /><polyline points="15,95 35,105 55,105 75,85 95,95 115,75 135,35 155,25 175,85 195,65" stroke="red" /></g></svg>
+</td></tr>
+<tr><td>類似度: 高い</td><td>類似度: 低い</td></tr>
+</table></div>
+<p>
+さらに、次のようなケースもカバーできる:
+<p>
+<div class=figure><table>
+<tr><th>高さが違うが形は似ているとき</th></tr>
+<tr><td>
+<svg height="120" version="1.1" width="220" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g fill="none" stroke="black" stroke-width="2"><line x1="10" x2="10" y1="110" y2="10" /><line x1="10" x2="210" y1="110" y2="110" /><polyline points="15,105 35,85 55,25 75,15 95,75 115,85 135,95 155,105 175,95 195,105" stroke="green" /><polyline points="15,105 35,95 55,65 75,55 95,95 115,95 135,105 155,105 175,105 195,105" stroke="red" /></g></svg>
+</td></tr>
+<tr><td>類似度: 高い</td></tr>
+</table></div>
+
+<h4>Pythonによる実装</h4>
+<p>
+各素性の集合からなるベクトルは、Python では辞書 (<code>dict</code>) として
+表すのがもっとも自然である。そこで、2つの与えられた辞書オブジェクトから
+cosine距離を求めるような関数 <code>calcdot()</code> を作る。
+
+<blockquote><pre>
+def calcdot(a, b):
+    ...
+    return
+
+v1 = {'x':1, 'y':2}
+v2 = {'x':2, 'y':1, 'z':3}
+print(calcdot(v1, v2))  <span class=comment># 0.47809144373375745</span>
+</pre></blockquote>
+
+<div class=q>
+<strong>演習.</strong>
+上の関数を完成させよ。
+</div>
+
+<h3 id="sequence">1.3. 文字列の場合 (Levenshtein Distance)</h3>
+<p>
+いっぽう A と B が文字列 (あるいはビット列) であり、
+その順序が重要となる場合は、
+<a href="https://en.wikipedia.org/wiki/Levenshtein_distance"><strong>編集距離</strong> (edit distance) あるいは
+<strong>レベンシュタイン距離</strong> (Levenshtein distance)</a> と
+呼ばれる尺度を利用する。
+これはようするに「文字列 A → 文字列 B に変換するとき、
+文字を挿入・削除・置換する回数はどれくらいか」を表したものであり、
+これは diff の長さに相当する。
+<p>
+実際の編集距離を定義するのは面倒くさいので、新山は
+<a href="https://en.wikipedia.org/wiki/Longest_common_subsequence_problem">LCS (Longest Common Subsequence)</a> と
+もとの文字列との比率で計算することが多い。
+<p>
+たとえば
+<ul>
+<li> HEADACHE
+<li> DEADBEEF
+</ul>
+の LCS は ?? 文字である。
+<p>
+LCS を計算するには、動的計画法を使うのが普通である。
+<blockquote><pre>
+def find_lcs_len(s1, s2):
+    m = [ [ 0 for x in s2 ] for y in s1 ]
+    for p1 in range(len(s1)):
+        for p2 in range(len(s2)):
+            if s1[p1] == s2[p2]:
+                if p1 and p2:
+                    m[p1][p2] = m[p1-1][p2-1]+1
+                else:
+                    m[p1][p2] = 1
+            elif m[p1-1][p2] &lt; m[p1][p2-1]:
+                m[p1][p2] = m[p1][p2-1]
+            else:  <span class=comment># m[p1][p2-1] &lt; m[p1-1][p2]</span>
+                m[p1][p2] = m[p1-1][p2]
+    return m[-1][-1]
+</pre></blockquote>
+
+<h3 id="experiment">1.4. 実際のデータへの適用</h3>
+<p>
+VSM は「離散的な、頻度情報あるもの」を比較するのに向いているので
+よく自然言語処理の文書比較に用いられる。
+ここでは、以下の英語 Wikipedia 記事 10000個から、
+たがいに良く似ている (単語の出現パターンが近い) 記事を発見してみる。
+<ul>
+<li> <a href="../sem20190914/enwiki-20140102-10000.txt.gz">Wikipedia英語版の記事データ (10000記事)</a>
+</ul>
+
+<div class=q>
+<strong>演習a.</strong>
+上の記事データをダウンロードし、
+各記事中の単語を単純な正規表現で切り出してカウントする
+Python プログラムを書け。
+このデータは以下のような構造になっている。
+<blockquote><pre>
+# 2428190 Melbourne Shuffle
+The Melbourne Shuffle (also known as Rocking or simply The Shuffle) is
+a rave and club dance that originated in the late 1980s in the
+underground rave music scene in Melbourne, Australia. The basic
+...
+(空行)
+# 442370 List of prime numbers
+By Euclid's theorem, there is an infinite number of prime
+numbers. Subsets of the prime numbers may be generated with various
+formulas for primes. The first 500 primes are listed below, followed
+...
+(空行)
+</pre></blockquote>
+</div>
+
+<h4>ヒント</h4>
+<p>
+まず文字列を単語のリストに変換する関数 <code>splitwords</code> を考える。
+英単語の正確な切り出しは本当は複雑なのであるが、
+ここでは正規表現を使って簡単にすませる:
+<blockquote><pre>
+import re
+def splitwords(text):
+    return [ w.lower() for w in re.findall(r'\w+', text) ]
+</pre></blockquote>
+<p>
+つぎに上の <code>doit()</code> を改良して、
+読み込みんだデータファイルを解析する:
+<blockquote><pre>
+def doit(args):
+    for line in fileinput.input(args):
+        line = line.strip()
+        if line.startswith('#'):
+            (artid, _, title) = line[2:].partition(' ')
+            artid = int(artid)
+        elif line:
+            <span class=comment># 単語に区切る。</span>
+            words = splitwords(line)
+        else:
+            <span class=comment># この時点で artid, title, words が設定されているはず。</span>
+            print(artid, title, words)
+            <span class=comment># 各単語の頻度情報を格納した辞書 wordcount を求める。</span>
+            wordcount = countwords(words)
+</pre></blockquote>
+<p>
+gzip圧縮されたデータを読み込むには、以下のようにする手もあるが:
+<blockquote><pre>
+$ <strong>gzip -dc enwiki-20140102-10000.txt.gz | python doit.py</strong>
+</pre></blockquote>
+<p>
+Pythonの<code>fileinput</code>にオプションを与えると、gzipをそのまま読み込むことができる。
+(ただし、UTF-8をデコードする必要があるので注意!)
+<blockquote><pre>
+    for line in fileinput.input(args, <mark>openhook=fileinput.hook_compressed</mark>):
+        ...
+</pre></blockquote>
+
+<div class=q>
+<strong>演習b.</strong>
+各記事ID, 記事タイトルおよび a. でカウントした頻度情報 (JSON形式) を
+入れる SQLテーブルを設計し、SQLiteを使って10000記事ぶんの情報を
+格納したデータベースを作成せよ。
+</div>
+
+<h4>ヒント</h4>
+<p>
+まずSQLiteのテーブルを作成しよう。
+<blockquote><pre>
+db = sqlite3.connect('articles.db')
+cur = db.cursor()
+cur.executescript('''
+CREATE TABLE Article (
+    ArtId INTEGER PRIMARY KEY,
+    Title TEXT,
+    Words TEXT);
+''')
+</pre></blockquote>
+<p>
+ここに、上で求めた <code>(artid, title, wordcount)</code> を INSERT していく。
+ただし、<code>wordcount</code> は辞書なので、JSONに変換する:
+<blockquote><pre>
+cur.execute('INSERT INTO Article VALUES(?,?,?);',
+            (artid, title, json.dumps(wordcount)))
+<span class=comment># 注意: commitしないとデータは書き込まれない。</span>
+db.commit()
+</pre></blockquote>
+
+<div class=q>
+<strong>演習c.</strong>
+上で設計した関数 <code>calcdot()</code> を
+10000×10000のベクトル対に適用し、
+もっとも高い類似度をもつ記事ペアを表示せよ。
+</div>
+
+<h4>ヒント</h4>
+<p>
+これは別の Python スクリプトにする。
+<p>
+基本戦略は、すべての記事対 |A| &times; |B| に対して、
+<code>calcdot(a,b)</code> を計算し、最高となる a, b を求めればよい:
+<blockquote><pre>
+articles = [ ... ]
+maxsim = 0
+maxpair = None
+for a in articles:
+    for b in articles:
+        sim = calcdot(a, b)
+        if maxsim &lt; sim:
+            maxsim = sim
+            maxpair = (a,b)
+</pre></blockquote>
+<p>
+実際には <code>calcdot(a,b) == calcdot(b,a)</code> であることを
+利用して、計算時間を半分にする:
+<blockquote><pre>
+for (i,a) in <mark>enumerate(articles)</mark>:
+    for b in <mark>articles[i+1:]</mark>:
+        sim = calcdot(a, b)
+        ...
+</pre></blockquote>
+<p>
+問題は、<code>articles</code> は巨大で
+一度にメモリに読み込みたくないということである。
+そこで、まず <code>artid</code> の一覧を取得し
+毎回 SQLite から記事のベクトルを読み込むことにする。
+
+<blockquote><pre>
+def getarticle(cur, artid):
+    for (wordcount,) in cur.execute(
+        'SELECT Words FROM Article WHERE ArtId = ?;', (artid,)):
+        return json.loads(wordcount)
+
+<span class=comment># すべての Artid のリストを取得。(これは小さい)</span>
+artids = [ artid for (artid,) in cur.execute('SELECT ArtId FROM Article;') ]
+</pre></blockquote>
+
+<p>
+(注意: なお、ここで紹介した方法は完璧ではない。
+一般的には、自然言語文の類似度計算には
+各単語の出現頻度だけでなく、単語の重み (IDF) も考慮している)
+
+<p>
+新山による実装:
+<a href="https://github.com/euske/python3-toys/blob/master/vsm.py">https://github.com/euske/python3-toys/blob/master/vsm.py</a>
+
+
+<h2 id="mlintro">2. 機械学習の超基本 (学部1年生向け)</h2>
+
+<h3 id="ai">2.1. 典型的な人工知能</h3>
+<p>
+古くからある「典型的な」人工知能では、
+次のような問題を扱っている:
+<ul>
+<li> <strong>物体認識</strong>:
+  画像をすべての物体の画像と比較し、もっとも近そうなものを返す。
+<li> <strong>将棋・チェス・囲碁</strong>:
+  可能なすべての手を調べ、もっとも良さそうな手を返す。
+<li> <strong>英日翻訳</strong>:
+  すべての単語の並び方を比較し、もっとも「日本語らしい」翻訳を返す。
+<li> ...
+</ul>
+<p>
+上の例からわかるように、多くの人工知能の問題は、<u>探索</u>として扱われる:
+<blockquote><pre>
+a = [すべての可能性]
+answer = なし
+for x in a:
+    <span class=comment># answer と x の「良さそう度」を比較する</span>
+    if E(answer) &lt; E(x):
+        answer = x
+print(answer)
+</pre></blockquote>
+
+<p>
+これをあまりにも大量かつ高速にやると、人間には「賢そう」に見える。
+人工知能の原理は、人間の脳が働く原理とはまったく別でもかまわない。
+(自動車が走る原理は、人間が走る原理とはまったく異なる。)
+問題は、「<code>すべての可能性</code>」を現実的にどうやって調べるか?
+ということである。普通にやると計算量が大きくなりすぎてしまうので、
+何らかの方法でサバを読む必要がある。また「良さそう度」を判定する関数
+<code>E(x)</code> はなにか、という問題もある。
+現在のほとんどの AI研究は、このような問題に対する解決策の研究である。
+
+<h3 id="ml">2.2. 機械学習とは何か?</h3>
+<p>
+以下のような処理を考えよう。
+100×100ピクセルの画像 (リストのリスト) を与えられると、
+それが「どれくらい人間の顔らしいか」を判定する
+関数 <code>faceness</code> があるとする:
+<blockquote><pre>
+def faceness(image):
+    ...
+    return x
+</pre></blockquote>
+<div class=figure>
+<table align=center border>
+<tr><th>画像</th><th>顔らしさ</th></tr>
+<tr><td>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="100" height="100">
+  <g fill="none" stroke="black" stroke-width="2">
+    <circle cx="50" cy="50" r="40" />
+    <circle cx="30" cy="40" r="5" />
+    <circle cx="60" cy="40" r="5" />
+    <line x1="40" y1="70" x2="60" y2="70" />
+  </g>
+</svg>
+</td><td class=bigscore>0.95</td></tr>
+<tr><td>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="100" height="100">
+  <g fill="none" stroke="black" stroke-width="2">
+    <ellipse cx="50" cy="50" rx="40" ry="30" />
+    <line x1="30" y1="45" x2="50" y2="40" />
+    <line x1="60" y1="40" x2="80" y2="45" />
+    <line x1="40" y1="65" x2="60" y2="70" />
+    <polyline points="20,30 30,10 40,20" />
+    <polyline points="80,30 70,15 60,20" />
+  </g>
+</svg>
+</td><td class=bigscore>0.87</td></tr>
+<tr><td>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="100" height="100">
+  <g fill="none" stroke="black" stroke-width="2">
+    <circle cx="40" cy="60" r="30" />
+    <rect x="10" y="10" width="30" height="35" fill="white" />
+    <polygon points="80,80 60,50 20,70" fill="white" />
+  </g>
+</svg>
+</td><td class=bigscore>0.02</td></tr>
+</table>
+</div>
+<p>
+このような関数は頑張れば作れるかもしれないが、非常に大変である。
+判定に使う変数が極端に多い (100×100個) うえに「何が顔らしいのか」を
+論理的に規定するのが難しいからである。そこで、
+あらかじめ「顔らしい画像」と「顔らしくない画像」を大量に用意しておき、
+コンピュータを使ってこのような関数を自動的に発見させよう、
+というアイデアが <u>機械学習</u> (Machine Learning, ML) である。
+このようにして発見されたプログラムを「<u>分類器</u> (classifier)」と呼ぶ。
+機械学習は人工知能の一分野であり、現在さかんに研究されているが、
+基本的には「プログラムを発見 (作成) するプログラム」といえる。
+機械学習はおもに自然界の現象 (規則できっちり定義できないもの) を対象に使われることが多い。
+(消費税の計算をするのに機械学習を使ったりはしない)
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="230" height="100">
+<defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+</defs>
+<g fill="none" stroke="black" stroke-width="2">
+  <rect x="100" y="35" width="40" height="30" />
+  <g marker-end="url(#arrow)">
+    <line x1="45" y1="10" x2="100" y2="40" />
+    <line x1="45" y1="40" x2="100" y2="50" />
+    <line x1="50" y1="70" x2="100" y2="60" />
+    <line x1="140" y1="50" x2="190" y2="50" />
+  </g>
+</g>
+<g text-anchor="middle">
+<text x="120" y="80" dy="0.5em">分類器</text>
+<text x="40" y="5" dy="0.5em" text-anchor="end">素性1</text>
+<text x="40" y="35" dy="0.5em" text-anchor="end">素性2</text>
+<text x="40" y="60" dy="0.5em" text-anchor="end">...</text>
+<text x="190" y="30" dy="0.5em">結果</text>
+</g>
+</svg>
+</div>
+<p>
+機械学習には、大きく分けて 3種類ある:
+<ol type=a>
+<li> <strong>教示つき学習</strong>: あらかじめ人が集めた正解データをもとに学習する。
+<li> <strong>教示なし学習</strong>: 分類されていない生のデータのみをもとに学習する。
+<li> <strong>強化学習</strong>: データがほとんどない状態から学習する。
+</ol>
+
+<h3 id="mlprob">2.3. 機械学習の問題点</h3>
+<p>
+他の人工知能の例にもれず、機械学習もまた探索として定義される:
+<blockquote><pre>
+a = [存在しうるすべてのプログラム]
+classifier = なし
+for p in a:
+    <span class=comment># プログラム p の良さそう度を比較する。</span>
+    if E(classifier) &lt; E(p):
+        classifier = p
+print(classifier)
+</pre></blockquote>
+<p>
+教示つき機械学習においては、ある分類器 (プログラム) が
+「良いかどうか」は比較的簡単に測定できる。
+たとえば顔認識では、あらかじめ顔らしい画像とそれ以外の画像が与えられるので、
+与えられた分類器がどれくらい顔を正しく認識できるかを数えればよい:
+<blockquote><pre>
+<span class=comment># 顔判定プログラム p の「良さそう度」を計算</span>
+def E(p):
+    score = 0
+    <span class=comment># 顔を顔として判定したら得点。</span>
+    for image in [すべての顔らしい画像]:
+        if プログラム p が image を顔と判定する:
+            score = score + 1
+    <span class=comment># 顔でないものを顔でないととして判定したら得点。</span>
+    for image in [すべての顔らしくない画像]:
+        if プログラム p が image を顔でないと判定する:
+            score = score + 1
+    return score
+</pre></blockquote>
+<p>
+機械学習の一番の問題は
+「存在しうるすべてのプログラム」が無限にあって、探索しつくせないということである。
+したがって、ふつう機械学習では「分類器」として Python のような本物のプログラムではなく、
+非常に限定された形のもののみを扱う。ここでの分類器の形式としては
+<strong>決定木</strong>、<strong>線形分類器</strong>、
+<strong>ニューラルネットワーク</strong>などが提案されているが、
+今回は <strong>Naive Bayes法</strong> を紹介する。
+
+
+<h2 id="naivebayes">3. Python による Naive Bayes の実装</h2>
+<p>
+Naive Bayes 法は、与えられた素性 (feature) と予測したい答え (prediction) との相関を、
+条件つき確率を使って求める方法である。
+離散的な少数の素性 (〜1000個程度) のみからなるデータを
+てっとり早く学習したいときに有用である。
+自然言語処理では Naive Bayes 法は spam の判定などに用いられるが、
+離散的なデータであれば何でも利用することができ、しかも精度はそれほど悪くない。
+<h4>利点</h4>
+<ul>
+<li> 学習が簡単 (数えるだけ)。
+<li> 確率の異なる複数の結果を返せる。
+</ul>
+<h4>欠点</h4>
+<ul>
+<li> 複雑な相関関係をもつデータには不向き。
+<li> 一度も学習データに表れなかった素性があるとつねに「確率ゼロ」になってしまう。
+</ul>
+
+<h3 id="prin">3.1. 原理</h3>
+<ol>
+<li> 学習: 素性の集合 <em>F</em> = {<em>f<sub>i</sub></em>} とクラス <em>k</em> に対して、
+条件つき確率
+P(<em>k</em> | <em>f<sub>1</sub></em>, <em>f<sub>2</sub></em>, ..., <em>f<sub>n</sub></em>) を計算する。
+<li> 予測: <em>F</em> が与えられたら、
+argmax<em><sub>k</sub></em> P(<em>k</em> | <em>F</em>) となるような <em>k</em> を求める。
+</ol>
+<p>
+で、どうやって P(<em>k</em> | <em>F</em>)
+を計算するのか? 以下の式を使う。
+(Naive <u>Bayes</u> といわれるゆえんである。)
+<div class=exp>
+P(<em>k</em> | <em>F</em>) = P(<em>k</em>)・P(<em>F</em>|<em>k</em>) / P(<em>F</em>)
+</div>
+ここで <em>F</em> はあらかじめ与えられているので P(<em>F</em>) は無視できて
+<div class=exp>
+argmax<em><sub>k</sub></em> P(<em>k</em> | <em>F</em>) =
+argmax<em><sub>k</sub></em> P(<em>k</em>)・P(<em>F</em> | <em>k</em>)
+</div>
+さらに、各素性 <em>f<sub>i</sub></em> と <em>k</em> は相関しているが、
+各素性
+<em>f<sub>1</sub></em>,  <em>f<sub>2</sub></em>, ...  <em>f<sub>n</sub></em> どうしは
+それぞれ <u>独立</u> (independent) して現れると仮定する。つまり
+<div class=exp>
+P(<em>f<sub>1</sub></em> | <em>f<sub>2</sub></em>) =
+P(<em>f<sub>1</sub></em> | <em>f<sub>3</sub></em>) =
+...
+P(<em>f<sub>1</sub></em> | <em>f<sub>n</sub></em>) =
+P(<em>f<sub>1</sub></em>)
+</div>
+<p>
+実際には、この仮定は正しくない。
+(<u>Naive</u> Bayes といわれるゆえんである。)
+しかしこの仮定により、
+<div class=exp>
+P(<em>F</em> | <em>k</em>) =
+P(<em>f<sub>1</sub></em>, <em>f<sub>2</sub></em>, ..., <em>f<sub>n</sub></em> | <em>k</em>) =
+P(<em>f<sub>1</sub></em> | <em>k</em>) ×
+P(<em>f<sub>2</sub></em> | <em>k</em>) ×
+... ×
+P(<em>f<sub>n</sub></em> | <em>k</em>)
+</div>
+と近似することができる。
+P(<em>f<sub>i</sub></em> | <em>k</em>) を求めるのは簡単である。
+学習データを見て、各素性 <em>f<sub>i</sub></em> と
+それに対応するクラス <em>k</em> が同時に現れる回数をただ数えればよい。
+このように、 Naive Bayes では素性と応答の数をただかぞえるだけで
+学習が可能である。
+
+<h3 id="impl">3.2. Python における実装</h3>
+<p>
+Naive Bayes を実装するには
+<ol type=a>
+<li> 各クラス <em>k</em> が学習データ中に何回現れたか。
+<li> 各クラスと素性の対 (<em>f<sub>i</sub></em>, <em>k</em>) が
+  学習データ中に何回現れたか。
+</ol>
+を記録しておく必要がある。
+a. は簡単である。いっぽう b. は、以下のように格納しておくと便利である:
+<blockquote><pre>
+fcount = {
+  クラス1: { 素性a: 回数, 素性b: 回数, ... }
+  クラス2: { 素性a: 回数, 素性b: 回数, ... }
+  ...
+}
+</pre></blockquote>
+さらに (素性と関係なく) <em>k</em> が現れた回数は、
+それ自体をひとつの特殊な素性 <code>ALL</code> とみなせるので
+<blockquote><pre>
+fcount = {
+  クラス1: { ALL: 回数, 素性a: 回数, 素性b: 回数, ... }
+  クラス2: { ALL: 回数, 素性a: 回数, 素性b: 回数, ... }
+  ...
+}
+</pre></blockquote>
+のようにできる。
+
+<p>
+これをふまえて、
+<code>NaiveBayes</code> クラスを定義する:
+
+<blockquote><pre>
+class NaiveBayes:
+
+    def __init__(self):
+        self.fcount = {}  <span class=comment># 素性 (k,f) の出現回数。</span>
+        return
+
+    <span class=comment># 素性とクラスの相関をひとつ学習する。</span>
+    def learn(self, k, feats):
+        <span class=comment># クラス k と同時に現れた素性一覧をとりだす。</span>
+        if k in self.fcount:
+            fc = self.fcount[k]
+        else:
+            fc = self.fcount[k] = {}
+        <span class=comment># k の数を数える。</span>
+        if 'ALL' not in fc:
+            fc['ALL'] = 0
+        fc['ALL'] += 1
+        <span class=comment># (f,k) の数を数える。</span>
+        for f in feats:
+            if f not in fc:
+                fc[f] = 0
+            fc[f] += 1
+        return
+</pre></blockquote>
+
+<h3 id="exp">3.3. 予測する</h3>
+<p>
+モデルが学習できたら、予測である。
+素性の集合 <code>feats</code> が与えられたら、
+各 <em>k</em> に対して
+<div class=exp>
+P(<em>k</em>)・&Pi; P(<em>f<sub>i</sub></em> | <em>k</em>) =
+P(<em>k</em>)・&Pi; {P(<em>f<sub>i</sub></em>, <em>k</em>) / P(<em>k</em>)}
+</div>
+を計算すればよいのであるが、実際には
+母数 <code>N</code> が同じなのでこれは確率である必要がない。
+<pre class=exp>
+fcount[k]['ALL'] * &Pi; (fcount[k][f] / fconut[k]['ALL'])
+</pre>
+だけで済んでしまう。
+さらに、あらかじめ <code>kcount</code> と <code>fcount</code> の log を記録しておき
+<pre class=exp>
+log(fcount[k]['ALL']) + &Sigma; (log(fcount[k][f]) - log(fconut[k]['ALL']))
+</pre>
+のようにすれば加減算だけでよくなる。
+これをふまえて、メソッド <code>predict()</code> を設計する:
+<blockquote><pre>
+class NaiveBayes:
+    ...
+
+    <span class=comment># 与えられた素性から推定される各クラスの確率を返す。</span>
+    def predict(self, feats):
+        klass = []
+        for (k,fc) in self.fcount.items():
+            <span class=comment># P(<em>k</em>)・P(<em>f<sub>i</sub></em> | <em>k</em>) を計算する。</span>
+            pk = log(fc['ALL'])
+            p = (pk + sum( (log(fc[f]) - pk) for f in feats ))
+            klass.append((p, k))
+        <span class=comment># クラスの一覧を確率の大きい順にソートする。</span>
+        klass.sort(reverse=True)
+        return klass
+</pre></blockquote>
+
+<p>
+この方法がよいのは、結果が確率 (のlog) つきで
+返されるということである。
+もっとも確実な予想だけを知りたければ <code>klass[0]</code> を使えばよいし、
+第2候補も欲しければ <code>klass[1]</code> も見ればよい。
+複数の候補が返されるのは Naive Bayes の大きな利点である。
+
+<h4>注意点</h3>
+<p>
+決定木における「素性」とは、何がしかの値を持つものであったが、
+Naive Bayes における「素性」は、実際には「存在するか否か」
+という二値的なものであることに注意。
+したがって、 <code>picnic.csv</code> のようなデータを使うには、
+各素性を "<code>Outlook=Sunny</code>" のように
+まるごと文字列として表してやる必要がある。
+つまり「素性 <code>Outlook</code> の値が
+"<code>Sunny</code>" / "<code>Overcast</code>" / "<code>Rain</code>" のどれかだ」と
+考えるのではなく、
+「"<code>Outlook=Sunny</code>"、
+"<code>Outlook=Overcast</code>"、
+"<code>Outlook=Rain</code>" という別々の素性が存在する」
+と考えるのである。
+当然、<code>Outlook</code> の値が排他的だという情報は
+Naive Bayes にはわからない。したがって Naive Bayes は
+「"<code>Outlook=Sunny</code>" かつ "<code>Outlook=Overcast</code>"」
+というありえない状況も排除しない。
+これは独立性の仮定を置いたことによる帰結で、
+Naive Bayes 法の限界である。
+
+<div class=q>
+<strong>演習.</strong>
+同じく、上で示した
+<code>picnic.csv </code> のデータを今度は
+<code>NaiveBayes</code> クラスに適用し、結果を観察せよ。
+
+<blockquote><pre>
+nb = NaiveBayes()
+FEATS = ( 'Outlook', 'Temp', 'Humidity', 'Wind' )
+for obj in objs:
+    <span class=comment># オブジェクトの各素性の値を、二値的な素性に変換する。</span>
+    feats = [ f'{k}={obj[k]}' for k in FEATS ]
+    <span class=comment># Decision の値と各素性との相関を学習する。</span>
+    nb.learn(obj['Decision'], feats)
+</pre></blockquote>
+</div>
+
+<p>
+新山による実装:
+<a href="https://github.com/euske/python3-toys/blob/master/naivebayes.py">https://github.com/euske/python3-toys/blob/master/naivebayes.py</a>
+
+<h3 id="smoothing">3.4. スムージング</h3>
+<p>
+実際に上の例を実行してみると、
+3番目のオブジェクトのあたりで
+「"<code>Outlook=Overcast</code>" という素性が存在しない」
+という <code>KeyError</code>例外が発生してしまう。
+これは P(<code>No</code> | <code>Outlook=Overcast</code>) の
+確率を計算しようとしたことによる。
+(<code>fcount['No']</code> の <code>fc</code> 中には
+<code>Outlook=Overcast</code> というキーが存在しない。)
+これは Naive Bayes を使うさいによく現れる問題で、
+このような学習データが存在しなかったのであるから、
+そもそも確率を計算できないのである。
+<p>
+このような場合、逃げの一種として
+「素性の各出現回数に 1 を出す」という方法がある。
+いわゆる "<a href="https://en.wikipedia.org/wiki/Additive_smoothing">Laplace smoothing</a>" である。
+これは
+<a href="https://en.wikipedia.org/wiki/Sunrise_problem">「どんな可能性もゼロではない」という信念</a>のもとに成り立っている。
+これは Python のコード上では、
+<code>fc[f]</code> でキーが存在しなかったときに
+<code>1</code> を返すように実装するだけである。
+
+<blockquote><pre>
+<span class=comment># 使用前</span>
+p = (pk + sum( (log(fc[f]) - pk) for f in feats ))
+<span class=comment># 使用後</span>
+p = (pk + sum( (log(<mark>fc.get(f,0)+1</mark>) - pk) for f in feats ))
+</pre></blockquote>
+
+
+<hr>
+<address>Yusuke Shinyama</address>
