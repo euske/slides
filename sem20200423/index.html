@@ -97,7 +97,7 @@ A = {a<sub>i</sub>}, B = {b<sub>i</sub>}
 A と B の「重なり」を調べる式には次のものがある:
 <div class=exp>
 <a href="https://en.wikipedia.org/wiki/Jaccard_index">Jaccard Index</a> =
-(A &cap; B) / (A &cup; B)
+|A &cap; B| / |A &cup; B|
 </div>
 
 <div class=exp>
@@ -217,7 +217,7 @@ VSM は「離散的な、頻度情報あるもの」を比較するのに向い�
 </ul>
 
 <div class=q>
-<strong>演習a.</strong>
+<strong>演習.</strong>
 上の記事データをダウンロードし、
 各記事中の単語を単純な正規表現で切り出してカウントする
 Python プログラムを書け。
@@ -281,37 +281,7 @@ Pythonの<code>fileinput</code>にオプションを与えると、gzipをその
 </pre></blockquote>
 
 <div class=q>
-<strong>演習b.</strong>
-各記事ID, 記事タイトルおよび a. でカウントした頻度情報 (JSON形式) を
-入れる SQLテーブルを設計し、SQLiteを使って10000記事ぶんの情報を
-格納したデータベースを作成せよ。
-</div>
-
-<h4>ヒント</h4>
-<p>
-まずSQLiteのテーブルを作成しよう。
-<blockquote><pre>
-db = sqlite3.connect('articles.db')
-cur = db.cursor()
-cur.executescript('''
-CREATE TABLE Article (
-    ArtId INTEGER PRIMARY KEY,
-    Title TEXT,
-    Words TEXT);
-''')
-</pre></blockquote>
-<p>
-ここに、上で求めた <code>(artid, title, wordcount)</code> を INSERT していく。
-ただし、<code>wordcount</code> は辞書なので、JSONに変換する:
-<blockquote><pre>
-cur.execute('INSERT INTO Article VALUES(?,?,?);',
-            (artid, title, json.dumps(wordcount)))
-<span class=comment># 注意: commitしないとデータは書き込まれない。</span>
-db.commit()
-</pre></blockquote>
-
-<div class=q>
-<strong>演習c.</strong>
+<strong>演習.</strong>
 上で設計した関数 <code>calcdot()</code> を
 10000×10000のベクトル対に適用し、
 もっとも高い類似度をもつ記事ペアを表示せよ。
@@ -342,21 +312,6 @@ for (i,a) in <mark>enumerate(articles)</mark>:
     for b in <mark>articles[i+1:]</mark>:
         sim = calcdot(a, b)
         ...
-</pre></blockquote>
-<p>
-問題は、<code>articles</code> は巨大で
-一度にメモリに読み込みたくないということである。
-そこで、まず <code>artid</code> の一覧を取得し
-毎回 SQLite から記事のベクトルを読み込むことにする。
-
-<blockquote><pre>
-def getarticle(cur, artid):
-    for (wordcount,) in cur.execute(
-        'SELECT Words FROM Article WHERE ArtId = ?;', (artid,)):
-        return json.loads(wordcount)
-
-<span class=comment># すべての Artid のリストを取得。(これは小さい)</span>
-artids = [ artid for (artid,) in cur.execute('SELECT ArtId FROM Article;') ]
 </pre></blockquote>
 
 <p>
@@ -500,9 +455,12 @@ def faceness(image):
 <p>
 機械学習には、大きく分けて 3種類ある:
 <ol type=a>
-<li> <strong>教示つき学習</strong>: あらかじめ人が集めた正解データをもとに学習する。
-<li> <strong>教示なし学習</strong>: 分類されていない生のデータのみをもとに学習する。
-<li> <strong>強化学習</strong>: データがほとんどない状態から学習する。
+<li> <strong>教示つき学習</strong> (supervised learning):
+  あらかじめ人が集めた正解データをもとに学習する。
+<li> <strong>教示なし学習</strong> (unsupervised learning): 
+  分類されていない生のデータのみをもとに学習する。
+<li> <strong>強化学習</strong> (reinforcement learning):
+  データがほとんどない状態から学習する。
 </ol>
 
 <h3 id="mlprob">2.3. 機械学習の問題点</h3>
@@ -718,7 +676,13 @@ class NaiveBayes:
 第2候補も欲しければ <code>klass[1]</code> も見ればよい。
 複数の候補が返されるのは Naive Bayes の大きな利点である。
 
-<h4>注意点</h3>
+<div class=q>
+<strong>演習.</strong>
+データ <a href="../sem20190914/picnic.csv">picnic.csv</a> に
+Naive Bayes 法を適用し、結果を観察せよ。
+</div>
+
+<h4>注意点</h4>
 <p>
 決定木における「素性」とは、何がしかの値を持つものであったが、
 Naive Bayes における「素性」は、実際には「存在するか否か」
@@ -739,12 +703,6 @@ Naive Bayes にはわからない。したがって Naive Bayes は
 というありえない状況も排除しない。
 これは独立性の仮定を置いたことによる帰結で、
 Naive Bayes 法の限界である。
-
-<div class=q>
-<strong>演習.</strong>
-同じく、上で示した
-<code>picnic.csv </code> のデータを今度は
-<code>NaiveBayes</code> クラスに適用し、結果を観察せよ。
 
 <blockquote><pre>
 nb = NaiveBayes()
