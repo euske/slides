@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<html>
+<head>
+<title>権藤研 夏ゼミ資料 2020/09/24 ソースコード解析の実装に関する諸々の事項</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 0.5em; }
+kbd { outline: 1px solid black; padding: 4px; margin: 4px; }
+pre { outline: 1px solid black; padding: 0.3em; }
+code { font-weight: bold; color: purple; }
+em { color: blue; }
+.h { text-align: right; }
+.q { border: 2px solid black; padding: 1em; margin: 1em; }
+.figure { border: 1px solid black; text-align: center; padding: 0.5em; margin: 0.5em; }
+.comment { color: green; }
+.file { outline: 1px solid black; margin: 1em; padding: 4px; }
+.file > pre { margin: 0; outline: 2px solid black; padding: 1em; }
+.c1 { background: yellow; }
+.c2 { background: cyan; }
+.c3 { background: magenta; }
+.c4 { background: lime; }
+.pkg { outline: 1px solid black; padding: 2px; margin: 2px; }
+.pkg span { font-weight: bold; color: green; font-size: 75%; }
+--></style>
+<script>
+function doit() {
+    if (document.baseURI.startsWith("file:")) {
+        for (e of document.getElementsByClassName("offline")) {
+            if (e.tagName == "IMG") {
+                let i = e.src.lastIndexOf("/");
+                let src = "./"+e.src.substr(i+1);
+                console.log("offline: "+e.src+" -> "+src);
+                e.src = src;
+            }
+        }
+    }
+}
+</script>
+</head>
+<body>
+
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>ソースコード解析の実装に関する諸々の事項</h1>
+
+<div class=h>
+権藤研 夏ゼミ 2020/09/24<br>
+新山
+</div>
+
+<h4>概要</h4>
+<p>
+大規模なプロジェクトにソースコード解析を適用する際に生じる、
+もろもろの問題を解説する。
+
+<ol>
+<li> <a href="#goal">目的</a>
+<li> <a href="#proc">手順</a>
+</ol>
+
+
+<h2 id="goal">1. 目的</h2>
+<p>
+始めに「ソースコード解析とは何か」をざっと定義しておく:
+<ul>
+<li> ソースコード解析 =
+  与えられたソースコード <em>S</em> に含まれる、
+  各プログラム要素間の関係の一群 (<em>T</em>, <em>V</em>, <em>P</em>, ...) を抽出すること。
+<ul>
+  <li> 型に関する関係 (<em>T</em>) … 例: 型名と、他の型への関係、型の内部構造など。
+  <li> 変数に関する関係 (<em>V</em>) … 例: 変数名とその型、それが所属するスコープなど。
+  <li> 手続きに関する関係 (<em>P</em>) … 例: 関数名と、その引数、型、内部処理など。
+</ul>
+<li> 具体的な関係や対象となるプログラム要素を何にするか?
+  というのはタスク依存である。
+<ul>
+  <li> 型、クラス
+  <li> 変数 (ローカル変数、グローバル変数、インスタンス変数, etc.)
+  <li> 関数、メソッド
+  <li> 定数、式
+  <li> 制御構造
+  <li> 前提条件、制約条件
+  <li> 他関数・モジュールとの関係
+  <li> ...
+</ul>
+<li> 構文解析もソースコード解析の一部に含まれる。
+  コンパイル言語の場合、ソースコードの解析はほぼ<u>静的解析</u>である。
+<li> 実際には「解析」はあくまで全体の処理の 1ステップでしかない。
+  この解析結果を使って、さまざまなアプリケーションに応用するわけである:
+<ul>
+  <li> コンパイラの場合: <kbd>解析結果</kbd> → <kbd>コード生成</kbd>。
+  <li> チェッカの場合: <kbd>解析結果</kbd> → <kbd>パターン抽出</kbd> → <kbd>警告生成</kbd>。
+  <li> その他の分析: <kbd>解析結果</kbd> → <kbd>処理</kbd> →
+    <kbd>さらに処理</kbd> → <kbd>なにかの情報</kbd>。
+</ul>
+</ul>
+<p>
+<strong>注意:</strong>
+ここでは、ソースコード解析 = プログラム解析全体、という理解では<strong>ない</strong>。
+ここで得られる「関係」は、(構文木からの比較的簡単な処理で得られる) 「表層的」なもので、
+それ以後の解析 (Dataflow解析、Taint解析、Reachability解析、記号実行など) は
+異なる処理である、という立場をとる。
+プログラム解析によっては、ソースコードを解析しなくても可能なものが多い。
+
+<h4>ソースコード解析 vs バイナリ解析</h4>
+<table border>
+<tr><th></th><th>ソースコード解析</th><th>バイナリ解析</th></tr>
+<tr><td>特徴</td><td>
+<ul>
+  <li> プログラマの視点に近い。
+  <li> コンパイル時の情報 (識別子、コメント、数式) にアクセス可能。
+</ul>
+</td><td>
+<ul>
+  <li> 計算機の視点に近い。
+  <li> 実行時の情報 (メモリ配置、使用レジスタ) にアクセス可能。
+</ul>
+</td></tr>
+<tr><td>長所</td><td>
+<ul>
+  <li> プログラマの意図をより明確に分析可能。
+  <li> コンパイルできなくても解析可能。
+  <li> 実行環境に依存しない。
+</ul>
+</td><td>
+<ul>
+  <li> 分析対象の仕様が単純。
+  <li> 実行時の挙動をより正確に分析可能。
+</ul>
+</td></tr>
+<tr><td>短所</td><td>
+<ul>
+  <li> 分析対象の仕様が複雑。
+  <li> 実行時の正確な状態はつかみにくい。
+</ul>
+</td><td>
+<ul>
+  <li> プログラマの意図はつかみにくい。
+  <li> コンパイルできないと対応不可。
+  <li> 実行環境に依存。
+</ul>
+</td></tr>
+</table>
+
+
+<h2 id="proc">2. 手順</h2>
+<p>
+ソースコード解析のおおまかな手順は以下のとおりである:
+<ol>
+  <li> 解析の対象となる「プログラム要素」を特定する。
+  <li> それぞれの解析対象に固有の識別子を付与する。
+  <li> 構文解析木をもとに、各関係を抽出する。
+</ol>
+<p>
+Step 1. および 2. はどんなソースコード解析においても
+ほぼ共通の処理である。これは、以下の要素に依存する:
+<ol type=a>
+<li> 対象のプログラミング言語
+<li> interprocedural かどうか
+</ol>
+<p>
+今回は、a) プログラミング言語 Java かつ b) interprocedural な例を扱う。
+たとえば、以下のようなプログラムが対象となる:
+<pre>
+package foo:
+  class <span class=c1>A</span> {
+    void f(int <span class=c1>x</span>) { ... }
+    void g(int <span class=c2>x</span>) { ... }
+  }
+
+package bar:
+  class <span class=c2>A</span> {
+    void <span class=c3>f</span>(int x) { ... }
+    void <span class=c4>f</span>(int x, int y) { ... <u>a.f(x);</u> ... }
+  }
+</pre>
+<p>
+たとえばここで、上の例にある <code>a.f(1);</code> が実行されるとき、
+実際に呼ばれるメソッド <code>f</code> はどれなのかを決定したいとしよう。
+そのためには、まず変数 <code>a</code> の型を知らねばならず、
+次にその中のどのメソッドが呼ばれるかを区別する必要がある。
+また、<code>x</code> というローカル変数は上のすべてのメソッドで使われているが、
+これらは異なる変数である。このように、プログラム中の各要素に対して
+use-def 関係を見いだすには、単なる名前の比較では不可能である。
+<p>
+本研究では、厳密には以下のような手順を使っている。
+<ol>
+<li> 型名空間の構築。
+<li> 変数名空間の構築。
+<li> 型の参照の解決。
+<li> 総称型の reify化。
+<li> メソッドの列挙。
+</ol>
+<p>
+<strong>ムカつくことに</strong>、
+これらの情報はほとんどコンパイラは知っているにもかかわらず、
+(たとえば <a href="https://projects.eclipse.org/projects/eclipse.jdt">Eclipse JDT</a> などの API を見ても)
+それらを外部から取り出す方法は存在しない。
+さらに Java 言語の使用を独自に拡張し、
+本来 type erasure されている総称型 (generics) を
+reify された形で扱いたかったので、結局
+自分で実装した。
+
+<h3>2.1. 型名空間の構築</h3>
+<p>
+<strong>問題:</strong>
+以下の Java コード中で定義されている型をすべて挙げよ。
+<pre>
+package ppp.qqq;
+
+class A&lt;T&gt; {
+    class B&lt;S extends A&lt;String&gt;&gt; { ... }
+    int foo(int x) {
+        class C { ... };
+        C c = new C() {
+            bar() { ... }
+        };
+        moo(3); moo("zzz");
+        return baz(3, (z -&gt; z+1));
+    }
+    int baz(int x, IntFunction f) { return f.apply(x); }
+    static &lt;P&gt; P moo(P p) { return p; }
+}
+</pre>
+<ul>
+<li> 総称クラスにおけるパラメータ型 (<code>T</code>, <code>S</code>)。
+<li> メソッド内でのみ有効な型 (<code>C</code>)。
+<li> 匿名クラス。
+<li> Lambda 式。
+<li> 総称メソッドにおけるパラメータ型 (<code>P</code>)。
+</ul>
+
+<p>
+型の名前空間を各パッケージ、クラス、メソッドごとに
+階層的に定義することで、各型に一意な名前を与える。
+
+<p>
+<strong>問題:</strong>
+以下の Java コード中で <code>???</code> の部分のフル型名を答えよ。
+<pre>
+package ppp.qqq;
+<div class=pkg><span>ppp</span>
+<div class=pkg><span>ppp.qqq</span>
+class A {
+<div class=pkg><span>ppp.qqq.A</span>
+    class B {
+<div class=pkg><span>ppp.qqq.A.B</span>
+        ...
+</div>    }
+    int foo(int x) {
+<div class=pkg><span>ppp.qqq.A.foo</span>
+        class C {
+<div class=pkg><span>???</span>
+            ...
+</div>        };
+</div>    }
+    ...
+</div>}
+</div></pre>
+
+<h3>2.2. 変数名空間の構築</h3>
+<p>
+変数の名前空間も階層的に定義するが、範囲が異なる。
+型の空間は1つのメソッドの内部で同一なのに対し、
+変数の名前空間はスコープによって異なるからだ。
+
+
+<hr>
+<address>Yusuke Shinyama</address>
