@@ -26,6 +26,8 @@ em { color: blue; }
 .c4 { background: lime; }
 .pkg { outline: 1px solid black; padding: 2px; margin: 2px; }
 .pkg span { font-weight: bold; color: green; font-size: 75%; }
+.scope { outline: 1px solid black; padding: 2px; margin: 2px; }
+.scope span { font-weight: bold; color: magenta; font-size: 75%; }
 --></style>
 <script>
 function doit() {
@@ -62,6 +64,14 @@ function doit() {
 <ol>
 <li> <a href="#goal">目的</a>
 <li> <a href="#proc">手順</a>
+<ul>
+  <li> <a href="#typespace">型名空間の構築</a>
+  <li> <a href="#typefinder">型finderの割り当て</a>
+  <li> <a href="#varscope">変数名空間の構築</a>
+  <li> <a href="#reify">総称型の reify化</a>
+  <li> <a href="#methods">メソッドの列挙</a>
+</ul>
+<li> <a href="#sig">おまけ - Java型名の内部表現</a>
 </ol>
 
 
@@ -148,6 +158,13 @@ function doit() {
 </td></tr>
 </table>
 
+<h4>ソースコード解析の前提</h4>
+<p>
+多くのソースコード解析で前提となっているのが
+「名前 (型名、変数名) が静的に解決可能」という仮定である。
+したがって、この前提があてはまらない処理
+(eval、reflection) を行っているプログラムは対象にしない。
+
 
 <h2 id="proc">2. 手順</h2>
 <p>
@@ -156,6 +173,11 @@ function doit() {
   <li> 解析の対象となる「プログラム要素」を特定する。
   <li> それぞれの解析対象に固有の識別子を付与する。
   <li> 構文解析木をもとに、各関係を抽出する。
+</ol>
+さらに欲をいえば
+<ol start="4">
+  <li> 全解析過程にわたって、対象となる各プログラム要素は、ソースコードの位置
+    (どのファイルの何文字目から何文字目か) と正確に結びついていることが望ましい。
 </ol>
 <p>
 Step 1. および 2. はどんなソースコード解析においても
@@ -189,10 +211,10 @@ package bar:
 これらは異なる変数である。このように、プログラム中の各要素に対して
 use-def 関係を見いだすには、単なる名前の比較では不可能である。
 <p>
-本研究では、厳密には以下のような手順を使っている。
+本手法では、厳密に以下のようなステージで解析する。
 <ol>
 <li> 型名空間の構築。
-<li> 型の参照の解決。
+<li> 型finderの割り当て。
 <li> 変数名空間の構築。
 <li> 総称型の reify化。
 <li> メソッドの列挙。
@@ -205,9 +227,9 @@ use-def 関係を見いだすには、単なる名前の比較では不可能で
 さらに Java 言語の使用を独自に拡張し、
 本来 type erasure されている総称型 (generics) を
 reify された形で扱いたかったので、結局
-自分で実装した。
+自分で実装することにした。
 
-<h3>2.1. 型名空間の構築</h3>
+<h3 id="typespace">2.1. 型名空間の構築</h3>
 <p>
 <strong>問題:</strong>
 以下の Java コード中で定義されている型をすべて挙げよ。
@@ -264,43 +286,121 @@ class A {
 </div>}
 </div></pre>
 
-<h3>2.2. 型の参照の解決</h3>
-<P>
+<h3 id="typefinder">2.2. 型finderの割り当て</h3>
+<p>
+Java の型システムをややこしくしている機能:
+<ul>
+<li> 同一パッケージ内にある型名は、そのパッケージのすべてのクラスから見える。
+<li> 各ファイルで import した型名は、そのファイルの中だけで見える。
+<li> あるクラスを継承すると、そのクラス内で定義された inner class が見える。
+</ul>
+<p>
+これを解決するために <code>finder()</code> という概念を導入する。
+これは「型名のPATH変数」のようなもので、Java コード中の異なる部分は
+異なる <code>finder()</code> をもつ。
+<p>
+まず、相互参照している型はふつうに扱える:
+<pre>
+-- A.java --------
+  <span class=comment>// finder(A) = [foo.*]</span>
+  package foo;
+  class A {
+      B b;
+  }
 
+-- B.java --------
+  <span class=comment>// finder(B) = [foo.*]</span>
+  package foo;
+  class B {
+      A a;
+  }
+</pre>
+<p>
+次に、各 Java ファイルも独自の <code>finder</code> をもつとする。
+これは <code>import</code> された型名を発見できるようにする。
+<pre>
+-- A.java --------
+  <span class=comment>// finder("A.java") = [animal.mammal.*, java.lang.*]</span>
+  package animal.mammal;
+  import java.lang.*;
 
-// A.java
-// finder("A.java") = [animal.mammal.*, java.lang.List]
-package animal.mammal;
-import java.lang.List;
+  <span class=comment>// finder(Felidae) = [animal.mammal.Felidae] + finder("A.java")</span>
+  class Felidae {
+      <span class=comment>// Visible throughout A.java.</span>
+      List a;
+      <span class=comment>// Only visible within Felidae (and its subclasses).</span>
+      class Paw { ... }
+      Paw p;
+  }
+</pre>
+<p>
+さらに、継承されたクラスは継承元クラスの <code>finder</code> も受け継ぐ。
+<pre>
+-- B.java --------
+  <span class=comment>// finder("B.java") = [animal.mammal.*]</span>
+  package animal.mammal;
 
-// finder(Felidae) = [animal.mammal.Felidae] + finder("A.java")
-class Felidae {
-    class Paw { ... }
-    List a;
-}
+  <span class=comment>// finder(Cat) = [animal.mammal.Cat] + finder(Felidae) + finder("B.java")</span>
+  class Cat extends Felidae {
+      class Ear { ... }
+  }
 
-// finder(Cat) = [animal.mammal.Cat] + finder(Felidae) + finder("A.java")
-class Cat extends Felidae {
-    class Ear { ... }
-}
+  <span class=comment>// finder(Grumpy) = [animal.mmala.Grumpy] + finder(Cat) + finder("B.java")</span>
+  class Grumpy extends Cat {
+      Paw x;  <span class=comment>// Visible</span>
+      Ear y;  <span class=comment>// Visible</span>
+  }
+</pre>
 
-// B.java
-// finder("B.java") = [animal.mammal.*, java.lang.List]
-package animal.mammal;
-import java.lang.List;
-
-// finder(Grumpy) = [animal.mmala.Grumpy] + finder(Cat) + finder("B.java")
-class Grumpy extends Cat {
-    Paw x;
-    Ear y;
-    List a;
-}
-
-<h3>2.3. 変数名空間の構築</h3>
+<h3 id="varscope">2.3. 変数名空間の構築</h3>
 <p>
 変数の名前空間も階層的に定義するが、範囲が異なる。
 型の空間は1つのメソッドの内部で同一なのに対し、
 変数の名前空間はスコープによって異なるからだ。
+<p>
+変数の名前空間 (スコープ) は、ブロックごとに作成される。
+これによって異なるブロックは異なる名前空間になり、識別子も異なったものになる。
+ちなみに、外側にある変数は内側から見えるようになっている。
+
+<p>
+<strong>問題:</strong>
+以下の Java コード中で <code>???</code> の部分のフル変数名を答えよ。
+<pre>
+class A {
+<div class=scope><span>A</span>
+    int <mark>a</mark>;  <span class=comment>// A.a</span>
+<div class=scope><span>A.f</span>
+    int f(int <mark>n</mark>) {  <span class=comment>// A.f.n</span>
+        int <mark>x</mark> = 0;  <span class=comment>// ???</span>
+<div class=scope><span>A.f.for1</span>
+        for (int <mark>i</mark> = 0; i < n; i++) {  <span class=comment>// A.f.for1.i</span>
+             x += i;
+        }
+</div><div class=scope><span>A.f.for2</span>
+        for (int <mark>i</mark> = 1; i < n; i++) {  <span class=comment>// ???</span>
+             x *= i;
+        }
+</div>        ...
+</div>    }
+</div>}
+</pre>
+
+<h3 id="reify">2.4. 総称型の reify化</h3>
+
+<h3 id="methods">2.5. メソッドの列挙</h3>
+
+
+<h2 id="sig">3. おまけ - Java型名の内部表現</h2>
+<p>
+<strong>問題:</strong>
+以下の Java 型名の内部表現を答えよ:
+<ul>
+<li> <code>boolean[]</code>
+<li> <code>String[][]</code>
+<li> <code>List&lt;String&gt;</code>
+<li> <code>int f(int)</code>
+<li> <code>Object[] g(int, List&lt;T&gt;)</code>
+</ul>
 
 
 <hr>
