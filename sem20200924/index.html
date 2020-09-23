@@ -192,8 +192,8 @@ use-def 関係を見いだすには、単なる名前の比較では不可能で
 本研究では、厳密には以下のような手順を使っている。
 <ol>
 <li> 型名空間の構築。
-<li> 変数名空間の構築。
 <li> 型の参照の解決。
+<li> 変数名空間の構築。
 <li> 総称型の reify化。
 <li> メソッドの列挙。
 </ol>
@@ -264,7 +264,39 @@ class A {
 </div>}
 </div></pre>
 
-<h3>2.2. 変数名空間の構築</h3>
+<h3>2.2. 型の参照の解決</h3>
+<P>
+
+
+// A.java
+// finder("A.java") = [animal.mammal.*, java.lang.List]
+package animal.mammal;
+import java.lang.List;
+
+// finder(Felidae) = [animal.mammal.Felidae] + finder("A.java")
+class Felidae {
+    class Paw { ... }
+    List a;
+}
+
+// finder(Cat) = [animal.mammal.Cat] + finder(Felidae) + finder("A.java")
+class Cat extends Felidae {
+    class Ear { ... }
+}
+
+// B.java
+// finder("B.java") = [animal.mammal.*, java.lang.List]
+package animal.mammal;
+import java.lang.List;
+
+// finder(Grumpy) = [animal.mmala.Grumpy] + finder(Cat) + finder("B.java")
+class Grumpy extends Cat {
+    Paw x;
+    Ear y;
+    List a;
+}
+
+<h3>2.3. 変数名空間の構築</h3>
 <p>
 変数の名前空間も階層的に定義するが、範囲が異なる。
 型の空間は1つのメソッドの内部で同一なのに対し、
