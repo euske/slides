@@ -73,7 +73,7 @@ function doit() {
   <li> <a href="#typespace">型名空間の構築</a>
   <li> <a href="#typefinder">型finderの割り当て</a>
   <li> <a href="#varscope">変数名空間の構築</a>
-  <li> <a href="#reify">総称型の reify化</a>
+  <li> <a href="#reify">generics の reify化</a>
   <li> <a href="#methods">メソッドの列挙</a>
   <li> <a href="#lambdas">Lambdaの決定</a>
   <li> <a href="#classfiles">classファイルの走査</a>
@@ -224,7 +224,7 @@ FGyama では、厳密に以下のようなステージで解析する。
 <li> 型名空間の構築。
 <li> 型finderの割り当て。
 <li> 変数名空間の構築。
-<li> 総称型の reify化。
+<li> generics の reify化。
 <li> メソッドの列挙。
 </ol>
 <p>
@@ -233,7 +233,7 @@ FGyama では、厳密に以下のようなステージで解析する。
 (たとえば <a href="https://projects.eclipse.org/projects/eclipse.jdt">Eclipse JDT</a> などの API を見ても)
 それらを外部から取り出す方法は存在しない。
 さらに Java 言語の使用を独自に拡張し、
-本来 type erasure されている総称型 (generics) を
+本来 type erasure されている generics (総称型) を
 reify された形で扱いたかったので、結局
 自分で実装することにした。
 
@@ -259,11 +259,11 @@ class A&lt;T&gt; {
 }
 </pre>
 <ul>
-<li> 総称クラスにおけるパラメータ型 (<code>T</code>, <code>S</code>)。
+<li> generics におけるパラメータ型 (<code>T</code>, <code>S</code>)。
 <li> メソッド内でのみ有効な型 (<code>C</code>)。
 <li> 匿名クラス。
 <li> Lambda 式。
-<li> 総称メソッドにおけるパラメータ型 (<code>P</code>)。
+<li> generic メソッドにおけるパラメータ型 (<code>P</code>)。
 </ul>
 
 <p>
@@ -393,13 +393,13 @@ class A {
 </div>}
 </pre>
 
-<h3 id="reify">2.4. 総称型の reify化</h3>
+<h3 id="reify">2.4. generics の reify化</h3>
 <p>
 実装にもよるが、ソースコードが含む重要な情報のひとつが変数の型である。
 
 <h4>Type Erasureとは</h4>
 <p>
-Java では、総称型は内部の型に関する情報を持っていない。
+Java では、generics は内部の型に関する情報を持っていない。
 つまり消去 (erasure) されている。
 したがって、たとえば次のようなメソッドは宣言できない:
 <pre>
@@ -409,14 +409,14 @@ void f(List&lt;Object&gt; a) { ... }  // List&lt;Object&gt; = List と同じ。
 
 <h4>Reify された型とは</h4>
 <p>
-いっぽう、C# などの言語では、総称型は内部の型に関する情報を持っている。
+いっぽう、C# などの言語では、generics は内部の型に関する情報を持っている。
 これを "reifyされた型" という。FGyama では、なるべく型の情報を区別したいため、
 たとえば <code>List&lt;String&gt;</code> に対して呼ばれたメソッドと、
 <code>List&lt;Object&gt;</code> に対して呼ばれたメソッドを区別したい。
-このため、すべての総称型は type erasure された型ではなく
+このため、すべての generics は type erasure された型ではなく
 reify された型として扱うことにした。
 つまり、この部分は意図的に Java の仕様から逸脱させている。
-FGyama では、総称型が具体化されると、それに付随するすべての型が
+FGyama では、generics が具体化されると、それに付随するすべての型が
 新たに定義されたとみなす。
 
 <pre>
@@ -430,18 +430,18 @@ C&lt;Object, List&lt;Object&gt;&gt; c1;  <span class=comment>// 型 C&lt;Object,
 C&lt;String, List&lt;String&gt;&gt; c2;  <span class=comment>// 型 C&lt;String, List&lt;String&gt;&gt;, C&lt;String, List&lt;String&gt;&gt;.E&lt;String&gt; が新たに定義される。</span>
 </pre>
 
-ただし、Java の総称型は依然としてパラメータ型を指定しない使用法も
+ただし、Java の generics は依然としてパラメータ型を指定しない使用法も
 許しているため、その場合は最小の基底型 (この場合は <code>Object</code>) を
 パラメータ型として仮定する。
 <pre>
 C c3;  <span class=comment>// C&lt;Object, List&lt;Object&gt;&gt;</span>
 </pre>
 
-<h4>総称型の定義内での finder</h4>
+<h4>Generics の定義内での finder</h4>
 <p>
-総称型の定義では、パラメータ型 (ここでは <code>S</code> や <code>T</code>) への参照が
+Generics の定義では、パラメータ型 (ここでは <code>S</code> や <code>T</code>) への参照が
 すでにパラメータ列の定義自身で使われることに注意。
-そのため、総称型の定義の内部では新たな finder が定義されるとみなしている。
+そのため、generics の定義の内部では新たな finder が定義されるとみなしている。
 <pre>
 package ppp;
 <div class=pkg><span>ppp</span>
@@ -450,6 +450,29 @@ class C <code class=gray>&lt;T, S&gt;</code> {
     class T extends Object { ... }   <span class=comment>// ppp.C.T</span>
     class S extends List&lt;T&gt; { ... }  <span class=comment>// ppp.C.S</span>
 </div>}</div></pre>
+
+<h4>Generic メソッドにおけるパラメータ型</h4>
+<p>
+Java の generic method におけるパラメータは
+generic class とは異なり、明示的に指定されない。
+つまり呼び出し時にパラメータ型を指定する必要がない:
+<pre>
+class A {
+    static &lt;P&gt; P moo(P p) { return p; }
+    void foo() {
+        moo(3);      <span class=comment>// int moo(int p) が呼ばれる。</span>
+        moo("zzz");  <span class=comment>// String moo(String p) が呼ばれる。</span>
+    }
+}
+</pre>
+<p>
+したがって、ここでは型 P を
+「任意の型に対して unification 可能な」
+特殊型とみなしている。
+ちなみに、FGyama では個々の generic メソッドも
+reify されるため、上の例では <code>int moo(int p)</code> および
+<code>String moo(String p)</code> という 2種類の関数が
+内部的に定義される。
 
 <h3 id="methods">2.5. メソッドの列挙</h3>
 <p>
@@ -518,7 +541,7 @@ Java のクラスファイル中では、
 <tr><td>void</td><td><code>V</code></td></tr>
 <tr><td>配列</td><td><code>[<em>型</em></code></td></tr>
 <tr><td>オブジェクト</td><td><code>L<em>名前</em>/.../<em>名前</em>;</code></td></tr>
-<tr><td>総称型</td><td><code>L<em>名前</em>/.../<em>名前</em>&lt;<em>型<sub>1</sub></em><em>型<sub>2</sub></em>...&gt;;</code></td></tr>
+<tr><td>Generics</td><td><code>L<em>名前</em>/.../<em>名前</em>&lt;<em>型<sub>1</sub></em><em>型<sub>2</sub></em>...&gt;;</code></td></tr>
 <tr><td>パラメータ型</td><td><code>T<em>名前</em>;</code></td></tr>
 <tr><td>上階型</td><td><code>+<em>型</em></code></td></tr>
 <tr><td>メソッド</td><td><code>(<em>型<sub>1</sub></em><em>型<sub>2</sub></em>...)<em>返り値型</em></code></td></tr>
