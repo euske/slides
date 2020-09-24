@@ -24,6 +24,7 @@ em { color: blue; }
 .c2 { background: cyan; }
 .c3 { background: magenta; }
 .c4 { background: lime; }
+.gray { color: gray; }
 .pkg { outline: 1px solid black; padding: 2px; margin: 2px; }
 .pkg span { font-weight: bold; color: green; font-size: 75%; }
 .scope { outline: 1px solid black; padding: 2px; margin: 2px; }
@@ -58,8 +59,12 @@ function doit() {
 
 <h4>概要</h4>
 <p>
-大規模なプロジェクトにソースコード解析を適用する際に生じる、
-もろもろの問題を解説する。
+<a href="https://github.com/euske/fgyama/">FGyama</a> は
+大規模かつ現実のプロジェクトに適用可能なソースコードレベルの
+データフロー解析ツールである。
+<p>
+ここでは FGyama を実装するさいに学んだ、
+ソースコード解析を適用する際に生じる諸問題を解説する。
 
 <ol>
 <li> <a href="#goal">目的</a>
@@ -70,8 +75,11 @@ function doit() {
   <li> <a href="#varscope">変数名空間の構築</a>
   <li> <a href="#reify">総称型の reify化</a>
   <li> <a href="#methods">メソッドの列挙</a>
+  <li> <a href="#lambdas">Lambdaの決定</a>
+  <li> <a href="#classfiles">classファイルの走査</a>
 </ul>
 <li> <a href="#sig">おまけ - Java型名の内部表現</a>
+<li> <a href="#conclusion">結論</a>
 </ol>
 
 
@@ -211,7 +219,7 @@ package bar:
 これらは異なる変数である。このように、プログラム中の各要素に対して
 use-def 関係を見いだすには、単なる名前の比較では不可能である。
 <p>
-本手法では、厳密に以下のようなステージで解析する。
+FGyama では、厳密に以下のようなステージで解析する。
 <ol>
 <li> 型名空間の構築。
 <li> 型finderの割り当て。
@@ -386,11 +394,135 @@ class A {
 </pre>
 
 <h3 id="reify">2.4. 総称型の reify化</h3>
+<p>
+実装にもよるが、ソースコードが含む重要な情報のひとつが変数の型である。
+
+<h4>Type Erasureとは</h4>
+<p>
+Java では、総称型は内部の型に関する情報を持っていない。
+つまり消去 (erasure) されている。
+したがって、たとえば次のようなメソッドは宣言できない:
+<pre>
+void f(List&lt;String&gt; a) { ... }  // List&lt;String&gt; = List と同じ。
+void f(List&lt;Object&gt; a) { ... }  // List&lt;Object&gt; = List と同じ。
+</pre>
+
+<h4>Reify された型とは</h4>
+<p>
+いっぽう、C# などの言語では、総称型は内部の型に関する情報を持っている。
+これを "reifyされた型" という。FGyama では、なるべく型の情報を区別したいため、
+たとえば <code>List&lt;String&gt;</code> に対して呼ばれたメソッドと、
+<code>List&lt;Object&gt;</code> に対して呼ばれたメソッドを区別したい。
+このため、すべての総称型は type erasure された型ではなく
+reify された型として扱うことにした。
+つまり、この部分は意図的に Java の仕様から逸脱させている。
+FGyama では、総称型が具体化されると、それに付随するすべての型が
+新たに定義されたとみなす。
+
+<pre>
+class C&lt;T extends Object, S extends List&lt;T&gt;&gt; {
+    T x;
+    S y;
+    class E&lt;T&gt; { ... }
+}
+
+C&lt;Object, List&lt;Object&gt;&gt; c1;  <span class=comment>// 型 C&lt;Object, List&lt;Object&gt;&gt;, C&lt;Object, List&lt;Object&gt;&gt;.E&lt;Object&gt; が新たに定義される。</span>
+C&lt;String, List&lt;String&gt;&gt; c2;  <span class=comment>// 型 C&lt;String, List&lt;String&gt;&gt;, C&lt;String, List&lt;String&gt;&gt;.E&lt;String&gt; が新たに定義される。</span>
+</pre>
+
+ただし、Java の総称型は依然としてパラメータ型を指定しない使用法も
+許しているため、その場合は最小の基底型 (この場合は <code>Object</code>) を
+パラメータ型として仮定する。
+<pre>
+C c3;  <span class=comment>// C&lt;Object, List&lt;Object&gt;&gt;</span>
+</pre>
+
+<h4>総称型の定義内での finder</h4>
+<p>
+総称型の定義では、パラメータ型 (ここでは <code>S</code> や <code>T</code>) への参照が
+すでにパラメータ列の定義自身で使われることに注意。
+そのため、総称型の定義の内部では新たな finder が定義されるとみなしている。
+<pre>
+package ppp;
+<div class=pkg><span>ppp</span>
+class C <code class=gray>&lt;T, S&gt;</code> {
+<div class=pkg><span>ppp.C</span>
+    class T extends Object { ... }   <span class=comment>// ppp.C.T</span>
+    class S extends List&lt;T&gt; { ... }  <span class=comment>// ppp.C.S</span>
+</div>}</div></pre>
 
 <h3 id="methods">2.5. メソッドの列挙</h3>
+<p>
+すべての型および変数名の識別が終わったら、
+ようやくメソッド中の実際のコードを解析することができる。
+<p>
+ここで最後の問題:
+Java はメソッドの多重定義を許しているため、
+「クラス名 + メソッド名」だけではメソッドの一意な識別子にならない。
+そのため、メソッドの識別子には次に挙げるような
+Java 型の内部表現文字列 (JNI名) を使うことにした:
+<pre>
+class C {
+    int foo(int x, int y) { ... }          <span class=comment>// 識別子: foo(II)I</span>
+    void foo(boolean x, String y) { ... }  <span class=comment>// 識別子: foo(ZLjava/lang/String;)V</span>
+}
+</pre>
+
+<h3 id="lambdas">2.6. Lambdaの決定</h3>
+<p>
+Java の Lambda 式は、基本的に新しい匿名クラスとして扱われる。
+ところが Java の Lambda式では、変数の型を明示的に指定しなくてもよい:
+<pre>
+class A {
+    void main() {
+       doit(<mark>x -&gt; x+1</mark>);
+    }
+
+    ...
+    int doit(IntFunction&lt;int&gt; f) { return f.apply(1); }  <span class=comment>// intをとる</span>
+    int doit(String x) { ... }
+}
+</pre>
+<p>
+つまり、各メソッド内のコード解析が一度完了してからでないと
+Lambda が実際にどのクラスに属する (つまり、Lambda 内の変数がどの型になる) かが
+判明しないということである。そのため、FGyama ではメソッド解析のあとに
+さらに lambda 式のための再帰的な解析ルーチンを含んでいる。
+
+<h3 id="classfile">2.7. classファイルの走査</h3>
+<p>
+ほとんどの Java のコードでは
+標準・外部から提供されたライブラリを参照するのが普通である。
+これら外部のコードの型情報はソースコードではなく、
+通常はクラスファイルに含まれている。
+したがって、以上の処理は実際にはテキストで書かれたソースコードだけでなく、
+.jar ファイル内のクラスファイルに対しても実行する必要がある。
+(FGyama では Apache BCEL を使用した)。
 
 
 <h2 id="sig">3. おまけ - Java型名の内部表現</h2>
+<p>
+Java のクラスファイル中では、
+型名は以下のような内部表現 (JNI名) で表現されている。
+これらは左から一意に字句解析可能なように作られている:
+<table border>
+<tr><th>型</th><th>構文</th></tr>
+<tr><td>byte</td><td><code>B</code></td></tr>
+<tr><td>char</td><td><code>C</code></td></tr>
+<tr><td>short</td><td><code>S</code></td></tr>
+<tr><td>int</td><td><code>I</code></td></tr>
+<tr><td>long</td><td><code>J</code></td></tr>
+<tr><td>float</td><td><code>F</code></td></tr>
+<tr><td>double</td><td><code>D</code></td></tr>
+<tr><td>boolean</td><td><code>Z</code></td></tr>
+<tr><td>void</td><td><code>V</code></td></tr>
+<tr><td>配列</td><td><code>[<em>型</em></code></td></tr>
+<tr><td>オブジェクト</td><td><code>L<em>名前</em>/.../<em>名前</em>;</code></td></tr>
+<tr><td>総称型</td><td><code>L<em>名前</em>/.../<em>名前</em>&lt;<em>型<sub>1</sub></em><em>型<sub>2</sub></em>...&gt;;</code></td></tr>
+<tr><td>パラメータ型</td><td><code>T<em>名前</em>;</code></td></tr>
+<tr><td>上階型</td><td><code>+<em>型</em></code></td></tr>
+<tr><td>メソッド</td><td><code>(<em>型<sub>1</sub></em><em>型<sub>2</sub></em>...)<em>返り値型</em></code></td></tr>
+</table>
 <p>
 <strong>問題:</strong>
 以下の Java 型名の内部表現を答えよ:
@@ -398,9 +530,17 @@ class A {
 <li> <code>boolean[]</code>
 <li> <code>String[][]</code>
 <li> <code>List&lt;String&gt;</code>
-<li> <code>int f(int)</code>
+<li> <code>int f(long)</code>
 <li> <code>Object[] g(int, List&lt;T&gt;)</code>
 </ul>
+
+
+<h2 id="conclusion">4. 結論</h2>
+<p>
+これらのことをぜーんぶ調査・実装するのに 2年かかってしまった。
+<p>
+(Java のような) 大きな言語のソースコード解析は、
+よほどのことがない限りやらないほうがよい。
 
 
 <hr>
