@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>
+まだプレゼンに PowerPoint・Keynote・PDF 使ってるの?
+- 権藤研 Lightning Talk 2021/04/20
+- 新山
+</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 0.5em; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+code { font-weight: bold; color: purple; }
+pre { border: 1px solid black; padding: 0.3em; }
+.author { text-align: right; }
+.notice { text-align: center; font-weight: bold; outline: 4px solid black; padding: 1em; margin: 1em; font-size: 200%; }
+.conclusion { outline: 4px solid black; padding: 1em; margin: 1em; font-size: 200%; }
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>SOAPBOX:<br>
+まだプレゼンに PowerPoint・Keynote・PDF 使ってるの?</h1>
+
+<div class=author>
+権藤研 Lightning Talk 2021/04/20<br>
+新山
+</div>
+
+<h2>1. なぜ PowerPoint・Keynote・PDF は悪か</h2>
+<ul>
+<li> 作成するのに専用アプリが必要。
+<li> 仕様がオープンでない。
+<li> サイズを調節できない。
+<li> 動作が遅い。
+<li> マウスを使わないと作業できない。
+<li> 今どきページ単位?
+<div class=figure>
+<img src="https://pixfeeds.com/images/2/165753/1200-173041322-overhead-projector-on-white-background.jpg" width="300" height="390">
+</div>
+</ul>
+
+<h2>2. じゃあどうすれば?</h2>
+<div class=notice>
+<u>HTML</u>を使え。
+</div>
+<ul>
+<li> ブラウザだけで見れる。
+<li> エディタだけで作れる。
+<li> 拡大・縮小でリフロー。
+<li> 音声読み上げ可。
+<li> 画像でも表でもJSでもYouTubeでも埋め込み可。<br>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<li> Alternative: Markdown.
+</ul>
+
+<h2>3. でも…</h2>
+<ul>
+<li> 「図が入れられない」 → SVGって知ってる?
+  <a href="https://developer.mozilla.org/en-US/docs/Web/SVG">手書き</a>、
+  <a href="https://svg-edit.github.io/svgedit/dist/editor/index.html">SVG-edit</a>、
+  <a href="https://app.diagrams.net/">diagrams</a>。
+<li> 「数式が入れられない」 →
+  <a href="https://www.mathjax.org/">MathJax</a>、
+  <a href="https://katex.org/">KaTeX</a>。
+<li> 「プレゼンテーション用のJSフレームワークが…」 → 必要なし。
+  このファイル自身をパクれ。
+<li> 「アニメーションが使えない」 → カッコつけるのは100年早い。
+<li> 「HTMLでプレゼンやってる奴なんている?」 →
+  <a href="https://euske.github.io/slides/">おります</a>。
+</ul>
+
+<h2>4. それでも人が PowerPoint・Keynote を使う理由</h2>
+<ul>
+<li> プレゼンがTED並にスゴい。
+<li> 金と時間が余っている。
+<li> 記憶力が低下しててHTMLの20個のタグが覚えられない。<br>
+  (プログラムはScratchで作ってるんでちゅか?)
+</ul>
+
+<h2>5. 結論</h2>
+<div class=conclusion>
+あなたのプレゼンはダサいし、金も時間もない。
+しかし、あなたには<strong>まともな技術を覚えて使いこなす能力がある</strong>。
+アホなことで時間を無駄にするのはおやめなさい。
+</div>
+
+<hr>
+<address>Yusuke Shinyama</address>
