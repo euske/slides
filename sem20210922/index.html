@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>
+プログラマはどのように低水準なデータ型を使って高水準の概念を表現しているのか?
+- 権藤研 夏ゼミ資料 2021/09/22
+- 新山
+</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 0.5em; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+code { font-weight: bold; color: purple; }
+pre { border: 1px solid black; padding: 0.3em; }
+.author { text-align: right; }
+.notice { text-align: center; font-weight: bold; outline: 4px solid black; padding: 1em; margin: 1em; font-size: 200%; }
+.comment { color: green; }
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>プログラマはどのように低水準なデータ型を使って高水準の概念を表現しているのか?</h1>
+
+<div class=author>
+権藤研 夏ゼミ資料 2021/09/22<br>
+新山
+</div>
+
+<h2>0. 概要</h2>
+<ul>
+<li> 現代のプログラミング言語はさまざまな型をユーザが定義可能である。
+<li> いっぽう <code>str</code> 型と <code>int</code> 型は「一般的な型」であり、
+  さまざまな用途に使われている。
+<li> プログラマは、ふさわしい変数名によってこれらの型の「目的」を区別していると考えられる。
+<li> 明らかに意味的に定まっている以下の「型」がどのような式で表現されているかを調査した:
+  <ul>
+    <li> <code>str</code>型: パス名, URL, ホスト名, SQL文
+    <li> <code>int</code>: ポート番号, (GUI上の)X座標,Y座標,幅,高さ, 年, 月, 日
+  </ul>
+<li> 測定手法:
+  Javaの標準APIには、上記の値を (strあるいはintの) 引数としてとるメソッドが多くある。
+  プログラマはあきらかにその引数の用途を理解しているはずなので、これらの式を調べる。
+<li> 実験方法:
+  <ol>
+    <li> 25個の有名なオープンソースプロジェクト (大規模) を選ぶ。
+    <li> こちらで選択した 110個の Java APIの呼び出し引数 (222項目) を列挙する。
+    <li> これらに使われている識別子の統計をとる。
+    <li> これらの式のデータフローを検査し、各識別子に流入している識別子も列挙してみる。
+  </ol>
+<li> (ほぼ自明な)結論:
+  多くのプログラムで、パス名には <code>path</code>、座標には
+  <code>x</code>, <code>y</code> などの識別子が使われていることがわかった。
+</ul>
+
+<h2>1. 背景</h2>
+<p>
+よく「悪いコード」として primitive obsession と呼ばれる現象がある:
+<blockquote><pre>
+String username = getCurrentUserName();
+String path = "/home/"+username+"/user.cfg";
+<span class=comment>// Unsafe path: extra check is needed!</span>
+File config = new File(path);
+</pre></blockquote>
+<p>
+まともな (しかし面倒くさい) コード:
+<blockquote><pre>
+User user = getCurrentUser();
+Path path = Paths.get(user.getHomeDirectory(), "user.cfg");
+<span class=comment>// Path is guaranteed to be safe.</span>
+File config = new File(path);
+</pre></blockquote>
+
+<h3>Research Questions</h3>
+<ol type=a>
+<li> 多くのプログラマが使う「高水準な型 (<strong>Conceptual Type</strong>, ctype)」とはどんなものか?
+<li> プログラマはそのような概念をコード中でどのように表現しているか?
+<li> コードからそれを推論することは可能なのか?
+</ol>
+
+<h2>2. 基本的なアイデア</h2>
+<p>
+プログラマは APIを呼び出すとき、その引数の用途 (ctype) を知っているはず:
+<blockquote><pre>
+String x = "foo/bar.txt";
+var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
+</pre></blockquote>
+
+<p>
+いくつかの Java オープンソースプロジェクトを調査し、
+以下の 12 の ctype を定めることにした:
+<table border>
+<tr><th>Ctype</th></th><th>言語の型</th><th>説明</th></tr>
+<tr><td>PATH   </td><td> <code>String</codE> </td><td> パス名</td></tr>
+<tr><td>URL    </td><td> <code>String</codE> </td><td> URL/URI</td></tr>
+<tr><td>SQL    </td><td> <code>String</codE> </td><td> SQL文</td></tr>
+<tr><td>HOST   </td><td> <code>String</codE> </td><td> ホスト名</td></tr>
+<tr><td>PORT   </td><td> <code>int</code>    </td><td> ポート番号</td></tr>
+<tr><td>XCOORD </td><td> <code>int</code>    </td><td> X座標 (GUI用)</td></tr>
+<tr><td>YCOORD </td><td> <code>int</code>    </td><td> Y座標 (GUI用)</td></tr>
+<tr><td>WIDTH  </td><td> <code>int</code>    </td><td> 幅 (GUI用)</td></tr>
+<tr><td>HEIGHT </td><td> <code>int</code>    </td><td> 高さ (GUI用)</td></tr>
+<tr><td>YEAR   </td><td> <code>int</code>    </td><td> 年</td></tr>
+<tr><td>MONTH  </td><td> <code>int</code>    </td><td> 月</td></tr>
+<tr><td>DAY    </td><td> <code>int</code>    </td><td> 日</td></tr>
+</table>
+
+<p>
+これを選んだ基準は以下のとおりである:
+<ol type=a>
+<li> ほとんどのプログラマが理解できる明確な概念であること
+<li> 互いにきっちり区別できること
+<li> 広範囲のアプリケーションで使われていること
+</ol>
+
+<p>
+つぎに Java Standard API を調べて、
+これらの ctype を含むメソッドを列挙した:
+<ul>
+<li> <code>new java.io.File(<u>PATH</u>)</code>
+<li> <code>new java.net.URI(<u>URL</u>)</code>
+<li> <code>java.sql.Statement.execute(<u>SQL</u>)</code>
+<li> <code>java.net.InetAddress.getByName(<u>HOST</u>)</code>
+<li> <code>new java.net.Socket(<u>HOST</u>, <u>PORT</u>)</code>
+<li> <code>new java.awt.Point(<u>XCOORD</u>, <u>YCOORD</u>)</code>
+<li> <code>new java.awt.Dimension(<u>WIDTH</u>, <u>HEIGHT</u>)</code>
+<li> <code>new java.util.Date(<u>YEAR</u>, <u>MONTH</u>, <u>DAY</u>)</code>
+<li> <code>java.util.Date.setYear(<u>YEAR</u>)</code>
+<li> <code>java.time.LocalDate.of(<u>YEAR</u>, <u>MONTH</u>, <u>DAY</u>)</code>
+</ul>
+
+<h2>3. 実装</h2>
+
+
+<hr>
+<address>Yusuke Shinyama</address>
