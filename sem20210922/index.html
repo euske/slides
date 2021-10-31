@@ -15,7 +15,7 @@ h2 { border-bottom: solid 2px #000080; }
 h3 { border-bottom: solid 1px #000080; }
 table { border-collapse: collapse; margin: 0.5em; }
 kbd { border: 1px solid black; padding: 4px; margin: 4px; }
-code { font-weight: bold; color: purple; }
+code { font-weight: bold; }
 pre { border: 1px solid black; padding: 0.3em; }
 .author { text-align: right; }
 .notice { text-align: center; font-weight: bold; outline: 4px solid black; padding: 1em; margin: 1em; font-size: 200%; }
@@ -36,27 +36,29 @@ pre { border: 1px solid black; padding: 0.3em; }
 <h2>0. 概要</h2>
 <ul>
 <li> 現代のプログラミング言語はさまざまな型をユーザが定義可能である。
-<li> いっぽう <code>str</code> 型と <code>int</code> 型は「一般的な型」であり、
+<li> いっぽう <code>String</code> 型と <code>int</code> 型は「一般的な型」であり、
   さまざまな用途に使われている。
 <li> プログラマは、ふさわしい変数名によってこれらの型の「目的」を区別していると考えられる。
 <li> 明らかに意味的に定まっている以下の「型」がどのような式で表現されているかを調査した:
   <ul>
-    <li> <code>str</code>型: パス名, URL, ホスト名, SQL文
+    <li> <code>String</code>型: パス名, URL, ホスト名, SQL文
     <li> <code>int</code>: ポート番号, (GUI上の)X座標,Y座標,幅,高さ, 年, 月, 日
   </ul>
 <li> 測定手法:
-  Javaの標準APIには、上記の値を (strあるいはintの) 引数としてとるメソッドが多くある。
+  Javaの標準APIには、上記の値を (Stringあるいはintの) 引数としてとるメソッドが多くある。
   プログラマはあきらかにその引数の用途を理解しているはずなので、これらの式を調べる。
 <li> 実験方法:
   <ol>
     <li> 25個の有名なオープンソースプロジェクト (大規模) を選ぶ。
     <li> こちらで選択した 110個の Java APIの呼び出し引数 (222項目) を列挙する。
     <li> これらに使われている識別子の統計をとる。
-    <li> これらの式のデータフローを検査し、各識別子に流入している識別子も列挙してみる。
+    <li> これらの識別子のデータフローから「型 (ctype)」を推論できるかどうか実験する。
   </ol>
 <li> (ほぼ自明な)結論:
   多くのプログラムで、パス名には <code>path</code>、座標には
   <code>x</code>, <code>y</code> などの識別子が使われていることがわかった。
+<li> データフローを決定木で解析することにより、これらのうち
+  83% (F値) を正しく識別することが可能。
 </ul>
 
 <h2>1. 背景</h2>
@@ -96,19 +98,31 @@ var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
 いくつかの Java オープンソースプロジェクトを調査し、
 以下の 12 の ctype を定めることにした:
 <table border>
-<tr><th>Ctype</th></th><th>言語の型</th><th>説明</th></tr>
-<tr><td>PATH   </td><td> <code>String</codE> </td><td> パス名</td></tr>
-<tr><td>URL    </td><td> <code>String</codE> </td><td> URL/URI</td></tr>
-<tr><td>SQL    </td><td> <code>String</codE> </td><td> SQL文</td></tr>
-<tr><td>HOST   </td><td> <code>String</codE> </td><td> ホスト名</td></tr>
-<tr><td>PORT   </td><td> <code>int</code>    </td><td> ポート番号</td></tr>
-<tr><td>XCOORD </td><td> <code>int</code>    </td><td> X座標 (GUI用)</td></tr>
-<tr><td>YCOORD </td><td> <code>int</code>    </td><td> Y座標 (GUI用)</td></tr>
-<tr><td>WIDTH  </td><td> <code>int</code>    </td><td> 幅 (GUI用)</td></tr>
-<tr><td>HEIGHT </td><td> <code>int</code>    </td><td> 高さ (GUI用)</td></tr>
-<tr><td>YEAR   </td><td> <code>int</code>    </td><td> 年</td></tr>
-<tr><td>MONTH  </td><td> <code>int</code>    </td><td> 月</td></tr>
-<tr><td>DAY    </td><td> <code>int</code>    </td><td> 日</td></tr>
+<tr><th>Ctype</th></th><th>言語の型</th><th>説明</th><th>メソッド数</th></tr>
+<tr><td>PATH   </td><td> <code>String</code> </td><td> パス名</td>
+<td align=right>14</td></tr>
+<tr><td>URL    </td><td> <code>String</code> </td><td> URL/URI</td>
+<td align=right>4</td></tr>
+<tr><td>SQL    </td><td> <code>String</code> </td><td> SQL文</td>
+<td align=right>10</td></tr>
+<tr><td>HOST   </td><td> <code>String</code> </td><td> ホスト名</td>
+<td align=right>17</td></tr>
+<tr><td>PORT   </td><td> <code>int</code>    </td><td> ポート番号</td>
+<td align=right>25</td></tr>
+<tr><td>XCOORD </td><td> <code>int</code>    </td><td> X座標 (GUI用)</td>
+<td align=right>25</td></tr>
+<tr><td>YCOORD </td><td> <code>int</code>    </td><td> Y座標 (GUI用)</td>
+<td align=right>25</td></tr>
+<tr><td>WIDTH  </td><td> <code>int</code>    </td><td> 幅 (GUI用)</td>
+<td align=right>24</td></tr>
+<tr><td>HEIGHT </td><td> <code>int</code>    </td><td> 高さ (GUI用)</td>
+<td align=right>24</td></tr>
+<tr><td>YEAR   </td><td> <code>int</code>    </td><td> 年</td>
+<td align=right>18</td></tr>
+<tr><td>MONTH  </td><td> <code>int</code>    </td><td> 月</td>
+<td align=right>14</td></tr>
+<tr><td>DAY    </td><td> <code>int</code>    </td><td> 日</td>
+<td align=right>18</td></tr>
 </table>
 
 <p>
@@ -133,10 +147,291 @@ var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
 <li> <code>new java.util.Date(<u>YEAR</u>, <u>MONTH</u>, <u>DAY</u>)</code>
 <li> <code>java.util.Date.setYear(<u>YEAR</u>)</code>
 <li> <code>java.time.LocalDate.of(<u>YEAR</u>, <u>MONTH</u>, <u>DAY</u>)</code>
+<li> ...
 </ul>
 
-<h2>3. 実装</h2>
+<h2>3. 実験</h2>
 
+<p>
+実験は以下の手順でおこなった:
+<ol>
+<li> 中〜大規模の 26 のJava オープンソースプロジェクトを選ぶ。
+<li> ソースコードを解析し、あらかじめ選んだ
+  メソッド (コンストラクタ) 呼び出しを探す。
+<li> それらの引数を集計する。
+</ol>
+
+<p>
+使用したプロジェクトとLoCは以下の通りである:
+<table border>
+<tr><th>Project</th><th>Description</th><th>LoC</th></tr>
+<tr><td>hadoop 3.3.1      </td><td>distributed computation </td><td align=right>1,789k</td></tr>
+<tr><td>ghidra 10.0       </td><td>binary analyzer         </td><td align=right>1,588k</td></tr>
+<tr><td>ignite 2.10.0     </td><td>distributed database    </td><td align=right>1,165k</td></tr>
+<tr><td>jetty 11.0.5      </td><td>web container           </td><td align=right>  441k</td></tr>
+<tr><td>kafka 2.7.1       </td><td>stream processing       </td><td align=right>  384k</td></tr>
+<tr><td>tomcat 8.5.68     </td><td>web server              </td><td align=right>  349k</td></tr>
+<tr><td>jitsi 2.10        </td><td>video conference        </td><td align=right>  327k</td></tr>
+<tr><td>binnavi 6.1.0     </td><td>binary analyzer         </td><td align=right>  309k</td></tr>
+<tr><td>netty 4.1.65      </td><td>network library         </td><td align=right>  303k</td></tr>
+<tr><td>libgdx 1.10.0     </td><td>game framework          </td><td align=right>  272k</td></tr>
+<tr><td>alluxio 2.5.0-3   </td><td>data orchestration      </td><td align=right>  228k</td></tr>
+<tr><td>plantuml 1.2021.7 </td><td>UML generator           </td><td align=right>  210k</td></tr>
+<tr><td>grpc 1.38.1       </td><td>RPC framework           </td><td align=right>  195k</td></tr>
+<tr><td>jenkins 2.299     </td><td>automation              </td><td align=right>  177k</td></tr>
+<tr><td>jmeter 5.4.1      </td><td>network analyzer        </td><td align=right>  145k</td></tr>
+<tr><td>jedit 5.6.0       </td><td>text editor             </td><td align=right>  125k</td></tr>
+<tr><td>gephi 0.9.2       </td><td>graph visualizer        </td><td align=right>  120k</td></tr>
+<tr><td>zookeeper 3.7.0   </td><td>distributed computation </td><td align=right>  114k</td></tr>
+<tr><td>selenium 3.141.59 </td><td>browser automation      </td><td align=right>   91k</td></tr>
+<tr><td>okhttp 4.9.1      </td><td>HTTP client             </td><td align=right>   36k</td></tr>
+<tr><td>jhotdraw 7.0.6    </td><td>graph drawing           </td><td align=right>   32k</td></tr>
+<tr><td>arduino 1.8.15    </td><td>development environment </td><td align=right>   27k</td></tr>
+<tr><td>gson 2.8.7        </td><td>serialization framework </td><td align=right>   25k</td></tr>
+<tr><td>websocket 1.5.2   </td><td>network framework       </td><td align=right>   15k</td></tr>
+<tr><td>picasso 2.8       </td><td>image processing        </td><td align=right>    9k</td></tr>
+<tr><td>jpacman           </td><td>action game             </td><td align=right>    3k</td></tr>
+<tr><td colspan="2">Total</td><td>8,480k</td></tr>
+</table>
+
+<p>
+プロジェクトごとの抽出された各c-type は以下のとおりである:
+<table border>
+<tr><th>Project</th><th>LoC</th><th><code>PATH</code></th><th><code>URL</code></th><th><code>SQL</code></th><th><code>HOST</code></th><th><code>PORT</code></th><th><code>XCOORD</code></th><th><code>YCOORD</code></th><th><code>WIDTH</code></th><th><code>HEIGHT</code></th><th><code>YEAR</code></th><th><code>MONTH</code></th><th><code>DAY</code></th><th><code>OTHER</code></th><th>All</th></tr>
+<tr><td>   alluxio </td><td align=right>  228k </td><td align=right>  72 </td><td align=right>  12 </td><td align=right>   0 </td><td align=right>  22 </td><td align=right>  26 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  15 </td><td align=right>  15 </td><td align=right>  15 </td><td align=right>  51 </td><td align=right>  228 </td></tr>
+<tr><td>   arduino </td><td align=right>   27k </td><td align=right>  39 </td><td align=right>   5 </td><td align=right>   0 </td><td align=right>  12 </td><td align=right>   9 </td><td align=right>   6 </td><td align=right>   6 </td><td align=right>  42 </td><td align=right>  42 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   1 </td><td align=right>  162 </td></tr>
+<tr><td>   binnavi </td><td align=right>  309k </td><td align=right>  42 </td><td align=right>   7 </td><td align=right>   1 </td><td align=right>   2 </td><td align=right>   1 </td><td align=right>  23 </td><td align=right>  23 </td><td align=right>  67 </td><td align=right>  67 </td><td align=right>   1 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   1 </td><td align=right>  235 </td></tr>
+<tr><td>     gephi </td><td align=right>  120k </td><td align=right>   5 </td><td align=right>   0 </td><td align=right>   2 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  28 </td><td align=right>  28 </td><td align=right>  66 </td><td align=right>  66 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  195 </td></tr>
+<tr><td>    ghidra </td><td align=right>1,588k </td><td align=right> 369 </td><td align=right>  25 </td><td align=right>   0 </td><td align=right>  10 </td><td align=right>   8 </td><td align=right> 320 </td><td align=right> 320 </td><td align=right> 511 </td><td align=right> 511 </td><td align=right>  13 </td><td align=right>  13 </td><td align=right>  13 </td><td align=right>  13 </td><td align=right> 2,126</td></tr>
+<tr><td>      grpc </td><td align=right>  195k </td><td align=right>  33 </td><td align=right>  16 </td><td align=right>   0 </td><td align=right>  68 </td><td align=right>  71 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  75 </td><td align=right>  263 </td></tr>
+<tr><td>      gson </td><td align=right>   25k </td><td align=right>   0 </td><td align=right>   4 </td><td align=right>   0 </td><td align=right>   2 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   6 </td><td align=right>   6 </td><td align=right>   6 </td><td align=right>   7 </td><td align=right>   31 </td></tr>
+<tr><td>    hadoop </td><td align=right>1,789k </td><td align=right> 978 </td><td align=right> 634 </td><td align=right>   9 </td><td align=right> 288 </td><td align=right> 259 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   2 </td><td align=right>   2 </td><td align=right>   2 </td><td align=right> 124 </td><td align=right> 2,298</td></tr>
+<tr><td>    ignite </td><td align=right>1,165k </td><td align=right> 168 </td><td align=right>  85 </td><td align=right> 666 </td><td align=right> 106 </td><td align=right> 111 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  12 </td><td align=right>  12 </td><td align=right>  12 </td><td align=right> 101 </td><td align=right> 1,273</td></tr>
+<tr><td>     jedit </td><td align=right>  125k </td><td align=right> 130 </td><td align=right>  19 </td><td align=right>   0 </td><td align=right>   3 </td><td align=right>   3 </td><td align=right>  50 </td><td align=right>  50 </td><td align=right> 112 </td><td align=right> 112 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   3 </td><td align=right>  482 </td></tr>
+<tr><td>   jenkins </td><td align=right>  117k </td><td align=right>  82 </td><td align=right>  28 </td><td align=right>   0 </td><td align=right>   6 </td><td align=right>   6 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right> 102 </td><td align=right> 102 </td><td align=right> 102 </td><td align=right> 237 </td><td align=right>  669 </td></tr>
+<tr><td>     jetty </td><td align=right>  441k </td><td align=right>  72 </td><td align=right> 216 </td><td align=right>   9 </td><td align=right> 163 </td><td align=right> 104 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  37 </td><td align=right>  601 </td></tr>
+<tr><td>  jhotdraw </td><td align=right>   32k </td><td align=right>   6 </td><td align=right>   5 </td><td align=right>   0 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right>  96 </td><td align=right>  96 </td><td align=right>  50 </td><td align=right>  50 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   1 </td><td align=right>  306 </td></tr>
+<tr><td>     jitsi </td><td align=right>  327k </td><td align=right>  22 </td><td align=right>  18 </td><td align=right>   1 </td><td align=right>   8 </td><td align=right>  31 </td><td align=right>  78 </td><td align=right>  78 </td><td align=right> 234 </td><td align=right> 234 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  30 </td><td align=right>  734 </td></tr>
+<tr><td>    jmeter </td><td align=right>  145k </td><td align=right> 112 </td><td align=right>  62 </td><td align=right>   2 </td><td align=right>  31 </td><td align=right>  28 </td><td align=right>   7 </td><td align=right>   7 </td><td align=right>  62 </td><td align=right>  62 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  28 </td><td align=right>  401 </td></tr>
+<tr><td>   jpacman </td><td align=right>    3k </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>    2 </td></tr>
+<tr><td>     kafka </td><td align=right>  384k </td><td align=right>  37 </td><td align=right>   1 </td><td align=right>   0 </td><td align=right>  85 </td><td align=right>  72 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  14 </td><td align=right>  14 </td><td align=right>  14 </td><td align=right>  44 </td><td align=right>  281 </td></tr>
+<tr><td>    libgdx </td><td align=right>  272k </td><td align=right>  83 </td><td align=right>   7 </td><td align=right>   0 </td><td align=right>   4 </td><td align=right>   5 </td><td align=right>   7 </td><td align=right>   7 </td><td align=right>  36 </td><td align=right>  36 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  185 </td></tr>
+<tr><td>     netty </td><td align=right>  303k </td><td align=right>  38 </td><td align=right>  24 </td><td align=right>   0 </td><td align=right>  54 </td><td align=right> 130 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right> 117 </td><td align=right>  366 </td></tr>
+<tr><td>    okhttp </td><td align=right>   36k </td><td align=right>   2 </td><td align=right>  24 </td><td align=right>   0 </td><td align=right>   6 </td><td align=right>   7 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   3 </td><td align=right>   42 </td></tr>
+<tr><td>   picasso </td><td align=right>    9k </td><td align=right>   1 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>    1 </td></tr>
+<tr><td>  plantuml </td><td align=right>  210k </td><td align=right>  29 </td><td align=right>   4 </td><td align=right>   0 </td><td align=right>   5 </td><td align=right>  11 </td><td align=right>   4 </td><td align=right>   4 </td><td align=right>  11 </td><td align=right>  11 </td><td align=right>   2 </td><td align=right>   2 </td><td align=right>   2 </td><td align=right>   2 </td><td align=right>   87 </td></tr>
+<tr><td>  selenium </td><td align=right>   91k </td><td align=right>  44 </td><td align=right>  66 </td><td align=right>   0 </td><td align=right>  15 </td><td align=right>  12 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right>  21 </td><td align=right>  163 </td></tr>
+<tr><td>    tomcat </td><td align=right>  349k </td><td align=right> 207 </td><td align=right>  64 </td><td align=right>  22 </td><td align=right>  38 </td><td align=right>  52 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  10 </td><td align=right>  10 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  47 </td><td align=right>  450 </td></tr>
+<tr><td> websocket </td><td align=right>   15k </td><td align=right>   9 </td><td align=right>  44 </td><td align=right>   0 </td><td align=right>   5 </td><td align=right>  43 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   1 </td><td align=right>  104 </td></tr>
+<tr><td> zookeeper </td><td align=right>  114k </td><td align=right>  88 </td><td align=right>   4 </td><td align=right>   0 </td><td align=right> 126 </td><td align=right> 192 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   1 </td><td align=right>   1 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  47 </td><td align=right>  459 </td></tr>
+<tr><td>Total</td><td align=right>8,480k </td><td align=right> 2,668 </td><td align=right> 1,374 </td><td align=right> 712 </td><td align=right> 1,060 </td><td align=right> 1,182 </td><td align=right> 621 </td><td align=right> 621 </td><td align=right> 1,205 </td><td align=right> 1,205 </td><td align=right> 169 </td><td align=right> 168 </td><td align=right> 168 </td><td align=right> 991 </td><td align=right> 12,144 </td></tr>
+</table>
+
+<p>
+以下は抽出した式に含まれていた PATH, URL, XCOORD, WIDTH 表現の抜粋である:
+<table border>
+<tr><th>PATH</th><th>Top Expressions</th></tr>
+<tr><td>alluxio</td><td><code>path, mLocalUfsPath+ufsBase, base</code></td></tr>
+<tr><td>arduino</td><td><code>path, PreferencesData.get("runtime.ide.path")</code></td></tr>
+<tr><td>binnavi</td><td><code>filename, directory, pathname</code></td></tr>
+<tr><td>gephi</td><td><code>System.getProperty("netbeans.user")</code></td></tr>
+<tr><td>ghidra</td><td><code>getTestDirectoryPath(), path, filename</code></td></tr>
+<tr><td>grpc</td><td><code>uri.getPath()</code></td></tr>
+<tr><td>hadoop</td><td><code>GenericTestUtils.getRandomizedTempPath()</code></td></tr>
+<tr><td>ignite</td><td><code>path, U.defaultWorkDirectory(), fileName</code></td></tr>
+<tr><td>jedit</td><td><code>path, dir, directory</code></td></tr>
+<tr><td>jenkins</td><td><code>System.getProperty("user.home"), war</code></td></tr>
+<tr><td>jetty</td><td><code>file.getParent()</code></td></tr>
+<tr><td>jhotdraw</td><td><code>prefs.get("projectFile", home)</code></td></tr>
+<tr><td>jitsi</td><td><code>path, localPath</code></td></tr>
+<tr><td>jmeter</td><td><code>filename, path, file</code></td></tr>
+<tr><td>kafka</td><td><code>storeDirectoryPath, argument</code></td></tr>
+<tr><td>libgdx</td><td><code>name, sourcePath, imagePath.replace('\textbackslash\textbackslash','/')</code></td></tr>
+<tr><td>netty</td><td><code>getClass().getResource("test.crt").getFile()</code></td></tr>
+<tr><td>plantuml</td><td><code>filename, newName</code></td></tr>
+<tr><td>selenium</td><td><code>System.getProperty("java.io.tmpdir"), logName</code></td></tr>
+<tr><td>tomcat</td><td><code>pathname, path, docBase</code></td></tr>
+<tr><td>zookeeper</td><td><code>path, KerberosTestUtils.getKeytabFile()</code></td></tr>
+<tr><th>URL</th><th>Top Expressions</th></tr>
+<tr><td>alluxio</td><td><code>journalDirectory, folder, inputDir</code></td></tr>
+<tr><td>arduino</td><td><code>contribution.getUrl(), packageIndexURLString</code></td></tr>
+<tr><td>binnavi</td><td><code>url, urlString</code></td></tr>
+<tr><td>ghidra</td><td><code>ref, getAbsolutePath(), url.toExternalForm()</code></td></tr>
+<tr><td>grpc</td><td><code>target, TARGET, oobTarget</code></td></tr>
+<tr><td>gson</td><td><code>nextString, urlValue, uriValue</code></td></tr>
+<tr><td>hadoop</td><td><code>uri, url, s</code></td></tr>
+<tr><td>ignite</td><td><code>GridTestProperties.getProperty("p2p.uri.cls")</code></td></tr>
+<tr><td>jedit</td><td><code>path, str, fileIcon</code></td></tr>
+<tr><td>jenkins</td><td><code>url, site.getData().core.url, plugin.url</code></td></tr>
+<tr><td>jetty</td><td><code>uri, inputUrl.toString(), s</code></td></tr>
+<tr><td>jitsi</td><td><code>url, imagePath, sourceString</code></td></tr>
+<tr><td>jmeter</td><td><code>url, LOCAL_HOST, requestPath</code></td></tr>
+<tr><td>kafka</td><td><code>config.getString(METRICS_URL_CONFIG)</code></td></tr>
+<tr><td>libgdx</td><td><code>url, URI, httpRequest.getUrl()+queryString</code></td></tr>
+<tr><td>netty</td><td><code>URL, request.uri(), server</code></td></tr>
+<tr><td>selenium</td><td><code>url, baseUrl, (String)raw.get("uri")</code></td></tr>
+<tr><td>tomcat</td><td><code>url, location, path</code></td></tr>
+<tr><td>websocket</td><td><code>uriField.getText(), uriinput.getText()</code></td></tr>
+<tr><td>zookeeper</td><td><code>urlStr</code></td></tr>
+<tr><th>XCOORD</th><th>Top Expressions</th></tr>
+<tr><td>arduino</td><td><code>noLeft, cancelLeft</code></td></tr>
+<tr><td>binnavi</td><td><code>x, m_x</code></td></tr>
+<tr><td>gephi</td><td><code>currentMouseX, x, bounds.x</code></td></tr>
+<tr><td>ghidra</td><td><code>x, center.x+deltaX, filterPanelBounds.x</code></td></tr>
+<tr><td>jedit</td><td><code>x, event.getX(), leftButtonWidth+leftWidth</code></td></tr>
+<tr><td>jhotdraw</td><td><code>evt.getX(), x, e.getX()</code></td></tr>
+<tr><td>jitsi</td><td><code>x, button.getX(), dx</code></td></tr>
+<tr><td>jmeter</td><td><code>graphPanel.getLocation().x, cellRect.x, x</code></td></tr>
+<tr><td>libgdx</td><td><code>upButtonX, getWidth()-buttonSize.width-5, x</code></td></tr>
+<tr><td>plantuml</td><td><code>e.getX()</code></td></tr>
+<tr><th>WIDTH</th><th>Top Expressions</th></tr>
+<tr><td>arduino</td><td><code>width, imageW, Preferences.BUTTON_WIDTH</code></td></tr>
+<tr><td>binnavi</td><td><code>COLORPANEL_WIDTH, TEXTFIELD_WIDTH, width</code></td></tr>
+<tr><td>gephi</td><td><code>w, constraintWidth, DEPTH</code></td></tr>
+<tr><td>ghidra</td><td><code>width, center.width, filterPanelBounds.width</code></td></tr>
+<tr><td>jedit</td><td><code>width, buttonSize.width, colWidth</code></td></tr>
+<tr><td>jhotdraw</td><td><code>frameWidth, r.width, bounds.width</code></td></tr>
+<tr><td>jitsi</td><td><code>MAX_MSG_PANE_WIDTH, WIDTH, width</code></td></tr>
+<tr><td>jmeter</td><td><code>graphPanel.width</code></td></tr>
+<tr><td>libgdx</td><td><code>width, buttonSize.width</code></td></tr>
+<tr><td>plantuml</td><td><code>newWidth</code></td></tr>
+<tr><td>tomcat</td><td><code>WIDTH</code></td></tr>
+</table>
+
+<p>
+抽出した式の長さは以下のとおりである:
+<table border>
+<tr><th>C-Type</th><th>n=1</th><th>n=2</th><th>n=3</th><th>n=4</th><th>n=5</th><th>n=6</th><th>n&ge;7</th></tr>
+<tr><td><code>PATH  </code></td><td align=right>49.6%</td><td align=right>22.8%</td><td align=right>7.0%</td><td align=right>6.3%</td><td align=right>4.8%</td><td align=right>2.2%</td><td align=right>7.3%</td></tr>
+<tr><td><code>URL   </code></td><td align=right>31.6%</td><td align=right>18.5%</td><td align=right>13.7%</td><td align=right>13.5%</td><td align=right>10.2%</td><td align=right>5.8%</td><td align=right>6.8%</td></tr>
+<tr><td><code>SQL   </code></td><td align=right>47.5%</td><td align=right>12.1%</td><td align=right>8.7%</td><td align=right>3.1%</td><td align=right>4.4%</td><td align=right>5.5%</td><td align=right>18.8%</td></tr>
+<tr><td><code>HOST  </code></td><td align=right>59.2%</td><td align=right>11.5%</td><td align=right>3.0%</td><td align=right>22.1%</td><td align=right>2.0%</td><td align=right>0.1%</td><td align=right>2.1%</td></tr>
+<tr><td><code>PORT  </code></td><td align=right>68.4%</td><td align=right>27.5%</td><td align=right>2.1%</td><td align=right>1.2%</td><td align=right>0.3%</td><td align=right>0.4%</td><td align=right>0.0%</td></tr>
+<tr><td><code>XCOORD</code></td><td align=right>54.1%</td><td align=right>24.6%</td><td align=right>9.8%</td><td align=right>6.4%</td><td align=right>1.6%</td><td align=right>2.1%</td><td align=right>1.3%</td></tr>
+<tr><td><code>YCOORD</code></td><td align=right>52.5%</td><td align=right>22.4%</td><td align=right>10.1%</td><td align=right>9.0%</td><td align=right>2.6%</td><td align=right>1.9%</td><td align=right>1.4%</td></tr>
+<tr><td><code>WIDTH </code></td><td align=right>71.0%</td><td align=right>15.2%</td><td align=right>6.3%</td><td align=right>2.5%</td><td align=right>1.5%</td><td align=right>1.8%</td><td align=right>1.7%</td></tr>
+<tr><td><code>HEIGHT</code></td><td align=right>71.4%</td><td align=right>15.4%</td><td align=right>6.4%</td><td align=right>3.1%</td><td align=right>1.5%</td><td align=right>1.3%</td><td align=right>1.0%</td></tr>
+<tr><td><code>YEAR  </code></td><td align=right>96.4%</td><td align=right>2.4%</td><td align=right>1.2%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td></tr>
+<tr><td><code>MONTH </code></td><td align=right>79.8%</td><td align=right>19.6%</td><td align=right>0.6%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td></tr>
+<tr><td><code>DAY   </code></td><td align=right>99.4%</td><td align=right>0.0%</td><td align=right>0.6%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td></tr>
+</table>
+
+<p>
+各c-typeにおける、複雑な式と演算子の組合せ例は以下のとおりである:
+<table border>
+<tr><th>C-Type</th><th>Expressions</th></tr>
+<tr><td><code>PATH</code></td><td><pre>
+mLocalUfsPath + ufsBase
+selectedFile.getAbsolutePath() + PREFERENCES_FILE_EXTENSION
+dir.getPath() + DIR_FAILURE_SUFFIX
+U.defaultWorkDirectory() + separatorChar + DEFAULT_TARGET_FOLDER + separatorChar
+</pre></td></tr>
+<tr><td><code>URL</code></td><td><pre>
+url.toExternalForm().substring(GhidraURL.PROTOCOL.length() + 1)
+str + KMSRESTConstants.SERVICE_VERSION + "/"
+newOrigin(getScheme(),getHost(),getPort()).asString() + path
+base + configFile
+</pre></td></tr>
+<tr><td><code>XCOORD</code></td><td><pre>
+center.x + center.width
+leftButtonWidth + leftWidth
+evt.getX() - getInsets().left
+prefs.getInt(name+".x", 0)
+</pre></td></tr>
+<tr><td><code>WIDTH</code></td><td><pre>
+Math.max(contentWidth, menuWidth) + insets.left + insets.right
+TITLE_X_OFFSET + titlePreferredSize.width
+width + insets.left + insets.right + 2
+(int)(bounds.getWidth() * percent)
+</pre></td></tr>
+</table>
+
+<p>
+式に出てきた頻出の単語は以下のとおりである:
+<table border>
+<tr><th>C-Type</th><th>Top words (# Projects)</th></tr>
+<tr><td><code>PATH</code></td><td><code>get</code> (21), <code>path</code> (21), <code>file</code> (20) </td></tr>
+<tr><td><code>URL</code></td><td><code>url</code> (19), <code>get</code> (18), <code>string</code> (18) </td></tr>
+<tr><td><code>SQL</code></td><td><code>get</code> (6), <code>query</code> (5), <code>create</code> (3) </td></tr>
+<tr><td><code>HOST</code></td><td><code>host</code> (21), <code>get</code> (17), <code>address</code> (17) </td></tr>
+<tr><td><code>PORT</code></td><td><code>port</code> (22), <code>get</code> (18), <code>local</code> (10) </td></tr>
+<tr><td><code>XCOORD</code></td><td><code>width</code> (9), <code>x</code> (9), <code>get</code> (9) </td></tr>
+<tr><td><code>YCOORD</code></td><td><code>height</code> (9), <code>y</code> (9), <code>get</code> (8) </td></tr>
+<tr><td><code>WIDTH</code></td><td><code>width</code> (13), <code>get</code> (11), <code>size</code> (10) </td></tr>
+<tr><td><code>HEIGHT</code></td><td><code>height</code> (12), <code>get</code> (11), <code>size</code> (10) </td></tr>
+<tr><td><code>YEAR</code></td><td><code>year</code> (4), <code>get</code> (2), <code>int</code> (2) </td></tr>
+<tr><td><code>MONTH</code></td><td><code>january</code> (3), <code>month</code> (3), <code>december</code> (3) </td></tr>
+<tr><td><code>DAY</code></td><td><code>day</code> (3), <code>int</code> (2), <code>parse</code> (2) </td></tr>
+</table>
+
+<p>
+<table border>
+<tr><th>Expression</th><th>Dependency</th></tr>
+<tr><td><code>#</code> (constant)</td><td>
+#</td></tr>
+<tr><td><code>A</code> (variable access)</td><td>
+A</td></tr>
+<tr><td><code>A()</code> (method call)</td><td>
+A()</td></tr>
+<tr><td><code>A.B</code> (field access)</td><td>
+A &rarr; B</td></tr>
+<tr><td><code>A.B()</code> (instance method call)</td><td>
+A &rarr; B()</td></tr>
+<tr><td><code>op A</code> (applying a unary operator)</td><td>
+A &rarr; op</td></tr>
+<tr><td><code>A op B</code> (applying a binary operator)</td><td>
+A &rarr; op, B &rarr; op</td></tr>
+<tr><td><code>B = A</code> (assignment)</td><td>
+A &rarr; B</td></tr>
+</table>
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="270" height="110">
+  <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="8" markerHeight="8" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g stroke="black" stroke-width="1" fill="none">
+    <ellipse cx="160" cy="20" rx="40" ry="15" />
+    <ellipse cx="240" cy="20" rx="20" ry="15" />
+    <ellipse cx="210" cy="60" rx="40" ry="15" />
+    <path d="M210,75 l0,20" marker-end="url(#arrow)" />
+    <path d="M170,35 l10,10" marker-end="url(#arrow)" />
+    <path d="M240,35 l-5,10" marker-end="url(#arrow)" />
+  </g>
+  <g text-anchor="middle" style="font-family: monospace;">
+    <text x="150" y="100" style="font-size: 125%;">new File(</text>
+    <text x="230" y="100" style="font-size: 125%;">)</text>
+    <text x="160" y="24">config</text>
+    <text x="240" y="24">i</text>
+    <text x="210" y="64">getPath()</text>
+  </g>
+  <g style="font-size: 75%; font-family: helvetica;">
+    <text x="0" y="24">Secondary identifiers</text>
+    <text x="0" y="64">Primary identifier</text>
+  </g>
+</svg>
+</div>
+
+<table border>
+<tr><th>C-Type</th><th>Precision</th><th>Recall</th><th>F-score</th></tr>
+<tr><td><code>PATH    </code></td><td align=right>  68.9% </td><td align=right> 91.8% </td><td align=right> 78.8% </td></tr>
+<tr><td><code>URL     </code></td><td align=right>  61.3% </td><td align=right> 53.0% </td><td align=right> 56.8% </td></tr>
+<tr><td><code>SQL     </code></td><td align=right>  70.4% </td><td align=right> 80.6% </td><td align=right> 75.2% </td></tr>
+<tr><td><code>HOST    </code></td><td align=right>  70.0% </td><td align=right> 73.8% </td><td align=right> 71.8% </td></tr>
+<tr><td><code>PORT    </code></td><td align=right>  84.6% </td><td align=right> 87.5% </td><td align=right> 86.0% </td></tr>
+<tr><td><code>XCOORD  </code></td><td align=right>  95.7% </td><td align=right> 82.1% </td><td align=right> 88.3% </td></tr>
+<tr><td><code>YCOORD  </code></td><td align=right>  97.5% </td><td align=right> 79.4% </td><td align=right> 87.5% </td></tr>
+<tr><td><code>WIDTH   </code></td><td align=right>  92.0% </td><td align=right> 92.5% </td><td align=right> 92.2% </td></tr>
+<tr><td><code>HEIGHT  </code></td><td align=right>  90.4% </td><td align=right> 93.4% </td><td align=right> 91.9% </td></tr>
+<tr><td><code>YEAR    </code></td><td align=right> 100.0% </td><td align=right> 83.7% </td><td align=right> 91.1% </td></tr>
+<tr><td><code>MONTH   </code></td><td align=right> 100.0% </td><td align=right> 77.0% </td><td align=right> 87.0% </td></tr>
+<tr><td><code>DAY     </code></td><td align=right> 100.0% </td><td align=right> 61.1% </td><td align=right> 75.9% </td></tr>
+<tr><td><strong>Average</strong> </td><td align=right>  <strong>85.9%</strong> </td><td align=right> <strong>79.6%</strong> </td><td align=right> <strong>82.7%</strong> </td></tr>
+</table>
 
 <hr>
 <address>Yusuke Shinyama</address>
