@@ -20,6 +20,12 @@ pre { border: 1px solid black; padding: 0.3em; }
 .author { text-align: right; }
 .notice { text-align: center; font-weight: bold; outline: 4px solid black; padding: 1em; margin: 1em; font-size: 200%; }
 .comment { color: green; }
+.path { background: #cfc; }
+.xcoord { background: #cff; }
+.ycoord { background: #ccf; }
+.width { background: #fcc; }
+.height { background: #ffc; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
 --></style>
 </head>
 <body>
@@ -33,7 +39,7 @@ pre { border: 1px solid black; padding: 0.3em; }
 新山
 </div>
 
-<h2>0. 概要</h2>
+<h2 id="summary">0. 概要</h2>
 <ul>
 <li> 現代のプログラミング言語はさまざまな型をユーザが定義可能である。
 <li> いっぽう <code>String</code> 型と <code>int</code> 型は「一般的な型」であり、
@@ -50,9 +56,9 @@ pre { border: 1px solid black; padding: 0.3em; }
 <li> 実験方法:
   <ol>
     <li> 25個の有名なオープンソースプロジェクト (大規模) を選ぶ。
-    <li> こちらで選択した 110個の Java APIの呼び出し引数 (222項目) を列挙する。
+    <li> こちらで選択した 110個の Java APIの呼び出し引数 (218項目) を列挙する。
     <li> これらに使われている識別子の統計をとる。
-    <li> これらの識別子のデータフローから「型 (ctype)」を推論できるかどうか実験する。
+    <li> これらの識別子のデータフローから「型 (c-type)」を推論できるかどうか実験する。
   </ol>
 <li> (ほぼ自明な)結論:
   多くのプログラムで、パス名には <code>path</code>、座標には
@@ -61,7 +67,7 @@ pre { border: 1px solid black; padding: 0.3em; }
   83% (F値) を正しく識別することが可能。
 </ul>
 
-<h2>1. 背景</h2>
+<h2 id="background">1. 背景</h2>
 <p>
 よく「悪いコード」として primitive obsession と呼ばれる現象がある:
 <blockquote><pre>
@@ -79,26 +85,39 @@ Path path = Paths.get(user.getHomeDirectory(), "user.cfg");
 File config = new File(path);
 </pre></blockquote>
 
-<h3>Research Questions</h3>
+<p>
+Primitive obsession はリスキーだが多くのプログラマが使っている。
+
+<h3 id="rqs">1.1. Research Questions</h3>
 <ol type=a>
-<li> 多くのプログラマが使う「高水準な型 (<strong>Conceptual Type</strong>, ctype)」とはどんなものか?
+<li> 多くのプログラマが使う「高水準な型 (abstract type, or <strong>Conceptual Type</strong>, c-type)」とはどんなものか?
 <li> プログラマはそのような概念をコード中でどのように表現しているか?
 <li> コードからそれを推論することは可能なのか?
 </ol>
 
-<h2>2. 基本的なアイデア</h2>
+<h3 id="related">1.2. Related Work</h3>
+<ul>
+<li> O'Callahan et al.: 静的解析 + 型推論による型の判別。同じ位置に格納されれば同じ型とみなす。
+<li> Guo et al.: 動的解析 + 型推論。
+<li> Dash et al.: 似た名前であれば似た型。
+<li> Jiang et al.: 次元解析 (dimensional analysis) による型の不一致検出。
+</ul>
+
+<h2 id="basic">2. 基本的なアイデア</h2>
 <p>
-プログラマは APIを呼び出すとき、その引数の用途 (ctype) を知っているはず:
+プログラマは APIを呼び出すとき、その引数の用途 (c-type) を知っているはず:
 <blockquote><pre>
 String x = "foo/bar.txt";
 var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
 </pre></blockquote>
+したがってAPI呼び出しとその引数を調べれば、
+プログラマが特定の概念をどのように表現しているかがわかるはずだ。
 
 <p>
 いくつかの Java オープンソースプロジェクトを調査し、
-以下の 12 の ctype を定めることにした:
+以下の 12 の c-type を定めることにした:
 <table border>
-<tr><th>Ctype</th></th><th>言語の型</th><th>説明</th><th>メソッド数</th></tr>
+<tr><th>C-Type</th></th><th>言語の型</th><th>説明</th><th>メソッド数</th></tr>
 <tr><td>PATH   </td><td> <code>String</code> </td><td> パス名</td>
 <td align=right>14</td></tr>
 <tr><td>URL    </td><td> <code>String</code> </td><td> URL/URI</td>
@@ -135,7 +154,7 @@ var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
 
 <p>
 つぎに Java Standard API を調べて、
-これらの ctype を含むメソッドを列挙した:
+これらの c-type を含む計218メソッド (重複あり) を列挙した:
 <ul>
 <li> <code>new java.io.File(<u>PATH</u>)</code>
 <li> <code>new java.net.URI(<u>URL</u>)</code>
@@ -150,16 +169,31 @@ var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
 <li> ...
 </ul>
 
-<h2>3. 実験</h2>
+<h2 id="experiment">3. 実験</h2>
 
 <p>
 実験は以下の手順でおこなった:
 <ol>
 <li> 中〜大規模の 26 のJava オープンソースプロジェクトを選ぶ。
-<li> ソースコードを解析し、あらかじめ選んだ
-  メソッド (コンストラクタ) 呼び出しを探す。
-<li> それらの引数を集計する。
+<li> ソースコードを解析し、あらかじめ選んだ API 呼び出しを探す。
+<li> それらの引数で使われている式を収集し、
+  その種別・大きさ・識別子に使われている単語などを調べる。
 </ol>
+
+<h4>例</h4>
+<blockquote><pre>
+<u>zookeeper/.../TxnLogToolkit.java:</u>
+
+    File file = new File(<span class=path>dir.getPath() + File.separator + Util.makeLogName(zxid)</span><sub>[PATH]</sub>);
+    ...
+</pre></blockquote>
+
+<blockquote><pre>
+<u>jitsi/.../SIPCommSplitPaneDivider.java:</u>
+
+    rightButton.setBounds(<span class=xcoord>(insets.left * 2) + leftSize.width + rightSize.width</span><sub>[XCOORD]</sub>,
+                          <span class=ycoord>y</span><sub>[YCOORD]</sub>, <span class=width>rightSize.width</span><sub>[WIDTH]</sub>, <span class=height>rightSize.height</span><sub>[HEIGHT]</sub>);
+</pre></blockquote>
 
 <p>
 使用したプロジェクトとLoCは以下の通りである:
@@ -195,7 +229,9 @@ var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
 </table>
 
 <p>
-プロジェクトごとの抽出された各c-type は以下のとおりである:
+各プロジェクト・c-typeごとの抽出された式の数は以下のとおりである。
+出現する式の数は、プロジェクトの大きさにほぼ比例する。
+しかし c-typeの種類はプロジェクトによって偏っている。
 <table border>
 <tr><th>Project</th><th>LoC</th><th><code>PATH</code></th><th><code>URL</code></th><th><code>SQL</code></th><th><code>HOST</code></th><th><code>PORT</code></th><th><code>XCOORD</code></th><th><code>YCOORD</code></th><th><code>WIDTH</code></th><th><code>HEIGHT</code></th><th><code>YEAR</code></th><th><code>MONTH</code></th><th><code>DAY</code></th><th><code>OTHER</code></th><th>All</th></tr>
 <tr><td>   alluxio </td><td align=right>  228k </td><td align=right>  72 </td><td align=right>  12 </td><td align=right>   0 </td><td align=right>  22 </td><td align=right>  26 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  15 </td><td align=right>  15 </td><td align=right>  15 </td><td align=right>  51 </td><td align=right>  228 </td></tr>
@@ -252,6 +288,7 @@ var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
 <tr><td>selenium</td><td><code>System.getProperty("java.io.tmpdir"), logName</code></td></tr>
 <tr><td>tomcat</td><td><code>pathname, path, docBase</code></td></tr>
 <tr><td>zookeeper</td><td><code>path, KerberosTestUtils.getKeytabFile()</code></td></tr>
+</table><table border>
 <tr><th>URL</th><th>Top Expressions</th></tr>
 <tr><td>alluxio</td><td><code>journalDirectory, folder, inputDir</code></td></tr>
 <tr><td>arduino</td><td><code>contribution.getUrl(), packageIndexURLString</code></td></tr>
@@ -273,6 +310,7 @@ var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
 <tr><td>tomcat</td><td><code>url, location, path</code></td></tr>
 <tr><td>websocket</td><td><code>uriField.getText(), uriinput.getText()</code></td></tr>
 <tr><td>zookeeper</td><td><code>urlStr</code></td></tr>
+</table><table border>
 <tr><th>XCOORD</th><th>Top Expressions</th></tr>
 <tr><td>arduino</td><td><code>noLeft, cancelLeft</code></td></tr>
 <tr><td>binnavi</td><td><code>x, m_x</code></td></tr>
@@ -284,6 +322,7 @@ var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
 <tr><td>jmeter</td><td><code>graphPanel.getLocation().x, cellRect.x, x</code></td></tr>
 <tr><td>libgdx</td><td><code>upButtonX, getWidth()-buttonSize.width-5, x</code></td></tr>
 <tr><td>plantuml</td><td><code>e.getX()</code></td></tr>
+</table><table border>
 <tr><th>WIDTH</th><th>Top Expressions</th></tr>
 <tr><td>arduino</td><td><code>width, imageW, Preferences.BUTTON_WIDTH</code></td></tr>
 <tr><td>binnavi</td><td><code>COLORPANEL_WIDTH, TEXTFIELD_WIDTH, width</code></td></tr>
@@ -296,24 +335,6 @@ var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
 <tr><td>libgdx</td><td><code>width, buttonSize.width</code></td></tr>
 <tr><td>plantuml</td><td><code>newWidth</code></td></tr>
 <tr><td>tomcat</td><td><code>WIDTH</code></td></tr>
-</table>
-
-<p>
-抽出した式の長さは以下のとおりである:
-<table border>
-<tr><th>C-Type</th><th>n=1</th><th>n=2</th><th>n=3</th><th>n=4</th><th>n=5</th><th>n=6</th><th>n&ge;7</th></tr>
-<tr><td><code>PATH  </code></td><td align=right>49.6%</td><td align=right>22.8%</td><td align=right>7.0%</td><td align=right>6.3%</td><td align=right>4.8%</td><td align=right>2.2%</td><td align=right>7.3%</td></tr>
-<tr><td><code>URL   </code></td><td align=right>31.6%</td><td align=right>18.5%</td><td align=right>13.7%</td><td align=right>13.5%</td><td align=right>10.2%</td><td align=right>5.8%</td><td align=right>6.8%</td></tr>
-<tr><td><code>SQL   </code></td><td align=right>47.5%</td><td align=right>12.1%</td><td align=right>8.7%</td><td align=right>3.1%</td><td align=right>4.4%</td><td align=right>5.5%</td><td align=right>18.8%</td></tr>
-<tr><td><code>HOST  </code></td><td align=right>59.2%</td><td align=right>11.5%</td><td align=right>3.0%</td><td align=right>22.1%</td><td align=right>2.0%</td><td align=right>0.1%</td><td align=right>2.1%</td></tr>
-<tr><td><code>PORT  </code></td><td align=right>68.4%</td><td align=right>27.5%</td><td align=right>2.1%</td><td align=right>1.2%</td><td align=right>0.3%</td><td align=right>0.4%</td><td align=right>0.0%</td></tr>
-<tr><td><code>XCOORD</code></td><td align=right>54.1%</td><td align=right>24.6%</td><td align=right>9.8%</td><td align=right>6.4%</td><td align=right>1.6%</td><td align=right>2.1%</td><td align=right>1.3%</td></tr>
-<tr><td><code>YCOORD</code></td><td align=right>52.5%</td><td align=right>22.4%</td><td align=right>10.1%</td><td align=right>9.0%</td><td align=right>2.6%</td><td align=right>1.9%</td><td align=right>1.4%</td></tr>
-<tr><td><code>WIDTH </code></td><td align=right>71.0%</td><td align=right>15.2%</td><td align=right>6.3%</td><td align=right>2.5%</td><td align=right>1.5%</td><td align=right>1.8%</td><td align=right>1.7%</td></tr>
-<tr><td><code>HEIGHT</code></td><td align=right>71.4%</td><td align=right>15.4%</td><td align=right>6.4%</td><td align=right>3.1%</td><td align=right>1.5%</td><td align=right>1.3%</td><td align=right>1.0%</td></tr>
-<tr><td><code>YEAR  </code></td><td align=right>96.4%</td><td align=right>2.4%</td><td align=right>1.2%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td></tr>
-<tr><td><code>MONTH </code></td><td align=right>79.8%</td><td align=right>19.6%</td><td align=right>0.6%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td></tr>
-<tr><td><code>DAY   </code></td><td align=right>99.4%</td><td align=right>0.0%</td><td align=right>0.6%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td></tr>
 </table>
 
 <p>
@@ -347,7 +368,43 @@ width + insets.left + insets.right + 2
 </table>
 
 <p>
-式に出てきた頻出の単語は以下のとおりである:
+抽出した式の長さは以下のとおりである (nは式中の項の数を表す):
+<table border>
+<tr><th>C-Type</th><th>n=1</th><th>n=2</th><th>n=3</th><th>n=4</th><th>n=5</th><th>n=6</th><th>n&ge;7</th></tr>
+<tr><td><code>PATH  </code></td><td align=right>49.6%</td><td align=right>22.8%</td><td align=right>7.0%</td><td align=right>6.3%</td><td align=right>4.8%</td><td align=right>2.2%</td><td align=right>7.3%</td></tr>
+<tr><td><code>URL   </code></td><td align=right>31.6%</td><td align=right>18.5%</td><td align=right>13.7%</td><td align=right>13.5%</td><td align=right>10.2%</td><td align=right>5.8%</td><td align=right>6.8%</td></tr>
+<tr><td><code>SQL   </code></td><td align=right>47.5%</td><td align=right>12.1%</td><td align=right>8.7%</td><td align=right>3.1%</td><td align=right>4.4%</td><td align=right>5.5%</td><td align=right>18.8%</td></tr>
+<tr><td><code>HOST  </code></td><td align=right>59.2%</td><td align=right>11.5%</td><td align=right>3.0%</td><td align=right>22.1%</td><td align=right>2.0%</td><td align=right>0.1%</td><td align=right>2.1%</td></tr>
+<tr><td><code>PORT  </code></td><td align=right>68.4%</td><td align=right>27.5%</td><td align=right>2.1%</td><td align=right>1.2%</td><td align=right>0.3%</td><td align=right>0.4%</td><td align=right>0.0%</td></tr>
+<tr><td><code>XCOORD</code></td><td align=right>54.1%</td><td align=right>24.6%</td><td align=right>9.8%</td><td align=right>6.4%</td><td align=right>1.6%</td><td align=right>2.1%</td><td align=right>1.3%</td></tr>
+<tr><td><code>YCOORD</code></td><td align=right>52.5%</td><td align=right>22.4%</td><td align=right>10.1%</td><td align=right>9.0%</td><td align=right>2.6%</td><td align=right>1.9%</td><td align=right>1.4%</td></tr>
+<tr><td><code>WIDTH </code></td><td align=right>71.0%</td><td align=right>15.2%</td><td align=right>6.3%</td><td align=right>2.5%</td><td align=right>1.5%</td><td align=right>1.8%</td><td align=right>1.7%</td></tr>
+<tr><td><code>HEIGHT</code></td><td align=right>71.4%</td><td align=right>15.4%</td><td align=right>6.4%</td><td align=right>3.1%</td><td align=right>1.5%</td><td align=right>1.3%</td><td align=right>1.0%</td></tr>
+<tr><td><code>YEAR  </code></td><td align=right>96.4%</td><td align=right>2.4%</td><td align=right>1.2%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td></tr>
+<tr><td><code>MONTH </code></td><td align=right>79.8%</td><td align=right>19.6%</td><td align=right>0.6%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td></tr>
+<tr><td><code>DAY   </code></td><td align=right>99.4%</td><td align=right>0.0%</td><td align=right>0.6%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td></tr>
+</table>
+
+<h2 id="infer">4. C-type の推論</h2>
+<p>
+次に、式の表現のみから c-type を推論できるかどうかを考えてみる。
+今のところ、我々は c-type の判定は API 呼び出しに頼っている。
+もしこれができれば API呼び出し以外の部分の c-type も判定することができる。
+
+<p>
+基本的な戦略は以下のとおりである:
+<ol>
+<li> 抽出した c-type とその式 (12k) を訓練データ・テストデータとして使用する。
+<li> 各式から分類に使えそうな特徴量を抽出する。
+<li> 機械学習 (決定木) を使って、どれくらいうまく判定できるかを測定する。
+</ol>
+<p>
+機械学習アルゴリズムとして決定木を使ったのは、
+記号的な特徴に向いており、かつ、できあがった規則が人間に読みやすいためである。
+
+<p>
+まず、式に出てきた識別子のうち、頻出の単語を取り出すと
+以下のようになる:
 <table border>
 <tr><th>C-Type</th><th>Top words (# Projects)</th></tr>
 <tr><td><code>PATH</code></td><td><code>get</code> (21), <code>path</code> (21), <code>file</code> (20) </td></tr>
@@ -365,25 +422,10 @@ width + insets.left + insets.right + 2
 </table>
 
 <p>
-<table border>
-<tr><th>Expression</th><th>Dependency</th></tr>
-<tr><td><code>#</code> (constant)</td><td>
-#</td></tr>
-<tr><td><code>A</code> (variable access)</td><td>
-A</td></tr>
-<tr><td><code>A()</code> (method call)</td><td>
-A()</td></tr>
-<tr><td><code>A.B</code> (field access)</td><td>
-A &rarr; B</td></tr>
-<tr><td><code>A.B()</code> (instance method call)</td><td>
-A &rarr; B()</td></tr>
-<tr><td><code>op A</code> (applying a unary operator)</td><td>
-A &rarr; op</td></tr>
-<tr><td><code>A op B</code> (applying a binary operator)</td><td>
-A &rarr; op, B &rarr; op</td></tr>
-<tr><td><code>B = A</code> (assignment)</td><td>
-A &rarr; B</td></tr>
-</table>
+本手法では、式の特徴を表現するのにデータフロー図を使った。
+式を構文解析して項どうしの依存関係を抽出する。
+たとえば <code>new File(config.getPath(i))</code> のデータフロー図は
+以下のようになる:
 
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -413,9 +455,51 @@ A &rarr; B</td></tr>
     <text x="0" y="24">Secondary identifiers</text>
     <text x="0" y="64">Primary identifier</text>
   </g>
-</svg>
+</svg><br>
+<code>new File(config.getPath(i))</code> のデータフロー図
 </div>
 
+
+<p>
+各式に対して、データフローから
+"primary identifier" および "secondary identifier(s)" を
+特徴量として使用して学習する。
+以下のような規則を使うと、以下の素性が抽出できる:
+<ul>
+<li> Primary identifer: <code>getPath()</code>
+<li> Secondary identifiers: <code>config</code>, <code>i</code>
+</ul>
+<table border>
+<tr><th>Expression</th><th>Dependency</th></tr>
+<tr><td><code>#</code> (constant)</td><td>
+#</td></tr>
+<tr><td><code>A</code> (variable access)</td><td>
+A</td></tr>
+<tr><td><code>A.B</code> (field access)</td><td>
+A &rarr; B</td></tr>
+<tr><td><code>B(A)</code> (method call)</td><td>
+A &rarr; B()</td></tr>
+<tr><td><code>A.B()</code> (instance method call)</td><td>
+A &rarr; B()</td></tr>
+<tr><td><code>op A</code> (applying a unary operator)</td><td>
+A &rarr; op</td></tr>
+<tr><td><code>A op B</code> (applying a binary operator)</td><td>
+A &rarr; op, B &rarr; op</td></tr>
+<tr><td><code>B = A</code> (assignment)</td><td>
+A &rarr; B</td></tr>
+</table>
+
+<p>
+これらの素性を使って、各ctypeを判別可能かどうか実験した。
+ここでは評価にプロジェクトごとの leave-one-project-out の
+クロスバリデーションを使っている:
+<ul>
+<li> プロジェクトをひとつ選び、そこに表れる式 (およびその ctype) をテストセットとする。
+<li> 残りのプロジェクト 25個の式を訓練セットとする。
+</ul>
+
+<p>
+以下のような結果が得られた:
 <table border>
 <tr><th>C-Type</th><th>Precision</th><th>Recall</th><th>F-score</th></tr>
 <tr><td><code>PATH    </code></td><td align=right>  68.9% </td><td align=right> 91.8% </td><td align=right> 78.8% </td></tr>
@@ -432,6 +516,48 @@ A &rarr; B</td></tr>
 <tr><td><code>DAY     </code></td><td align=right> 100.0% </td><td align=right> 61.1% </td><td align=right> 75.9% </td></tr>
 <tr><td><strong>Average</strong> </td><td align=right>  <strong>85.9%</strong> </td><td align=right> <strong>79.6%</strong> </td><td align=right> <strong>82.7%</strong> </td></tr>
 </table>
+
+<p>
+URL c-type は性能が悪い。
+その理由は、URLの式は
+<blockquote><pre>
+"https://"+getHostName()+":"+getPort()+"/"+getPath()
+</pre></blockquote>
+などのように長くなる傾向があり、
+さらに内部で Hostname や port など他の c-type と混同するような
+項が多く表れるためであった。
+
+
+<h2 id="concl">5. 結論</h2>
+<p>
+本研究では、Java standard API で使われている 12 の c-type を定義し、
+それらが 26個のオープンソースプロジェクトでどのように使われているかを分析した。
+ソースコード中の API 呼び出しを収集してそれらの傾向を調べた。
+その後、データフロー解析と決定木を組み合わせた c-type 判定手法をテストした。
+<p>
+Research Question ふたたび:
+<ol type=a>
+<li> 多くのプログラマが使う「高水準な型 (abstract type, or <strong>Conceptual Type</strong>, c-type)」とはどんなものか?<br>
+→ 12個のc-typeを定義した。実験によれば、それらの出現頻度はプロジェクトのドメインに依存していた。
+<li> プログラマはそのような概念をコード中でどのように表現しているか?
+<li> コードからそれを推論することは可能なのか?<br>
+→ これらの質問は関連している。比較的単純な決定木ベースの手法が
+うまくいっているので、少なくともよく知られているコンセプトに対しては、
+プログラマは c-type を判定しやすいように書いていると思われる。
+</ol>
+
+<h3 id="threats">5.1. Threats to Validity</h3>
+<ul>
+<li> 使ったAPI以外にも c-typeの表れる可能性がある。
+<li> オープンソースを使ったことによる選択バイアス。
+<li> いくつかの c-type はめったに使われない。
+<li> いくつかの c-type は曖昧にしか定義できない: たとえば URL と URI、ファイル名とパス名など。
+<li> 「定義されていない c-type」をどのように扱っていいのかわからない。
+  この実験では、一部の引数を "OTHER" タイプとして判定したが、
+  潜在的にはこのような引数は非常に多い (あるいはほとんど) かもしれず、
+  それを含めれば判定精度はずっと下がる可能性がある。
+</ul>
+
 
 <hr>
 <address>Yusuke Shinyama</address>
