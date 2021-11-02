@@ -52,34 +52,33 @@ Katsuhiko Gondow<br>
 <ul>
 <li> Large projects are developed by a team with multiple people.
   <ul>
-    <li> Even if there's only one real developer, they turn into a different person as time passes.
+    <li> Even if there's only one real developer, they turn into a different person in future!
   </ul>
-<li> Typically, a style guide is set up to facilitate collaboration of team members.
+<li> A style guide is set up to facilitate collaboration of team members.
   <ul>
-    <li> Source code style guides are well known:
+    <li> Source code style guides:
       <ul>
 	<li> <a href="https://google.github.io/styleguide/jsguide.html">Google JavaScript Style Guide</a>
 	<li> <a href="https://github.com/nytimes/objective-c-style-guide/">NYTimes Objective-C Style Guide</a>
       </ul>
-    <li> On the other hand, there's little guideline of how to give a name to
-      variable names and function names.
+    <li> There's little guideline of how to give a name to variables and functions...
       <ul>
         <li> <a href="https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/general-naming-conventions">Microsoft General Naming Conventions</a>
       </ul>
   </ul>
-<li> However, identifiers are crucial for program understanding:
+<li> Identifiers are <strong>crucial</strong> for program understanding:
   <ul>
     <li> Programmers rely on the meaning of names.
       <a href="https://ieeexplore.ieee.org/document/1631100">[Lawrie, 06]</a>
-    <li> Bad names obstructs program understanding, resulting in bad code quality.
+    <li> Bad names obstructs program understanding, resulting in bad code.
       <a href="https://ieeexplore.ieee.org/document/7961504">[Avidan, 17]</a>
     <li> One of the most asked questions by programmers:
       "Where is this class/method used?"
       <a href="https://ieeexplore.ieee.org/document/4497212">[Sillito, 08]</a>
     <li> Just searching GitHub Issues with "<code>wrong name</code>" results
       <a href="https://github.com/search?q=wrong+name&amp;type=Issues">more than a million results</a>.
-    <li> The importance of names are also emphasized in books,
-      e.g. "Code Complete", "The Practice of Programming".
+    <li> The importance of names are also emphasized in "Code Complete"
+      and "The Practice of Programming".
   </ul>
 </ul>
 
@@ -87,22 +86,25 @@ Katsuhiko Gondow<br>
 <h2 id="objective">2. Goal: Detecting Inconsistent Names in Source Code</h2>
 
 <blockquote><pre>
-void printResult(Stream out, String result) {
-  out.writeLine("result:"+result);
+void printResult(Stream <mark>out</mark>, String result) {
+  <mark>out</mark>.writeLine("result:"+result);
 }
 
-void printStat(Stream out, int stat) {
-  out.writeLine("stat:"+stat);
+void printStat(Stream <mark>out</mark>, int stat) {
+  <mark>out</mark>.writeLine("stat:"+stat);
 }
 
 void printInfo(Stream <mark>strm</mark>, String info) {
   <mark>strm</mark>.writeLine("info:"+info);  <span class=comment>// XXX "strm" should be "out".</span>
 }
 </pre></blockquote>
+<p>
+Note: "<code>out</code>" might not necessarily be the most relavant name
+for an output stream, but it is <strong>consistent</strong> throughout the program.
 
-<h3>2.1. Related Work</h3>
+<h3 id="related">2.1. Related Work</h3>
 <ul>
-<li> A lot of work has been done to handle the problem of identifiers:
+<li> A lot of work has been done for the problem of identifiers:
   <ul>
     <li> Checking the relevance of method names:
       <a href="https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.232.9803">[H&oslash;st, 09]</a>
@@ -115,17 +117,16 @@ void printInfo(Stream <mark>strm</mark>, String info) {
     <li> Extract an embedding from code (code2vec):
       <a href="https://arxiv.org/abs/1803.09473">[Alon, 18]</a>
   </ul>
-<li> We think that variable names are just as important as method names:
+<li> Variable names are just as important as method names:
   <ul>
-    <li> Variables are named after "things" that an application handles.
-    <li> They are typically nouns, which are much more varied than verbs
-      and strongly related to the domain of the application:
+    <li> Variables are named after "things" in an application domain.
+    <li> They are typically nouns, which are much more varied than verbs:
 <table border>
 <tr><th>Project</th><th>Top Nouns</th><th>Top Verbs</th></tr>
 <tr><td>ant (build tool)</td>
 <td>file, name, function, class, output</td>
 <td>set, get, add, create, execute</td></tr>
-<tr><td>antlr4 (LALR parser)</td>
+<tr><td>antlr4 (parser generator)</td>
 <td>string, rule, token, code, name</td>
 <td>get, set, add, remove, visit</td></tr>
 <tr><td>bcel (byte code analyzer)</td>
@@ -137,13 +138,13 @@ void printInfo(Stream <mark>strm</mark>, String info) {
 <tr><td>jedit (text editor)</td>
 <td>jj, action, line, string, buffer</td>
 <td>get, set, add, run, remove</td></tr>
-<tr><td>jhotdraw (drawing tool)</td>
+<tr><td>jhotdraw (diagram renderer)</td>
 <td>action, figure, color, name, property</td>
 <td>get, set, create, add, read</td></tr>
 <tr><td>junit (unit testing)</td>
 <td>test, class, method, failure, runner</td>
 <td>get, assert, run, test, validate</td></tr>
-<tr><td>lucene (document search)</td>
+<tr><td>lucene (document indexing)</td>
 <td>doc, next, string, value, bytes</td>
 <td>get, set, compare, add, read</td></tr>
 <tr><td>tomcat (web server)</td>
@@ -160,46 +161,48 @@ void printInfo(Stream <mark>strm</mark>, String info) {
 <td>get, write, read, close, set</td></tr>
 </table>
   </ul>
-<li> Our research goal was the following:
+<li> Our design goal:
   <ul>
-    <li> Avoid using a dictionary or heuristics in order to reduce
-      the maintenance cost and cognitive bias.
-    <li> One size doesn't fit all.
-      Aim at a tunable system for each project
-      because the meaning of identifiers varies.
+    <li> Do not use a dictionary or heuristics.
+    <li> Aim at a tunable system for each project
+      whose meaning of identifiers varies:
       <ul>
 	<li> "<code>view</code>" in a GUI application.
 	<li> "<code>view</code>" in an SQL engine.
 	<li> Different abbreviation: <code>message</code> and <code>msg</code>, etc.
       </ul>
-    <li> Make the system output explainable by showing
-      how a particular answer was obtained.
+    <li> Make the system transparent and explainable:
+      <ul>
+        <li> Show how an answer is produced.
+      </ul>
   </ul>
 </ul>
 
 
-<h2 id="consistency">3. What is "consistency" anyway?</h2>
+<h2 id="consistency">3. What is "Consistency" Anyway?</h2>
 
 <h3>3.1. General discussion</h3>
 <ul>
 <li> Suppose A → B is expected. Call this knowledge K.
-<li> Suppose A is satisfied.
-<li> When B is satisfied, "B is consistent with our knowledge K".
-<li> When &not; B is satisfied, "B is not conssitent with our knowledge K".
+<li> Assume A is satisfied.
+<li> When B is also satisfied, "B is consistent with our knowledge K".
+<li> When &not; B is satisfied, "B is not consistent with our knowledge K".
 </ul>
 
-<h4>Example.</h4>
+<h4>Trivial Example:</h4>
 <ul>
 <li> K &equiv; A → B: "Whenever it's cloudy, he carries an umbrella."
 <li> A: It's cloudy.
 <li> B: He's carrying an umbrella. (Consistent)
+<li> A: It's cloudy.
+<li> B: He's not carrying an umbrella. (Inconsistent)
 </ul>
 
 <h3>3.2. Program Variables</h3>
 <p>
 Focus on the usage of program variables:
 <ul>
-<li> K &equiv; A: "When a variable receives the return value of <code>open()</code> and is passed to the first argument of <code>write()</code>" → B: "The name of variable is <code>out</code>."
+<li> K &equiv; A: "When a variable receives the return value of <code>open()</code> and is passed to the first argument of <code>write()</code>" → B: "The name of variable is <code><mark>out</mark></code>."
 <blockquote><pre>
 <mark>out</mark> = open(...);
 write(<mark>out</mark>, ...);
@@ -209,31 +212,32 @@ write(<mark>out</mark>, ...);
 <mark>???</mark> = open(...);
 write(<mark>???</mark>, ...);
 </pre></blockquote>
-<li> B: When the variable name <code>???</code> is <code>out</code>, then it's consistent with K.
+<li> B: When the variable name <code><mark>???</mark></code> is <code>out</code>, then it's consistent with K.
 </ul>
 
 <h3>3.3. Make it Bayesian</h3>
 <p>
 In reality, most rules do not hold for 100% of the time.
-Therefore, we introduce the "degree of consistency"
-by using probablistic rules.
+We quantify the "degree of consistency"
+by using probability.
 <ul>
-<li> There's a high chance of A → B &equiv; Probablility P(B | A) is high.
+<li> High likelihood of A → B &equiv; High probablility of P(B | A).
 <li> When P(B | A) and P(A) are both high,
 yet P(B) is low → low consistency.
 </ul>
 
 
-<h2 id="datapath">4. Focus on the "use flow" of variables</h2>
+<h2 id="datapath">4. Focus on the "Use Flow" of Variables</h2>
 
-<p>
-We define the usage of a variable as a sequence of
-operations that is applied to the value assigned into that variable.
-Let us call this dataflow of the variable "<strong>use flow</strong>".
+<ul>
+<li> Usage of a variable = Sequence of operations
+  applied to the value assigned into that variable.
+<li> Let us call this dataflow of the variable "<strong>use flow</strong>".
+</ul>
 
 <h3>4.1. Example of use flows</h3>
 <p>
-Focus on the variable <code>line</code> in the following snippet:
+Focus on the variable <code><mark>line</mark></code>:
 <blockquote><pre>
 private BufferedReader fp;
 
@@ -244,7 +248,7 @@ public String get() {
 }
 </pre></blockquote>
 <p>
-Here is how it is visualized:
+Here is its data flow visualization:
 <div class=figure>
 <!-- Title: get() Pages: 1 -->
 <svg width="270pt" height="454pt"
@@ -350,8 +354,7 @@ Here is how it is visualized:
 </svg>
 </div>
 <p>
-The <u>red lines</u> in the above graph show
-the use flow of the variable <code>line</code>:
+The <u>red lines</u> above = the use flow of <code><mark>line</mark></code>:
 <ul>
   <li> <code>fp.readLine()</code> &rarr; <code><mark>line</mark></code> &rarr; <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code>
 </ul>
@@ -375,10 +378,10 @@ public void show() {
 }
 </pre></blockquote>
 <p>
-Note that the value of <code>line</code> in function <code>get()</code>
-now reaches <code>name</code> in the function <code>show()</code>.
+Note that <code><mark>line</mark></code> in function <code>get()</code>
+is now <code>name</code> in function <code>show()</code>.
 <p>
-Here's the visualization:
+Here's the data flow graph:
 <div class=figure>
 <!-- Title: A Pages: 1 -->
 <svg width="301pt" height="797pt"
@@ -543,22 +546,17 @@ Here's the visualization:
 </div>
 
 <p>
-Finally, the use flow of the variable <code>line</code> is:
+The final use flow of <code><mark>line</mark></code>:
 <ul>
   <li> <code>fp.readLine()</code> &rarr; <code><mark>line</mark></code> &rarr; <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code> &rarr; <code>assign:name</code> &rarr; <code>L:+</code> &rarr; <code>#arg0:println()</code>
 </ul>
-This sequence represents the usage of the variable <code>line</code> in this program.
-<p>
-For the sake of simplicity, we ignore branches in the data flow
-and treat each path separately.
+This path represents the usage of the variable <code>line</code> in this program.
 
 
 <h2 id="learning">5. Training and Prediction</h2>
 <p>
-We extracted the use flows for every variable in a program
-(in an interprocedural manner).
-Then we trained a model that predicts a variable name
-from a given use flow:
+We trained a probabilistic model that predicts a variable name from a
+given use flow:
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -598,14 +596,13 @@ from a given use flow:
 </svg>
 </div>
 <p>
-For example, the following use flow
-predicts <code><kbd>???</kbd></code> = <code>line</code>:
+The following use flow predicts <code><kbd>???</kbd></code> = <code>line</code>:
 <ul>
   <li> <code>fp.readLine()</code> &rarr; <code><kbd>???</kbd></code> &rarr; <code>#this:indexOf()</code> &rarr; <code>#arg1:substring()</code> &rarr; <code>assign:name</code> &rarr; <code>L:+</code> &rarr; <code>#arg0:println()</code>
 </ul>
 <p>
-If the variable is other than <code>line</code>,
-its name is regarded not consistent with this usage.
+If the variable name is other than <code>line</code>,
+it is <strong>inconsistent</strong> with this usage.
 <p>
 Algorithm:
 <ul>
@@ -620,76 +617,69 @@ Algorithm:
 <li> The variable name is consistent if n = v<sub>1</sub>.name.
   Otherwise, suggest n as a better name for the variable v<sub>1</sub>.
 </ol>
-<li> The actual features includes a set of words:
-  Instead of <code>useflow</code> → <code>outputBufferName</code>, we use:
-  <ul>
-    <li> → <code>output</code>
-    <li> → <code>buffer</code>
-    <li> → <code>name</code>
-  </ul>
-  (Words are segmented by <code>CamelCase</code> or <code>snake_case</code>)
 </ul>
 
 <h2 id="evaluation">6. Experiment and Evaluation</h2>
 <p>
-以下のプロジェクトに対して検証をおこなった:
-(実際には #エッジ &lt; #useflow)
+We evaluated our method with the following projects:
+(#edges &lt; #useflow)
 
 <table border>
-<tr><th>プロジェクト</th><th align=right>KLOC</th><th align=right>#変数</th>
-<th align=right>#ノード</th><th align=right>#エッジ</th></tr>
-<tr><td>ant (ビルドツール)</td><td align=right>112k</td><td align=right>23,971</td>
+<tr><th>Project</th><th align=right>kLoC</th><th align=right>#vars</th>
+<th align=right>#nodes</th><th align=right>#edges</th></tr>
+<tr><td>ant (build tool)</td><td align=right>112k</td><td align=right>23,971</td>
 <td align=right>350k</td><td align=right>5,211k</td></tr>
-<tr><td>antlr4 (構文解析)</td><td align=right>31k</td><td align=right>7,131</td>
+<tr><td>antlr4 (parser generator)</td><td align=right>31k</td><td align=right>7,131</td>
 <td align=right>74k</td><td align=right>1,103k</td></tr>
-<tr><td>bcel (バイトコード解析)</td><td align=right>31k</td><td align=right>6,583</td>
+<tr><td>bcel (byte code analyzer)</td><td align=right>31k</td><td align=right>6,583</td>
 <td align=right>80k</td><td align=right>1,190k</td></tr>
-<tr><td>compress (データ圧縮)</td><td align=right>24k</td><td align=right>5,896</td>
+<tr><td>compress (data compression)</td><td align=right>24k</td><td align=right>5,896</td>
 <td align=right>69k</td><td align=right>929k</td></tr>
-<tr><td>jedit (テキストエディタ)</td><td align=right>115k</td><td align=right>21,977</td>
+<tr><td>jedit (text editor)</td><td align=right>115k</td><td align=right>21,977</td>
 <td align=right>294k</td><td align=right>6,106k</td></tr>
-<tr><td>jhotdraw (図形描画)</td><td align=right>80k</td><td align=right>17,367</td>
+<tr><td>jhotdraw (diagram renderer)</td><td align=right>80k</td><td align=right>17,367</td>
 <td align=right>235k</td><td align=right>2,351k</td></tr>
-<tr><td>junit (ユニットテスト)</td><td align=right>9k</td><td align=right>2,384</td>
+<tr><td>junit (unit testing)</td><td align=right>9k</td><td align=right>2,384</td>
 <td align=right>21k</td><td align=right>280k</td></tr>
-<tr><td>lucene (文書検索)</td><td align=right>109k</td><td align=right>30,341</td>
+<tr><td>lucene (document indexing)</td><td align=right>109k</td><td align=right>30,341</td>
 <td align=right>414k</td><td align=right>7,146k</td></tr>
-<tr><td>tomcat (Webサーバ)</td><td align=right>238k</td><td align=right>49,275</td>
+<tr><td>tomcat (web server)</td><td align=right>238k</td><td align=right>49,275</td>
 <td align=right>649k</td><td align=right>11,799k</td></tr>
-<tr><td>weka (機械学習)</td><td align=right>324k</td><td align=right>59,274</td>
+<tr><td>weka (machine learning)</td><td align=right>324k</td><td align=right>59,274</td>
 <td align=right>943k</td><td align=right>13,224k</td></tr>
-<tr><td>xerces (XMLパーサ)</td><td align=right>114k</td><td align=right>21,852</td>
+<tr><td>xerces (XML parser)</td><td align=right>114k</td><td align=right>21,852</td>
 <td align=right>314k</td><td align=right>7,017k</td></tr>
-<tr><td>xz (データ圧縮)</td><td align=right>7k</td><td align=right>1,825</td>
+<tr><td>xz (data compression)</td><td align=right>7k</td><td align=right>1,825</td>
 <td align=right>23k</td><td align=right>299k</td></tr>
 </table>
 
 <p>
-被験者: 著者3人 + 大学院生6人 = 計9人
+Test subjects: authors (3) + grad students (6) = 9 people.
 
-<h3>RQ1. useflowは変数名の「使われ方」を表現するのに適切なのか?</h3>
+<h3 id="rq1">RQ1. Is Use Flow a Good Representation for Variable Usage?</h3>
 <p>
-まず予備実験として、useflowを本手法に使うことの妥当性を判断する。
-もしuseflowが変数名の「使われ方」をうまく表現できていれば、
-「同じuseflow」をもつ異なる変数は「同じ使われ方」をしているはずである。
+If use flows can accurately represent the usage of a variable,
+multiple variables that share the same use flow is considered equivalent.
 
-<h4>実験1. useflowを使って同じ役割をもつ変数を判定する</h4>
-<p>
-各プロジェクトから同じuseflowの類似度が高い (cosine &gt; 0.90)
-変数の組を選び、(もとの変数名は隠して) それらが表れているコードを
-人間に見せて、同じ変数名にすべきかどうかを判定させる。
-
+<h4>Experiment 1. Variable Equivalence Test</h4>
+<ol>
+<li> Choose a pair of variables that have the high similarlity
+  of use flows (cosine &gt; 0.90) for each project.
+<li> Present the surrounding snippet of each variable (whose names hidden) to human subjects.
+<li> Ask the subjects to choose one of the following:
 <ol type=a>
-<li> 2つの変数名は同じであるべきだ。
-<li> 2つの変数名は同じでもよい。
-<li> 2つの変数名は違っているべきだ。
-<li> わからない。
+<li> Two variables should have the same name.
+<li> Two variables can have a different name.
+<li> Two variables should have a different name.
+<li> Undecidable. (Not enough information)
 </ol>
+</ol>
+
 <p>
-全12プロジェクト × 各プロジェクト5問 × 9人 = 計540問の結果:
-<div class=figure>
+We tested for 12 projects × 5 variable pairs × 9 subjects = 540 questionnaires.
+
 <table border>
-<tr><th>プロジェクト</th><th align=right>#a</th><th align=right>#b</th><th align=right>#c</th><th align=right>#d</th><th align=right>#全体</th></tr>
+<tr><th>Project</th><th align=right>#a</th><th align=right>#b</th><th align=right>#c</th><th align=right>#d</th><th align=right>#Total</th></tr>
 <tr><td>ant</td><td align=right>23</td><td align=right>17</td><td align=right>5</td><td align=right>0</td><td align=right>45</td></tr>
 <tr><td>antlr4</td><td align=right>13</td><td align=right>22</td><td align=right>9</td><td align=right>1</td><td align=right>45</td></tr>
 <tr><td>bcel</td><td align=right>3</td><td align=right>11</td><td align=right>31</td><td align=right>0</td><td align=right>45</td></tr>
@@ -702,40 +692,38 @@ Algorithm:
 <tr><td>weka</td><td align=right>4</td><td align=right>28</td><td align=right>12</td><td align=right>1</td><td align=right>45</td></tr>
 <tr><td>xerces</td><td align=right>12</td><td align=right>22</td><td align=right>9</td><td align=right>2</td><td align=right>45</td></tr>
 <tr><td>xz</td><td align=right>4</td><td align=right>15</td><td align=right>26</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>計</td><td align=right>134</td><td align=right>235</td><td align=right>159</td><td align=right>12</td><td align=right>540</td></tr>
+<tr><td>Total</td><td align=right>134</td><td align=right>235</td><td align=right>159</td><td align=right>12</td><td align=right>540</td></tr>
 </table>
-</div>
-<p>
-#a + #b の割合が全体の 68% (369/540) を占めている。
-したがって、useflowが類似している変数は同じ名前をもつ可能性が高い。
-<p>
-なお、被験者は各組の cosine を知らされていないが、
-もともと 0.90 以上の対のみに絞ってしまったので、
-あまり blind test とは言えなくなくなってしまった。
-(#a + #b の平均 cosine は 0.980, #c の平均 cosine は 0.976 である)
 
-<h3>RQ2. うまく一貫性のある変数名を予測できたか?</h3>
+<ul>
+<li> Ratio of #a + #b = 68% (369/540)
+<li> High similarity in use flows = the same variable name.
+</ul>
 
-<h4>実験2-1. 提案した名前がよいものかどうか判定する</h4>
 <p>
-For each 変数 について、(名前は隠して)
-それが使われている部分を見せ
+<strong>Defects:</strong>
+We only tested with the high similarity pairs.
+Therefore the test was not completely blind. :(
+
+<h3 id="rq2">RQ2. Can the System Predict a Good (Consistent) Variable Name?</h3>
+
+<h4>Experiment 2-1. Name Suggestiong Test</h4>
+<ol>
+<li> Present the surrounding snippet of a certain variable to human subjects.
+<li> Ask the subjects to choose which names fits the best
+(with the order randomized):
 <ol type=a>
-<li> オリジナルの変数名
-<li> 本手法によって提案された変数名
-<li> ベースライン手法によって提案された変数名 (型のみによって変数名を決定する、
-たとえば <code>int</code>型ならば変数名はつねに <code>i</code>)
+<li> Original name
+<li> System suggestion
+<li> Baseline suggestion (only depends on the type of the variable,
+e.g. <code>int</code> variable is always named <code>i</code>)
+</ol>
 </ol>
 <p>
-の中から選ばせる (blind test)。
-なお、各プロジェクトごとに、
-提案されたスコアが高いものから 10個を選んだ。
-<p>
-全12プロジェクト × 各プロジェクト10問 × 9人 = 計1,080問のうち、
-本手法の提案した変数名を選んだ人の割合は以下のようになる:
-<div class=figure>
+We tested for 12 projects × 10 variables × 9 subjects = 1,080 questionnaires.
+
 <table border>
-<tr><th>プロジェクト</th><th align=right>#本手法</th><th align=right>#全体</th></tr>
+<tr><th>Project</th><th align=right>#Ours</th><th align=right>#Total</th></tr>
 <tr><td>ant</td><td align=right>39</td><td align=right>90</td></tr>
 <tr><td>antlr4</td><td align=right>34</td><td align=right>90</td></tr>
 <tr><td>bcel</td><td align=right>48</td><td align=right>90</td></tr>
@@ -748,76 +736,41 @@ For each 変数 について、(名前は隠して)
 <tr><td>weka</td><td align=right>29</td><td align=right>90</td></tr>
 <tr><td>xerces</td><td align=right>31</td><td align=right>90</td></tr>
 <tr><td>xz</td><td align=right>46</td><td align=right>90</td></tr>
-<tr><td>計</td><td align=right>416 (39%)</td><td align=right>1080</td></tr>
+<tr><td>Total</td><td align=right>416 (39%)</td><td align=right>1080</td></tr>
 </table>
-</div>
-<p>
-なお、9人の被験者による合意度 (<a href="https://en.wikipedia.org/wiki/Cohen%27s_kappa#Fleiss'_kappa">Fleiss' Kappa</a>) は 0.45 (Moderate) であった。
-<p>
-ちなみに、useflowから素性を生成するとき、
-異なるアルゴリズムを使った場合の実験結果は以下のようであった。
-<div class=figure>
-<table border>
-<tr><th>Methods</th><th>Interproc.</th><th>Name</th><th>Type</th><th>Length</th><th align=right>%</th></tr>
-<tr><td>5</td><td>+</td><td>+</td><td>+</td><td>5</td><td align=right>39%</td></tr>
-<tr><td>5</td><td>+</td><td>+</td><td>+</td><td>3</td><td align=right>14%</td></tr>
-<tr><td>5</td><td>+</td><td>+</td><td>+</td><td>1</td><td align=right>7%</td></tr>
-<tr><td>5</td><td>+</td><td>-</td><td>-</td><td>5</td><td align=right>6%</td></tr>
-<tr><td>5</td><td>+</td><td>+</td><td>-</td><td>5</td><td align=right>10%</td></tr>
-<tr><td>5</td><td>+</td><td>-</td><td>+</td><td>5</td><td align=right>8%</td></tr>
-<tr><td>5</td><td>-</td><td>+</td><td>+</td><td>5</td><td align=right>10%</td></tr>
-<tr><td>1</td><td>+</td><td>+</td><td>+</td><td>5</td><td align=right>16%</td></tr>
-</table>
-</div>
 
 <p>
-また、各プロジェクトごとに生成された提案の数とそのスコア内訳は以下のようである:
-<div class=figure>
-<table border>
-<tr><th>プロジェクト</th><th>90%</th><th>80%</th><th>70%</th><th>60%</th><th>50%</th><th>40%</th><th>30%</th><th>20%</th><th>10%</th><th>0%</th><th>計</th></tr>
-<tr><td>ant</td><td align=right>2</td><td align=right>15</td><td align=right>61</td><td align=right>144</td><td align=right>302</td><td align=right>637</td><td align=right>1031</td><td align=right>1985</td><td align=right>3061</td><td align=right>5784</td><td align=right>13022</td></tr>
-<tr><td>antlr4</td><td align=right>7</td><td align=right>9</td><td align=right>41</td><td align=right>74</td><td align=right>144</td><td align=right>217</td><td align=right>344</td><td align=right>453</td><td align=right>658</td><td align=right>965</td><td align=right>2912</td></tr>
-<tr><td>bcel</td><td align=right>3</td><td align=right>5</td><td align=right>12</td><td align=right>55</td><td align=right>103</td><td align=right>203</td><td align=right>294</td><td align=right>501</td><td align=right>644</td><td align=right>1042</td><td align=right>2862</td></tr>
-<tr><td>compress</td><td align=right>4</td><td align=right>6</td><td align=right>16</td><td align=right>45</td><td align=right>98</td><td align=right>214</td><td align=right>276</td><td align=right>504</td><td align=right>822</td><td align=right>1012</td><td align=right>2997</td></tr>
-<tr><td>jedit</td><td align=right>7</td><td align=right>14</td><td align=right>58</td><td align=right>199</td><td align=right>345</td><td align=right>606</td><td align=right>965</td><td align=right>1621</td><td align=right>2349</td><td align=right>3837</td><td align=right>10001</td></tr>
-<tr><td>jhotdraw</td><td align=right>12</td><td align=right>22</td><td align=right>68</td><td align=right>150</td><td align=right>251</td><td align=right>441</td><td align=right>648</td><td align=right>895</td><td align=right>1284</td><td align=right>1695</td><td align=right>5466</td></tr>
-<tr><td>junit</td><td align=right>6</td><td align=right>12</td><td align=right>27</td><td align=right>40</td><td align=right>89</td><td align=right>89</td><td align=right>89</td><td align=right>149</td><td align=right>182</td><td align=right>135</td><td align=right>818</td></tr>
-<tr><td>lucene</td><td align=right>9</td><td align=right>18</td><td align=right>48</td><td align=right>137</td><td align=right>292</td><td align=right>567</td><td align=right>945</td><td align=right>1735</td><td align=right>2913</td><td align=right>4546</td><td align=right>11210</td></tr>
-<tr><td>tomcat</td><td align=right>13</td><td align=right>42</td><td align=right>112</td><td align=right>264</td><td align=right>544</td><td align=right>1165</td><td align=right>1729</td><td align=right>3038</td><td align=right>4897</td><td align=right>8422</td><td align=right>20226</td></tr>
-<tr><td>weka</td><td align=right>9</td><td align=right>22</td><td align=right>63</td><td align=right>200</td><td align=right>407</td><td align=right>970</td><td align=right>2054</td><td align=right>3468</td><td align=right>6905</td><td align=right>10672</td><td align=right>24770</td></tr>
-<tr><td>xerces</td><td align=right>5</td><td align=right>27</td><td align=right>49</td><td align=right>131</td><td align=right>289</td><td align=right>435</td><td align=right>756</td><td align=right>1263</td><td align=right>1924</td><td align=right>3371</td><td align=right>8250</td></tr>
-<tr><td>xz</td><td align=right>3</td><td align=right>9</td><td align=right>8</td><td align=right>14</td><td align=right>24</td><td align=right>33</td><td align=right>74</td><td align=right>86</td><td align=right>157</td><td align=right>111</td><td align=right>519</td></tr>
-</table>
-</div>
+The degree of agreement (<a href="https://en.wikipedia.org/wiki/Cohen%27s_kappa#Fleiss'_kappa">Fleiss' Kappa</a>) = 0.45 (Moderate).
 
-<h4>実験2-2.
-システムの出力をもとに各プロジェクト用の修正パッチを作成し、作者のもとに送る</h4>
+
+<h4>Experiment 2-2. Sending Patches to Developers</h4>
 <p>
-各プロジェクトに対して計12個のパッチを作成。
+Based on our results we manually crafted 12 patches
+to the open source projects.
 <ul>
-<li> 3プロジェクトで採用された。
-<li> 2プロジェクトで議論中。
-<li> 1プロジェクトから「それほど優先度高くない」と返答。
+<li> 3 projects incorporated it.
+<li> 2 projects are still in discussion.
+<li> 1 projects rejected it.
 </ul>
 
-<h3>RQ3. 変数名の予測には説得力があったか?</h3>
+<h3 id="rq3">RQ3. Is the System Output Explainable?</h3>
 
-<h4>実験3-1. 提案した名前とその論拠を表示し、説得力があるかどうかを判定する</h4>
-<p>
-各プロジェクトごとに
-本手法で提案されたスコアが高いものから低いものまで 5個を選び、
-証拠とともに評価させる:
+<h4>Experiment 3. Evidence Persuasiveness Test</h4>
+<ol>
+<li> Choose 5 variable name suggestions which was highly ranked.
+<li> Present the evidences (snippets) used for producing each suggestion.
+<li> Ask the subjects to choose one of the following:
 <ol type=a>
-<li> 提案した名前を支持する確固たる説得力がある。
-<li> 提案した名前がそれなりに正しそうな証拠である。
-<li> 提案した名前が正しそうという確信はもてない。
-<li> わからない。
+<li> Presented evidence is convincing.
+<li> Presented evidence is relevant.
+<li> Presented evidence is irrelevant.
+<li> Undecidable.
+</ol>
 </ol>
 <p>
-全12プロジェクト × 各プロジェクト5問 × 9人 = 計540問の結果:
-<div class=figure>
+We tested for 12 projects × 5 questions × 9 subjects = 540 questionnaires.
 <table border>
-<tr><th>プロジェクト</th><th align=right>#a</th><th align=right>#b</th><th align=right>#c</th><th align=right>#d</th><th align=right>#全体</th></tr>
+<tr><th>Project</th><th align=right>#a</th><th align=right>#b</th><th align=right>#c</th><th align=right>#d</th><th align=right>#Total</th></tr>
 <tr><td>ant</td><td align=right>7</td><td align=right>8</td><td align=right>30</td><td align=right>0</td><td align=right>45</td></tr>
 <tr><td>antlr4</td><td align=right>8</td><td align=right>8</td><td align=right>29</td><td align=right>0</td><td align=right>45</td></tr>
 <tr><td>bcel</td><td align=right>10</td><td align=right>15</td><td align=right>20</td><td align=right>0</td><td align=right>45</td></tr>
@@ -830,32 +783,16 @@ For each 変数 について、(名前は隠して)
 <tr><td>weka</td><td align=right>1</td><td align=right>10</td><td align=right>34</td><td align=right>0</td><td align=right>45</td></tr>
 <tr><td>xerces</td><td align=right>6</td><td align=right>10</td><td align=right>28</td><td align=right>1</td><td align=right>45</td></tr>
 <tr><td>xz</td><td align=right>1</td><td align=right>7</td><td align=right>35</td><td align=right>2</td><td align=right>45</td></tr>
-<tr><td>計</td><td align=right>60</td><td align=right>102</td><td align=right>373</td><td align=right>5</td><td align=right>540</td></tr>
+<tr><td>Total</td><td align=right>60</td><td align=right>102</td><td align=right>373</td><td align=right>5</td><td align=right>540</td></tr>
 </table>
-</div>
 
 <p>
-#a + #b の割合が全体の 30% (162/540) しかないが、
-以下に示すように、スコアが高い提案は #a + #b の評価になる
-割合が高く、スコアが低いものは #c になる割合が高い:
+The results did not know that our system produced good explanation
+for its suggestions. :(
 
-<div class=figure>
-<table border>
-<tr><th>%score</th><th>#total</th><th>#a+#b</th><th>#c</th></tr>
-<tr><td>&gt; 80%</td><td>207</td><td>71 (34%)</td><td> 133 (64%)</td></tr>
-<tr><td>&gt; 60%</td><td>108</td><td>40 (37%)</td><td>66 (61%)</td></tr>
-<tr><td>&gt; 40%</td><td>108</td><td>20 (19%)</td><td>88 (81%)</td></tr>
-<tr><td>&gt; 20%</td><td>108</td><td>24 (22%)</td><td>84 (78%)</td></tr>
-<tr><td>&gt; 0%</td><td>9</td><td>7 (78%)</td><td>2 (22%)</td></tr>
-</table>
-</div>
-
+<h3 id="examples">Anecdotal Examples</h3>
 <p>
-しかしこれは本手法によるスコアの妥当性を示しているにすぎず、
-全体としては論拠の有用性は示せなかった。
-(そもそもどうすれば有用性を示せたのか、いまとなっては謎である)
-
-<h3>Anecdotal Examples</h3>
+Some of the system suggestions were good:
 <ul>
 <li> Make the name more task oriented:
 <pre>
@@ -901,16 +838,15 @@ src/org/tukaani/xz/lz/Hash234.java
 
 
 <h2 id="discussion">7. Discussion</h2>
-<p>
-本実験の結果から…
 <ol>
-<li> useflowは変数の使われ方を表現するのにある程度有効。
-<li> 実際のプロジェクトで、39% の確率でもとの開発者よりもよい名前を提案できた。
-<li> 各提案で人間に納得できる論拠がきちんと示せたかどうかは証明できなかった。
+<li> Use flows are somewhat good at representing the variable usage.
+<li> In real projects, our system suggested a better (more consistent) name
+  than the original with 39% probability.
+<li> We are not sure that our system produced a good explaination for its output.
 </ol>
 
-<h3>7.1. Threats to Validity</h3>
-<h4>Internal Validity (実験はRQに答えているか?)</h4>
+<h3 id="threats">7.1. Threats to Validity</h3>
+<h4>Internal Validity (Did we answer RQs?)</h4>
 <ol type=a>
 <li> 被験者のプログラミング能力に左右されている。<br>
   → しかし、もし被験者がランダムに選んでいるとしたら
@@ -922,7 +858,7 @@ src/org/tukaani/xz/lz/Hash234.java
   → 「完璧なソースコード」を取得することが不可能なので、
   Recall は無理。
 </ol>
-<h4>External Validity (一般化可能か?)</h4>
+<h4>External Validity (Is our result generalizable?)</h4>
 <ol type=a>
 <li> 現状では、プログラミング言語は Java のみ。
 <li> 実験プロジェクトおよび被験者の数が充分でない。
