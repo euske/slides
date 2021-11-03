@@ -39,6 +39,22 @@ Katsuhiko Gondow<br>
 (APSEC 2021 Paper #125)<br>
 </div>
 
+<ol>
+<li> <a href="#background">Background</a>
+<ul>
+<li> <a href="#rqs">Research Questions</a>
+<li> <a href="#related">Related Work</a>
+</ul>
+<li> <a href="#basic">Basic Idea</a>
+<li> <a href="#experiment">Experiment</a>
+<li> <a href="#inference">Inferring C-types</a>
+<li> <a href="#conclusion">Conclusion</a>
+<ul>
+<li> <a href="#threats">Threats to Validity</a>
+</ul>
+</ol>
+
+
 <h2 id="summary">0. 概要</h2>
 <ul>
 <li> 現代のプログラミング言語はさまざまな型をユーザが定義可能である。
@@ -68,8 +84,12 @@ Katsuhiko Gondow<br>
 </ul>
 
 <h2 id="background">1. Background</h2>
-<p>
-Primitive Obsession is considered as one of bad smell:
+<ul>
+<li> Modern programming languages allow various user defined types.
+<li> <code>String</code> and <code>int</code> types, however,
+  are still used for a wide variety of purposes.
+<li> On the other hand,
+<strong>primitive obsession</strong> often is considered as bad smell:
 <blockquote><pre>
 String username = getCurrentUserName();
 String path = "/home/"+username+"/user.cfg";
@@ -84,19 +104,17 @@ Path path = Paths.get(user.getHomeDirectory(), "user.cfg");
 <span class=comment>// Path is guaranteed to be safe.</span>
 File config = new File(path);
 </pre></blockquote>
-
-<p>
-However, generic <code>String</code> and <code>int</code> types are
-still widely used for a variety of purposes.  We are interested in how
-they are used in software projects and what we can do about it.
+<li> We are interested in how generic data types
+  (such as <code>String</code> and <code>int</code>)
+  are used in various software projects.
+</ul>
 
 
 <h3 id="rqs">1.1. Research Questions</h3>
 <ol>
-<li> What do the "high-level types (abstract types, or <strong>Conceptual Types</strong>, c-type)"
-look like?
-<li> How programmers express such concepts in source code?
-<li> Is it possible to infer them purely from source code?
+<li> What are common "high-level data types"?
+<li> How do programmers express these high-level types in source code?
+<li> Is it possible to infer them from source code?
 </ol>
 
 <h3 id="related">1.2. Related Work</h3>
@@ -110,19 +128,35 @@ When two values are stored at the same location, they are the same type.
 
 <h2 id="basic">2. Basic Idea</h2>
 <p>
-When programmers make an API call, they are aware of the role (c-type)
-of its arguments:
+When programmers make an API call, they are aware of the role of its arguments:
 <blockquote><pre>
-String x = "foo/bar.txt";
-var f = new java.io.File(x);  <span class=comment>// x is a pathname</span>
+String <mark>x</mark> = "foo/bar.txt";
+var f = new java.io.File(<mark>x</mark>);  <span class=comment>// x is a pathname</span>
 </pre></blockquote>
 
-<p>
-We can figure out how some concepts are expressed
-by looking at API calls and its arguments.
+<ul>
+<li> While <code><mark>x</mark></code> is <code>String</code>,
+we know that it's a pathname because of how it's used.
+<li> We define these specific roles of data types
+as <strong>Conceptual Types</strong> or <strong>c-type</strong>.
+<div>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="200" height="150">
+  <g stroke="black" stroke-width="2" fill="none">
+    <circle cx="100" cy="75" r="70" />
+    <circle cx="120" cy="90" r="40" />
+  </g>
+  <g text-anchor="middle">
+    <text x="100" y="40">data type</text>
+    <text x="120" y="100">c-type</text>
+  </g>
+</svg>
+</div>
+</ul>
 
 <p>
-First we defined 12 commonly used c-types:
+We defined 12 commonly used c-types:
 <table border>
 <tr><th>C-Type</th></th><th>Language Type</th><th>Description</th><th># Methods</th></tr>
 <tr><td>PATH   </td><td> <code>String</code> </td><td> Path name</td>
@@ -152,16 +186,16 @@ First we defined 12 commonly used c-types:
 </table>
 
 <p>
-これを選んだ基準は以下のとおりである:
+The criterion that we used are:
 <ol type=a>
-<li> ほとんどのプログラマが理解できる明確な概念であること
-<li> 互いにきっちり区別できること
-<li> 広範囲のアプリケーションで使われていること
+<li> Clearly defined and well understood.
+<li> Distinct enough to not mix up with other concepts.
+<li> Widely used in many applications.
 </ol>
 
 <p>
-つぎに Java Standard API を調べて、
-これらの c-type を含む計218メソッド (重複あり) を列挙した:
+We studied Java Standard API and
+listed 218 methods that takes a c-type:
 <ul>
 <li> <code>new java.io.File(<u>PATH</u>)</code>
 <li> <code>new java.net.URI(<u>URL</u>)</code>
@@ -176,34 +210,32 @@ First we defined 12 commonly used c-types:
 <li> ...
 </ul>
 
-<h2 id="experiment">3. 実験</h2>
+<h2 id="experiment">3. Experiment</h2>
 
 <p>
-実験は以下の手順でおこなった:
+We did the following experiments:
 <ol>
-<li> 中〜大規模の 25 のJava オープンソースプロジェクトを選ぶ。
-<li> ソースコードを解析し、あらかじめ選んだ API 呼び出しを探す。
-<li> それらの引数で使われている式を収集し、
-  その種別・大きさ・識別子に使われている単語などを調べる。
+<li> Choose medium-sized 25 Java open source projects.
+<li> List all the specified API calls.
+<li> Extract <strong>c-type expressions</strong> for the arguments of each API call.
+<li> Examine the type, complexity and commonly used words for each c-type expression.
 </ol>
 
-<h4>例</h4>
+<h4>C-type Expression Examples:</h4>
 <blockquote><pre>
 <u>zookeeper/.../TxnLogToolkit.java:</u>
-
-    File file = new File(<span class=path>dir.getPath() + File.separator + Util.makeLogName(zxid)</span><sub>[PATH]</sub>);
     ...
+    File file = new File(<span class=path>dir.getPath() + File.separator + Util.makeLogName(zxid)</span><sub>[PATH]</sub>);
 </pre></blockquote>
 
 <blockquote><pre>
 <u>jitsi/.../SIPCommSplitPaneDivider.java:</u>
-
+    ...
     rightButton.setBounds(<span class=xcoord>(insets.left * 2) + leftSize.width + rightSize.width</span><sub>[XCOORD]</sub>,
                           <span class=ycoord>y</span><sub>[YCOORD]</sub>, <span class=width>rightSize.width</span><sub>[WIDTH]</sub>, <span class=height>rightSize.height</span><sub>[HEIGHT]</sub>);
 </pre></blockquote>
 
-<p>
-使用したプロジェクトとLoCは以下の通りである:
+<h3 id="projects">3.1. Projects and Sizes</h3>
 <table border>
 <tr><th>Project</th><th>Description</th><th>LoC</th></tr>
 <tr><td>hadoop 3.3.1      </td><td>distributed computation </td><td align=right>1,789k</td></tr>
@@ -235,10 +267,10 @@ First we defined 12 commonly used c-types:
 <tr><td colspan="2">Total</td><td>8,480k</td></tr>
 </table>
 
+<h3 id="numctypes">3.2. Number of Obtained C-Type Expressions</h3>
 <p>
-各プロジェクト・c-typeごとの抽出された式の数は以下のとおりである。
-出現する式の数は、プロジェクトの大きさにほぼ比例する。
-しかし c-typeの種類はプロジェクトによって偏っている。
+The distribution of c-type expressions differs by application domain.
+The total number of c-types is roughly propotional to the project size.
 <table border>
 <tr><th>Project</th><th>LoC</th><th><code>PATH</code></th><th><code>URL</code></th><th><code>SQL</code></th><th><code>HOST</code></th><th><code>PORT</code></th><th><code>XCOORD</code></th><th><code>YCOORD</code></th><th><code>WIDTH</code></th><th><code>HEIGHT</code></th><th><code>YEAR</code></th><th><code>MONTH</code></th><th><code>DAY</code></th><th><code>OTHER</code></th><th>All</th></tr>
 <tr><td>   alluxio </td><td align=right>  228k </td><td align=right>  72 </td><td align=right>  12 </td><td align=right>   0 </td><td align=right>  22 </td><td align=right>  26 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>   0 </td><td align=right>  15 </td><td align=right>  15 </td><td align=right>  15 </td><td align=right>  51 </td><td align=right>  228 </td></tr>
@@ -270,10 +302,11 @@ First we defined 12 commonly used c-types:
 <tr><td>Total</td><td align=right>8,480k </td><td align=right> 2,668 </td><td align=right> 1,374 </td><td align=right> 712 </td><td align=right> 1,060 </td><td align=right> 1,182 </td><td align=right> 621 </td><td align=right> 621 </td><td align=right> 1,205 </td><td align=right> 1,205 </td><td align=right> 169 </td><td align=right> 168 </td><td align=right> 168 </td><td align=right> 991 </td><td align=right> 12,144 </td></tr>
 </table>
 
-<p>
-以下は抽出した式に含まれていた PATH, URL, XCOORD, WIDTH 表現の抜粋である:
+<h3 id="topexprs">3.3. Top C-Type Expressions for Each Project</h3>
+
+<h4>PATH</h4>
 <table border>
-<tr><th>PATH</th><th>Top Expressions</th></tr>
+<tr><th>Project</th><th>Top Expressions</th></tr>
 <tr><td>alluxio</td><td><code>path, mLocalUfsPath+ufsBase, base</code></td></tr>
 <tr><td>arduino</td><td><code>path, PreferencesData.get("runtime.ide.path")</code></td></tr>
 <tr><td>binnavi</td><td><code>filename, directory, pathname</code></td></tr>
@@ -296,7 +329,9 @@ First we defined 12 commonly used c-types:
 <tr><td>tomcat</td><td><code>pathname, path, docBase</code></td></tr>
 <tr><td>zookeeper</td><td><code>path, KerberosTestUtils.getKeytabFile()</code></td></tr>
 </table><table border>
-<tr><th>URL</th><th>Top Expressions</th></tr>
+
+<h4>URL</h4>
+<tr><th>Project</th><th>Top Expressions</th></tr>
 <tr><td>alluxio</td><td><code>journalDirectory, folder, inputDir</code></td></tr>
 <tr><td>arduino</td><td><code>contribution.getUrl(), packageIndexURLString</code></td></tr>
 <tr><td>binnavi</td><td><code>url, urlString</code></td></tr>
@@ -318,7 +353,8 @@ First we defined 12 commonly used c-types:
 <tr><td>websocket</td><td><code>uriField.getText(), uriinput.getText()</code></td></tr>
 <tr><td>zookeeper</td><td><code>urlStr</code></td></tr>
 </table><table border>
-<tr><th>XCOORD</th><th>Top Expressions</th></tr>
+<h4>XCOORD</h4>
+<tr><th>Project</th><th>Top Expressions</th></tr>
 <tr><td>arduino</td><td><code>noLeft, cancelLeft</code></td></tr>
 <tr><td>binnavi</td><td><code>x, m_x</code></td></tr>
 <tr><td>gephi</td><td><code>currentMouseX, x, bounds.x</code></td></tr>
@@ -330,7 +366,8 @@ First we defined 12 commonly used c-types:
 <tr><td>libgdx</td><td><code>upButtonX, getWidth()-buttonSize.width-5, x</code></td></tr>
 <tr><td>plantuml</td><td><code>e.getX()</code></td></tr>
 </table><table border>
-<tr><th>WIDTH</th><th>Top Expressions</th></tr>
+<h4>WIDTH</h4>
+<tr><th>Project</th><th>Top Expressions</th></tr>
 <tr><td>arduino</td><td><code>width, imageW, Preferences.BUTTON_WIDTH</code></td></tr>
 <tr><td>binnavi</td><td><code>COLORPANEL_WIDTH, TEXTFIELD_WIDTH, width</code></td></tr>
 <tr><td>gephi</td><td><code>w, constraintWidth, DEPTH</code></td></tr>
@@ -344,38 +381,40 @@ First we defined 12 commonly used c-types:
 <tr><td>tomcat</td><td><code>WIDTH</code></td></tr>
 </table>
 
-<p>
-各c-typeにおける、複雑な式と演算子の組合せ例は以下のとおりである:
-<table border>
-<tr><th>C-Type</th><th>Expressions</th></tr>
-<tr><td><code>PATH</code></td><td><pre>
-mLocalUfsPath + ufsBase
-selectedFile.getAbsolutePath() + PREFERENCES_FILE_EXTENSION
-dir.getPath() + DIR_FAILURE_SUFFIX
-U.defaultWorkDirectory() + separatorChar + DEFAULT_TARGET_FOLDER + separatorChar
-</pre></td></tr>
-<tr><td><code>URL</code></td><td><pre>
-url.toExternalForm().substring(GhidraURL.PROTOCOL.length() + 1)
-str + KMSRESTConstants.SERVICE_VERSION + "/"
-newOrigin(getScheme(),getHost(),getPort()).asString() + path
-base + configFile
-</pre></td></tr>
-<tr><td><code>XCOORD</code></td><td><pre>
-center.x + center.width
-leftButtonWidth + leftWidth
-evt.getX() - getInsets().left
-prefs.getInt(name+".x", 0)
-</pre></td></tr>
-<tr><td><code>WIDTH</code></td><td><pre>
-Math.max(contentWidth, menuWidth) + insets.left + insets.right
-TITLE_X_OFFSET + titlePreferredSize.width
-width + insets.left + insets.right + 2
-(int)(bounds.getWidth() * percent)
-</pre></td></tr>
-</table>
+<h3 id="complex">3.4. Complex C-Type Expressions</h3>
 
+<h4>PATH</h4>
+<ul>
+<li> <code>mLocalUfsPath + ufsBase</code>
+<li> <code>selectedFile.getAbsolutePath() + PREFERENCES_FILE_EXTENSION</code>
+<li> <code>dir.getPath() + DIR_FAILURE_SUFFIX</code>
+<li> <code>U.defaultWorkDirectory() + separatorChar + DEFAULT_TARGET_FOLDER + separatorChar</code>
+</ul>
+<h4>URL</h4>
+<ul>
+<li> <code>url.toExternalForm().substring(GhidraURL.PROTOCOL.length() + 1)</code>
+<li> <code>str + KMSRESTConstants.SERVICE_VERSION + "/"</code>
+<li> <code>newOrigin(getScheme(),getHost(),getPort()).asString() + path</code>
+<li> <code>base + configFile</code>
+</ul>
+<h4>XCOORD</h4>
+<ul>
+<li> <code>center.x + center.width</code>
+<li> <code>leftButtonWidth + leftWidth</code>
+<li> <code>evt.getX() - getInsets().left</code>
+<li> <code>prefs.getInt(name+".x", 0)</code>
+</ul>
+<h4>WIDTH</h4>
+<ul>
+<li> <code>Math.max(contentWidth, menuWidth) + insets.left + insets.right</code>
+<li> <code>TITLE_X_OFFSET + titlePreferredSize.width</code>
+<li> <code>width + insets.left + insets.right + 2</code>
+<li> <code>(int)(bounds.getWidth() * percent)</code>
+</ul>
+
+<h3 id="complexity">3.5. Complexity of C-Type Expressions</h3>
 <p>
-抽出した式の長さは以下のとおりである (nは式中の項の数を表す):
+(n: number of terms)
 <table border>
 <tr><th>C-Type</th><th>n=1</th><th>n=2</th><th>n=3</th><th>n=4</th><th>n=5</th><th>n=6</th><th>n&ge;7</th></tr>
 <tr><td><code>PATH  </code></td><td align=right>49.6%</td><td align=right>22.8%</td><td align=right>7.0%</td><td align=right>6.3%</td><td align=right>4.8%</td><td align=right>2.2%</td><td align=right>7.3%</td></tr>
@@ -392,26 +431,24 @@ width + insets.left + insets.right + 2
 <tr><td><code>DAY   </code></td><td align=right>99.4%</td><td align=right>0.0%</td><td align=right>0.6%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td><td align=right>0.0%</td></tr>
 </table>
 
-<h2 id="infer">4. C-type の推論</h2>
+<h2 id="inference">4. Inferring C-types</h2>
 <p>
-次に、式の表現のみから c-type を推論できるかどうかを考えてみる。
-今のところ、我々は c-type の判定は API 呼び出しに頼っている。
-もしこれができれば API呼び出し以外の部分の c-type も判定することができる。
-
+We tried to infer the c-types from the surface clue of expressions.
 <p>
-基本的な戦略は以下のとおりである:
+Basic strategy:
 <ol>
-<li> 抽出した c-type とその式 (12k) を訓練データ・テストデータとして使用する。
-<li> 各式から分類に使えそうな特徴量を抽出する。
-<li> 機械学習 (決定木) を使って、どれくらいうまく判定できるかを測定する。
+<li> Use the obtained c-type expressions (12k) as training set/test set.
+<li> Extract the features from each expression.
+<li> Use machine learning (decision tree) to identify the c-type from expressions.
 </ol>
 <p>
-機械学習アルゴリズムとして決定木を使ったのは、
-記号的な特徴に向いており、かつ、できあがった規則が人間に読みやすいためである。
+Decision tree-based machine learning is used because
+<ul>
+<li> They are suitable for symbolic features.
+<li> The obtained rules are easy to understand for humans.
+</ul>
 
-<p>
-まず、式に出てきた識別子のうち、頻出の単語を取り出すと
-以下のようになる:
+<h4>Common Top Words for C-Type Expressions:</h4>
 <table border>
 <tr><th>C-Type</th><th>Top words (# Projects)</th></tr>
 <tr><td><code>PATH</code></td><td><code>get</code> (21), <code>path</code> (21), <code>file</code> (20) </td></tr>
@@ -429,10 +466,7 @@ width + insets.left + insets.right + 2
 </table>
 
 <p>
-本手法では、式の特徴を表現するのにデータフロー図を使った。
-式を構文解析して項どうしの依存関係を抽出する。
-たとえば <code>new File(config.getPath(i))</code> のデータフロー図は
-以下のようになる:
+We used a dataflow diagram to extract features from expressions:
 
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -463,19 +497,10 @@ width + insets.left + insets.right + 2
     <text x="0" y="64">Primary identifier</text>
   </g>
 </svg><br>
-<code>new File(config.getPath(i))</code> のデータフロー図
+Dataflow diagram of "<code>new File(config.getPath(i))</code>"
 </div>
 
-
-<p>
-各式に対して、データフローから
-"primary identifier" および "secondary identifier(s)" を
-特徴量として使用して学習する。
-以下のような規則を使うと、以下の素性が抽出できる:
-<ul>
-<li> Primary identifer: <code>getPath()</code>
-<li> Secondary identifiers: <code>config</code>, <code>i</code>
-</ul>
+<h4>Dependency Rules</h4>
 <table border>
 <tr><th>Expression</th><th>Dependency</th></tr>
 <tr><td><code>#</code> (constant)</td><td>
@@ -497,16 +522,24 @@ A &rarr; B</td></tr>
 </table>
 
 <p>
-これらの素性を使って、各ctypeを判別可能かどうか実験した。
-ここでは評価にプロジェクトごとの leave-one-project-out の
-クロスバリデーションを使っている:
+We extract "primary identifier" and "secondary identifier(s)"
+from the above diagram:
 <ul>
-<li> プロジェクトをひとつ選び、そこに表れる式 (およびその ctype) をテストセットとする。
-<li> 残りのプロジェクト 25個の式を訓練セットとする。
+<li> Primary identifer: <code>getPath()</code>
+<li> Secondary identifiers: <code>config</code>, <code>i</code>
 </ul>
 
 <p>
-以下のような結果が得られた:
+We tested the obtained decision tree classifier
+with leave-one-project-out cross validation:
+<ul>
+<li> Choose one project (and its c-type expressions) as a test set.
+<li> Use the other 25 projects as a training set.
+<li> Average the results of all projects.
+</ul>
+
+<h4>Classification Performance</h4>
+
 <table border>
 <tr><th>C-Type</th><th>Precision</th><th>Recall</th><th>F-score</th></tr>
 <tr><td><code>PATH    </code></td><td align=right>  68.9% </td><td align=right> 91.8% </td><td align=right> 78.8% </td></tr>
@@ -525,44 +558,43 @@ A &rarr; B</td></tr>
 </table>
 
 <p>
-URL c-type は性能が悪い。
-その理由は、URLの式は
+The reason why URL c-type wasn't recognized very well:
+URL expressions often include HOST, PORT or PATH
+expressions, which confused the classifier:
 <blockquote><pre>
 "https://"+getHostName()+":"+getPort()+"/"+getPath()
 </pre></blockquote>
-などのように長くなる傾向があり、
-さらに内部で Hostname や port など他の c-type と混同するような
-項が多く表れるためであった。
 
 
-<h2 id="concl">5. 結論</h2>
-<p>
-本研究では、Java standard API で使われている 12 の c-type を定義し、
-それらが 26個のオープンソースプロジェクトでどのように使われているかを分析した。
-ソースコード中の API 呼び出しを収集してそれらの傾向を調べた。
-その後、データフロー解析と決定木を組み合わせた c-type 判定手法をテストした。
-<p>
-Research Question ふたたび:
+<h2 id="conclusion">5. Conclusion</h2>
+<ul>
+<li> We defined 12 c-types used in Java standard API.
+<li> C-type expressions can be extracted by scanning API calls.
+<li> We studied 26 open source projects.
+<li> We used a decision tree classifier to infer the c-type
+from its expressions and obtained 83% F-score.
+</ul>
+
+<h4>Research Questions (again):</h4>
 <ol type=a>
-<li> 多くのプログラマが使う「高水準な型 (abstract type, or <strong>Conceptual Type</strong>, c-type)」とはどんなものか?<br>
-→ 12個のc-typeを定義した。実験によれば、それらの出現頻度はプロジェクトのドメインに依存していた。
-<li> プログラマはそのような概念をコード中でどのように表現しているか?
-<li> コードからそれを推論することは可能なのか?<br>
-→ これらの質問は関連している。比較的単純な決定木ベースの手法が
-うまくいっているので、少なくともよく知られているコンセプトに対しては、
-プログラマは c-type を判定しやすいように書いていると思われる。
+<li> What are common "high-level data types"?<br>
+→ The distribution of c-types depends on the domain of each project.
+ is roughly proportional to the project size.
+<li> How do programmers express these high-level types in source code?
+<li> Is it possible to infer them from source code?<br>
+→ These questions are related.
+By using surface features, we obtained a classifier with 83% F-score.
+This suggests that programmers tend to express the common c-types
+in a rather obvious way.
 </ol>
 
 <h3 id="threats">5.1. Threats to Validity</h3>
 <ul>
-<li> 使ったAPI以外にも c-typeの表れる可能性がある。
-<li> オープンソースを使ったことによる選択バイアス。
-<li> いくつかの c-type はめったに使われない。
-<li> いくつかの c-type は曖昧にしか定義できない: たとえば URL と URI、ファイル名とパス名など。
-<li> 「定義されていない c-type」をどのように扱っていいのかわからない。
-  この実験では、一部の引数を "OTHER" タイプとして判定したが、
-  潜在的にはこのような引数は非常に多い (あるいはほとんど) かもしれず、
-  それを含めれば判定精度はずっと下がる可能性がある。
+<li> Not all the Java API are inspected.
+<li> Selection bias of open source projects.
+<li> Some c-type distinction might be vague: URL and URI, Filename and Pathname, etc.
+<li> There could be potentially many other c-types that are rarely used.<Br>
+  Our results didn't account them.
 </ul>
 
 

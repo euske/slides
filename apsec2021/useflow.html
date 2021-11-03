@@ -40,16 +40,16 @@ Katsuhiko Gondow<br>
 (APSEC 2021 Paper #83)<br>
 </div>
 
-<ul>
-<li> <a href="#background">1. Background: Consistency is Crucial for Maintaining Large Software Projects</a>
-<li> <a href="#objective">2. Goal: Detecting Inconsistent Names in Source Code</a>
-<li> <a href="#consistency">3. What is "consistency" anyway?</a>
-<li> <a href="#datapath">4. "Use flow" of variables</a>
-<li> <a href="#learning">5. Training and Prediction</a>
-<li> <a href="#evaluation">6. Experiment and Evaluation</a>
-<li> <a href="#discussion">7. Discussion</a>
-<li> <a href="#contribution">8. Conclusion</a>
-</ul>
+<ol>
+<li> <a href="#background">Background: Consistency is Crucial for Maintaining Large Software Projects</a>
+<li> <a href="#objective">Goal: Detecting Inconsistent Names in Source Code</a>
+<li> <a href="#consistency">What is "consistency" anyway?</a>
+<li> <a href="#datapath">"Use flow" of variables</a>
+<li> <a href="#learning">Training and Prediction</a>
+<li> <a href="#evaluation">Experiment and Evaluation</a>
+<li> <a href="#discussion">Discussion</a>
+<li> <a href="#contribution">Conclusion</a>
+</ol>
 
 
 <h2 id="background">1. Background: Consistency is Crucial for Maintaining Large Software Projects</h2>
@@ -141,7 +141,7 @@ for an output stream, but it is <strong>consistent</strong> throughout the progr
 
 <h2 id="consistency">3. What is "Consistency" Anyway?</h2>
 
-<h3>3.1. General discussion</h3>
+<h3 id="general">3.1. General discussion</h3>
 <ul>
 <li> Suppose A → B is expected. Call this knowledge K.
 <li> Assume A is satisfied.
@@ -158,7 +158,7 @@ for an output stream, but it is <strong>consistent</strong> throughout the progr
 <li> B: He's not carrying an umbrella. (Inconsistent)
 </ul>
 
-<h3>3.2. Program Variables</h3>
+<h3 id="variables">3.2. Program Variables</h3>
 <p>
 Focus on the usage of program variables:
 <ul>
@@ -175,7 +175,7 @@ write(<mark>???</mark>, ...);
 <li> B: When the variable name <code><mark>???</mark></code> is <code>out</code>, then it's consistent with K.
 </ul>
 
-<h3>3.3. Make it Bayesian</h3>
+<h3 id="bayesian">3.3. Make it Bayesian</h3>
 <p>
 In reality, most rules do not hold for 100% of the time.
 We quantify the "degree of consistency"
@@ -195,7 +195,7 @@ yet P(B) is low → low consistency.
 <li> Let us call this dataflow of the variable "<strong>use flow</strong>".
 </ul>
 
-<h3>4.1. Example of use flows</h3>
+<h3 id="useflow">4.1. Example of use flows</h3>
 <p>
 Take a look at the variable <code><mark>line</mark></code>:
 <blockquote><pre>
@@ -322,7 +322,7 @@ The <u>red lines</u> above = a use flow of <code><mark>line</mark></code>:
 This path shows what is assigned to the variable <code>line</code> and
 how it is used.
 
-<h3>4.2. Make It Interprocedural</h3>
+<h3 id="interp">4.2. Make It Interprocedural</h3>
 <blockquote><pre>
 private BufferedReader fp;
 
