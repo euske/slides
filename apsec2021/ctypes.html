@@ -62,10 +62,7 @@ Katsuhiko Gondow<br>
 <h2 id="background">1. Background</h2>
 <ul>
 <li> Modern programming languages allow various user defined types.
-<li> <code>String</code> and <code>int</code> types, however,
-  are still used for a wide variety of purposes.
-<li> On the other hand,
-<strong>primitive obsession</strong> often is considered as bad smell:
+<li> <strong>Primitive obsession</strong> often is considered as bad smell:
 <blockquote><pre>
 String username = getCurrentUserName();
 String path = "/home/"+username+"/user.cfg";
@@ -80,6 +77,8 @@ Path path = Paths.get(user.getHomeDirectory(), "user.cfg");
 <span class=comment>// Path is guaranteed to be safe.</span>
 File config = new File(path);
 </pre></blockquote>
+<li> <code>String</code> and <code>int</code> types, however,
+  are still used for a wide variety of purposes.
 <li> We are interested in how generic data types
   (such as <code>String</code> and <code>int</code>)
   are used in various software projects.
@@ -90,14 +89,14 @@ File config = new File(path);
 <ol>
 <li> What are common "high-level data types"?
 <li> How do programmers express these high-level types in source code?
-<li> Is it possible to infer them from source code?
+<li> Is it possible to infer them from surface clues?
 </ol>
 
 <h3 id="related">1.2. Related Work</h3>
 <ul>
-<li> O'Callahan et al.: Type identification by Static analysis + Type inference.
+<li> O'Callahan et al.: Type identification by static analysis + type inference.
 When two values are stored at the same location, they are the same type.
-<li> Guo et al.:  Dynamic analysis + Type inference.
+<li> Guo et al.:  Dynamic analysis + type inference.
 <li> Dash et al.: Similar names imply related types.
 <li> Jiang et al.: Type inconsistency detection via dimensional analysis.
 </ul>
@@ -129,6 +128,8 @@ as <strong>Conceptual Types</strong> or <strong>c-type</strong>.
   </g>
 </svg>
 </div>
+<li> API calls are easy to collect and its function is well defined.<br>
+  &rarr; <strong>They provide us a plenty of unambiguous use cases of c-types!</strong>
 </ul>
 
 <p>
@@ -191,9 +192,9 @@ listed 218 methods that takes a c-type:
 <p>
 We did the following experiments:
 <ol>
-<li> Choose medium-sized 25 Java open source projects.
-<li> List all the specified API calls.
-<li> Extract <strong>c-type expressions</strong> for the arguments of each API call.
+<li> Choose medium-sized 26 Java open source projects.
+<li> Search all the specified API calls.
+<li> Extract <strong>c-type expressions</strong> from the arguments of each API call.
 <li> Examine the type, complexity and commonly used words for each c-type expression.
 </ol>
 
@@ -555,14 +556,16 @@ from its expressions and obtained 83% F-score.
 <ol type=a>
 <li> What are common "high-level data types"?<br>
 → The distribution of c-types depends on the domain of each project.
- is roughly proportional to the project size.
 <li> How do programmers express these high-level types in source code?
-<li> Is it possible to infer them from source code?<br>
+<li> Is it possible to infer them from surface clues?<br>
 → These questions are related.
-By using surface features, we obtained a classifier with 83% F-score.
+By using superficial features, we obtained a classifier with 83% F-score.
 This suggests that programmers tend to express the common c-types
 in a rather obvious way.
 </ol>
+<p>
+In future, we could use the obtained classifier to
+infer c-types in other parts of code.
 
 <h3 id="threats">5.1. Threats to Validity</h3>
 <ul>
