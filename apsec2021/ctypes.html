@@ -67,9 +67,9 @@ Katsuhiko Gondow<br>
   83% (F値) を正しく識別することが可能。
 </ul>
 
-<h2 id="background">1. 背景</h2>
+<h2 id="background">1. Background</h2>
 <p>
-よく「悪いコード」として primitive obsession と呼ばれる現象がある:
+Primitive Obsession is considered as one of bad smell:
 <blockquote><pre>
 String username = getCurrentUserName();
 String path = "/home/"+username+"/user.cfg";
@@ -77,7 +77,7 @@ String path = "/home/"+username+"/user.cfg";
 File config = new File(path);
 </pre></blockquote>
 <p>
-まともな (しかし面倒くさい) コード:
+A better (but cumbersome) code would be:
 <blockquote><pre>
 User user = getCurrentUser();
 Path path = Paths.get(user.getHomeDirectory(), "user.cfg");
@@ -86,61 +86,68 @@ File config = new File(path);
 </pre></blockquote>
 
 <p>
-Primitive obsession はリスキーだが多くのプログラマが使っている。
+However, generic <code>String</code> and <code>int</code> types are
+still widely used for a variety of purposes.  We are interested in how
+they are used in software projects and what we can do about it.
+
 
 <h3 id="rqs">1.1. Research Questions</h3>
-<ol type=a>
-<li> 多くのプログラマが使う「高水準な型 (abstract type, or <strong>Conceptual Type</strong>, c-type)」とはどんなものか?
-<li> プログラマはそのような概念をコード中でどのように表現しているか?
-<li> コードからそれを推論することは可能なのか?
+<ol>
+<li> What do the "high-level types (abstract types, or <strong>Conceptual Types</strong>, c-type)"
+look like?
+<li> How programmers express such concepts in source code?
+<li> Is it possible to infer them purely from source code?
 </ol>
 
 <h3 id="related">1.2. Related Work</h3>
 <ul>
-<li> O'Callahan et al.: 静的解析 + 型推論による型の判別。同じ位置に格納されれば同じ型とみなす。
-<li> Guo et al.: 動的解析 + 型推論。
-<li> Dash et al.: 似た名前であれば似た型。
-<li> Jiang et al.: 次元解析 (dimensional analysis) による型の不一致検出。
+<li> O'Callahan et al.: Type identification by Static analysis + Type inference.
+When two values are stored at the same location, they are the same type.
+<li> Guo et al.:  Dynamic analysis + Type inference.
+<li> Dash et al.: Similar names imply related types.
+<li> Jiang et al.: Type inconsistency detection via dimensional analysis.
 </ul>
 
-<h2 id="basic">2. 基本的なアイデア</h2>
+<h2 id="basic">2. Basic Idea</h2>
 <p>
-プログラマは APIを呼び出すとき、その引数の用途 (c-type) を知っているはず:
+When programmers make an API call, they are aware of the role (c-type)
+of its arguments:
 <blockquote><pre>
 String x = "foo/bar.txt";
-var f = new java.io.File(x);  <span class=comment>// x はパス名</span>
+var f = new java.io.File(x);  <span class=comment>// x is a pathname</span>
 </pre></blockquote>
-したがってAPI呼び出しとその引数を調べれば、
-プログラマが特定の概念をどのように表現しているかがわかるはずだ。
 
 <p>
-いくつかの Java オープンソースプロジェクトを調査し、
-以下の 12 の c-type を定めることにした:
+We can figure out how some concepts are expressed
+by looking at API calls and its arguments.
+
+<p>
+First we defined 12 commonly used c-types:
 <table border>
-<tr><th>C-Type</th></th><th>言語の型</th><th>説明</th><th>メソッド数</th></tr>
-<tr><td>PATH   </td><td> <code>String</code> </td><td> パス名</td>
+<tr><th>C-Type</th></th><th>Language Type</th><th>Description</th><th># Methods</th></tr>
+<tr><td>PATH   </td><td> <code>String</code> </td><td> Path name</td>
 <td align=right>14</td></tr>
 <tr><td>URL    </td><td> <code>String</code> </td><td> URL/URI</td>
 <td align=right>4</td></tr>
-<tr><td>SQL    </td><td> <code>String</code> </td><td> SQL文</td>
+<tr><td>SQL    </td><td> <code>String</code> </td><td> SQL statement</td>
 <td align=right>10</td></tr>
-<tr><td>HOST   </td><td> <code>String</code> </td><td> ホスト名</td>
+<tr><td>HOST   </td><td> <code>String</code> </td><td> Host name</td>
 <td align=right>17</td></tr>
-<tr><td>PORT   </td><td> <code>int</code>    </td><td> ポート番号</td>
+<tr><td>PORT   </td><td> <code>int</code>    </td><td> Port number</td>
 <td align=right>25</td></tr>
-<tr><td>XCOORD </td><td> <code>int</code>    </td><td> X座標 (GUI用)</td>
+<tr><td>XCOORD </td><td> <code>int</code>    </td><td> X coordinate (GUI)</td>
 <td align=right>25</td></tr>
-<tr><td>YCOORD </td><td> <code>int</code>    </td><td> Y座標 (GUI用)</td>
+<tr><td>YCOORD </td><td> <code>int</code>    </td><td> Y coordinate (GUI)</td>
 <td align=right>25</td></tr>
-<tr><td>WIDTH  </td><td> <code>int</code>    </td><td> 幅 (GUI用)</td>
+<tr><td>WIDTH  </td><td> <code>int</code>    </td><td> width (GUI)</td>
 <td align=right>24</td></tr>
-<tr><td>HEIGHT </td><td> <code>int</code>    </td><td> 高さ (GUI用)</td>
+<tr><td>HEIGHT </td><td> <code>int</code>    </td><td> height (GUI)</td>
 <td align=right>24</td></tr>
-<tr><td>YEAR   </td><td> <code>int</code>    </td><td> 年</td>
+<tr><td>YEAR   </td><td> <code>int</code>    </td><td> year</td>
 <td align=right>18</td></tr>
-<tr><td>MONTH  </td><td> <code>int</code>    </td><td> 月</td>
+<tr><td>MONTH  </td><td> <code>int</code>    </td><td> month</td>
 <td align=right>14</td></tr>
-<tr><td>DAY    </td><td> <code>int</code>    </td><td> 日</td>
+<tr><td>DAY    </td><td> <code>int</code>    </td><td> day</td>
 <td align=right>18</td></tr>
 </table>
 

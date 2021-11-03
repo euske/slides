@@ -99,7 +99,7 @@ void printInfo(Stream <mark>strm</mark>, String info) {
 }
 </pre></blockquote>
 <p>
-Note: "<code>out</code>" might not necessarily be the most relavant name
+Note: "<code>out</code>" might not necessarily be the most relevant name
 for an output stream, but it is <strong>consistent</strong> throughout the program.
 
 <h3 id="related">2.1. Related Work</h3>
@@ -221,7 +221,7 @@ In reality, most rules do not hold for 100% of the time.
 We quantify the "degree of consistency"
 by using probability.
 <ul>
-<li> High likelihood of A → B &equiv; High probablility of P(B | A).
+<li> High likelihood of A → B &equiv; High probability of P(B | A).
 <li> When P(B | A) and P(A) are both high,
 yet P(B) is low → low consistency.
 </ul>
@@ -663,7 +663,7 @@ multiple variables that share the same use flow is considered equivalent.
 
 <h4>Experiment 1. Variable Equivalence Test</h4>
 <ol>
-<li> Choose a pair of variables that have the high similarlity
+<li> Choose a pair of variables that have the high similarity
   of use flows (cosine &gt; 0.90) for each project.
 <li> Present the surrounding snippet of each variable (whose names hidden) to human subjects.
 <li> Ask the subjects to choose one of the following:
@@ -707,7 +707,7 @@ Therefore the test was not completely blind. :(
 
 <h3 id="rq2">RQ2. Can the System Predict a Good (Consistent) Variable Name?</h3>
 
-<h4>Experiment 2-1. Name Suggestiong Test</h4>
+<h4>Experiment 2-1. Name Suggestion Test</h4>
 <ol>
 <li> Present the surrounding snippet of a certain variable to human subjects.
 <li> Ask the subjects to choose which names fits the best
@@ -848,32 +848,25 @@ src/org/tukaani/xz/lz/Hash234.java
 <h3 id="threats">7.1. Threats to Validity</h3>
 <h4>Internal Validity (Did we answer RQs?)</h4>
 <ol type=a>
-<li> 被験者のプログラミング能力に左右されている。<br>
-  → しかし、もし被験者がランダムに選んでいるとしたら
-  Kappa = 0 になるはずなので、被験者9人は
-  ある程度の一般的な基準を有しているといえる。
-<li> 被験者が評価コードに対する前提知識があるかもしれない。<br>
-  → 今回のケースではない。
-<li> Precision のみで Recall が測定できていない。<br>
-  → 「完璧なソースコード」を取得することが不可能なので、
-  Recall は無理。
+<li> The subjects might have a prior knowledge about the projects used.
+<li> The results depend on each subject's proficiency of the language.
+<li> It is not clear how many variables the proposed method can apply to.
+<li> Not every use flow is correctly obtained.
 </ol>
 <h4>External Validity (Is our result generalizable?)</h4>
 <ol type=a>
-<li> 現状では、プログラミング言語は Java のみ。
-<li> 実験プロジェクトおよび被験者の数が充分でない。
-<li> useflowの取得方法が完璧でない。
-  (実装上のミス、機能の欠損)
-<li> 動的ディスパッチ、variable aliasing を全部追えていない。
-<li> useflow全体を比較せず、エッジを比較するだけの判定では不十分である。
-<li> Naive Bayes classifier の性能が不十分である。
+<li> The programming language is limited to Java.
+<li> Not enough projects are tested with enough subjects.
+<li> Dynamic dispatching or variable aliasing is not considered.
+<li> Naive Bayes classifier could be improved.
 </ol>
 
 <h2 id="contribution">8. Conclusion</h2>
 <ul>
-<li> 一貫性を検査するための一般的な枠組みを提案した。
-<li> 変数の使い方を表現するためのuseflowという形式を提案した。
-<li> 上の手法を使って、変数名の一貫性を検査・修正することができた。
+<li> We presented a framework to test the consistency of variable names.
+<li> We proposed use flow as the representation of variable usage.
+<li> We demonstrated that the proposed method can detect and correct
+inconsistent variable names.
 </ul>
 
 
