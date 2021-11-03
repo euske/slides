@@ -16,6 +16,7 @@ table { border-collapse: collapse; margin: 0.5em; }
 kbd { border: 1px solid black; padding: 4px; margin: 4px; }
 code { font-weight: bold; }
 pre { border: 1px solid black; padding: 0.3em; }
+.announce { font-size: 120%; font-weight: bold; }
 .author { text-align: right; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
 .notice { text-align: center; font-weight: bold; outline: 4px solid black; padding: 1em; margin: 1em; font-size: 200%; }
@@ -28,6 +29,9 @@ pre { border: 1px solid black; padding: 0.3em; }
 <a href="../index.html">&lt; back</a>
 </div>
 <h1>Improving Semantic Consistency of Variable Names with Use-Flow Graph Analysis</h1>
+<div class=announce>
+URL: <code>https://euske.github.io/</code>
+</div>
 
 <div class=author>
 Yusuke Shinyama<br>
@@ -40,7 +44,7 @@ Katsuhiko Gondow<br>
 <li> <a href="#background">1. Background: Consistency is Crucial for Maintaining Large Software Projects</a>
 <li> <a href="#objective">2. Goal: Detecting Inconsistent Names in Source Code</a>
 <li> <a href="#consistency">3. What is "consistency" anyway?</a>
-<li> <a href="#datapath">4. Focus on the "use flow" of variables</a>
+<li> <a href="#datapath">4. "Use flow" of variables</a>
 <li> <a href="#learning">5. Training and Prediction</a>
 <li> <a href="#evaluation">6. Experiment and Evaluation</a>
 <li> <a href="#discussion">7. Discussion</a>
@@ -52,7 +56,7 @@ Katsuhiko Gondow<br>
 <ul>
 <li> Large projects are developed by a team with multiple people.
   <ul>
-    <li> Even if there's only one real developer, they turn into a different person in future!
+    <li> Even if there's only a single developer, they turn into a different person over time!
   </ul>
 <li> A style guide is set up to facilitate collaboration of team members.
   <ul>
@@ -72,11 +76,6 @@ Katsuhiko Gondow<br>
       <a href="https://ieeexplore.ieee.org/document/1631100">[Lawrie, 06]</a>
     <li> Bad names obstructs program understanding, resulting in bad code.
       <a href="https://ieeexplore.ieee.org/document/7961504">[Avidan, 17]</a>
-    <li> One of the most asked questions by programmers:
-      "Where is this class/method used?"
-      <a href="https://ieeexplore.ieee.org/document/4497212">[Sillito, 08]</a>
-    <li> Just searching GitHub Issues with "<code>wrong name</code>" results
-      <a href="https://github.com/search?q=wrong+name&amp;type=Issues">more than a million results</a>.
     <li> The importance of names are also emphasized in "Code Complete"
       and "The Practice of Programming".
   </ul>
@@ -99,7 +98,7 @@ void printInfo(Stream <mark>strm</mark>, String info) {
 }
 </pre></blockquote>
 <p>
-Note: "<code>out</code>" might not necessarily be the most relevant name
+Note: "<code>out</code>" might not necessarily be the best name
 for an output stream, but it is <strong>consistent</strong> throughout the program.
 
 <h3 id="related">2.1. Related Work</h3>
@@ -120,46 +119,7 @@ for an output stream, but it is <strong>consistent</strong> throughout the progr
 <li> Variable names are just as important as method names:
   <ul>
     <li> Variables are named after "things" in an application domain.
-    <li> They are typically nouns, which are much more varied than verbs:
-<table border>
-<tr><th>Project</th><th>Top Nouns</th><th>Top Verbs</th></tr>
-<tr><td>ant (build tool)</td>
-<td>file, name, function, class, output</td>
-<td>set, get, add, create, execute</td></tr>
-<tr><td>antlr4 (parser generator)</td>
-<td>string, rule, token, code, name</td>
-<td>get, set, add, remove, visit</td></tr>
-<tr><td>bcel (byte code analyzer)</td>
-<td>constant, class, string, type, value</td>
-<td>visit, get, accept, set, dump</td></tr>
-<tr><td>compress (data compression)</td>
-<td>stream, entry, archive, data, input</td>
-<td>get, set, read, write, close</td></tr>
-<tr><td>jedit (text editor)</td>
-<td>jj, action, line, string, buffer</td>
-<td>get, set, add, run, remove</td></tr>
-<tr><td>jhotdraw (diagram renderer)</td>
-<td>action, figure, color, name, property</td>
-<td>get, set, create, add, read</td></tr>
-<tr><td>junit (unit testing)</td>
-<td>test, class, method, failure, runner</td>
-<td>get, assert, run, test, validate</td></tr>
-<tr><td>lucene (document indexing)</td>
-<td>doc, next, string, value, bytes</td>
-<td>get, set, compare, add, read</td></tr>
-<tr><td>tomcat (web server)</td>
-<td>name, string, session, max, class</td>
-<td>get, set, add, remove, create</td></tr>
-<tr><td>weka (machine learning)</td>
-<td>text, tip, options, action, string</td>
-<td>get, set, add, create, remove</td></tr>
-<tr><td>xerces (XML parser)</td>
-<td>element, name, decl, type, impl</td>
-<td>get, set, create, add, start</td></tr>
-<tr><td>xz (data compression)</td>
-<td>stream, input, size, output, memory</td>
-<td>get, write, read, close, set</td></tr>
-</table>
+    <li> They are typically nouns, which are much more varied than verbs.
   </ul>
 <li> Our design goal:
   <ul>
@@ -173,7 +133,7 @@ for an output stream, but it is <strong>consistent</strong> throughout the progr
       </ul>
     <li> Make the system transparent and explainable:
       <ul>
-        <li> Show how an answer is produced.
+        <li> Show how an answer is obtained.
       </ul>
   </ul>
 </ul>
@@ -227,7 +187,7 @@ yet P(B) is low → low consistency.
 </ul>
 
 
-<h2 id="datapath">4. Focus on the "Use Flow" of Variables</h2>
+<h2 id="datapath">4. "Use Flow" of Variables</h2>
 
 <ul>
 <li> Usage of a variable = Sequence of operations
@@ -237,7 +197,7 @@ yet P(B) is low → low consistency.
 
 <h3>4.1. Example of use flows</h3>
 <p>
-Focus on the variable <code><mark>line</mark></code>:
+Take a look at the variable <code><mark>line</mark></code>:
 <blockquote><pre>
 private BufferedReader fp;
 
