@@ -188,7 +188,7 @@ write(<span class=bl>strm</span>, ...);
 <ul>
   <li> <code>out</code>
   <li> <code>out</code>
-  <li> <code>strm</code> (Hey!)
+  <li> <code><mark>strm</mark></code> (Hey!)
   <li> <code>out</code>
 </ul>
 </ol>
@@ -591,7 +591,7 @@ Algorithm:
 Evaluated our method with the following projects:
 (#edges &lt; #useflow)
 
-<table border>
+<table border align=center>
 <tr><th>Project</th><th align=right>kLoC</th><th align=right>#vars</th>
 <th align=right>#nodes</th><th align=right>#edges</th></tr>
 <tr><td>ant (build tool)</td><td align=right>112k</td><td align=right>23,971</td>
@@ -661,27 +661,13 @@ Present a pair of variables (whose names hidden) to human subjects:
 <p>
 Tested for 12 projects × 5 variable pairs × 9 subjects = 540 questionnaires.
 <ul>
-<li> Ratio of #a + #b = 68% (369/540)
+<li> Ratio of #MustBeSame + #CanBeSame = 68% (369/540)
 <li> High similarity in use flows = the same variable name.
 </ul>
 
-<table border>
-<tr><th>Project</th><th align=right>#a</th><th align=right>#b</th><th align=right>#c</th><th align=right>#d</th><th align=right>#Total</th></tr>
-<tr><td>ant</td><td align=right>23</td><td align=right>17</td><td align=right>5</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>antlr4</td><td align=right>13</td><td align=right>22</td><td align=right>9</td><td align=right>1</td><td align=right>45</td></tr>
-<tr><td>bcel</td><td align=right>3</td><td align=right>11</td><td align=right>31</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>compress</td><td align=right>10</td><td align=right>9</td><td align=right>24</td><td align=right>2</td><td align=right>45</td></tr>
-<tr><td>jedit</td><td align=right>7</td><td align=right>25</td><td align=right>9</td><td align=right>4</td><td align=right>45</td></tr>
-<tr><td>jhotdraw</td><td align=right>15</td><td align=right>17</td><td align=right>12</td><td align=right>1</td><td align=right>45</td></tr>
-<tr><td>junit</td><td align=right>14</td><td align=right>21</td><td align=right>10</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>lucene</td><td align=right>18</td><td align=right>21</td><td align=right>6</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>tomcat</td><td align=right>11</td><td align=right>27</td><td align=right>6</td><td align=right>1</td><td align=right>45</td></tr>
-<tr><td>weka</td><td align=right>4</td><td align=right>28</td><td align=right>12</td><td align=right>1</td><td align=right>45</td></tr>
-<tr><td>xerces</td><td align=right>12</td><td align=right>22</td><td align=right>9</td><td align=right>2</td><td align=right>45</td></tr>
-<tr><td>xz</td><td align=right>4</td><td align=right>15</td><td align=right>26</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>Total</td><td align=right>134</td><td align=right>235</td><td align=right>159</td><td align=right>12</td><td align=right>540</td></tr>
-</table>
-
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="300" version="1.1"><g fill="none" stroke="black" stroke-width="2"><line x1="10" y1="210" x2="10" y2="10" /><line x1="10" y1="210" x2="290" y2="210" /><rect fill="#0f0" x="20" y="10" width="10" height="102" /><rect fill="#0cf" x="20" y="112" width="10" height="76" /><rect fill="#f0f" x="20" y="188" width="10" height="22" /><rect fill="#000" x="20" y="211" width="10" height="0" /><rect fill="#0f0" x="40" y="10" width="10" height="58" /><rect fill="#0cf" x="40" y="68" width="10" height="98" /><rect fill="#f0f" x="40" y="166" width="10" height="40" /><rect fill="#000" x="40" y="207" width="10" height="4" /><rect fill="#0f0" x="60" y="10" width="10" height="13" /><rect fill="#0cf" x="60" y="23" width="10" height="49" /><rect fill="#f0f" x="60" y="73" width="10" height="138" /><rect fill="#000" x="60" y="211" width="10" height="0" /><rect fill="#0f0" x="80" y="10" width="10" height="44" /><rect fill="#0cf" x="80" y="54" width="10" height="40" /><rect fill="#f0f" x="80" y="95" width="10" height="107" /><rect fill="#000" x="80" y="202" width="10" height="9" /><rect fill="#0f0" x="100" y="10" width="10" height="31" /><rect fill="#0cf" x="100" y="41" width="10" height="111" /><rect fill="#f0f" x="100" y="153" width="10" height="40" /><rect fill="#000" x="100" y="193" width="10" height="18" /><rect fill="#0f0" x="120" y="10" width="10" height="67" /><rect fill="#0cf" x="120" y="77" width="10" height="76" /><rect fill="#f0f" x="120" y="153" width="10" height="53" /><rect fill="#000" x="120" y="207" width="10" height="4" /><rect fill="#0f0" x="140" y="10" width="10" height="62" /><rect fill="#0cf" x="140" y="72" width="10" height="93" /><rect fill="#f0f" x="140" y="166" width="10" height="44" /><rect fill="#000" x="140" y="211" width="10" height="0" /><rect fill="#0f0" x="160" y="10" width="10" height="80" /><rect fill="#0cf" x="160" y="90" width="10" height="93" /><rect fill="#f0f" x="160" y="184" width="10" height="27" /><rect fill="#000" x="160" y="211" width="10" height="0" /><rect fill="#0f0" x="180" y="10" width="10" height="49" /><rect fill="#0cf" x="180" y="59" width="10" height="120" /><rect fill="#f0f" x="180" y="179" width="10" height="27" /><rect fill="#000" x="180" y="207" width="10" height="4" /><rect fill="#0f0" x="200" y="10" width="10" height="18" /><rect fill="#0cf" x="200" y="28" width="10" height="124" /><rect fill="#f0f" x="200" y="153" width="10" height="53" /><rect fill="#000" x="200" y="207" width="10" height="4" /><rect fill="#0f0" x="220" y="10" width="10" height="53" /><rect fill="#0cf" x="220" y="63" width="10" height="98" /><rect fill="#f0f" x="220" y="162" width="10" height="40" /><rect fill="#000" x="220" y="202" width="10" height="9" /><rect fill="#0f0" x="240" y="10" width="10" height="18" /><rect fill="#0cf" x="240" y="28" width="10" height="67" /><rect fill="#f0f" x="240" y="95" width="10" height="116" /><rect fill="#000" x="240" y="211" width="10" height="0" /><rect fill="#0f0" x="270" y="10" width="10" height="50" /><rect fill="#0cf" x="270" y="60" width="10" height="87" /><rect fill="#f0f" x="270" y="147" width="10" height="59" /><rect fill="#000" x="270" y="207" width="10" height="4" /><rect fill="#0f0" x="300" y="10" width="10" height="10" /><rect fill="#0cf" x="300" y="40" width="10" height="10" /><rect fill="#f0f" x="300" y="70" width="10" height="10" /><rect fill="#000" x="300" y="100" width="10" height="10" /></g><g style="font-size: 75%;"><text transform="translate(20,215) rotate(90)" x="0" y="0">ant</text><text transform="translate(40,215) rotate(90)" x="0" y="0">antlr4</text><text transform="translate(60,215) rotate(90)" x="0" y="0">bcel</text><text transform="translate(80,215) rotate(90)" x="0" y="0">compress</text><text transform="translate(100,215) rotate(90)" x="0" y="0">jedit</text><text transform="translate(120,215) rotate(90)" x="0" y="0">jhotdraw</text><text transform="translate(140,215) rotate(90)" x="0" y="0">junit</text><text transform="translate(160,215) rotate(90)" x="0" y="0">lucene</text><text transform="translate(180,215) rotate(90)" x="0" y="0">tomcat</text><text transform="translate(200,215) rotate(90)" x="0" y="0">weka</text><text transform="translate(220,215) rotate(90)" x="0" y="0">xerces</text><text transform="translate(240,215) rotate(90)" x="0" y="0">xz</text><text transform="translate(270,215) rotate(90)" x="0" y="0">Avg.</text><text x="315" y="20">MustBeSame</text><text x="315" y="50">CanBeSame</text><text x="315" y="80">Different</text><text x="315" y="110">Unknown</text></g></svg>
+</div>
 <p>
 <strong>Defects:</strong>
 Only tested with the high similarity pairs.
@@ -726,9 +712,9 @@ Present a snippet to human subjects:
 <p>
 Their choices are (in random order):
 <ol type=a>
-<li> Original name
-<li> Our system suggestion
-<li> Baseline suggestion
+<li> Original name (Orig)
+<li> Our system suggestion (Ours)
+<li> Baseline suggestion (Baseline)
 </ol>
 <p>
 Tested for 12 projects × 10 variables × 9 subjects = 1,080 questionnaires.
@@ -737,23 +723,9 @@ Tested for 12 projects × 10 variables × 9 subjects = 1,080 questionnaires.
 <li> The degree of agreement (<a href="https://en.wikipedia.org/wiki/Cohen%27s_kappa#Fleiss'_kappa">Fleiss' Kappa</a>) = 0.45 (Moderate).
 </ul>
 
-<table border>
-<tr><th>Project</th><th align=right>#Ours</th><th align=right>#Total</th></tr>
-<tr><td>ant</td><td align=right>39</td><td align=right>90</td></tr>
-<tr><td>antlr4</td><td align=right>34</td><td align=right>90</td></tr>
-<tr><td>bcel</td><td align=right>48</td><td align=right>90</td></tr>
-<tr><td>compress</td><td align=right>53</td><td align=right>90</td></tr>
-<tr><td>jedit</td><td align=right>24</td><td align=right>90</td></tr>
-<tr><td>jhotdraw</td><td align=right>4</td><td align=right>90</td></tr>
-<tr><td>junit</td><td align=right>34</td><td align=right>90</td></tr>
-<tr><td>lucene</td><td align=right>40</td><td align=right>90</td></tr>
-<tr><td>tomcat</td><td align=right>34</td><td align=right>90</td></tr>
-<tr><td>weka</td><td align=right>29</td><td align=right>90</td></tr>
-<tr><td>xerces</td><td align=right>31</td><td align=right>90</td></tr>
-<tr><td>xz</td><td align=right>46</td><td align=right>90</td></tr>
-<tr><td>Total</td><td align=right>416 (39%)</td><td align=right>1080</td></tr>
-</table>
-
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="300" version="1.1"><g fill="none" stroke="black" stroke-width="2"><line x1="10" y1="210" x2="10" y2="10" /><line x1="10" y1="210" x2="290" y2="210" /><rect fill="#0f0" x="20" y="10" width="10" height="87" /><rect fill="#f0f" x="20" y="97" width="10" height="113" /><rect fill="#0f0" x="40" y="10" width="10" height="76" /><rect fill="#f0f" x="40" y="86" width="10" height="124" /><rect fill="#0f0" x="60" y="10" width="10" height="107" /><rect fill="#f0f" x="60" y="117" width="10" height="93" /><rect fill="#0f0" x="80" y="10" width="10" height="118" /><rect fill="#f0f" x="80" y="128" width="10" height="82" /><rect fill="#0f0" x="100" y="10" width="10" height="53" /><rect fill="#f0f" x="100" y="63" width="10" height="147" /><rect fill="#0f0" x="120" y="10" width="10" height="9" /><rect fill="#f0f" x="120" y="19" width="10" height="191" /><rect fill="#0f0" x="140" y="10" width="10" height="76" /><rect fill="#f0f" x="140" y="86" width="10" height="124" /><rect fill="#0f0" x="160" y="10" width="10" height="89" /><rect fill="#f0f" x="160" y="99" width="10" height="111" /><rect fill="#0f0" x="180" y="10" width="10" height="76" /><rect fill="#f0f" x="180" y="86" width="10" height="124" /><rect fill="#0f0" x="200" y="10" width="10" height="64" /><rect fill="#f0f" x="200" y="74" width="10" height="136" /><rect fill="#0f0" x="220" y="10" width="10" height="69" /><rect fill="#f0f" x="220" y="79" width="10" height="131" /><rect fill="#0f0" x="240" y="10" width="10" height="102" /><rect fill="#f0f" x="240" y="112" width="10" height="98" /><rect fill="#0f0" x="270" y="10" width="10" height="77" /><rect fill="#f0f" x="270" y="87" width="10" height="123" /><rect fill="#0f0" x="300" y="10" width="10" height="10" /><rect fill="#f0f" x="300" y="40" width="10" height="10" /></g><g style="font-size: 75%;"><text transform="translate(20,215) rotate(90)" x="0" y="0">ant</text><text transform="translate(40,215) rotate(90)" x="0" y="0">antlr4</text><text transform="translate(60,215) rotate(90)" x="0" y="0">bcel</text><text transform="translate(80,215) rotate(90)" x="0" y="0">compress</text><text transform="translate(100,215) rotate(90)" x="0" y="0">jedit</text><text transform="translate(120,215) rotate(90)" x="0" y="0">jhotdraw</text><text transform="translate(140,215) rotate(90)" x="0" y="0">junit</text><text transform="translate(160,215) rotate(90)" x="0" y="0">lucene</text><text transform="translate(180,215) rotate(90)" x="0" y="0">tomcat</text><text transform="translate(200,215) rotate(90)" x="0" y="0">weka</text><text transform="translate(220,215) rotate(90)" x="0" y="0">xerces</text><text transform="translate(240,215) rotate(90)" x="0" y="0">xz</text><text transform="translate(270,215) rotate(90)" x="0" y="0">Avg.</text><text x="315" y="20">Ours</text><text x="315" y="50">Orig+Baseline</text></g></svg>
+</div>
 
 <h4>Experiment 2-2. Sending Patches to Developers</h4>
 <p>
@@ -772,30 +744,16 @@ Based on our results, we manually submitted 12 patches to the open source projec
 <li> Present the evidences (snippets) used for producing each suggestion.
 <li> Ask the subjects to choose one of the following:
 <ol type=a>
-<li> Presented evidence is convincing.
-<li> Presented evidence is relevant.
-<li> Presented evidence is irrelevant.
-<li> Undecidable.
+<li> Presented evidence is convincing. (#Good)
+<li> Presented evidence is relevant. (#Soso)
+<li> Presented evidence is irrelevant. (#Bad)
+<li> Undecidable. (#Unknown)
 </ol>
 </ol>
 <p>
 Tested for 12 projects × 5 questions × 9 subjects = 540 questionnaires.
-<table border>
-<tr><th>Project</th><th align=right>#a</th><th align=right>#b</th><th align=right>#c</th><th align=right>#d</th><th align=right>#Total</th></tr>
-<tr><td>ant</td><td align=right>7</td><td align=right>8</td><td align=right>30</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>antlr4</td><td align=right>8</td><td align=right>8</td><td align=right>29</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>bcel</td><td align=right>10</td><td align=right>15</td><td align=right>20</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>compress</td><td align=right>5</td><td align=right>5</td><td align=right>34</td><td align=right>1</td><td align=right>45</td></tr>
-<tr><td>jedit</td><td align=right>6</td><td align=right>6</td><td align=right>33</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>jhotdraw</td><td align=right>4</td><td align=right>5</td><td align=right>36</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>junit</td><td align=right>2</td><td align=right>7</td><td align=right>36</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>lucene</td><td align=right>3</td><td align=right>14</td><td align=right>27</td><td align=right>1</td><td align=right>45</td></tr>
-<tr><td>tomcat</td><td align=right>7</td><td align=right>7</td><td align=right>31</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>weka</td><td align=right>1</td><td align=right>10</td><td align=right>34</td><td align=right>0</td><td align=right>45</td></tr>
-<tr><td>xerces</td><td align=right>6</td><td align=right>10</td><td align=right>28</td><td align=right>1</td><td align=right>45</td></tr>
-<tr><td>xz</td><td align=right>1</td><td align=right>7</td><td align=right>35</td><td align=right>2</td><td align=right>45</td></tr>
-<tr><td>Total</td><td align=right>60</td><td align=right>102</td><td align=right>373</td><td align=right>5</td><td align=right>540</td></tr>
-</table>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="400" height="300" version="1.1"><g fill="none" stroke="black" stroke-width="2"><line x1="10" y1="210" x2="10" y2="10" /><line x1="10" y1="210" x2="290" y2="210" /><rect fill="#0f0" x="20" y="10" width="10" height="31" /><rect fill="#0cf" x="20" y="41" width="10" height="36" /><rect fill="#f0f" x="20" y="77" width="10" height="133" /><rect fill="#000" x="20" y="211" width="10" height="0" /><rect fill="#0f0" x="40" y="10" width="10" height="36" /><rect fill="#0cf" x="40" y="46" width="10" height="36" /><rect fill="#f0f" x="40" y="82" width="10" height="129" /><rect fill="#000" x="40" y="211" width="10" height="0" /><rect fill="#0f0" x="60" y="10" width="10" height="44" /><rect fill="#0cf" x="60" y="54" width="10" height="67" /><rect fill="#f0f" x="60" y="122" width="10" height="89" /><rect fill="#000" x="60" y="211" width="10" height="0" /><rect fill="#0f0" x="80" y="10" width="10" height="22" /><rect fill="#0cf" x="80" y="32" width="10" height="22" /><rect fill="#f0f" x="80" y="55" width="10" height="151" /><rect fill="#000" x="80" y="207" width="10" height="4" /><rect fill="#0f0" x="100" y="10" width="10" height="27" /><rect fill="#0cf" x="100" y="37" width="10" height="27" /><rect fill="#f0f" x="100" y="64" width="10" height="147" /><rect fill="#000" x="100" y="211" width="10" height="0" /><rect fill="#0f0" x="120" y="10" width="10" height="18" /><rect fill="#0cf" x="120" y="28" width="10" height="22" /><rect fill="#f0f" x="120" y="51" width="10" height="160" /><rect fill="#000" x="120" y="211" width="10" height="0" /><rect fill="#0f0" x="140" y="10" width="10" height="9" /><rect fill="#0cf" x="140" y="19" width="10" height="31" /><rect fill="#f0f" x="140" y="51" width="10" height="160" /><rect fill="#000" x="140" y="211" width="10" height="0" /><rect fill="#0f0" x="160" y="10" width="10" height="13" /><rect fill="#0cf" x="160" y="23" width="10" height="62" /><rect fill="#f0f" x="160" y="86" width="10" height="120" /><rect fill="#000" x="160" y="207" width="10" height="4" /><rect fill="#0f0" x="180" y="10" width="10" height="31" /><rect fill="#0cf" x="180" y="41" width="10" height="31" /><rect fill="#f0f" x="180" y="73" width="10" height="138" /><rect fill="#000" x="180" y="211" width="10" height="0" /><rect fill="#0f0" x="200" y="10" width="10" height="4" /><rect fill="#0cf" x="200" y="14" width="10" height="44" /><rect fill="#f0f" x="200" y="59" width="10" height="151" /><rect fill="#000" x="200" y="211" width="10" height="0" /><rect fill="#0f0" x="220" y="10" width="10" height="27" /><rect fill="#0cf" x="220" y="37" width="10" height="44" /><rect fill="#f0f" x="220" y="82" width="10" height="124" /><rect fill="#000" x="220" y="207" width="10" height="4" /><rect fill="#0f0" x="240" y="10" width="10" height="4" /><rect fill="#0cf" x="240" y="14" width="10" height="31" /><rect fill="#f0f" x="240" y="46" width="10" height="156" /><rect fill="#000" x="240" y="202" width="10" height="9" /><rect fill="#0f0" x="270" y="10" width="10" height="22" /><rect fill="#0cf" x="270" y="32" width="10" height="38" /><rect fill="#f0f" x="270" y="71" width="10" height="138" /><rect fill="#000" x="270" y="209" width="10" height="2" /><rect fill="#0f0" x="300" y="10" width="10" height="10" /><rect fill="#0cf" x="300" y="40" width="10" height="10" /><rect fill="#f0f" x="300" y="70" width="10" height="10" /><rect fill="#000" x="300" y="100" width="10" height="10" /></g><g style="font-size: 75%;"><text transform="translate(20,215) rotate(90)" x="0" y="0">ant</text><text transform="translate(40,215) rotate(90)" x="0" y="0">antlr4</text><text transform="translate(60,215) rotate(90)" x="0" y="0">bcel</text><text transform="translate(80,215) rotate(90)" x="0" y="0">compress</text><text transform="translate(100,215) rotate(90)" x="0" y="0">jedit</text><text transform="translate(120,215) rotate(90)" x="0" y="0">jhotdraw</text><text transform="translate(140,215) rotate(90)" x="0" y="0">junit</text><text transform="translate(160,215) rotate(90)" x="0" y="0">lucene</text><text transform="translate(180,215) rotate(90)" x="0" y="0">tomcat</text><text transform="translate(200,215) rotate(90)" x="0" y="0">weka</text><text transform="translate(220,215) rotate(90)" x="0" y="0">xerces</text><text transform="translate(240,215) rotate(90)" x="0" y="0">xz</text><text transform="translate(270,215) rotate(90)" x="0" y="0">Avg.</text><text x="315" y="20">Good</text><text x="315" y="50">Soso</text><text x="315" y="80">Bad</text><text x="315" y="110">Unknown</text></g></svg></div>
 
 <p>
 The results did not know that our system produced good explanation
