@@ -113,7 +113,8 @@ var f = new java.io.File(<mark>x</mark>);  <span class=comment>// x is a pathnam
 <li> While <code><mark>x</mark></code> is <code>String</code>,
 we know that it's a pathname because of how it's used.
 <li> We define these specific roles of data types
-as <strong>Conceptual Types</strong> or <strong>c-type</strong>.
+as <strong>Conceptual Types</strong> or <strong>c-type</strong>.<br>
+(They can also be called <strong>Abstract Types</strong>!)
 <div>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -569,7 +570,7 @@ infer c-types in other parts of code.
 
 <h3 id="threats">5.1. Threats to Validity</h3>
 <ul>
-<li> Not all the Java API are inspected.
+<li> Not all the Java APIs are inspected.
 <li> Selection bias of open source projects.
 <li> Some c-type distinction might be vague: URL and URI, Filename and Pathname, etc.
 <li> There could be potentially many other c-types that are rarely used.<Br>

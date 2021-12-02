@@ -16,11 +16,31 @@ table { border-collapse: collapse; margin: 0.5em; }
 kbd { border: 1px solid black; padding: 4px; margin: 4px; }
 code { font-weight: bold; }
 pre { border: 1px solid black; padding: 0.3em; }
+.bl { outline: 1px solid black; padding: 2px; font-size: 120%; }
 .announce { font-size: 120%; font-weight: bold; }
 .author { text-align: right; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
+.example { outline: 1px solid black; padding: 0.5em; margin: 1em; }
 .notice { text-align: center; font-weight: bold; outline: 4px solid black; padding: 1em; margin: 1em; font-size: 200%; }
 .comment { color: green; }
+.v1 { background: cyan; }
+.v2 { background: magenta; }
+.pair { background: #000088; color: white; padding: 2px; }
+.rewrite { color: white; background: black; padding: 4px; }
+.evidence { border-bottom: 1px solid black; margin-top: 0.5em; }
+.cat { outline: 1px dashed black; padding: 2px; background: #eeeeee; margin: 1em; }
+.src0 { background:#eeffff; }
+.src0 mark { background:#ff88ff; }
+.src1 { background:#ffffee; }
+.src1 mark { background:#44cc44; }
+.cand { margin: 1em; padding: 1em; outline: 2px solid black; }
+.old { background: #ccccff; }
+.old mark { color: white; background: blue; }
+.new { background: #88ff88; }
+.new mark { color: black; background: yellow; }
+.match { background: #ffcccc; }
+.match mark { color: white; background: red; }
+.support { background: green; color: white; }
 --></style>
 </head>
 <body>
@@ -43,7 +63,7 @@ Katsuhiko Gondow<br>
 <ol>
 <li> <a href="#background">Background: Consistency is Crucial for Maintaining Large Software Projects</a>
 <li> <a href="#objective">Goal: Detecting Inconsistent Names in Source Code</a>
-<li> <a href="#consistency">What is "consistency" anyway?</a>
+<li> <a href="#inconsistency">How to Catch Inconsistency?</a>
 <li> <a href="#datapath">"Use flow" of variables</a>
 <li> <a href="#learning">Training and Prediction</a>
 <li> <a href="#evaluation">Experiment and Evaluation</a>
@@ -85,21 +105,41 @@ Katsuhiko Gondow<br>
 <h2 id="objective">2. Goal: Detecting Inconsistent Names in Source Code</h2>
 
 <blockquote><pre>
-void printResult(Stream <mark>out</mark>, String result) {
-  <mark>out</mark>.writeLine("result:"+result);
+void printResult(Stream <span class=v1>out</span>, String result) {
+  <span class=v1>out</span>.writeLine("result:"+result);
 }
 
-void printStat(Stream <mark>out</mark>, int stat) {
-  <mark>out</mark>.writeLine("stat:"+stat);
+void printStat(Stream <span class=v1>out</span>, int stat) {
+  <span class=v1>out</span>.writeLine("stat:"+stat);
 }
 
-void printInfo(Stream <mark>strm</mark>, String info) {
-  <mark>strm</mark>.writeLine("info:"+info);  <span class=comment>// XXX "strm" should be "out".</span>
+void printInfo(Stream <span class=v2>strm</span>, String info) {
+  <span class=v2>strm</span>.writeLine("info:"+info);  <span class=comment>// XXX "strm" should be "out".</span>
 }
 </pre></blockquote>
 <p>
 Note: "<code>out</code>" might not necessarily be the best name
 for an output stream, but it is <strong>consistent</strong> throughout the program.
+
+<p>We also tried to:
+<ol type=a>
+  <li> Make an adjustable system:<br>
+    Each project uses the same word for different senses:
+    <ul>
+      <li> "<code>view</code>" in a GUI application.
+      <li> "<code>view</code>" in an SQL engine.
+    </ul>
+    Or different abbreviations:
+    <ul>
+      <li> <code>message</code>
+      <li> <code>msg</code>
+    </ul>
+  <li> <strong>Not</strong> use a dictionary or heuristics.
+  <li> Make the system transparent:
+    <ul>
+      <li> Present <strong>how</strong> they are inconsistent to the developer.
+    </ul>
+</ol>
 
 <h3 id="related">2.1. Related Work</h3>
 <ul>
@@ -121,76 +161,43 @@ for an output stream, but it is <strong>consistent</strong> throughout the progr
     <li> Variables are named after "things" in an application domain.
     <li> They are typically nouns, which are much more varied than verbs.
   </ul>
-<li> Our design goal:
-  <ul>
-    <li> Do not use a dictionary or heuristics.
-    <li> Aim at a tunable system for each project
-      whose meaning of identifiers varies:
-      <ul>
-	<li> "<code>view</code>" in a GUI application.
-	<li> "<code>view</code>" in an SQL engine.
-	<li> Different abbreviation: <code>message</code> and <code>msg</code>, etc.
-      </ul>
-    <li> Make the system transparent and explainable:
-      <ul>
-        <li> Show how an answer is obtained.
-      </ul>
-  </ul>
 </ul>
 
 
-<h2 id="consistency">3. What is "Consistency" Anyway?</h2>
+<h2 id="inconsistency">3. How to Catch Inconsistency?</h2>
 
-<h3 id="general">3.1. General discussion</h3>
+<ol>
+<li> Construct a mapping between the <u>usage</u> and the <u>name</u> for each variable:
 <ul>
-<li> Suppose A → B is expected. Call this knowledge K.
-<li> Assume A is satisfied.
-<li> When B is also satisfied, "B is consistent with our knowledge K".
-<li> When &not; B is satisfied, "B is not consistent with our knowledge K".
+<li> Variable usage:
+<pre>
+<span class=bl>   </span> = open(...);
+write(<span class=bl>   </span>, ...);
+</pre>
+<li> Variable name: <code>out</code>
 </ul>
-
-<h4>Trivial Example:</h4>
+<li> Find all the variables that have the same <u>usage</u>:
 <ul>
-<li> K &equiv; A → B: "Whenever it's cloudy, he carries an umbrella."
-<li> A: It's cloudy.
-<li> B: He's carrying an umbrella. (Consistent)
-<li> A: It's cloudy.
-<li> B: He's not carrying an umbrella. (Inconsistent)
+<li>
+<pre>
+<span class=bl>strm</span> = open(...);
+write(<span class=bl>strm</span>, ...);
+</pre>
 </ul>
-
-<h3 id="variables">3.2. Program Variables</h3>
-<p>
-Focus on the usage of program variables:
+<li> Compare the variable names and single out the outliers.
 <ul>
-<li> K &equiv; A: "When a variable receives the return value of <code>open()</code> and is passed to the first argument of <code>write()</code>" → B: "The name of variable is <code><mark>out</mark></code>."
-<blockquote><pre>
-<mark>out</mark> = open(...);
-write(<mark>out</mark>, ...);
-</pre></blockquote>
-<li> A: "A variable receives the return value of <code>open()</code> and is passed to the first argument of <code>write()</code>"
-<blockquote><pre>
-<mark>???</mark> = open(...);
-write(<mark>???</mark>, ...);
-</pre></blockquote>
-<li> B: When the variable name <code><mark>???</mark></code> is <code>out</code>, then it's consistent with K.
+  <li> <code>out</code>
+  <li> <code>out</code>
+  <li> <code>strm</code> (Hey!)
+  <li> <code>out</code>
 </ul>
-
-<h3 id="bayesian">3.3. Make it Bayesian</h3>
-<p>
-In reality, most rules do not hold for 100% of the time.
-We quantify the "degree of consistency"
-by using probability.
-<ul>
-<li> High likelihood of A → B &equiv; High probability of P(B | A).
-<li> When P(B | A) and P(A) are both high,
-yet P(B) is low → low consistency.
-</ul>
-
+</ol>
 
 <h2 id="datapath">4. "Use Flow" of Variables</h2>
 
 <ul>
-<li> Usage of a variable = Sequence of operations
+<li> Now, how do we express "the usage of a variable"?
+<li> Usage of variable = Sequence of operations
   applied to the value assigned into that variable.
 <li> Let us call this dataflow of the variable "<strong>use flow</strong>".
 </ul>
@@ -515,7 +522,7 @@ This path represents the usage of the variable <code>line</code> in this program
 
 <h2 id="learning">5. Training and Prediction</h2>
 <p>
-We trained a probabilistic model that predicts a variable name from a
+Trained a Bayesian probabilistic model that predicts a variable name from a
 given use flow:
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -581,7 +588,7 @@ Algorithm:
 
 <h2 id="evaluation">6. Experiment and Evaluation</h2>
 <p>
-We evaluated our method with the following projects:
+Evaluated our method with the following projects:
 (#edges &lt; #useflow)
 
 <table border>
@@ -619,21 +626,44 @@ Test subjects: authors (3) + grad students (6) = 9 people.
 <h3 id="rq1">RQ1. Is Use Flow a Good Representation for Variable Usage?</h3>
 
 <h4>Experiment 1. Variable Equivalence Test</h4>
-<ol>
-<li> Choose a pair of variables that have the high similarity
-  of use flows (cosine &gt; 0.90) for each project.
-<li> Present the surrounding snippet of each variable (whose names hidden) to human subjects.
-<li> Ask the subjects to choose one of the following:
-<ol type=a>
-<li> Two variables should have the same name.
-<li> Two variables can have a different name.
-<li> Two variables should have a different name.
-<li> Undecidable. (Not enough information)
-</ol>
-</ol>
 
 <p>
-We tested for 12 projects × 5 variable pairs × 9 subjects = 540 questionnaires.
+Present a pair of variables (whose names hidden) to human subjects:
+
+<div class=example>
+<div class=pair>Pair R003</div>
+<div class=cat><span id="R003" class=ui>Choice: <select><option value="x">x. ???</option><option value="a">a. MUST BE the same name</option><option value="b">b. CAN BE the same name</option><option value="c">c. MUST NOT BE the same name</option></select></span></div>
+<div>DefaultJspCompilerAdapter.java <pre class=src0>
+     ...
+
+  100:     */
+  101:    protected void addArg(CommandlineJava <mark>aa</mark>, String argument, String value) {
+  102:        if (value != null) {
+  103:            <mark>aa</mark>.createArgument().setValue(argument);
+  104:            <mark>aa</mark>.createArgument().setValue(value);
+  105:        }
+     ...
+
+</pre></div>
+<div>DefaultJspCompilerAdapter.java <pre class=src1>
+     ...
+
+   87:     */
+   88:    protected void addArg(CommandlineJava <mark>bb</mark>, String argument) {
+   89:        if (argument != null &amp;&amp; !argument.isEmpty()) {
+   90:           <mark>bb</mark>.createArgument().setValue(argument);
+   91:        }
+     ...
+
+</pre></div>
+</div>
+
+<p>
+Tested for 12 projects × 5 variable pairs × 9 subjects = 540 questionnaires.
+<ul>
+<li> Ratio of #a + #b = 68% (369/540)
+<li> High similarity in use flows = the same variable name.
+</ul>
 
 <table border>
 <tr><th>Project</th><th align=right>#a</th><th align=right>#b</th><th align=right>#c</th><th align=right>#d</th><th align=right>#Total</th></tr>
@@ -652,32 +682,60 @@ We tested for 12 projects × 5 variable pairs × 9 subjects = 540 questionnaires
 <tr><td>Total</td><td align=right>134</td><td align=right>235</td><td align=right>159</td><td align=right>12</td><td align=right>540</td></tr>
 </table>
 
-<ul>
-<li> Ratio of #a + #b = 68% (369/540)
-<li> High similarity in use flows = the same variable name.
-</ul>
-
 <p>
 <strong>Defects:</strong>
-We only tested with the high similarity pairs.
+Only tested with the high similarity pairs.
 Therefore the test was not completely blind. :(
 
 <h3 id="rq2">RQ2. Can the System Predict a Good (Consistent) Variable Name?</h3>
 
 <h4>Experiment 2-1. Name Suggestion Test</h4>
-<ol>
-<li> Present the surrounding snippet of a certain variable to human subjects.
-<li> Ask the subjects to choose which names fits the best
-(with the order randomized):
+
+<p>
+Present a snippet to human subjects:
+<div class=example>
+<div class=rewrite>Rewrite R000 (11.118)</div>
+<div class=cat><span id="R000" class=ui>Choice: <code class=old><mark>xxx</mark></code> &rarr; <select><option value="x">x. ???</option><option value="a">a. msg</option><option value="b">b. message</option><option value="c">c. name</option></select></span></div>
+<div class=old style="margin: 1em;">
+<div>BuildException.java <pre class=src>
+     ...
+
+   82:     */
+   83:    public BuildException(<mark>String xxx</mark>, Throwable cause, Location location) {
+   84:        this(<mark>xxx</mark>, cause);
+   85:        this.location = location;
+     ...
+
+</pre></div>
+</div>
+<div class=evidence>Evidence</div>
+<div class=new style="margin: 1em;">
+<div>BuildException.java <pre class=src>
+     ...
+
+   67:     */
+   68:    public BuildException(<mark>String message</mark>, Throwable cause) {
+   69:        <mark>super(<mark>message</mark>, cause);</mark>
+   70:    }
+     ...
+
+</pre></div>
+</div>
+</div>
+
+<p>
+Their choices are (in random order):
 <ol type=a>
 <li> Original name
-<li> System suggestion
-<li> Baseline suggestion (only depends on the type of the variable,
-e.g. <code>int</code> variable is always named <code>i</code>)
-</ol>
+<li> Our system suggestion
+<li> Baseline suggestion
 </ol>
 <p>
-We tested for 12 projects × 10 variables × 9 subjects = 1,080 questionnaires.
+Tested for 12 projects × 10 variables × 9 subjects = 1,080 questionnaires.
+<ul>
+<li> For the 39% (416/1080) variables, our suggestion were chosen.
+<li> The degree of agreement (<a href="https://en.wikipedia.org/wiki/Cohen%27s_kappa#Fleiss'_kappa">Fleiss' Kappa</a>) = 0.45 (Moderate).
+</ul>
 
 <table border>
 <tr><th>Project</th><th align=right>#Ours</th><th align=right>#Total</th></tr>
@@ -696,14 +754,10 @@ We tested for 12 projects × 10 variables × 9 subjects = 1,080 questionnaires.
 <tr><td>Total</td><td align=right>416 (39%)</td><td align=right>1080</td></tr>
 </table>
 
-<p>
-The degree of agreement (<a href="https://en.wikipedia.org/wiki/Cohen%27s_kappa#Fleiss'_kappa">Fleiss' Kappa</a>) = 0.45 (Moderate).
-
 
 <h4>Experiment 2-2. Sending Patches to Developers</h4>
 <p>
-Based on our results we manually crafted 12 patches
-to the open source projects.
+Based on our results, we manually submitted 12 patches to the open source projects.
 <ul>
 <li> 3 projects incorporated it.
 <li> 2 projects are still in discussion.
@@ -725,7 +779,7 @@ to the open source projects.
 </ol>
 </ol>
 <p>
-We tested for 12 projects × 5 questions × 9 subjects = 540 questionnaires.
+Tested for 12 projects × 5 questions × 9 subjects = 540 questionnaires.
 <table border>
 <tr><th>Project</th><th align=right>#a</th><th align=right>#b</th><th align=right>#c</th><th align=right>#d</th><th align=right>#Total</th></tr>
 <tr><td>ant</td><td align=right>7</td><td align=right>8</td><td align=right>30</td><td align=right>0</td><td align=right>45</td></tr>
