@@ -110,8 +110,8 @@ var f = new java.io.File(<mark>x</mark>);  <span class=comment>// x is a pathnam
 </pre></blockquote>
 
 <ul>
-<li> While <code><mark>x</mark></code> is <code>String</code>,
-we know that it's a pathname because of how it's used.
+<li> Here, <code><mark>x</mark></code> refers to a <code>String</code>,
+but it's clearly a pathname.
 <li> We define these specific roles of data types
 as <strong>Conceptual Types</strong> or <strong>c-type</strong>.<br>
 (They can also be called <strong>Abstract Types</strong>!)
@@ -130,13 +130,14 @@ as <strong>Conceptual Types</strong> or <strong>c-type</strong>.<br>
 </svg>
 </div>
 <li> API calls are easy to collect and its function is well defined.<br>
-  &rarr; <strong>They provide us a plenty of unambiguous use cases of c-types!</strong>
+  &rarr; <strong>They provide us a plenty of unambiguous use cases forx c-types!</strong>
 </ul>
 
 <p>
-We defined 12 commonly used c-types:
+We studied Java Standard API and defined 12 commonly used c-types:
 <table border>
 <tr><th>C-Type</th></th><th>Language Type</th><th>Description</th><th># Methods</th></tr>
+<tr><td colspan="4"></td></tr>
 <tr><td>PATH   </td><td> <code>String</code> </td><td> Path name</td>
 <td align=right>14</td></tr>
 <tr><td>URL    </td><td> <code>String</code> </td><td> URL/URI</td>
@@ -161,19 +162,12 @@ We defined 12 commonly used c-types:
 <td align=right>14</td></tr>
 <tr><td>DAY    </td><td> <code>int</code>    </td><td> day</td>
 <td align=right>18</td></tr>
+<tr><td colspan="4"></td></tr>
+<tr><td colspan="3">Total</td><td align=right>218</td></tr>
 </table>
 
 <p>
-The criterion that we used are:
-<ol type=a>
-<li> Clearly defined and well understood.
-<li> Distinct enough to not mix up with other concepts.
-<li> Widely used in many applications.
-</ol>
-
-<p>
-We studied Java Standard API and
-listed 218 methods that takes a c-type:
+Method examples:
 <ul>
 <li> <code>new java.io.File(<u>PATH</u>)</code>
 <li> <code>new java.net.URI(<u>URL</u>)</code>
@@ -187,6 +181,14 @@ listed 218 methods that takes a c-type:
 <li> <code>java.time.LocalDate.of(<u>YEAR</u>, <u>MONTH</u>, <u>DAY</u>)</code>
 <li> ...
 </ul>
+
+<p>
+The criterion that we used are:
+<ol type=a>
+<li> Clearly defined and well understood.
+<li> Distinct enough to not mix up with other concepts.
+<li> Widely used in many applications.
+</ol>
 
 <h2 id="experiment">3. Experiment</h2>
 
@@ -216,6 +218,7 @@ We did the following experiments:
 <h3 id="projects">3.1. Projects and Sizes</h3>
 <table border>
 <tr><th>Project</th><th>Description</th><th>LoC</th></tr>
+<tr><td colspan="3"></td></tr>
 <tr><td>hadoop 3.3.1      </td><td>distributed computation </td><td align=right>1,789k</td></tr>
 <tr><td>ghidra 10.0       </td><td>binary analyzer         </td><td align=right>1,588k</td></tr>
 <tr><td>ignite 2.10.0     </td><td>distributed database    </td><td align=right>1,165k</td></tr>
@@ -242,6 +245,7 @@ We did the following experiments:
 <tr><td>websocket 1.5.2   </td><td>network framework       </td><td align=right>   15k</td></tr>
 <tr><td>picasso 2.8       </td><td>image processing        </td><td align=right>    9k</td></tr>
 <tr><td>jpacman           </td><td>action game             </td><td align=right>    3k</td></tr>
+<tr><td colspan="3"></td></tr>
 <tr><td colspan="2">Total</td><td>8,480k</td></tr>
 </table>
 
@@ -258,6 +262,7 @@ The total number of c-types is roughly propotional to the project size.
 <h4>PATH</h4>
 <table border>
 <tr><th>Project</th><th>Top Expressions</th></tr>
+<tr><td colspan="2"></td></tr>
 <tr><td>alluxio</td><td><code>path, mLocalUfsPath+ufsBase, base</code></td></tr>
 <tr><td>arduino</td><td><code>path, PreferencesData.get("runtime.ide.path")</code></td></tr>
 <tr><td>binnavi</td><td><code>filename, directory, pathname</code></td></tr>
@@ -283,6 +288,7 @@ The total number of c-types is roughly propotional to the project size.
 
 <h4>URL</h4>
 <tr><th>Project</th><th>Top Expressions</th></tr>
+<tr><td colspan="2"></td></tr>
 <tr><td>alluxio</td><td><code>journalDirectory, folder, inputDir</code></td></tr>
 <tr><td>arduino</td><td><code>contribution.getUrl(), packageIndexURLString</code></td></tr>
 <tr><td>binnavi</td><td><code>url, urlString</code></td></tr>
@@ -306,6 +312,7 @@ The total number of c-types is roughly propotional to the project size.
 </table><table border>
 <h4>XCOORD</h4>
 <tr><th>Project</th><th>Top Expressions</th></tr>
+<tr><td colspan="2"></td></tr>
 <tr><td>arduino</td><td><code>noLeft, cancelLeft</code></td></tr>
 <tr><td>binnavi</td><td><code>x, m_x</code></td></tr>
 <tr><td>gephi</td><td><code>currentMouseX, x, bounds.x</code></td></tr>
@@ -319,6 +326,7 @@ The total number of c-types is roughly propotional to the project size.
 </table><table border>
 <h4>WIDTH</h4>
 <tr><th>Project</th><th>Top Expressions</th></tr>
+<tr><td colspan="2"></td></tr>
 <tr><td>arduino</td><td><code>width, imageW, Preferences.BUTTON_WIDTH</code></td></tr>
 <tr><td>binnavi</td><td><code>COLORPANEL_WIDTH, TEXTFIELD_WIDTH, width</code></td></tr>
 <tr><td>gephi</td><td><code>w, constraintWidth, DEPTH</code></td></tr>
@@ -389,6 +397,7 @@ Decision tree-based machine learning is used because
 <h4>Common Top Words for C-Type Expressions:</h4>
 <table border>
 <tr><th>C-Type</th><th>Top words (# Projects)</th></tr>
+<tr><td colspan="2"></td></tr>
 <tr><td><code>PATH</code></td><td><code>get</code> (21), <code>path</code> (21), <code>file</code> (20) </td></tr>
 <tr><td><code>URL</code></td><td><code>url</code> (19), <code>get</code> (18), <code>string</code> (18) </td></tr>
 <tr><td><code>SQL</code></td><td><code>get</code> (6), <code>query</code> (5), <code>create</code> (3) </td></tr>
@@ -441,6 +450,7 @@ Dataflow diagram of "<code>new File(config.getPath(i))</code>"
 <h4>Dependency Rules</h4>
 <table border>
 <tr><th>Expression</th><th>Dependency</th></tr>
+<tr><td colspan="2"></td></tr>
 <tr><td><code>#</code> (constant)</td><td>
 #</td></tr>
 <tr><td><code>A</code> (variable access)</td><td>
@@ -480,6 +490,7 @@ with leave-one-project-out cross validation:
 
 <table border>
 <tr><th>C-Type</th><th>Precision</th><th>Recall</th><th>F-score</th></tr>
+<tr><td colspan="4"></td></tr>
 <tr><td><code>PATH    </code></td><td align=right>  68.9% </td><td align=right> 91.8% </td><td align=right> 78.8% </td></tr>
 <tr><td><code>URL     </code></td><td align=right>  61.3% </td><td align=right> 53.0% </td><td align=right> 56.8% </td></tr>
 <tr><td><code>SQL     </code></td><td align=right>  70.4% </td><td align=right> 80.6% </td><td align=right> 75.2% </td></tr>
@@ -492,6 +503,7 @@ with leave-one-project-out cross validation:
 <tr><td><code>YEAR    </code></td><td align=right> 100.0% </td><td align=right> 83.7% </td><td align=right> 91.1% </td></tr>
 <tr><td><code>MONTH   </code></td><td align=right> 100.0% </td><td align=right> 77.0% </td><td align=right> 87.0% </td></tr>
 <tr><td><code>DAY     </code></td><td align=right> 100.0% </td><td align=right> 61.1% </td><td align=right> 75.9% </td></tr>
+<tr><td colspan="4"></td></tr>
 <tr><td><strong>Average</strong> </td><td align=right>  <strong>85.9%</strong> </td><td align=right> <strong>79.6%</strong> </td><td align=right> <strong>82.7%</strong> </td></tr>
 </table>
 
