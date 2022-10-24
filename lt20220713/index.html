@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>
+Are you STILL using PowerPoint/Keynote/PDF for presentation??!1
+- Shinoda Lab Lightning Talk 2022/07/13
+- Yusuke Shinyama
+</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 0.5em; }
+kbd { border: 1px solid black; padding: 4px; margin: 4px; }
+code { font-weight: bold; color: purple; }
+pre { border: 1px solid black; padding: 0.3em; }
+.author { text-align: right; }
+.figure { text-align: center; outline: 1px solid black; padding: 1em; }
+.notice { text-align: center; font-weight: bold; outline: 4px solid black; padding: 1em; margin: 1em; font-size: 200%; }
+.small { font-size: 50%; }
+.conclusion { outline: 4px solid black; padding: 1em; margin: 1em; font-size: 200%; }
+--></style>
+<script src="weights.js"></script>
+<script src="minist.js"></script>
+<script src="optim.js"></script>
+</head>
+<body onload="minist_setup('canvas', 'result'); optim_setup('sliders1', 'sliders2');">
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>SOAPBOX:<br>
+Are you STILL using PowerPoint/Keynote/PDF for presentation??!1</h1>
+
+<div class=author>
+Shinoda Lab Lightning Talk 2022/07/13<br>
+Yusuke Shinyama
+</div>
+
+<h2>1. Why PowerPoint/Keynote/PDF is Evil</h2>
+<ul>
+<li> Non-open format.
+<li> Needs a proprietary app to create.
+<li> Slow.
+<li> Requires a mouse.
+<li> No auto-adjust for screen size.
+<li> Are we still doing page-based presentation in 2022?
+<div class=figure>
+<img src="https://upload.wikimedia.org/wikipedia/commons/7/72/OHP-sch.JPG" width="259" height="194">
+</div>
+</ul>
+
+<h2>2. What to Do, Then?</h2>
+<div class=notice>
+Use <u>HTML</u>.
+<div class=small>(or Markdown)</div>
+</div>
+<ul>
+<li> Anyone can see it with a browser.
+<li> Even blind people can see it with a screen reader!
+<li> Only requires a text editor to create.
+<li> Allows continuous scroll. Easy to see where we are at →
+<li> Responsive (auto-adjust for screen size).
+<li> Easy to share: <a href="https://euske.github.io/"><tt>euske.github.io</tt></a>
+<li> You can embed whatever you want.<br>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<div class=figure>
+<div style="display: flex; align-items: center; justify-content: center;">
+<canvas id="canvas" width="420" height="504"></canvas>
+<span style="width: 2em;">&nbsp;</span>
+Answer: <input id="result" size="2" disabled="true">
+&nbsp;
+<button onclick="minist_clear();">Clear</button>
+</div>
+A little MNIST demo.
+</div>
+
+</ul>
+
+<h2>3. But...</h2>
+<ul>
+<li> "How to put a figure?"<br>
+  Ever heard of SVG?<br>
+  It can be
+  <a href="https://developer.mozilla.org/en-US/docs/Web/SVG">hand-written</a>,
+  or made by apps like
+  <a href="https://svg-edit.github.io/svgedit/dist/editor/index.html">SVG-edit</a> or
+  <a href="https://app.diagrams.net/">diagrams</a>.
+<li> "How to put a formula?"<br>
+  Use <a href="https://www.mathjax.org/">MathJax</a> or
+  <a href="https://katex.org/">KaTeX</a>.
+<li> "How to choose the best HTML template?"<Br>
+  No need. Just copy this file.
+<li> "How to do animation?"<br>
+  Animated slides are bad idea anyway.
+</ul>
+
+<h2>4. You still want to use PowerPoint/Keynote because...</h2>
+<ul>
+<li> You are going to speak at TED.
+<li> You have too much time and money.
+<li> You are too old to remember 20+ HTML tags.<br>
+  (I wonder how you've ever learned a programming language.)
+</ul>
+
+<h2>5. Conclusion</h2>
+<div class=conclusion>
+Don't be lazy.
+You have an ability to <u>learn and use good stuff.</u>
+</div>
+<p>
+And that's thoughtfulness.
+
+<h2>References</h2>
+<ul>
+<li> <a href="https://motherfuckingwebsite.com/">See this.</a>
+</ul>
+
+<hr>
+<address>Yusuke Shinyama</address>
