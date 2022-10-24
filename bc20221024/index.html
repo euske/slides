@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UNIXの基礎</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; }
+td { padding: 4px; }
+kbd { outline: 1px solid black; padding: 2px; }
+pre { outline: 1px solid black; padding: 4px; overflow: auto; }
+mark { font-weight: bold; }
+pre, code { background: #ddd; font-size: 150%; font-family: courier; }
+img { max-width: 80vw; height: auto; }
+dt { text-decoration: underline; font-weight: bold; }
+u { color: green; font-weight: bold; }
+.author { text-align: right; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
+.notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
+.formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+.note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+.comment { color: #008800; }
+.exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
+.exercise .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>UNIXの基礎</h1>
+
+<div class=author>
+Yusuke Shinyama<br>
+</div>
+
+<ol>
+<li> <a href="#unix">UNIXとは</a>
+<li> <a href="#filesystem">ファイルシステム</a>
+<li> <a href="#process">プロセス</a>
+<li> <a href="#stdio">標準入力・標準出力・標準エラー出力</a>
+<li> <a href="#shell">シェル</a>
+<li> <a href="#summary">本日のまとめ</a>
+</ol>
+
+<div class=formula>
+<a target="_blank" href="https://bellard.org/jslinux/vm.html?url=alpine-x86.cfg&amp;mem=192">JSLinux: ブラウザ上で動くLinuxエミュレータ</a>
+</div>
+
+
+<h2 id="unix">1. UNIXとは</h2>
+<p>
+1970年ごろに作られた<u>オペレーティングシステム</u> (OS)。
+以後の多くの OS がこれを継承あるいは模倣している。
+以下ではこれらの「UNIX風OS」も含めて UNIX と呼称する。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="450" height="300">
+  <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="8" markerHeight="8" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g stroke="black" stroke-width="1" fill="none">
+    <rect x="180" y="10" width="80" height="40" />
+    <rect x="30" y="140" width="80" height="40" />
+    <rect x="140" y="140" width="80" height="40" />
+    <rect x="250" y="140" width="80" height="40" />
+    <rect x="360" y="140" width="80" height="40" />
+    <rect x="10" y="60" width="80" height="40" />
+    <rect x="140" y="240" width="80" height="40" />
+    <g stroke-dasharray="4,4" marker-end="url(#arrow)">
+      <path d="M100,80 L190,55" />
+      <path d="M80,135 L200,60" />
+    </g>
+    <path d="M180,140 L220,50" />
+    <path d="M290,140 L220,50" />
+    <path d="M400,140 L220,50" />
+    <path d="M180,240 L180,180" />
+  </g>
+  <g text-anchor="middle">
+    <text x="220" y="40">UNIX v7</text>
+    <text x="50" y="90">Windows</text>
+    <text x="70" y="170">Linux</text>
+    <text x="180" y="170">FreeBSD</text>
+    <text x="290" y="155">NetBSD</text>
+    <text x="290" y="175">OpenBSD</text>
+    <text x="290" y="195">...</text>
+    <text x="400" y="155">Solaris</text>
+    <text x="400" y="175">HP-UX</text>
+    <text x="400" y="195">...</text>
+    <text x="180" y="270">macOS</text>
+    <text x="120" y="65">模倣</text>
+    <text x="130" y="100">模倣</text>
+  </g>
+</svg>
+</div>
+<p>
+従来の (UNIXでない) OS と比べると、UNIX は非常に単純であった:
+<ul>
+<li> ファイルはただのバイト列
+<li> ユーザは基本的に 2種類のみ (<u>スーパーユーザ</u>・<u>一般ユーザ</u>)
+<li> すべてのファイルに所有者は1人のみ
+</ul>
+
+<h3 id="os">1.1. オペレーティングシステム (OS) とは?</h3>
+<p>
+コンピュータの基本的な処理 (ディスク操作、
+ネットワーク処理、画面表示など) を提供する<u>基本ソフトウェア</u>。
+ほとんどの人は、このオペレーティングシステムを使った
+アプリケーション (<u>応用ソフトウェア</u>) を書いている。
+実際には、アプリはコンピュータで動いているソフトウェア全体のごく一部である。
+また、OS は多くの仮想化処理 (ファイルシステム、遠隔操作、同時並列処理)
+を実現している。
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="200">
+  <g fill="white" stroke="black" stroke-width="2">
+    <rect x="2" y="2" width="296" height="196" fill="#ddd" />
+    <rect x="150" y="50" width="60" height="40"/>
+    <rect x="50" y="110" width="60" height="40"/>
+    <rect x="190" y="140" width="60" height="40"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="150" y="20" dy="0.5em">オペレーティングシステム (OS)</text>
+    <text x="180" y="70" dy="0.5em">アプリ</text>
+    <text x="80" y="130" dy="0.5em">アプリ</text>
+    <text x="220" y="160" dy="0.5em">アプリ</text>
+  </g>
+</svg>
+</div>
+
+
+<h2 id="filesystem">2. ファイルシステム</h2>
+<p>
+UNIXは<u>階層型ファイルシステム</u> (hierarchical filesystem) という概念を導入している。
+これはすべてのファイル・フォルダはひとつの巨大な<u>木構造</u> (tree) をなしており、
+あらゆるファイルの位置は<u>パス名</u> (path) で表すことができる。
+また、UNIXでは「すべてはファイルである」という考え方をおしすすめている。
+そのため、メモリや画面 (端末) も <code>/dev/mem</code> や
+<code>/dev/tty</code> といった特殊ファイルとして表現されている。
+なお、 UNIXではフォルダのことを <u>ディレクトリ</u> (directory) と呼ぶ。
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="300">
+  <defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <symbol id="folder" width="100" height="100">
+    <g stroke="black" stroke-width="2" stroke-linejoin="round" fill="#ffee88">
+      <polygon points="2,2 65,2 65,80 40,80" />
+      <polygon points="2,2 55,10 55,90 2,80" fill="white" />
+      <path d="M10,15 L45,25 M10,25 L45,35 M10,35 L45,45 M10,45 L45,55 M10,55 L45,65 M10,65 L45,75" />
+      <polygon points="2,2 40,20 40,100 2,80" />
+    </g>
+  </symbol>
+  <symbol id="file" width="100" height="100">
+    <g fill="none" stroke="black" stroke-width="2" stroke-linejoin="round">
+      <polygon points="20,10 60,10 80,30 80,90 20,90" fill="white" />
+      <path d="M30,25 L70,25 M30,35 L70,35 M30,45 L70,45 M30,55 L70,55 M30,65 L70,65 M30,75 L70,75" />
+      <polygon points="60,10 60,30 80,30" fill="white" />
+    </g>
+  </symbol>
+  <symbol id="disk" width="100" height="100">
+    <g fill="none" stroke="black" stroke-width="2" stroke-linejoin="round">
+      <polygon points="10,40 30,30 90,30 90,50 70,60 10,60" fill="white" />
+      <path d="M15,42 L68,42 L68,56 M68,42 L86,33 M20,48 L30,48" />
+    </g>
+  </symbol>
+  </defs>
+  <g transform="translate(10.5,0.5) scale(0.6,0.6)">
+    <use x="300" y="0" xlink:href="#disk" />
+    <use x="150" y="120" xlink:href="#folder" />
+    <use x="300" y="120" xlink:href="#folder" />
+    <use x="410" y="120" xlink:href="#file" />
+    <use x="250" y="250" xlink:href="#file" />
+    <use x="340" y="250" xlink:href="#file" />
+    <use x="40" y="260" xlink:href="#folder" />
+    <use x="160" y="260" xlink:href="#folder" />
+    <use x="210" y="390" xlink:href="#folder" />
+    <use x="100" y="380" xlink:href="#file" />
+    <use x="0" y="390" xlink:href="#file" />
+    <g stroke="black" fill="none" stroke-width="2">
+      <line x1="330" y1="70" x2="200" y2="116" />
+      <line x1="340" y1="70" x2="330" y2="116" />
+      <line x1="350" y1="70" x2="430" y2="116" />
+      <line x1="330" y1="220" x2="300" y2="250" />
+      <line x1="350" y1="220" x2="380" y2="250" />
+      <line x1="170" y1="220" x2="100" y2="256" />
+      <line x1="180" y1="220" x2="200" y2="256" />
+      <line x1="190" y1="360" x2="160" y2="380" />
+      <line x1="210" y1="360" x2="240" y2="386" />
+      <line x1="65" y1="360" x2="50" y2="390" />
+    </g>
+    <g text-anchor="end">
+      <text x="300" y="50">ディスク</text>
+      <text x="145" y="160">A</text>
+      <text x="295" y="160">B</text>
+      <text x="500" y="160" text-anchor="start">C</text>
+      <text x="30" y="300">B</text>
+      <text x="150" y="300">E</text>
+      <text x="260" y="300">C</text>
+      <text x="440" y="300">K</text>
+      <text x="10" y="440">H</text>
+      <text x="110" y="440">K</text>
+      <text x="290" y="440" text-anchor="start">X</text>
+    </g>
+    <g style="font-family: monospace;">
+      <text x="400" y="50">/</text>
+    </g>
+  </g>
+</svg>
+</div>
+
+<div class=exercise id="ex1">
+<div class=header>演習 1. パス名の練習</div>
+<ol class=spacy>
+<li> <mark>ディレクトリ <code>X</code></mark> のパス名を書け。
+<li> <mark>ファイル <code>H</code></mark> のパス名を書け。
+<li> <mark>ファイル <code>C</code></mark> のパス名を 2つ書け。
+</ol>
+</div>
+
+<h4>UNIXにおける「お約束」パス名</h4>
+<p>
+UNIX では、いくつかのパス名は
+「お約束」として決められている。
+<ul>
+  <li> <code>/bin</code>: 実行可能ファイル (プログラム)</li>
+  <li> <code>/home</code>: 各ユーザのホームディレクトリ</li>
+  <li> <code>/etc</code>: 設定ファイル</li>
+  <li> <code>/dev</code>: デバイスファイル</li>
+  <li> ...</li>
+</ul>
+
+<div class=exercise id="ex2">
+<div class=header>演習 2. やってみよう</div>
+<ul>
+<li> <code>ls <em>パス名</em></code> … <em>パス名</em>に含まれているファイル一覧を表示する。
+<blockquote><pre>
+$ <strong>ls /etc</strong>
+ImageMagick-7         logrotate.d           screenrc
+X11                   lynx.cfg              securetty
+alpine-release        lynx.lss              services
+...
+</pre></blockquote>
+<li> <code>ls -l <em>パス名</em></code> … より詳細なメタデータとともに表示する。
+<blockquote><pre>
+$ <strong>ls -l /etc</strong>
+total 516
+drwxr-xr-x    2 root     root           434 Jul  5  2020 ImageMagick-7
+drwxr-xr-x    4 root     root           114 Jul  5  2020 X11
+-rw-r--r--    1 root     root             7 May 29  2020 alpine-release
+drwxr-xr-x    4 root     root           164 Jan  9  2021 apk
+...
+</pre></blockquote>
+<li> <code>cat <em>パス名</em></code> … ファイルの内容を表示する。
+<blockquote><pre>
+$ <strong>cat /etc/issue</strong>
+Welcome to Alpine Linux 3.12
+Kernel \r on an \m (\l)
+</pre></blockquote>
+UNIX ではどんなファイルも同様に扱われるので、
+実は <code>cat</code>コマンドを使えば
+あらゆるファイルの内容を (バイト列として) 表示できる。
+しかし実際には JPEG などの画像ファイルをバイト列として表示しても
+意味不明な文字列が表れるだけである。
+<li> <code>less <em>パス名</em></code> … ファイルの内容を少しずつ表示する。
+<blockquote><pre>
+$ <strong>less /etc/services</strong>
+</pre></blockquote>
+<p>
+lessでは以下のキー操作が使える:
+<ul>
+<li> <kbd>Space</kbd> … 次のページへ進む。
+<li> <kbd>b</kbd> … 前のページへ戻る。
+<li> <kbd>q</kbd> … 終了する。
+<li> <kbd>j</kbd> … 1行下へ (↓)。
+<li> <kbd>k</kbd> … 1行上へ (↑)。
+<li> <kbd>/</kbd> … 文字列検索。
+</ul>
+</ul>
+</div>
+
+<p>
+UNIXでは、各ファイルには以下のようなメタデータが付与されている:
+<ul>
+<li> ファイル名
+<li> 所有者 (ユーザ)
+<li> 最終更新日時
+<li> サイズ
+<li> 読み書き許可フラグ
+<li> 実行可能フラグ
+...
+</ul>
+
+
+<h3 id="cd">2.1. カレント・ディレクトリ (カレント・フォルダ) とは</h3>
+<ul>
+  <li> パス名を使うことの問題: いくらでも長くなりうる!<br>
+  例: <code>/Applications/Safari.app/Contents/MacOS/... </code>
+  <li> いちいちパス名を入力するのは面倒。簡単にできないか?<br>
+    → <strong>いま開いている・注目している</strong> (カレント, current)
+    ディレクトリという考えを導入する。
+</ul>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="300">
+  <defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <symbol id="folder" width="100" height="100">
+    <g stroke="black" stroke-width="2" stroke-linejoin="round" fill="#ffee88">
+      <polygon points="2,2 65,2 65,80 40,80" />
+      <polygon points="2,2 55,10 55,90 2,80" fill="white" />
+      <path d="M10,15 L45,25 M10,25 L45,35 M10,35 L45,45 M10,45 L45,55 M10,55 L45,65 M10,65 L45,75" />
+      <polygon points="2,2 40,20 40,100 2,80" />
+    </g>
+  </symbol>
+  <symbol id="file" width="100" height="100">
+    <g fill="none" stroke="black" stroke-width="2" stroke-linejoin="round">
+      <polygon points="20,10 60,10 80,30 80,90 20,90" fill="white" />
+      <path d="M30,25 L70,25 M30,35 L70,35 M30,45 L70,45 M30,55 L70,55 M30,65 L70,65 M30,75 L70,75" />
+      <polygon points="60,10 60,30 80,30" fill="white" />
+    </g>
+  </symbol>
+  <symbol id="disk" width="100" height="100">
+    <g fill="none" stroke="black" stroke-width="2" stroke-linejoin="round">
+      <polygon points="10,40 30,30 90,30 90,50 70,60 10,60" fill="white" />
+      <path d="M15,42 L68,42 L68,56 M68,42 L86,33 M20,48 L30,48" />
+    </g>
+  </symbol>
+  </defs>
+  <g transform="translate(10.5,0.5) scale(0.6,0.6)">
+    <use x="300" y="0" xlink:href="#disk" />
+    <use x="150" y="120" xlink:href="#folder" />
+    <use x="300" y="120" xlink:href="#folder" />
+    <use x="410" y="120" xlink:href="#file" />
+    <use x="250" y="250" xlink:href="#file" />
+    <use x="340" y="250" xlink:href="#file" />
+    <use x="40" y="260" xlink:href="#folder" />
+    <use x="160" y="260" xlink:href="#folder" />
+    <use x="210" y="390" xlink:href="#folder" />
+    <use x="100" y="380" xlink:href="#file" />
+    <use x="0" y="390" xlink:href="#file" />
+    <g stroke="black" fill="none" stroke-width="2">
+      <line x1="330" y1="70" x2="200" y2="116" />
+      <line x1="340" y1="70" x2="330" y2="116" />
+      <line x1="350" y1="70" x2="430" y2="116" />
+      <line x1="330" y1="220" x2="300" y2="250" />
+      <line x1="350" y1="220" x2="380" y2="250" />
+      <line x1="170" y1="220" x2="100" y2="256" />
+      <line x1="180" y1="220" x2="200" y2="256" />
+      <line x1="190" y1="360" x2="160" y2="380" />
+      <line x1="210" y1="360" x2="240" y2="386" />
+      <line x1="65" y1="360" x2="50" y2="390" />
+    </g>
+    <g stroke="red" fill="none" stroke-width="4">
+      <rect x="120" y="250" width="110" height="100" />
+      <line x1="220" y1="350" x2="340" y2="380" />
+    </g>
+    <g text-anchor="end">
+      <text x="145" y="160">A</text>
+      <text x="295" y="160">B</text>
+      <text x="500" y="160" text-anchor="start">C</text>
+      <text x="30" y="300">B</text>
+      <text x="150" y="300">E</text>
+      <text x="260" y="300">C</text>
+      <text x="440" y="300">K</text>
+      <text x="10" y="440">H</text>
+      <text x="110" y="440">K</text>
+      <text x="290" y="440" text-anchor="start">X</text>
+      <text x="340" y="400" text-anchor="start" fill="red">カレント・ディレクトリ</text>
+    </g>
+  </g>
+</svg>
+</div>
+</div>
+</ul>
+
+<h3 id="abs-rel">2.2. 絶対パス名と相対パス名</h3>
+<p>
+実は「パス名」と呼ばれているものには 2つの種類がある。
+上で説明した「パス名」は「<u>絶対パス名</u>」のことであった。
+<ul>
+<li> <u>絶対パス名</u>: <mark>ディスクの先頭から</mark>たどったパス名。
+<li> <u>相対パス名</u>: <mark>カレント・ディレクトリから</mark>たどったパス名。
+</ul>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="300">
+  <defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <symbol id="folder" width="100" height="100">
+    <g stroke="black" stroke-width="2" stroke-linejoin="round" fill="#ffee88">
+      <polygon points="2,2 65,2 65,80 40,80" />
+      <polygon points="2,2 55,10 55,90 2,80" fill="white" />
+      <path d="M10,15 L45,25 M10,25 L45,35 M10,35 L45,45 M10,45 L45,55 M10,55 L45,65 M10,65 L45,75" />
+      <polygon points="2,2 40,20 40,100 2,80" />
+    </g>
+  </symbol>
+  <symbol id="file" width="100" height="100">
+    <g fill="none" stroke="black" stroke-width="2" stroke-linejoin="round">
+      <polygon points="20,10 60,10 80,30 80,90 20,90" fill="white" />
+      <path d="M30,25 L70,25 M30,35 L70,35 M30,45 L70,45 M30,55 L70,55 M30,65 L70,65 M30,75 L70,75" />
+      <polygon points="60,10 60,30 80,30" fill="white" />
+    </g>
+  </symbol>
+  <symbol id="disk" width="100" height="100">
+    <g fill="none" stroke="black" stroke-width="2" stroke-linejoin="round">
+      <polygon points="10,40 30,30 90,30 90,50 70,60 10,60" fill="white" />
+      <path d="M15,42 L68,42 L68,56 M68,42 L86,33 M20,48 L30,48" />
+    </g>
+  </symbol>
+  </defs>
+  <g transform="translate(10.5,0.5) scale(0.6,0.6)">
+    <use x="300" y="0" xlink:href="#disk" />
+    <use x="150" y="120" xlink:href="#folder" />
+    <use x="300" y="120" xlink:href="#folder" />
+    <use x="410" y="120" xlink:href="#file" />
+    <use x="250" y="250" xlink:href="#file" />
+    <use x="340" y="250" xlink:href="#file" />
+    <use x="40" y="260" xlink:href="#folder" />
+    <use x="160" y="260" xlink:href="#folder" />
+    <use x="210" y="390" xlink:href="#folder" />
+    <use x="100" y="380" xlink:href="#file" />
+    <use x="0" y="390" xlink:href="#file" />
+    <g stroke="black" fill="none" stroke-width="2">
+      <line x1="330" y1="70" x2="200" y2="116" />
+      <line x1="340" y1="70" x2="330" y2="116" />
+      <line x1="350" y1="70" x2="430" y2="116" />
+      <line x1="330" y1="220" x2="300" y2="250" />
+      <line x1="350" y1="220" x2="380" y2="250" />
+      <line x1="170" y1="220" x2="100" y2="256" />
+      <line x1="180" y1="220" x2="200" y2="256" />
+      <line x1="190" y1="360" x2="160" y2="380" />
+      <line x1="210" y1="360" x2="240" y2="386" />
+      <line x1="65" y1="360" x2="50" y2="390" />
+    </g>
+    <g stroke="red" fill="none" stroke-width="4">
+      <rect x="120" y="250" width="110" height="100" />
+      <line x1="220" y1="350" x2="340" y2="380" />
+      <rect x="210" y="390" width="110" height="100" stroke="blue" />
+    </g>
+    <g text-anchor="end">
+      <text x="145" y="160">A</text>
+      <text x="295" y="160">B</text>
+      <text x="500" y="160" text-anchor="start">C</text>
+      <text x="30" y="300">B</text>
+      <text x="150" y="300">E</text>
+      <text x="260" y="300">C</text>
+      <text x="440" y="300">K</text>
+      <text x="10" y="440">H</text>
+      <text x="110" y="440">K</text>
+      <text x="290" y="440" text-anchor="start">X</text>
+      <text x="340" y="400" text-anchor="start" fill="red">カレント・ディレクトリ</text>
+      <text x="340" y="490" text-anchor="start" fill="blue">目的のディレクトリ</text>
+    </g>
+  </g>
+</svg>
+</div>
+
+<p>
+つまり、上のディレクトリ <code>X</code> の位置は、次の2通りで表せる:
+<ul>
+  <li> 絶対パス名: <code>/A/<span style="color:red;">E</span>/<span style="color:blue;">X</span></code>
+  <li> 相対パス名: <code><mark>.</mark>/<span style="color:blue;">X</span></code>
+</ul>
+
+<h3 id="relpath">2.3. 相対パス名の表し方</h3>
+<ul>
+<li> 相対パス名では、カレント・ディレクトリの位置を<br>
+  「<code>.</code> (ドット)」で表す:
+  <code>./X</code>, <code>./K</code> など
+<li> さらに、相対パス名では、ひとつ「上の」ディレクトリを<br>
+  「<code>..</code>」で表せる。
+<li> 相対パス名の能力は、絶対パス名と等価である。
+つまり、絶対パスで表せるどんな位置も相対パス名によって表すことができる。<br>
+例: <code>../../../../../../../Application</code> =
+<code>/Application</code>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="300">
+  <defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <symbol id="folder" width="100" height="100">
+    <g stroke="black" stroke-width="2" stroke-linejoin="round" fill="#ffee88">
+      <polygon points="2,2 65,2 65,80 40,80" />
+      <polygon points="2,2 55,10 55,90 2,80" fill="white" />
+      <path d="M10,15 L45,25 M10,25 L45,35 M10,35 L45,45 M10,45 L45,55 M10,55 L45,65 M10,65 L45,75" />
+      <polygon points="2,2 40,20 40,100 2,80" />
+    </g>
+  </symbol>
+  <symbol id="file" width="100" height="100">
+    <g fill="none" stroke="black" stroke-width="2" stroke-linejoin="round">
+      <polygon points="20,10 60,10 80,30 80,90 20,90" fill="white" />
+      <path d="M30,25 L70,25 M30,35 L70,35 M30,45 L70,45 M30,55 L70,55 M30,65 L70,65 M30,75 L70,75" />
+      <polygon points="60,10 60,30 80,30" fill="white" />
+    </g>
+  </symbol>
+  <symbol id="disk" width="100" height="100">
+    <g fill="none" stroke="black" stroke-width="2" stroke-linejoin="round">
+      <polygon points="10,40 30,30 90,30 90,50 70,60 10,60" fill="white" />
+      <path d="M15,42 L68,42 L68,56 M68,42 L86,33 M20,48 L30,48" />
+    </g>
+  </symbol>
+  </defs>
+  <g transform="translate(10.5,0.5) scale(0.6,0.6)">
+    <use x="300" y="0" xlink:href="#disk" />
+    <use x="150" y="120" xlink:href="#folder" />
+    <use x="300" y="120" xlink:href="#folder" />
+    <use x="410" y="120" xlink:href="#file" />
+    <use x="250" y="250" xlink:href="#file" />
+    <use x="340" y="250" xlink:href="#file" />
+    <use x="40" y="260" xlink:href="#folder" />
+    <use x="160" y="260" xlink:href="#folder" />
+    <use x="210" y="390" xlink:href="#folder" />
+    <use x="100" y="380" xlink:href="#file" />
+    <use x="0" y="390" xlink:href="#file" />
+    <g stroke="black" fill="none" stroke-width="2">
+      <line x1="330" y1="70" x2="200" y2="116" />
+      <line x1="340" y1="70" x2="330" y2="116" />
+      <line x1="350" y1="70" x2="430" y2="116" />
+      <line x1="330" y1="220" x2="300" y2="250" />
+      <line x1="350" y1="220" x2="380" y2="250" />
+      <line x1="170" y1="220" x2="100" y2="256" />
+      <line x1="180" y1="220" x2="200" y2="256" />
+      <line x1="190" y1="360" x2="160" y2="380" />
+      <line x1="210" y1="360" x2="240" y2="386" />
+      <line x1="65" y1="360" x2="50" y2="390" />
+    </g>
+    <g stroke="red" fill="none" stroke-width="4">
+      <rect x="120" y="250" width="110" height="100" />
+      <line x1="220" y1="350" x2="340" y2="380" />
+      <line x1="220" y1="30" x2="300" y2="50" />
+      <line x1="50" y1="110" x2="110" y2="140" />
+    </g>
+    <g text-anchor="end">
+      <text x="40" y="100" style="font-family:monospace;">..</text>
+      <text x="220" y="20" style="font-family:monospace;">../..</text>
+      <text x="145" y="160">A</text>
+      <text x="295" y="160">B</text>
+      <text x="500" y="160" text-anchor="start">C</text>
+      <text x="30" y="300">B</text>
+      <text x="150" y="300">E</text>
+      <text x="260" y="300">C</text>
+      <text x="440" y="300">K</text>
+      <text x="10" y="440">H</text>
+      <text x="110" y="440">K</text>
+      <text x="290" y="440" text-anchor="start">X</text>
+      <text x="340" y="400" text-anchor="start" fill="red">カレント・ディレクトリ</text>
+    </g>
+  </g>
+</svg>
+</div>
+</ul>
+
+<div class=exercise id="ex3">
+<div class=header>演習 3. 相対パスの練習</div>
+<p>
+カレント・ディレクトリが <code>E</code> のとき…
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="500" height="300">
+  <defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <symbol id="folder" width="100" height="100">
+    <g stroke="black" stroke-width="2" stroke-linejoin="round" fill="#ffee88">
+      <polygon points="2,2 65,2 65,80 40,80" />
+      <polygon points="2,2 55,10 55,90 2,80" fill="white" />
+      <path d="M10,15 L45,25 M10,25 L45,35 M10,35 L45,45 M10,45 L45,55 M10,55 L45,65 M10,65 L45,75" />
+      <polygon points="2,2 40,20 40,100 2,80" />
+    </g>
+  </symbol>
+  <symbol id="file" width="100" height="100">
+    <g fill="none" stroke="black" stroke-width="2" stroke-linejoin="round">
+      <polygon points="20,10 60,10 80,30 80,90 20,90" fill="white" />
+      <path d="M30,25 L70,25 M30,35 L70,35 M30,45 L70,45 M30,55 L70,55 M30,65 L70,65 M30,75 L70,75" />
+      <polygon points="60,10 60,30 80,30" fill="white" />
+    </g>
+  </symbol>
+  <symbol id="disk" width="100" height="100">
+    <g fill="none" stroke="black" stroke-width="2" stroke-linejoin="round">
+      <polygon points="10,40 30,30 90,30 90,50 70,60 10,60" fill="white" />
+      <path d="M15,42 L68,42 L68,56 M68,42 L86,33 M20,48 L30,48" />
+    </g>
+  </symbol>
+  </defs>
+  <g transform="translate(10.5,0.5) scale(0.6,0.6)">
+    <use x="300" y="0" xlink:href="#disk" />
+    <use x="150" y="120" xlink:href="#folder" />
+    <use x="300" y="120" xlink:href="#folder" />
+    <use x="410" y="120" xlink:href="#file" />
+    <use x="250" y="250" xlink:href="#file" />
+    <use x="340" y="250" xlink:href="#file" />
+    <use x="40" y="260" xlink:href="#folder" />
+    <use x="160" y="260" xlink:href="#folder" />
+    <use x="210" y="390" xlink:href="#folder" />
+    <use x="100" y="380" xlink:href="#file" />
+    <use x="0" y="390" xlink:href="#file" />
+    <g stroke="black" fill="none" stroke-width="2">
+      <line x1="330" y1="70" x2="200" y2="116" />
+      <line x1="340" y1="70" x2="330" y2="116" />
+      <line x1="350" y1="70" x2="430" y2="116" />
+      <line x1="330" y1="220" x2="300" y2="250" />
+      <line x1="350" y1="220" x2="380" y2="250" />
+      <line x1="170" y1="220" x2="100" y2="256" />
+      <line x1="180" y1="220" x2="200" y2="256" />
+      <line x1="190" y1="360" x2="160" y2="380" />
+      <line x1="210" y1="360" x2="240" y2="386" />
+      <line x1="65" y1="360" x2="50" y2="390" />
+    </g>
+    <g stroke="red" fill="none" stroke-width="4">
+      <rect x="120" y="250" width="110" height="100" />
+      <line x1="220" y1="350" x2="340" y2="380" />
+    </g>
+    <g text-anchor="end">
+      <text x="145" y="160">A</text>
+      <text x="295" y="160">B</text>
+      <text x="500" y="160" text-anchor="start">C</text>
+      <text x="30" y="300">B</text>
+      <text x="150" y="300">E</text>
+      <text x="260" y="300">C</text>
+      <text x="440" y="300">K</text>
+      <text x="10" y="440">H</text>
+      <text x="110" y="440">K</text>
+      <text x="290" y="440" text-anchor="start">X</text>
+      <text x="340" y="400" text-anchor="start" fill="red">カレント・ディレクトリ</text>
+    </g>
+  </g>
+</svg>
+</div>
+<ol type=a>
+  <li> ディレクトリ <code>A</code> への相対パス名は?
+  <li> ファイル <code>H</code> への相対パス名は?
+  <li> ファイル <code>K</code> への相対パス名は? (2つある)
+</ol>
+</div>
+
+<div class=exercise id="ex4">
+<div class=header>演習 4. やってみよう</div>
+<ul>
+<li> <code>cd パス名</code> … カレント・ディレクトリを指定されたパス名に変更する。
+<li> <code>pwd</code> … カレント・ディレクトリを表示する。
+<blockquote><pre>
+$ <strong>pwd</strong>
+/home/yusuke
+$ <strong>cd /etc</strong>
+$ <strong>pwd</strong>
+/etc
+</pre></blockquote>
+<li> <code>ls</code> (パス名を省略) … カレント・ディレクトリに含まれているファイル一覧を表示する。
+<li> <code>ls -l</code> (パス名を省略) … より詳細なメタデータとともに表示する。
+</ul>
+</div>
+
+
+<h2 id="process">3. プロセス</h2>
+<p>
+ファイルシステム上で「<u>実行可能</u> (executable)」フラグ (<code>x</code>) がついている
+ファイルはプログラムとして実行可能である。実行されたプログラムは、システム上で一定時間
+<u>プロセス</u> (process) として走り続ける。UNIXはマルチタスクOSなので、通常は
+複数のプロセスが並列に実行される。とはいえ実際の CPU は一度にひとつの
+プログラムしか実行できないため、各プロセスは高速に切り替えられ
+少しずつ (10ms程度) 実行される (時分割処理)。
+これらプロセス切り替え処理は、OS の
+<u>カーネル</u> (kernel) という部分がおこなう。
+
+<h4>UNIXプロセスの特徴</h4>
+
+<ul>
+<li> あるプロセスから、さらに別のプロセス (<u>子プロセス</u>) を起動することができる。
+このとき、もとのプロセスは <u>親プロセス</u> と呼ばれる。
+<li> プログラミングにおける関数と同じように、各プロセスは
+親プロセスから <u>引数</u> (argument) を受けとることができる。
+また、プロセスは終了時に <u>終了状態</u> (exit code) を親プロセスに返す。
+<li> UNIX 起動時には、まず最初のプロセスである <code>init</code> (プロセスID: 1)
+が実行される。ここから他のすべてのプロセスが起動される。
+<li> プロセスも、ファイルと同じように「所有者」が存在する。
+あるプロセスの権限は、それを起動したユーザの権限と同じになる。
+<li> 各プロセスには以下のものが付属している:
+<ul>
+<li> プロセスID (固有の識別番号、<u>PID</u>)
+<li> ユーザID (プロセスの所有者)
+<li> カレントディレクトリ
+<li> 標準入力・標準出力・標準エラー出力 (後述)
+<li> 環境変数
+<li> Control Group
+</ul>
+</ul>
+
+<p>
+UNIX の各プロセスは、<code>init</code> から先祖-子孫関係が存在し、
+全体として木構造を形成している:
+<blockquote><pre>
+$ <strong>pstree</strong>
+systemd─┬─agetty
+        ├─automount───3*[{automount}]
+        ├─avahi-daemon───avahi-daemon
+        ├─crond
+        ├─dbus-daemon
+        ├─nmbd
+        ├─ntpd───{ntpd}
+        ├─smbd─┬─cleanupd
+        │      ├─smbd
+        │      └─smbd-notifyd
+        ├─sshd
+       ...
+</pre></blockquote>
+
+<div class=exercise id="ex5">
+<div class=header>演習 5. やってみよう</div>
+<ul>
+<li> <code>ps x</code> … 自分が所有するプロセス一覧を表示する。
+<blockquote><pre>
+$ <strong>ps x</strong>
+  PID TTY      STAT   TIME COMMAND
+19857 ?        Ss     0:00 /lib/systemd/systemd --user
+19858 ?        S      0:00 (sd-pam)
+19872 ?        R      0:00 sshd: euske@pts/0
+19874 pts/0    Ss     0:00 -bash
+19880 pts/0    R+     0:00 ps x
+</pre></blockquote>
+<li> <code>ps ax</code> … すべてのプロセス一覧を表示する。
+<blockquote><pre>
+$ <strong>ps ax</strong>
+  PID TTY      STAT   TIME COMMAND
+    1 ?        Ss     0:43 /sbin/init
+    2 ?        S      0:00 [kthreadd]
+    3 ?        I&lt;     0:00 [rcu_gp]
+    4 ?        I&lt;     0:00 [rcu_par_gp]
+...
+</pre></blockquote>
+<li> <code>ps aux</code> … より詳細な情報 (所有者) を表示する。
+<li> <code>ps alx</code> … より詳細な情報 (親プロセスID) を表示する。
+<li> <code>pstree</code> … プロセスの木構造を視覚的に表示する。
+(注: pstreeコマンドは標準の macOS には存在しないので、
+brewを使ってインストールする)
+</ul>
+</div>
+
+<h4>実行中のプロセスを止めるには</h4>
+<p>
+UNIX のプロセスには、<u>シグナル</u> (signal) を送ることができる。
+シグナルにはいくつかの種類があるが、たいていの場合シグナルを送られた
+プロセスは終了する。
+<ul>
+<li> <code>SIGTERM</code> … プロセスを正常終了させる。
+<li> <code>SIGKILL</code> … プロセスを強制終了させる。(SIGTERMよりも強力で、最後の手段)
+<li> <code>SIGINT</code> … プロセスの所属する端末 (標準入力) で <kbd>Control</kbd>+<kbd>C</kbd> が押されたときに送られる。
+<li> <code>SIGSEGV</code> … プロセスが異常な動作をしたときに、カーネルによって送られる。
+</ul>
+
+<div class=exercise id="ex6">
+<div class=header>演習 6. やってみよう</div>
+<ul>
+<li> <code>kill <em>プロセスID</em></code> … 指定したプロセスに <code>SIGTERM</code> を送る。
+<blockquote><pre>
+$ <strong>sleep 60</strong>
+または
+$ <strong>find / </strong>
+...
+
+(別のウィンドウで)
+$ <strong>ps x</strong>
+$ <strong>kill 12345</strong>
+</pre></blockquote>
+<li> <code>kill -KILL <em>プロセスID</em></code> … 指定したプロセスに <code>SIGKILL</code> を送る。
+</ul>
+</div>
+
+
+<h2 id="stdio">4. 標準入力・標準出力・標準エラー出力</h2>
+
+<p>
+UNIX の各プロセスには
+「<u>標準入力</u> (stdin)」
+「<u>標準出力</u> (stdout)」
+「<u>標準エラー出力</u> (stderr)」
+という 3つの仮想的な装置が付属している。
+これらはプロセスが画面に文字を表示したり、
+キーボードから文字を入力するために使用する。
+
+<p>
+まず、通常の状態では、プロセスの
+標準入力・標準出力・標準エラー出力は、
+どれも「<u>端末</u> (画面)」に接続されている。
+(昔はこれはタイプライタや電話線だったが、現在ではおもに
+ウィンドウ上の<u>仮想端末</u>が使われる。)
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="310" height="140">
+  <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="8" markerHeight="8" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g stroke="black" stroke-width="2" fill="none">
+    <rect x="10" y="20" width="100" height="110" />
+    <rect x="200" y="20" width="100" height="30" />
+    <rect x="200" y="60" width="100" height="30" />
+    <rect x="200" y="100" width="100" height="30" />
+    <path d="M200,35 l-80,0" marker-end="url(#arrow)" />
+    <path d="M110,75 l80,0" marker-end="url(#arrow)" />
+    <path d="M110,115 l80,0" marker-end="url(#arrow)" />
+  </g>
+  <g style="font-size:75%;" text-anchor="middle">
+    <text x="60" y="15">プロセス</text>
+    <text text-anchor="end" x="105" y="40">標準入力</text>
+    <text text-anchor="end" x="105" y="80">標準出力</text>
+    <text text-anchor="end" x="105" y="120">標準エラー出力</text>
+    <text x="250" y="40">端末</text>
+    <text x="250" y="80">端末</text>
+    <text x="250" y="120">端末</text>
+  </g>
+</svg>
+</div>
+
+<p>
+標準出力は、プロセスからの出力を表示するのに使われる:
+<blockquote><pre>
+$ <strong>./hello</strong>
+hello, world.
+</pre></blockquote>
+
+<p>
+いっぽう標準入力は、ユーザが文字を入力するのに使われる:
+<blockquote><pre>
+$ <strong>./greet</strong>
+your name?
+<strong>yusuke</strong>
+greetings, yusuke
+</pre></blockquote>
+
+<p>
+さて UNIX では、後述するシェルの機能を使うと、
+標準出力を端末ではなくファイルに切り替える (<u>リダイレクト</u>する)
+ことができる:
+<blockquote><pre>
+$ <strong>./hello &gt; output.txt</strong>
+(テキストファイル output.txt が生成される)
+</pre></blockquote>
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="310" height="140">
+  <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="8" markerHeight="8" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g stroke="black" stroke-width="2" fill="none">
+    <rect x="10" y="20" width="100" height="110" />
+    <rect x="200" y="20" width="100" height="30" />
+    <rect x="200" y="60" width="100" height="30" fill="#ffcccc" />
+    <rect x="200" y="100" width="100" height="30" />
+    <path d="M200,35 l-80,0" marker-end="url(#arrow)" />
+    <path d="M110,75 l80,0" marker-end="url(#arrow)" />
+    <path d="M110,115 l80,0" marker-end="url(#arrow)" />
+  </g>
+  <g style="font-size:75%;" text-anchor="middle">
+    <text x="60" y="15">hello</text>
+    <text text-anchor="end" x="105" y="40">標準入力</text>
+    <text text-anchor="end" x="105" y="80">標準出力</text>
+    <text text-anchor="end" x="105" y="120">標準エラー出力</text>
+    <text x="250" y="40">端末</text>
+    <text style="font-family:monospace;" x="250" y="80">output.txt</text>
+    <text x="250" y="120">端末</text>
+  </g>
+</svg>
+</div>
+
+<p>
+また、標準<strong>入力</strong>を端末ではなくファイルにリダイレクトすることも
+可能である:
+<blockquote><pre>
+(テキストファイル input.txt を作成する)
+$ <strong>./greet &lt; input.txt</strong>
+your name?
+greetings, test
+</pre></blockquote>
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="310" height="140">
+  <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="8" markerHeight="8" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g stroke="black" stroke-width="2" fill="none">
+    <rect x="10" y="20" width="100" height="110" />
+    <rect x="200" y="20" width="100" height="30" fill="#88ff88" />
+    <rect x="200" y="60" width="100" height="30" />
+    <rect x="200" y="100" width="100" height="30" />
+    <path d="M200,35 l-80,0" marker-end="url(#arrow)" />
+    <path d="M110,75 l80,0" marker-end="url(#arrow)" />
+    <path d="M110,115 l80,0" marker-end="url(#arrow)" />
+  </g>
+  <g style="font-size:75%;" text-anchor="middle">
+    <text x="60" y="15">greet</text>
+    <text text-anchor="end" x="105" y="40">標準入力</text>
+    <text text-anchor="end" x="105" y="80">標準出力</text>
+    <text text-anchor="end" x="105" y="120">標準エラー出力</text>
+    <text style="font-family:monospace;" x="250" y="40">input.txt</text>
+    <text x="250" y="80">端末</text>
+    <text x="250" y="120">端末</text>
+  </g>
+</svg>
+</div>
+
+<p>
+さらに、UNIX には「<u>パイプ</u> (pipe)」という機能がある。
+これを使うと
+「あるプロセスの標準<strong>出力</strong>を、別のプロセスの標準<strong>入力</strong>に」
+リダイレクトすることができる:
+
+<blockquote><pre>
+$ <strong>./hello | ./greet</strong>
+your name?
+greetings, hello, world.
+</pre></blockquote>
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="650" height="180">
+  <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="8" markerHeight="8" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g stroke="black" stroke-width="2" fill="none">
+    <rect x="10" y="20" width="100" height="110" />
+    <rect x="180" y="20" width="100" height="30" />
+    <ellipse cx="230" cy="75" rx="50" ry="15" fill="#ffff88" />
+    <rect x="180" y="100" width="100" height="30" />
+    <path d="M180,35 l-60,0" marker-end="url(#arrow)" />
+    <path d="M110,75 l60,0" marker-end="url(#arrow)" />
+    <path d="M110,115 l60,0" marker-end="url(#arrow)" />
+    <rect x="350" y="60" width="100" height="110" />
+    <rect x="520" y="100" width="100" height="30" />
+    <rect x="520" y="140" width="100" height="30" />
+    <path d="M280,75 l60,0" marker-end="url(#arrow)" />
+    <path d="M450,115 l60,0" marker-end="url(#arrow)" />
+    <path d="M450,155 l60,0" marker-end="url(#arrow)" />
+  </g>
+  <g style="font-size:75%;" text-anchor="middle">
+    <text x="60" y="15">hello</text>
+    <text text-anchor="end" x="105" y="40">標準入力</text>
+    <text text-anchor="end" x="105" y="80">標準出力</text>
+    <text text-anchor="end" x="105" y="120">標準エラー出力</text>
+    <text x="230" y="40">端末</text>
+    <text x="230" y="80">パイプ</text>
+    <text x="230" y="120">端末</text>
+    <text x="400" y="55">greet</text>
+    <text text-anchor="start" x="355" y="80">標準入力</text>
+    <text text-anchor="end" x="445" y="120">標準出力</text>
+    <text text-anchor="end" x="445" y="160">標準エラー出力</text>
+    <text x="570" y="120">端末</text>
+    <text x="570" y="160">端末</text>
+  </g>
+</svg>
+</div>
+
+<div class=exercise id="ex7">
+<div class=header>演習 7. やってみよう</div>
+<ul>
+<li> 以下のコマンドを実行し、ls の出力がテキストファイルになっていることを確認せよ。
+<blockquote><pre>
+$ <strong>ls -l > output.txt</strong>
+</pre></blockquote>
+<li> <code>grep</code>コマンドを使うと、
+標準入力から特定のパターンが含まれる行だけを表示できる:
+<blockquote><pre>
+$ <strong>ls -l | grep .conf</strong>
+-rw-r--r--    1 root     root          5613 Jun 18  2020 ca-certificates.conf
+drwxr-xr-x    2 root     root           520 Jul  5  2020 conf.d
+-rw-r--r--    1 root     root          1102 Jul  6  2020 dhcpcd.conf
+...
+</pre></blockquote>
+<li> <code>sort</code>コマンドを使うと、
+標準入力の各行を昇順あるいは降順に並べ替え (ソート) できる:
+<blockquote><pre>
+$ <strong>ls -l | sort</strong> (各列の行頭からアルファベット順にソート)
+...
+$ <strong>ls -l | sort +2</strong> (空白で区切られた 2番目の列を基準にソート)
+...
+$ <strong>ls -l | sort -n +4</strong> (数値としてソート)
+...
+$ <strong>ls -l | sort -n -r +4</strong> (reverse, 逆順に表示)
+...
+</pre></blockquote>
+<p>
+このように、UNIX のコマンドは "<code>-</code>" や "<code>+</code>" で始まる
+文字列を与えることにより異なった動きをするものが多い。
+(これは何か規則があるわけではなく、ただの慣例である。)
+このような文字列を一般にコマンドの「<u>オプション</u> (option)」と呼ぶ。
+
+</ul>
+</div>
+
+<p>
+パイプによる複数プロセスの接続は UNIX (シェル) の特徴的な機能のひとつである。
+これをうまく使うと、複雑な処理をいくつかのコマンドの組み合わせによって
+実現することができる。
+<blockquote><pre>
+(ls コマンドの出力を検索し、さらにそれをソートして最初の10行を表示する)
+$ <strong>ls -l | grep yusuke | sort | head -n10</strong>
+</pre></blockquote>
+
+<div class=note>
+<strong>注意:</strong>
+<code>&lt;</code> や <code>&gt;</code> による
+標準入力・標準出力の切り替えは、
+プロセスを<strong>起動する瞬間</strong>にしか指定できない。
+いちどプロセスが起動してしまうと、あとから
+切り替えることはできないので注意。
+</div>
+
+<div class=note>
+<strong>注意:</strong>
+UNIX は無愛想な OS なので、
+<code>&gt;</code> の出力先として
+うっかり存在するファイル名を指定してしまうと、
+そのファイルは<strong>何の警告もなく</strong>上書きされ、
+空のファイルされる。
+</div>
+
+
+<h2 id="shell">5. シェル</h2>
+<p>
+以上に挙げたような各プロセスの起動、標準入力・標準出力の切り替えなどを
+おこなうプログラムが<u>シェル</u> (shell) である。
+シェルは UNIX を使ううえで中心的な役割を果たしている。
+UNIX 上で「<u>コマンド</u> (command)」と呼ばれるものは、
+実はほとんどシェルによって起動されるプロセスである。
+シェルの役割は:
+<ul>
+<li> プロセスの起動
+<li> プロセスの終了 (シグナルの送信)
+<li> プロセス起動時の標準入力・標準出力・標準エラー出力の切り替え
+<li> プロセス起動時の環境変数 (後述) の設定
+<li> カレントディレクトリの切り替え
+</ul>
+
+<p>
+実は UNIX では、シェルも普通のプロセスである。
+そのため (<code>sh</code>, <code>csh</code>, <code>bash</code>, <code>zsh</code> など)
+いろいろなシェルが開発されている。
+ほとんどの場合、シェルは以下の動作を繰り返しているだけである:
+<ol>
+<li> 端末 (標準入力) からコマンド文字列が入力されるのを待つ。
+<li> 文字列を解析し、スペースで区切られた引数のリストを作成する (<u>引数展開</u>)。
+<li> 必要に応じて標準入力・標準出力・標準エラー出力を切り替えて、子プロセスを起動する。
+<li> 子プロセスが終了するのを待ち、終了状態を受けとる。
+<li> 1. に戻る。
+</ol>
+
+<h3>5.1. コマンド引数の展開</h3>
+<p>
+先に述べたように、UNIX コマンドのほとんどは実はプロセスであり (例外も存在する)、
+シェルの主な機能はコマンド文字列を解析し、プロセスを起動することである。
+たとえば
+<blockquote><pre>
+$ <strong>ls -l /etc</strong>
+</pre></blockquote>
+という行は、以下の行と同じである:
+<blockquote><pre>
+$ <strong>/bin/ls -l /etc</strong>
+</pre></blockquote>
+<p>
+この行が入力されたとき、シェルは以下のことをおこなう:
+<ol>
+<li> <code>/bin/ls</code> というプログラムを子プロセスとして起動する。
+<li> このとき、各引数を文字列としてプロセスに渡す:
+<ul>
+<li> <code>ls</code> … 0番目の引数 (コマンド名あるいはプログラムのパス名)
+<li> <code>-l</code> … 1番目の引数
+<li> <code>/etc</code> … 2番目の引数
+</ul>
+<li> 子プロセスが終了するまで待つ。
+</ol>
+<p>
+ここで注意したいのは、引数である
+「<code>-l</code>」や「<code>/etc</code>」をどのように利用するかは
+<strong>各コマンド次第</strong>ということである。
+すべてのコマンドにおいて
+「<code>-l</code>」がオプションであると決まっているわけではないし
+「<code>/etc</code>」がパス名として解釈されるとも限らない。
+
+<div class=note>
+<strong>注意:</strong>
+もし実際に
+「<code>-l</code>」という名前のディレクトリがあったとすると、
+そのままでは <code>ls</code> のパス名として指定できない。
+だが <code>ls ./-l</code> というトリックを使えば指定できる。)
+</div>
+
+<p>
+たとえば <code>echo</code> というコマンドは、シェルから与えらえた引数をただそのまま
+表示するだけのコマンドである:
+<blockquote><pre>
+$ <strong>echo abc 1234</strong>
+abc 1234
+$ <strong>echo -l /etc</strong>
+-l /etc
+</pre></blockquote>
+
+<p>
+一般にシェルの引数は「<code> </code> 」(スペース) で
+区切られるが、<code>"〜"</code> で囲むことにより
+スペースが入っている文字列を「ひとつの引数」として認識させることができる:
+<blockquote><pre>
+$ <strong>ls -l /etc</strong>
+...
+$ <strong>ls "-l /etc"</strong>
+ls: invalid option -- ' '
+$ <strong>"ls -l" /etc</strong>
+ls -l: command not found
+</pre></blockquote>
+
+<div class=exercise id="ex8">
+<div class=header>演習 8. シェルの引数展開</div>
+<p>
+以下のコマンドラインの引数を 0番目からすべて挙げよ:
+<ol class=spacy>
+<li> <code>ls /etc /bin</code>
+<li> <code>ls "/etc /bin"</code>
+<li> <code>ls "/etc" "/bin"</code>
+</ol>
+</div>
+
+<h3>5.2. ファイル名の展開</h3>
+<p>
+シェルでは、ディレクトリ上に複数のファイルがあるとき、
+それらのファイル名を複数の引数として展開する機能がある
+(<u>ファイル名展開</u>, filename expansion)。
+<p>
+たとえば、カレントディレクトリ内に <code>a</code>, <code>bb</code>, <code>ccc</code>
+というファイルがあるとき…
+<blockquote><pre>
+$ <strong>ls</strong>
+a   bb   ccc
+</pre></blockquote>
+以下の <code>*</code> (<u>ワイルドカード</u>) を指定すると
+<blockquote><pre>
+$ <strong>cat *</strong>
+</pre></blockquote>
+以下の引数を与えたのと同じである:
+<blockquote><pre>
+$ <strong>cat a bb cc</strong>
+</pre></blockquote>
+<p>
+ワイルドカードには、パターンを指定することもできる。
+たとえば <code>/etc</code> 内に多くの「<code>.conf</code>」で終わるファイルがあるとき…
+<blockquote><pre>
+$ <strong>ls -l | grep .conf</strong>
+-rw-r--r--    1 root     root          5613 Jun 18  2020 ca-certificates.conf
+drwxr-xr-x    2 root     root           520 Jul  5  2020 conf.d
+-rw-r--r--    1 root     root          1102 Jul  6  2020 dhcpcd.conf
+...
+</pre></blockquote>
+以下のパターンは
+<blockquote><pre>
+$ <strong>cat /etc/*.conf</strong>
+</pre></blockquote>
+以下のような引数に展開される:
+<blockquote><pre>
+$ <strong>cat /etc/ca-certificates<mark>.conf</mark> /etc/dhcpcd<mark>.conf</mark> ...</strong>
+</pre></blockquote>
+<p>
+繰り返すが、ここで展開されたパス名をどのように扱うかは
+<strong>各コマンド次第</strong>である。
+シェルがファイル名展開したからといって、
+各コマンドがこれらをファイル名として扱う保証はない。
+<p>
+ここで、<code>echo</code> コマンドは
+シェルが各引数をどのように展開したかを表示するのに使える:
+<blockquote><pre>
+$ <strong>echo /etc/*.conf</strong>
+/etc/ca-certificates.conf /etc/dhcpcd.conf ...
+</pre></blockquote>
+
+<div class=exercise id="ex9">
+<div class=header>演習 9. ファイル名展開</div>
+<p>
+<code>/etc</code> 以下に次のようなファイルがあるとする:
+<ul>
+<li> <code>a.conf</code>
+<li> <code>b.conf</code>
+<li> <code>issue</code>
+</ul>
+カレントディレクトリも <code>/etc</code> であるとして、
+以下のコマンドラインの出力を答えよ:
+<ol class=spacy>
+<li> <code>echo *</code>
+<li> <code>echo *.conf</code>
+<li> <code>echo *.conf /etc/*</code>
+<li> <code>echo /etc/issue*</code>
+<li> <code>echo "*"</code>
+</ol>
+</div>
+
+<h4>Dockerの原理</h4>
+<p>
+各プロセスに所属する Control Group (cgroup) という機能を使うと、
+あるプロセス (およびその子孫プロセスすべて) からアクセスできる
+ファイルやネットワークを制限することができる。
+
+つまるところ、docker がやっているのは、ある Control Group 内で
+プロセスを起動し、それ以降のすべての子プロセスを
+特定の空間に閉じ込める (containする) ことによって
+各プロセスが独立したマシン上で動いているかのように
+見せかけているだけなのである。
+
+
+<h2 id="summary">本日のまとめ</h2>
+<p>
+本日紹介したコマンドは以下のとおり:
+<ul>
+<li> <code>ls</code>
+<li> <code>cat</code>
+<li> <code>less</code>
+<li> <code>cd</code>
+<li> <code>pwd</code>
+<li> <code>ps</code>
+<li> <code>kill</code>
+<li> <code>grep</code>
+<li> <code>sort</code>
+<li> <code>echo</code>
+<li> <code>&gt;</code>, <code>&lt;</code> による標準入力、標準出力のリダイレクト
+<li> <code>|</code> の使い方
+<li> シェルの引数展開
+<li> <code>*</code> によるファイル名展開
+</ul>
+
+<div class=exercise id="ex10">
+<div class=header>演習 10. まとめ問題</div>
+<p>
+以下の用語の違いを説明せよ:
+<ul>
+<li> プログラム
+<li> プロセス
+<li> コマンド
+</ul>
+</div>
+
+<hr>
+<address>Yusuke Shinyama</address>
