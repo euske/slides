@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>UNIXの基礎</title>
+<title>(プログラマのための) UNIXの基礎</title>
 <style><!--
 body { line-height: 1.5; }
 h1 { border-bottom: solid 4px #000080; }
@@ -32,7 +32,7 @@ u { color: green; font-weight: bold; }
 <div class=nav>
 <a href="../index.html">&lt; もどる</a>
 </div>
-<h1>UNIXの基礎</h1>
+<h1>(プログラマのための) UNIXの基礎</h1>
 <p>
 2022/10/24 勉強会資料
 
@@ -1062,7 +1062,13 @@ UNIX は無愛想な OS なので、
 シェルは UNIX を使ううえで中心的な役割を果たしている。
 UNIX 上で「<u>コマンド</u> (command)」と呼ばれるものは、
 実はほとんどシェルによって起動されるプロセスである。
-シェルの役割は:
+しかもたいていのコマンド (プロセス) は数ミリ秒〜数秒しか生存しない。
+通常の PC では、アプリ (これもプロセス) は一度起動したら
+長時間走らせておくのが普通だが、
+UNIX は「湯水のようにプロセスを消費する」OSである。
+
+<p>
+シェルの役割には、以下のものがある:
 <ul>
 <li> プロセスの起動
 <li> プロセスの終了 (シグナルの送信)
@@ -1115,6 +1121,10 @@ $ <strong>/bin/ls -l /etc</strong>
 すべてのコマンドにおいて
 「<code>-l</code>」がオプションであると決まっているわけではないし
 「<code>/etc</code>」がパス名として解釈されるとも限らない。
+この意味で、UNIX の使い方を学ぶことは
+API の使い方を学ぶのに似ている。
+個々の関数・メソッドの引数がどのような意味をもつのか学習し、
+それらを組み合わせて必要な処理を実現する。
 
 <div class=note>
 <strong>注意:</strong>
@@ -1155,6 +1165,7 @@ ls -l: command not found
 <li> <code>ls /etc /bin</code>
 <li> <code>ls "/etc /bin"</code>
 <li> <code>ls "/etc" "/bin"</code>
+<li> <code>ls "" "/bin"</code>
 <li> <code>"ls /etc /bin"</code>
 </ol>
 </div>
@@ -1276,6 +1287,7 @@ $ <strong>echo /etc/*.conf</strong>
 
 <h3>次回予告</h3>
 <ul>
+<li> シェルからのファイル操作
 <li> 環境変数の使い方
 <li> 実行モードの変更
 <li> シェルスクリプトの書き方
