@@ -24,6 +24,7 @@ u { color: green; font-weight: bold; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .comment { color: #008800; }
+pre em { color: #008800; }
 .exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
 .exercise .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
 --></style>
@@ -34,7 +35,7 @@ u { color: green; font-weight: bold; }
 </div>
 <h1>(プログラマのための) UNIXの基礎</h1>
 <p>
-2022/10/24 勉強会資料
+勉強会資料 2022/10/24, 2022/11/01
 
 <div class=author>
 Yusuke Shinyama<br>
@@ -58,7 +59,7 @@ Yusuke Shinyama<br>
 <h2 id="unix">1. UNIXとは</h2>
 <p>
 1970年ごろに作られた<u>オペレーティングシステム</u> (OS)。
-以後の多くの OS がこれを継承あるいは模倣している。
+以後の多くの OS が UNIX を継承あるいは模倣している。
 以下ではこれらの「UNIX風OS」も含めて UNIX と呼称する。
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -304,6 +305,7 @@ UNIXでは、各ファイルには以下のようなメタデータが付与さ�
 <li> サイズ
 <li> 読み書き許可フラグ
 <li> 実行可能フラグ
+<li>
 ...
 </ul>
 
@@ -698,8 +700,6 @@ $ <strong>pwd</strong>
 <li> プログラミングにおける関数と同じように、各プロセスは
 親プロセスから <u>引数</u> (argument) を受けとることができる。
 また、プロセスは終了時に <u>終了状態</u> (exit code) を親プロセスに返す。
-<li> UNIX 起動時には、まず最初のプロセスである <code>init</code> (プロセスID: 1)
-が実行される。ここから他のすべてのプロセスが起動される。
 <li> プロセスも、ファイルと同じように「所有者」が存在する。
 あるプロセスの権限は、それを起動したユーザの権限と同じになる。
 <li> 各プロセスには以下のものが付属している:
@@ -714,8 +714,10 @@ $ <strong>pwd</strong>
 </ul>
 
 <p>
+UNIX 起動時には、まず最初のプロセスである <code>init</code>
+(プロセスID: 1) が実行される。ここから他のすべてのプロセスが起動される。
 UNIX の各プロセスは、<code>init</code> から先祖-子孫関係が存在し、
-全体として木構造を形成している:
+全体として木構造を形成している。
 <blockquote><pre>
 $ <strong>pstree</strong>
 systemd─┬─agetty
@@ -766,13 +768,13 @@ brewを使ってインストールする)
 <h4>実行中のプロセスを止めるには</h4>
 <p>
 UNIX のプロセスには、<u>シグナル</u> (signal) を送ることができる。
-シグナルにはいくつかの種類があるが、たいていの場合シグナルを送られた
-プロセスは終了する。
+シグナルにはいくつかの種類がある:
 <ul>
 <li> <code>SIGTERM</code> … プロセスを正常終了させる。
 <li> <code>SIGKILL</code> … プロセスを強制終了させる。(SIGTERMよりも強力で、最後の手段)
-<li> <code>SIGINT</code> … プロセスの所属する端末 (標準入力) で <kbd>Control</kbd>+<kbd>C</kbd> が押されたときに送られる。
+<li> <code>SIGINT</code> … プロセスの所属する端末 (標準入力) で <kbd>Control</kbd>+<kbd>C</kbd> が押されたときに送られる。たいていのプロセスは終了するが、プロセスはこれを無視することもできる。
 <li> <code>SIGSEGV</code> … プロセスが異常な動作をしたときに、カーネルによって送られる。
+ほとんどのプロセスは終了する。
 </ul>
 
 <div class=exercise id="ex6">
@@ -1287,25 +1289,62 @@ HOME=/home/euske
 最初に共通の環境変数を設定しておけば、以後すべての子プロセスで
 共通の設定を利用することができる。
 
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="310" height="180">
+  <g stroke="black" stroke-width="2" fill="none">
+    <rect x="10" y="20" width="100" height="60" />
+    <rect x="170" y="20" width="100" height="60" />
+    <rect x="170" y="110" width="100" height="60" />
+    <path d="M110,50 l60,0 M110,50 m30,0 l0,90 l30,0" />
+    <path d="M270,50 l20,0" />
+    <path d="M290,50 l20,0" stroke-dasharray="4,4" />
+    <path d="M270,140 l20,0" />
+    <path d="M290,140 l20,0" stroke-dasharray="4,4" />
+  </g>
+  <g style="font-size:75%;" text-anchor="middle">
+    <text x="60" y="15">親プロセス</text>
+    <text x="220" y="15">子プロセス</text>
+    <text x="220" y="105">子プロセス</text>
+  </g>
+  <g style="font-size:75%; font-family: monospace">
+    <text x="20" y="40">USER=yusuke</text>
+    <text x="180" y="40">USER=yusuke</text>
+    <text x="180" y="60">DATABASE=alpha</text>
+    <text x="180" y="130">USER=yusuke</text>
+    <text x="180" y="150">DATABASE=beta</text>
+  </g>
+</svg>
+</div>
+
 <h3>6.1. 環境変数を使う</h3>
 <p>
 各プロセスにおける環境変数は、
-プログラム全体で共有されているグローバルなデータとして
+プログラム中のどこからでも文字列値として
 アクセス可能である:
 
 <h4>Node (JavaScript) の場合</h4>
 <blockquote><pre>
+<em>// 環境変数USERの値を取得する。</em>
 const user = process.env['USER']
+</pre></blockquote>
+
+<h4>Java の場合</h4>
+<blockquote><pre>
+<em>// 環境変数USERの値を取得する。</em>
+Strign user = System.getenv("USER");
 </pre></blockquote>
 
 <h4>Kotlin の場合</h4>
 <blockquote><pre>
+<em>// 環境変数USERの値を取得する。</em>
 val user: String? = System.getenv("USER")
 </pre></blockquote>
 
 <p>
 慣例により、環境変数の名前には大文字が使われることが多い
-(実際には、どんな名前でもつけることが可能)。
+(実際には、英数字であればなんでもよい)。
 
 <h4>シェルの場合</h4>
 <p>
@@ -1331,11 +1370,34 @@ $ <strong>echo /home/${USSR}/foo</strong>
 /home//foo
 </pre></blockquote>
 <p>
-なお、<code>${〜}</code>中の中カッコは省略可能である:
+なお、<code>${〜}</code>の中カッコは省略可能である:
 <blockquote><pre>
 $ <strong>echo $USER</strong>
 euske
 </pre></blockquote>
+
+<h4>高度な機能</h4>
+<p>
+シェルには変数を展開するさいにさまざまな演算をおこなう機能がある。
+たとえば
+<blockquote><pre>
+$ <strong>echo ${USER/xxx/yyy}</strong>  <em>(USER中の xxx を yyyに置換した文字列に展開される)</em>
+$ <strong>echo ${LANG:-ja}</strong>      <em>(LANGが定義されていない場合、デフォルト値としてjaに展開される)</em>
+</pre></blockquote>
+
+<div class=exercise id="ex10">
+<div class=header>演習 10. 環境変数の展開</div>
+<p>
+環境変数 <code>USER</code> に <code>jon</code> という文字列が、
+環境変数 <code>FILE</code> に <code>athan</code> という文字列が、
+入っているとき、以下のコマンドの出力を答えよ:
+<ol>
+<li> <code>echo /home/${USER}/${FILE}</code>
+<li> <code>echo $USER$FILE</code>
+<li> <code>echo "$USER"ny</code>
+<li> <code>echo $USERny</code>
+</ol>
+</div>
 
 <h3>6.2. 環境変数を設定する</h3>
 <p>
@@ -1381,8 +1443,8 @@ EDITOR=vi
 「<code><strong>変数名</strong>=<strong>値</strong></code>」のように書けば
 値を設定できる。
 <blockquote><pre>
-$ <strong>XYZ=abc123</strong>  (シェル変数XYZにabc123を設定)
-$ <strong>echo $XYZ</strong>   (シェル変数XYZの値を表示する)
+$ <strong>XYZ=abc123</strong>  <em>(シェル変数XYZにabc123を設定)</em>
+$ <strong>echo $XYZ</strong>   <em>(シェル変数XYZの値を表示する)</em>
 </pre></blockquote>
 
 <p>
@@ -1392,13 +1454,13 @@ $ <strong>echo $XYZ</strong>   (シェル変数XYZの値を表示する)
 Export属性をもったシェル変数は、何も指定しなくても
 以後シェルから起動したすべてのプロセスに環境変数として渡される:
 <blockquote><pre>
-$ <strong>XYZ=abc123</strong>  (シェル変数XYZにabc123を設定)
-$ <strong>echo $XYZ</strong>   (シェル変数XYZの値を表示する)
+$ <strong>XYZ=abc123</strong>  <em>(シェル変数XYZにabc123を設定)</em>
+$ <strong>echo $XYZ</strong>   <em>(シェル変数XYZの値を表示する)</em>
 abc123
-$ <strong>env</strong>         (XYZは環境変数ではない)
+$ <strong>env</strong>         <em>(XYZは環境変数ではない)</em>
 ...
-$ <strong>export XYZ</strong>  (XYZにexport属性をつける)
-$ <strong>env</strong>         (XYZが環境変数として渡されている)
+$ <strong>export XYZ</strong>  <em>(XYZにexport属性をつける)</em>
+$ <strong>env</strong>         <em>(XYZが環境変数として渡されている)</em>
 ...
 XYZ=abc123
 ...
@@ -1458,6 +1520,13 @@ $ <strong>/bin/ls</strong>
 ...
 </pre></blockquote>
 
+<p>
+なお、<code>PATH</code> はよくシステムのデフォルト値をカスタマイズして
+使うことが多い。<code>PATH</code> に独自のディレクトリを追加するには、以下のようにする:
+<blockquote><pre>
+PATH=$PATH:/home/euske/bin  <em>(/home/euske/bin もコマンド検索順序に追加する)</em>
+</pre></blockquote>
+
 <h4>環境変数 HOME</h4>
 <p>
 UNIX では、各ユーザのホームディレクトリは
@@ -1469,14 +1538,14 @@ UNIX では、各ユーザのホームディレクトリは
 この値を変更することで、どんなディレクトリでもホームディレクトリとして
 使用することができる:
 <blockquote><pre>
-$ <strong>echo $HOME</strong> (環境変数HOMEの内容を表示する)
+$ <strong>echo $HOME</strong>  <em>(環境変数HOMEの内容を表示する)</em>
 /home/euske
-$ <strong>cd</strong>         (ホームディレクトリに移動)
-$ <strong>pwd</strong>        (カレントディレクトリを表示)
+$ <strong>cd</strong>          <em>(ホームディレクトリに移動)</em>
+$ <strong>pwd</strong>         <em>(カレントディレクトリを表示)</em>
 /home/euske
-$ <strong>HOME=/etc</strong>  (環境変数HOMEを変更する - ホームディレクトリが変更される)
-$ <strong>cd</strong>         (ホームディレクトリに移動)
-$ <strong>pwd</strong>        (カレントディレクトリを表示)
+$ <strong>HOME=/etc</strong>   <em>(環境変数HOMEを変更する - ホームディレクトリが変更される)</em>
+$ <strong>cd</strong>          <em>(ホームディレクトリに移動)</em>
+$ <strong>pwd</strong>         <em>(カレントディレクトリを表示)</em>
 /etc
 </pre></blockquote>
 <p>
@@ -1526,8 +1595,8 @@ UNIX におけるホームディレクトリとは、つまるところ:
 <li> <code>export</code>
 </ul>
 
-<div class=exercise id="ex10">
-<div class=header>演習 10. まとめ問題</div>
+<div class=exercise id="ex11">
+<div class=header>演習 11. まとめ問題</div>
 <ol>
 <li> 以下の用語の違いを説明せよ:
 <ul>
@@ -1544,6 +1613,14 @@ $ echo *
 </pre></blockquote>
 </ol>
 </div>
+
+<h3>おすすめの本</h3>
+<ul>
+<li> <a href="https://www.amazon.co.jp/dp/429713148X/">［試して理解］Linuxのしくみ　―実験と図解で学ぶOS、仮想マシン、コンテナの基礎知識【増補改訂版】</a>
+- 最近評判のよい本。OS の内部まで学習したい人向け。
+<li> <a href="https://www.amazon.co.jp/dp/B00KRB9U8K/">詳解UNIXプログラミング 第3版</a>
+- 通称「Stevensの本」と呼ばれる歴史的名著。
+</ul>
 
 <h3>次回予告</h3>
 <ul>
