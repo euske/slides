@@ -46,6 +46,7 @@ Yusuke Shinyama<br>
 <li> <a href="#process">プロセス</a>
 <li> <a href="#stdio">標準入力・標準出力・標準エラー出力</a>
 <li> <a href="#shell">シェル</a>
+<li> <a href="#env">環境変数</a>
 <li> <a href="#summary">本日のまとめ</a>
 </ol>
 
@@ -667,7 +668,7 @@ UNIXでは、各ファイルには以下のようなメタデータが付与さ�
 <li> <code>pwd</code> … カレント・ディレクトリを表示する。
 <blockquote><pre>
 $ <strong>pwd</strong>
-/home/yusuke
+/home/euske
 $ <strong>cd /etc</strong>
 $ <strong>pwd</strong>
 /etc
@@ -853,8 +854,8 @@ hello, world.
 <blockquote><pre>
 $ <strong>./greet</strong>
 your name?
-<strong>yusuke</strong>
-greetings, yusuke
+<strong>euske</strong>
+greetings, euske
 </pre></blockquote>
 
 <p>
@@ -1033,7 +1034,7 @@ $ <strong>ls -l | sort -n -r +4</strong> (reverse, 逆順に表示)
 実現することができる。
 <blockquote><pre>
 (ls コマンドの出力を検索し、さらにそれをソートして最初の10行を表示する)
-$ <strong>ls -l | grep yusuke | sort | head -n10</strong>
+$ <strong>ls -l | grep euske | sort | head -n10</strong>
 </pre></blockquote>
 
 <div class=note>
@@ -1254,9 +1255,254 @@ $ <strong>echo /etc/*.conf</strong>
 見せかけているだけなのである。
 
 
-<h2 id="summary">6. 本日のまとめ</h2>
+<h2 id="env">6. 環境変数</h2>
 <p>
-本日紹介したコマンドは以下のとおり:
+UNIX では、各プロセスに<u>環境変数</u> (environment variable) というものが
+付属している。これは各種の設定を保持しておくための文字列型の変数で、
+プログラムの変数と同様に、好きな数だけ作成することができる。
+<p>
+現在の環境変数一覧を見るためには <code>env</code>コマンドを使う:
+<blockquote><pre>
+$ <strong>env</strong>
+SHELL=/bin/bash
+WINDOWID=4194316
+TMUX=/tmp/tmux-1000/default,366,0
+EDITOR=vi
+...
+</pre></blockquote>
+<p>
+順序がばらばらで見にくいので <code>sort</code>で並べ変えてみる:
+<blockquote><pre>
+$ <strong>env | sort</strong>
+DISPLAY=:1
+EDITOR=vi
+HOME=/home/euske
+...
+</pre></blockquote>
+<p>
+注意: Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
+<strong>UNIXにおける環境変数は各プロセスごとに独立している</strong>。
+あるプロセスの環境変数を別のプロセスの環境変数にすることはできない。
+ただし、<strong>親プロセスの環境変数は、子プロセスに引きつがれる</strong>ため、
+最初に共通の環境変数を設定しておけば、以後すべての子プロセスで
+共通の設定を利用することができる。
+
+<h3>6.1. 環境変数を使う</h3>
+<p>
+各プロセスにおける環境変数は、
+プログラム全体で共有されているグローバルなデータとして
+アクセス可能である:
+
+<h4>Node (JavaScript) の場合</h4>
+<blockquote><pre>
+const user = process.env['USER']
+</pre></blockquote>
+
+<h4>Kotlin の場合</h4>
+<blockquote><pre>
+val user: String? = System.getenv("USER")
+</pre></blockquote>
+
+<p>
+慣例により、環境変数の名前には大文字が使われることが多い
+(実際には、どんな名前でもつけることが可能)。
+
+<h4>シェルの場合</h4>
+<p>
+シェルでは、コマンドライン引数に含まれる環境変数の値が展開される。
+たとえば環境変数 <code>USER</code> に <code>euske</code> という値が入っている場合、
+<blockquote><pre>
+$ <strong>ls /home/<mark>${USER}</mark>/foo</strong>
+</pre></blockquote>
+は、以下のように展開される:
+<blockquote><pre>
+$ <strong>ls /home/euske/foo</strong>
+</pre></blockquote>
+<p>
+<code>echo</code>コマンドは、環境変数の内容を確認するためによく使われる:
+<blockquote><pre>
+$ <strong>echo ${USER}</strong>
+euske
+</pre></blockquote>
+<p>
+未定義の環境変数を展開してもエラーにはならず、空文字列として扱われる:
+<blockquote><pre>
+$ <strong>echo /home/${USSR}/foo</strong>
+/home//foo
+</pre></blockquote>
+<p>
+なお、<code>${〜}</code>中の中カッコは省略可能である:
+<blockquote><pre>
+$ <strong>echo $USER</strong>
+euske
+</pre></blockquote>
+
+<h3>6.2. 環境変数を設定する</h3>
+<p>
+各プロセスの環境変数は、一般にそのプロセスの<strong>起動時にだけ</strong>設定できる。
+プロセスの起動時に環境変数を設定するには、実行したいコマンド引数の前に
+「<code><strong>変数名</strong>=<strong>値</strong></code>」のような形式を追加する。
+たとえば <code>date</code> コマンドは、
+環境変数 <code>TZ</code> の値によって異なる時間帯の時刻を返す:
+<blockquote><pre>
+$ <strong>date</strong>
+Mon Oct 31 06:56:48 JST 2022
+$ <strong><mark>TZ=UTC</mark> date</strong>
+Sun Oct 30 21:56:48 UTC 2022
+$ <strong><mark>TZ=America/New_York</mark> date</strong>
+Sun Oct 30 17:56:48 EDT 2022
+</pre></blockquote>
+<p>
+また、親プロセスが持っている環境変数はすべて子プロセスに継承される。
+そのため親プロセスに環境変数を設定しておけば、すべての子プロセスで共通の値が使える:
+<blockquote><pre>
+$ <strong>echo $XYZ</strong>       <em>(環境変数XYZは未定義)</em>
+
+$ <strong>XYZ=abc123 zsh</strong>  <em>(環境変数XYZにabc123を設定して zshを起動)</em>
+$ <strong>echo $XYZ</strong>       <em>(環境変数XYZに値が入っている)</em>
+ABC123
+</pre></blockquote>
+
+<p>
+例外はシェルで、シェルの中ではいつでも環境変数を作成・変更できる。
+実際には、環境変数はより一般的な<u>シェル変数</u> (shell variable) の一部として扱われる。
+シェル変数の一覧 (環境変数も含む) を表示するには
+<code>set</code>コマンドを使う:
+<blockquote><pre>
+$ <strong>set</strong>
+BASH=/bin/bash
+COLUMNS=100
+DISPLAY=:1
+EDITOR=vi
+...
+</pre></blockquote>
+<p>
+シェル変数は、ただ
+「<code><strong>変数名</strong>=<strong>値</strong></code>」のように書けば
+値を設定できる。
+<blockquote><pre>
+$ <strong>XYZ=abc123</strong>  (シェル変数XYZにabc123を設定)
+$ <strong>echo $XYZ</strong>   (シェル変数XYZの値を表示する)
+</pre></blockquote>
+
+<p>
+ただし、<strong>すべてのシェル変数が環境変数として扱われるわけではない</strong>ことに注意。
+環境変数として扱われるのは、シェル変数のうち
+「export属性」をもつものだけである。
+Export属性をもったシェル変数は、何も指定しなくても
+以後シェルから起動したすべてのプロセスに環境変数として渡される:
+<blockquote><pre>
+$ <strong>XYZ=abc123</strong>  (シェル変数XYZにabc123を設定)
+$ <strong>echo $XYZ</strong>   (シェル変数XYZの値を表示する)
+abc123
+$ <strong>env</strong>         (XYZは環境変数ではない)
+...
+$ <strong>export XYZ</strong>  (XYZにexport属性をつける)
+$ <strong>env</strong>         (XYZが環境変数として渡されている)
+...
+XYZ=abc123
+...
+</pre></blockquote>
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="220" height="220">
+  <g stroke="black" stroke-width="2" fill="none">
+    <circle cx="110" cy="110" r="100" />
+    <circle cx="140" cy="150" r="45" />
+  </g>
+  <g text-anchor="middle">
+    <text x="110" y="80">シェル</text>
+    <text x="110" y="100">変数</text>
+    <text x="140" y="150">環境変数</text>
+  </g>
+</svg>
+</div>
+
+<h3>6.3. 重要な環境変数</h3>
+<p>
+UNIX の環境変数のなかでも <code>PATH</code> と <code>HOME</code> は
+とくに重要である。
+<h4>環境変数 PATH</h4>
+<p>
+通常、UNIX シェルでは第0引数としてコマンド (プログラム) のパス名を指定する:
+<blockquote><pre>
+$ <strong>/bin/ls -l /etc</strong>
+</pre></blockquote>
+しかし実際には以下のように書いても動く:
+<blockquote><pre>
+$ <strong>ls -l /etc</strong>
+</pre></blockquote>
+これを可能にしているのは環境変数 <code>PATH</code> のためである。
+環境変数 <code>PATH</code> の中身を見てみると、
+コロン (<code>:</code>) で区切られたパス名 (ディレクトリ名) の一覧が含まれているのがわかる:
+<blockquote><pre>
+$ <strong>echo $PATH</strong>
+<mark>/usr/local/bin</mark>:<mark>/usr/bin</mark>:<mark>/bin</mark>
+</pre></blockquote>
+<p>
+これは「あるコマンドが実行されたとき、
+<code>/usr/local/bin/<em>コマンド名</em></code>、
+<code>/usr/bin/<em>コマンド名</em></code>、
+<code>/bin/<em>コマンド名</em></code>
+のいずれかのプログラムを実行せよ」ということを表している。
+PATH にはこのようなコマンドの「検索順序」が記録されている。
+その証拠に、<code>PATH</code> をおかしな値にすると動かない:
+
+<blockquote><pre>
+$ <strong>PATH=xxx</strong>
+$ <strong>ls</strong>
+ls: command not found
+$ <strong>/bin/ls</strong>
+...
+</pre></blockquote>
+
+<h4>環境変数 HOME</h4>
+<p>
+UNIX では、各ユーザのホームディレクトリは
+<code>/home/<em>ユーザ名</em></code> とされているが、
+これはただの慣例であり、実際にはどこであってもかまわない。
+環境変数 <code>HOME</code> は、そのユーザの所有する
+<u>ホームディレクトリ</u>のパス名を指定する。
+これは起動時には通常そのユーザのデフォルト値が設定されているが、
+この値を変更することで、どんなディレクトリでもホームディレクトリとして
+使用することができる:
+<blockquote><pre>
+$ <strong>echo $HOME</strong> (環境変数HOMEの内容を表示する)
+/home/euske
+$ <strong>cd</strong>         (ホームディレクトリに移動)
+$ <strong>pwd</strong>        (カレントディレクトリを表示)
+/home/euske
+$ <strong>HOME=/etc</strong>  (環境変数HOMEを変更する - ホームディレクトリが変更される)
+$ <strong>cd</strong>         (ホームディレクトリに移動)
+$ <strong>pwd</strong>        (カレントディレクトリを表示)
+/etc
+</pre></blockquote>
+<p>
+また、シェルのコマンドライン上では <code>~</code> が
+自分のホームディレクトリに展開されるが、
+この値も実際には環境変数 <code>HOME</code> を展開しているだけである:
+<blockquote><pre>
+$ <strong>echo $HOME/work</strong>
+/home/euske/work
+$ <strong>echo ~/work</strong>
+/home/euske/work
+</pre></blockquote>
+<p>
+UNIX では、各ユーザのデフォルトのホームディレクトリ (やシェル) は
+<code>/etc/passwd</code> というテキストファイル内に記載されている。
+UNIX におけるホームディレクトリとは、つまるところ:
+<ul>
+<li> そのユーザが所有している
+<li> 環境変数 <code>HOME</code> が、そのパス名に設定されている
+</ul>
+だけのものなのである。
+
+
+<h2 id="summary">7. 本日のまとめ</h2>
+<p>
+本日紹介したコマンド・概念は以下のとおり (出てきた順):
 <ul>
 <li> <code>ls</code>
 <li> <code>cat</code>
@@ -1265,30 +1511,43 @@ $ <strong>echo /etc/*.conf</strong>
 <li> <code>pwd</code>
 <li> <code>ps</code>
 <li> <code>kill</code>
+<li> <code>&lt;</code>, <code>&gt;</code> による標準入力、標準出力のリダイレクト
+<li> <code>|</code> の使い方
 <li> <code>grep</code>
 <li> <code>sort</code>
-<li> <code>echo</code>
-<li> <code>&gt;</code>, <code>&lt;</code> による標準入力、標準出力のリダイレクト
-<li> <code>|</code> の使い方
 <li> シェルの引数展開
+<li> <code>echo</code>
 <li> <code>*</code> によるファイル名展開
+<li> <code>env</code>
+<li> 環境変数の展開
+<li> <code>date</code>
+<li> シェル変数・環境変数の設定
+<li> <code>set</code>
+<li> <code>export</code>
 </ul>
 
 <div class=exercise id="ex10">
 <div class=header>演習 10. まとめ問題</div>
-<p>
-以下の用語の違いを説明せよ:
+<ol>
+<li> 以下の用語の違いを説明せよ:
 <ul>
 <li> プログラム
 <li> プロセス
 <li> コマンド
 </ul>
+<li> 空のディレクトリで、
+以下のコマンド列を実行すると何が表示されるか答えよ:
+<blockquote><pre>
+$ echo &gt; hello
+$ echo &gt; world
+$ echo *
+</pre></blockquote>
+</ol>
 </div>
 
 <h3>次回予告</h3>
 <ul>
 <li> シェルからのファイル操作
-<li> 環境変数の使い方
 <li> 実行モードの変更
 <li> シェルスクリプトの書き方
 <li> 繰り返し・条件分岐
