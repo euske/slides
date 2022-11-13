@@ -6,9 +6,9 @@
 <title>(プログラマのための) UNIXの基礎</title>
 <style><!--
 body { line-height: 1.5; }
-h1 { border-bottom: solid 4px #000080; }
-h2 { border-bottom: solid 2px #000080; }
-h3 { border-bottom: solid 1px #000080; }
+h1 { border-bottom: solid 4px #000088; }
+h2 { border-bottom: solid 2px #000088; }
+h3 { border-bottom: solid 1px #000088; }
 table { border-collapse: collapse; }
 td { padding: 4px; }
 kbd { outline: 1px solid black; padding: 2px; }
@@ -17,16 +17,19 @@ mark { font-weight: bold; }
 pre, code { background: #ddd; font-size: 150%; font-family: courier; }
 img { max-width: 80vw; height: auto; }
 dt { text-decoration: underline; font-weight: bold; }
-u { color: green; font-weight: bold; }
+u { color: #880000; font-weight: bold; }
 .author { text-align: right; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
 .notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
-.comment { color: #008800; }
 pre em { color: #008800; }
+code em { color: #000088; }
 .exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
 .exercise .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.file { outline: 2px solid black; padding: 1em; margin: 1em; }
+.file .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
+.file pre { margin: 0; }
 --></style>
 </head>
 <body>
@@ -43,14 +46,40 @@ Yusuke Shinyama<br>
 
 <ol>
 <li> <a href="#unix">UNIXとは</a>
+<ul>
+  <li> <a href="#unix-os">オペレーティングシステム (OS) とは?</a>
+</ul>
 <li> <a href="#filesystem">ファイルシステム</a>
+<ul>
+  <li> <a href="#fs-path">パス名とは</a>
+  <li> <a href="#fs-cd">カレント・ディレクトリ (カレント・フォルダ) とは</a>
+  <li> <a href="#fs-abspath">絶対パス名と相対パス名</a>
+  <li> <a href="#fs-relpath">相対パス名の表し方</a>
+</ul>
 <li> <a href="#process">プロセス</a>
 <li> <a href="#stdio">標準入力・標準出力・標準エラー出力</a>
 <li> <a href="#shell">シェル</a>
+<ul>
+  <li> <a href="#shell-exp">コマンド引数の展開</a>
+  <li> <a href="#filename-exp">ファイル名の展開</a>
+</ul>
 <li> <a href="#env">環境変数</a>
-<li> <a href="#summary">本日のまとめ</a>
+<ul>
+  <li> <a href="#env-use">環境変数を使う</a>
+  <li> <a href="#env-set">環境変数を設定する</a>
+  <li> <a href="#env-path">重要な環境変数: PATHとHOME</a>
+</ul>
+<li> <a href="#fileops">ファイル操作</a>
+<li> <a href="#scripting">シェルスクリプトの基礎</a>
+<ul>
+  <li> <a href="#script-args">コマンドに与えられた引数を利用する</a>
+  <li> <a href="#script-chmod">通常のコマンドとして使う</a>
+</ul>
+<li> <a href="#controls">繰り返し・条件分岐</a>
+<li> <a href="#summary">まとめ</a>
 </ol>
 
+<h4>実行環境の準備</h4>
 <div class=formula>
 <a target="_blank" href="https://bellard.org/jslinux/vm.html?url=alpine-x86.cfg&amp;mem=192">JSLinux: ブラウザ上で動くLinuxエミュレータ</a>
 </div>
@@ -59,6 +88,14 @@ Yusuke Shinyama<br>
 に
 <a target="_blank" href="https://docs.getutm.app/guides/ubuntu/">Ubuntu 22.04 をインストールする方法</a>。
 </div>
+
+<h4>おすすめの本</h4>
+<ul>
+<li> <a href="https://www.amazon.co.jp/dp/429713148X/">［試して理解］Linuxのしくみ　―実験と図解で学ぶOS、仮想マシン、コンテナの基礎知識【増補改訂版】</a>
+- 最近評判のよい本。OS の内部まで学習したい人向け。
+<li> <a href="https://www.amazon.co.jp/dp/B00KRB9U8K/">詳解UNIXプログラミング 第3版</a>
+- 通称「Stevensの本」と呼ばれる歴史的名著。
+</ul>
 
 
 <h2 id="unix">1. UNIXとは</h2>
@@ -99,10 +136,10 @@ Yusuke Shinyama<br>
     <text x="180" y="170">FreeBSD</text>
     <text x="290" y="155">NetBSD</text>
     <text x="290" y="175">OpenBSD</text>
-    <text x="290" y="195">...</text>
+    <text x="290" y="195">…</text>
     <text x="400" y="155">Solaris</text>
     <text x="400" y="175">HP-UX</text>
-    <text x="400" y="195">...</text>
+    <text x="400" y="195">…</text>
     <text x="180" y="270">macOS</text>
     <text x="120" y="65">模倣</text>
     <text x="130" y="100">模倣</text>
@@ -117,7 +154,7 @@ Yusuke Shinyama<br>
 <li> すべてのファイルに所有者は1人のみ
 </ul>
 
-<h3 id="os">1.1. オペレーティングシステム (OS) とは?</h3>
+<h3 id="unix-os">1.1. オペレーティングシステム (OS) とは?</h3>
 <p>
 コンピュータの基本的な処理 (ディスク操作、
 ネットワーク処理、画面表示など) を提供する<u>基本ソフトウェア</u>。
@@ -150,12 +187,16 @@ Yusuke Shinyama<br>
 <h2 id="filesystem">2. ファイルシステム</h2>
 <p>
 UNIXは<u>階層型ファイルシステム</u> (hierarchical filesystem) という概念を導入している。
-これはすべてのファイル・フォルダはひとつの巨大な<u>木構造</u> (tree) をなしており、
-あらゆるファイルの位置は<u>パス名</u> (path) で表すことができる。
+これはすべてのファイル・フォルダはひとつの巨大な<u>木構造</u> (tree) をなしている。
 また、UNIXでは「すべてはファイルである」という考え方をおしすすめている。
-そのため、メモリや画面 (端末) も <code>/dev/mem</code> や
-<code>/dev/tty</code> といった特殊ファイルとして表現されている。
+そのため、メモリや画面 (端末) も <code>mem</code> や <code>tty</code> といった
+特殊ファイルとして表現されている。
 なお、 UNIXではフォルダのことを <u>ディレクトリ</u> (directory) と呼ぶ。
+
+<h3 id="fs-path">2.1. パス名とは</h3>
+<p>
+ファイルシステム中のあらゆるファイルの位置は、
+<u>パス名</u> (path) で表すことができる:
 
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -249,7 +290,7 @@ UNIX では、いくつかのパス名は
   <li> <code>/home</code>: 各ユーザのホームディレクトリ</li>
   <li> <code>/etc</code>: 設定ファイル</li>
   <li> <code>/dev</code>: デバイスファイル</li>
-  <li> ...</li>
+  <li> …</li>
 </ul>
 
 <div class=exercise id="ex2">
@@ -261,7 +302,7 @@ $ <strong>ls /etc</strong>
 ImageMagick-7         logrotate.d           screenrc
 X11                   lynx.cfg              securetty
 alpine-release        lynx.lss              services
-...
+…
 </pre></blockquote>
 <li> <code>ls -l <em>パス名</em></code> … より詳細なメタデータとともに表示する。
 <blockquote><pre>
@@ -271,7 +312,7 @@ drwxr-xr-x    2 root     root           434 Jul  5  2020 ImageMagick-7
 drwxr-xr-x    4 root     root           114 Jul  5  2020 X11
 -rw-r--r--    1 root     root             7 May 29  2020 alpine-release
 drwxr-xr-x    4 root     root           164 Jan  9  2021 apk
-...
+…
 </pre></blockquote>
 <li> <code>cat <em>パス名</em></code> … ファイルの内容を表示する。
 <blockquote><pre>
@@ -311,14 +352,13 @@ UNIXでは、各ファイルには以下のようなメタデータが付与さ�
 <li> 読み書き許可フラグ
 <li> 実行可能フラグ
 <li>
-...
+…
 </ul>
 
-
-<h3 id="cd">2.1. カレント・ディレクトリ (カレント・フォルダ) とは</h3>
+<h3 id="fs-cd">2.2. カレント・ディレクトリ (カレント・フォルダ) とは</h3>
 <ul>
   <li> パス名を使うことの問題: いくらでも長くなりうる!<br>
-  例: <code>/Applications/Safari.app/Contents/MacOS/... </code>
+  例: <code>/Applications/Safari.app/Contents/MacOS/… </code>
   <li> いちいちパス名を入力するのは面倒。簡単にできないか?<br>
     → <strong>いま開いている・注目している</strong> (カレント, current)
     ディレクトリという考えを導入する。
@@ -400,7 +440,7 @@ UNIXでは、各ファイルには以下のようなメタデータが付与さ�
 </div>
 </ul>
 
-<h3 id="abs-rel">2.2. 絶対パス名と相対パス名</h3>
+<h3 id="fs-abspath">2.3. 絶対パス名と相対パス名</h3>
 <p>
 実は「パス名」と呼ばれているものには 2つの種類がある。
 上で説明した「パス名」は「<u>絶対パス名</u>」のことであった。
@@ -492,7 +532,7 @@ UNIXでは、各ファイルには以下のようなメタデータが付与さ�
   <li> 相対パス名: <code><mark>.</mark>/<span style="color:blue;">X</span></code>
 </ul>
 
-<h3 id="relpath">2.3. 相対パス名の表し方</h3>
+<h3 id="fs-relpath">2.4. 相対パス名の表し方</h3>
 <ul>
 <li> 相対パス名では、カレント・ディレクトリの位置を<br>
   「<code>.</code> (ドット)」で表す:
@@ -711,7 +751,7 @@ $ <strong>pwd</strong>
 <ul>
 <li> プロセスID (固有の識別番号、<u>PID</u>)
 <li> ユーザID (プロセスの所有者)
-<li> カレントディレクトリ
+<li> カレント・ディレクトリ
 <li> 標準入力・標準出力・標準エラー出力 (後述)
 <li> 環境変数
 <li> Control Group
@@ -760,7 +800,7 @@ $ <strong>ps ax</strong>
     2 ?        S      0:00 [kthreadd]
     3 ?        I&lt;     0:00 [rcu_gp]
     4 ?        I&lt;     0:00 [rcu_par_gp]
-...
+…
 </pre></blockquote>
 <li> <code>ps aux</code> … より詳細な情報 (所有者) を表示する。
 <li> <code>ps alx</code> … より詳細な情報 (親プロセスID) を表示する。
@@ -790,7 +830,7 @@ UNIX のプロセスには、<u>シグナル</u> (signal) を送ることがで�
 $ <strong>sleep 60</strong>
 または
 $ <strong>find / </strong>
-...
+…
 
 (別のウィンドウで)
 $ <strong>ps x</strong>
@@ -1012,19 +1052,19 @@ $ <strong>ls -l | grep .conf</strong>
 -rw-r--r--    1 root     root          5613 Jun 18  2020 ca-certificates.conf
 drwxr-xr-x    2 root     root           520 Jul  5  2020 conf.d
 -rw-r--r--    1 root     root          1102 Jul  6  2020 dhcpcd.conf
-...
+…
 </pre></blockquote>
 <li> <code>sort</code>コマンドを使うと、
 標準入力の各行を昇順あるいは降順に並べ替え (ソート) できる:
 <blockquote><pre>
 $ <strong>ls -l | sort</strong> (各列の行頭からアルファベット順にソート)
-...
+…
 $ <strong>ls -l | sort +2</strong> (空白で区切られた 2番目の列を基準にソート)
-...
+…
 $ <strong>ls -l | sort -n +4</strong> (数値としてソート)
-...
+…
 $ <strong>ls -l | sort -n -r +4</strong> (reverse, 逆順に表示)
-...
+…
 </pre></blockquote>
 <p>
 このように、UNIX のコマンドは "<code>-</code>" や "<code>+</code>" で始まる
@@ -1082,7 +1122,7 @@ UNIX は「湯水のようにプロセスを消費する」OSである。
 <li> プロセスの終了 (シグナルの送信)
 <li> プロセス起動時の標準入力・標準出力・標準エラー出力の切り替え
 <li> プロセス起動時の環境変数 (後述) の設定
-<li> カレントディレクトリの切り替え
+<li> カレント・ディレクトリの切り替え
 </ul>
 
 <p>
@@ -1098,7 +1138,7 @@ UNIX は「湯水のようにプロセスを消費する」OSである。
 <li> 1. に戻る。
 </ol>
 
-<h3>5.1. コマンド引数の展開</h3>
+<h3 id="shell-exp">5.1. コマンド引数の展開</h3>
 <p>
 先に述べたように、UNIX コマンドのほとんどは実はプロセスであり (例外も存在する)、
 シェルの主な機能はコマンド文字列を解析し、プロセスを起動することである。
@@ -1158,7 +1198,7 @@ $ <strong>echo -l /etc</strong>
 スペースが入っている文字列を「ひとつの引数」として認識させることができる:
 <blockquote><pre>
 $ <strong>ls -l /etc</strong>
-...
+…
 $ <strong>ls "-l /etc"</strong>
 ls: invalid option -- ' '
 $ <strong>"ls -l" /etc</strong>
@@ -1178,13 +1218,14 @@ ls -l: command not found
 </ol>
 </div>
 
-<h3>5.2. ファイル名の展開</h3>
+<h3 id="filename-exp">5.2. ファイル名の展開</h3>
 <p>
 シェルでは、ディレクトリ上に複数のファイルがあるとき、
 それらのファイル名を複数の引数として展開する機能がある
 (<u>ファイル名展開</u>, filename expansion)。
 <p>
-たとえば、カレントディレクトリ内に <code>a</code>, <code>bb</code>, <code>ccc</code>
+たとえば、カレント・ディレクトリ内に
+<code>a</code>, <code>bb</code>, <code>ccc</code>
 というファイルがあるとき…
 <blockquote><pre>
 $ <strong>ls</strong>
@@ -1206,7 +1247,7 @@ $ <strong>ls -l | grep .conf</strong>
 -rw-r--r--    1 root     root          5613 Jun 18  2020 ca-certificates.conf
 drwxr-xr-x    2 root     root           520 Jul  5  2020 conf.d
 -rw-r--r--    1 root     root          1102 Jul  6  2020 dhcpcd.conf
-...
+…
 </pre></blockquote>
 以下のパターンは
 <blockquote><pre>
@@ -1214,7 +1255,7 @@ $ <strong>cat /etc/*.conf</strong>
 </pre></blockquote>
 以下のような引数に展開される:
 <blockquote><pre>
-$ <strong>cat /etc/ca-certificates<mark>.conf</mark> /etc/dhcpcd<mark>.conf</mark> ...</strong>
+$ <strong>cat /etc/ca-certificates<mark>.conf</mark> /etc/dhcpcd<mark>.conf</mark> …</strong>
 </pre></blockquote>
 <p>
 繰り返すが、ここで展開されたパス名をどのように扱うかは
@@ -1226,7 +1267,7 @@ $ <strong>cat /etc/ca-certificates<mark>.conf</mark> /etc/dhcpcd<mark>.conf</mar
 シェルが各引数をどのように展開したかを表示するのに使える:
 <blockquote><pre>
 $ <strong>echo /etc/*.conf</strong>
-/etc/ca-certificates.conf /etc/dhcpcd.conf ...
+/etc/ca-certificates.conf /etc/dhcpcd.conf …
 </pre></blockquote>
 
 <div class=exercise id="ex9">
@@ -1238,7 +1279,7 @@ $ <strong>echo /etc/*.conf</strong>
 <li> <code>b.conf</code>
 <li> <code>issue</code>
 </ul>
-カレントディレクトリも <code>/etc</code> であるとして、
+カレント・ディレクトリも <code>/etc</code> であるとして、
 以下のコマンドラインの出力を答えよ:
 <ol class=spacy>
 <li> <code>echo *</code>
@@ -1275,7 +1316,7 @@ SHELL=/bin/bash
 WINDOWID=4194316
 TMUX=/tmp/tmux-1000/default,366,0
 EDITOR=vi
-...
+…
 </pre></blockquote>
 <p>
 順序がばらばらで見にくいので <code>sort</code>で並べ変えてみる:
@@ -1284,7 +1325,7 @@ $ <strong>env | sort</strong>
 DISPLAY=:1
 EDITOR=vi
 HOME=/home/euske
-...
+…
 </pre></blockquote>
 <p>
 注意: Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
@@ -1323,7 +1364,7 @@ HOME=/home/euske
 </svg>
 </div>
 
-<h3>6.1. 環境変数を使う</h3>
+<h3 id="env-use">6.1. 環境変数を使う</h3>
 <p>
 各プロセスにおける環境変数は、
 プログラム中のどこからでも文字列値として
@@ -1404,7 +1445,7 @@ $ <strong>echo ${LANG:-ja}</strong>      <em>(LANGが定義されていない場
 </ol>
 </div>
 
-<h3>6.2. 環境変数を設定する</h3>
+<h3 id="env-set">6.2. 環境変数を設定する</h3>
 <p>
 各プロセスの環境変数は、一般にそのプロセスの<strong>起動時にだけ</strong>設定できる。
 プロセスの起動時に環境変数を設定するには、実行したいコマンド引数の前に
@@ -1441,7 +1482,7 @@ BASH=/bin/bash
 COLUMNS=100
 DISPLAY=:1
 EDITOR=vi
-...
+…
 </pre></blockquote>
 <p>
 シェル変数は、ただ
@@ -1463,12 +1504,12 @@ $ <strong>XYZ=abc123</strong>  <em>(シェル変数XYZにabc123を設定)</em>
 $ <strong>echo $XYZ</strong>   <em>(シェル変数XYZの値を表示する)</em>
 abc123
 $ <strong>env</strong>         <em>(XYZは環境変数ではない)</em>
-...
+…
 $ <strong>export XYZ</strong>  <em>(XYZにexport属性をつける)</em>
 $ <strong>env</strong>         <em>(XYZが環境変数として渡されている)</em>
-...
+…
 XYZ=abc123
-...
+…
 </pre></blockquote>
 
 <div class=figure>
@@ -1487,7 +1528,7 @@ XYZ=abc123
 </svg>
 </div>
 
-<h3>6.3. 重要な環境変数</h3>
+<h3 id="env-path">6.3. 重要な環境変数: PATHとHOME</h3>
 <p>
 UNIX の環境変数のなかでも <code>PATH</code> と <code>HOME</code> は
 とくに重要である。
@@ -1522,7 +1563,7 @@ $ <strong>PATH=xxx</strong>
 $ <strong>ls</strong>
 ls: command not found
 $ <strong>/bin/ls</strong>
-...
+…
 </pre></blockquote>
 
 <p>
@@ -1546,11 +1587,11 @@ UNIX では、各ユーザのホームディレクトリは
 $ <strong>echo $HOME</strong>  <em>(環境変数HOMEの内容を表示する)</em>
 /home/euske
 $ <strong>cd</strong>          <em>(ホームディレクトリに移動)</em>
-$ <strong>pwd</strong>         <em>(カレントディレクトリを表示)</em>
+$ <strong>pwd</strong>         <em>(カレント・ディレクトリを表示)</em>
 /home/euske
 $ <strong>HOME=/etc</strong>   <em>(環境変数HOMEを変更する - ホームディレクトリが変更される)</em>
 $ <strong>cd</strong>          <em>(ホームディレクトリに移動)</em>
-$ <strong>pwd</strong>         <em>(カレントディレクトリを表示)</em>
+$ <strong>pwd</strong>         <em>(カレント・ディレクトリを表示)</em>
 /etc
 </pre></blockquote>
 <p>
@@ -1574,31 +1615,197 @@ UNIX におけるホームディレクトリとは、つまるところ:
 だけのものなのである。
 
 
-<h2 id="summary">7. 本日のまとめ</h2>
+<h2 id="fileops">7. ファイル操作</h2>
+<p>
+シェル上でファイル操作を行うためのおもなコマンドは以下のとおり:
+<dl>
+<dt> <code>ls</code>
+<dd> 指定したディレクトリに含まれるファイル一覧を表示する。
+<pre>
+$ <strong>ls</strong>
+…  <em>(カレント・ディレクトリのファイル一覧を表示)</em>
+$ <strong>ls /etc</strong>
+…  <em>(ディレクトリ /etc のファイル一覧を表示)</em>
+</pre>
+<dt> <code>cd</code> (Change Directory)
+<dd> カレント・ディレクトリを変更する。
+<pre>
+$ <strong>cd /etc</strong>
+<em>(カレント・ディレクトリを /etc に変更)</em>
+$ <strong>cd</strong>
+<em>(カレント・ディレクトリを自分のホームディレクトリに変更)</em>
+</pre>
+<dt> <code>pwd</code> (Print Working Directory)
+<dd> カレント・ディレクトリのパス名を表示する。
+<pre>
+$ <strong>pwd</strong>
+<em>(現在のパス名を表示)</em>
+</pre>
+<dt> <code>cat</code> ・ <code>less</code>
+<dd> ファイルの内容を表示する。
+もともと <code>cat</code> は
+複数のファイルを連結 (conCATenate) するためのコマンドだった。
+<pre>
+$ <strong>less /etc/services</strong>
+<em>(/etc/services の内容を表示)</em>
+$ <strong>cat /etc/hosts /etc/services</strong>
+<em>(/etc/hosts の内容と /etc/services の内容を連結して表示)</em>
+</pre>
+<dt> <code>mkdir</code> (MaKe DIRectory)
+<dd> 空のディレクトリを新規作成する。
+<pre>
+$ <strong>mkdir foo</strong>
+<em>(カレント・ディレクト下に foo を作成)</em>
+</pre>
+<dt> <code>cp</code> (CoPy)
+<dd> 指定したファイルを宛先パス名に複製する。
+<pre>
+$ <strong>cp a.txt b.txt</strong>
+<em>(a.txt を新しい b.txt という名前で複製する)</em>
+$ <strong>cp a.txt dist/</strong>
+<em>(a.txt を dist/ ディレクトリ内に同じ名前で複製する)</em>
+$ <strong>cp a.txt b.txt c.txt dist/</strong>
+<em>(a.txt, b.txt, c.txt の各ファイルを dist/ 内に同じ名前で複製する)</em>
+$ <strong>cp *.txt dist/</strong>
+<em>(〜.txt で終わるすべてのファイルを dist/ 内に同じ名前で複製する)</em>
+</pre>
+<p>
+<strong>注意:</strong>
+UNIX は無愛想な OS なので、
+コピー先としてうっかり存在するファイル名を指定してしまうと、
+そのファイルは<strong>何の警告もなく</strong>上書きされる。
+これを防ぐためには <code>-i</code> オプションを使う:
+<pre>
+$ <strong>cp -i a.txt b.txt</strong>
+<em>(a.txt を新しい b.txt という名前で複製するが、
+ すでに同名のファイルがある場合は確認する)</em>
+</pre>
+<dt> <code>mv</code> (MoVe)
+<dd> 指定したファイルを宛先パス名に変更あるいは移動する。
+<pre>
+$ <strong>mv a.txt b.txt</strong>
+<em>(a.txt を新しい b.txt という名前に変更する)</em>
+$ <strong>mv a.txt dist/</strong>
+<em>(a.txt を dist/ ディレクトリ内に移動する)</em>
+$ <strong>mv a.txt b.txt c.txt dist/</strong>
+<em>(a.txt, b.txt, c.txt の各ファイルを dist/ 内に移動する)</em>
+$ <strong>mv *.txt dist/</strong>
+<em>(〜.txt で終わるすべてのファイルを dist/ 内に移動する)</em>
+</pre>
+<p>
+<strong>注意:</strong>
+UNIX は無愛想な OS なので、
+移動先としてうっかり存在するファイル名を指定してしまうと、
+そのファイルは<strong>何の警告もなく</strong>上書きされる。
+これを防ぐためには <code>-i</code> オプションを使う:
+<pre>
+$ <strong>mv -i a.txt b.txt</strong>
+<em>(a.txt を新しい b.txt という名前に変更するが、
+ すでに同名のファイルがある場合は確認する)</em>
+</pre>
+
+<dt> <code>rm</code> (ReMove)
+<dd> 指定したファイルを削除する。
+<pre>
+$ <strong>rm a.txt</strong>
+<em>(ファイル a.txt を削除する)</em>
+$ <strong>rm *.txt</strong>
+<em>(〜.txt で終わるすべてのファイルを削除する)</em>
+</pre>
+<p>
+<code>rm</code> で削除できるのは、通常はファイルのみである。
+あるディレクトリ内のファイルを (ディレクトリごと) 削除したい場合には
+<code>-r</code> オプションを使う:
+<pre>
+$ <strong>rm -r dist/</strong>
+<em>(dist/ ディレクトリ内とその中のファイルをすべて削除する)</em>
+</pre>
+<p>
+<strong>注意:</strong>
+UNIX は無愛想な OS なので、
+<code>rm</code> コマンドは削除が成功しても何も表示しない。
+削除するファイルをひとつずつ確認するためには
+<code>-i</code> オプションを使う:
+<pre>
+$ <strong>rm -i *.txt</strong>
+<em>(〜.txt で終わる各ファイルを yes/no で確認しながら削除する)</em>
+</pre>
+
+</dl>
+
+<h4>パス名の指定方法に注意</h4>
+<p>
+<code>cp</code>, <code>mv</code>, <code>rm</code> などのコマンドでは
+「<code>-</code>」で始まる引数はオプションとみなされる。
+もし実際に "<code>-i</code>" というファイルを複製したい場合、
+<code>cp -i a.txt</code> などとやってもうまくいかない:
+<blockquote><pre>
+$ <strong>cp -i a.txt</strong>
+cp: missing destination file operand after 'a'
+<em>(エラーが出て実行できない)</em>
+</pre></blockquote>
+<p>
+このような場合には、2つの方法がある:
+<ol type=a>
+<li> 引数が「<code>-</code>」で始まらなけれさえすればよいので、
+<code>-i</code> がカレント・ディレクトリにあることを利用して、
+以下のようにする:
+<blockquote><pre>
+$ <strong>cp ./-i a.txt</strong>
+<em>(カレント・ディレクトリの -i というファイルがコピーされる)</em>
+</pre></blockquote>
+<li> 多くの UNIX 標準コマンドは、引数に "<code>--</code>" が表れると、
+それ以後の引数をオプションとして解釈することをやめ、
+ファイル名として解釈するように実装されている。
+このことを利用して:
+<blockquote><pre>
+$ <strong>cp -- -i a.txt</strong>
+<em>(-i はオプションでなく実際のファイル名として解釈される)</em>
+</pre></blockquote>
+</ol>
+
+
+<h2 id="scripting">8. シェルスクリプトの基礎</h2>
+<p>
+<u>シェルスクリプト</u>とは、シェルによって実行される簡単なプログラムである。
+もっとも基本的なシェルスクリプトは、単に実行するコマンド列を1行にひとつずつ
+並べたテキストファイルである:
+<div class=file>
+<div class=header>hello.sh</div>
+<pre>
+echo Hello!
+date
+ls /etc
+</pre>
+</div>
+<p>
+シェルスクリプトを実行するには、シェルの引数としてスクリプトの
+ファイル名を与えればよい。シェルスクリプトの実行には通常 Bourne shell
+(<code>/bin/sh</code>) が使われる:
+<blockquote><pre>
+$ <strong>sh hello.sh</strong>
+Hello!                                                 <em>(echo が実行される)</em>
+Sun Nov 13 14:48:02 JST 2022                           <em>(date が実行される)</em>
+ImageMagick-7         logrotate.d           screenrc   <em>(ls /etc が実行される)</em>
+X11                   lynx.cfg              securetty
+alpine-release        lynx.lss              services
+…
+</pre></blockquote>
+
+<h3 id="script-args">8.1. コマンドに与えられた引数を利用する</h3>
+
+<h3 id="script-chmod">8.2. 通常のコマンドとして使う</h3>
+
+
+<h2 id="controls">9. 繰り返し・条件分岐</h2>
+<p>
+シェルでは、コマンドの<u>終了状態</u>に応じた
+条件分岐を設定できる。
+
+
+<h2 id="summary">10. まとめ</h2>
 <p>
 本日紹介したコマンド・概念は以下のとおり (出てきた順):
-<ul>
-<li> <code>ls</code>
-<li> <code>cat</code>
-<li> <code>less</code>
-<li> <code>cd</code>
-<li> <code>pwd</code>
-<li> <code>ps</code>
-<li> <code>kill</code>
-<li> <code>&lt;</code>, <code>&gt;</code> による標準入力、標準出力のリダイレクト
-<li> <code>|</code> の使い方
-<li> <code>grep</code>
-<li> <code>sort</code>
-<li> シェルの引数展開
-<li> <code>echo</code>
-<li> <code>*</code> によるファイル名展開
-<li> <code>env</code>
-<li> 環境変数の展開
-<li> <code>date</code>
-<li> シェル変数・環境変数の設定
-<li> <code>set</code>
-<li> <code>export</code>
-</ul>
 
 <div class=exercise id="ex11">
 <div class=header>演習 11. まとめ問題</div>
@@ -1609,31 +1816,39 @@ UNIX におけるホームディレクトリとは、つまるところ:
 <li> プロセス
 <li> コマンド
 </ul>
+<li> 以下のコマンドがそれぞれ何をするか簡単に説明せよ:
+<ul>
+<li> <code>ls</code>
+<li> <code>cat</code>
+<li> <code>less</code>
+<li> <code>cd</code>
+<li> <code>pwd</code>
+<li> <code>ps</code>
+<li> <code>kill</code>
+<li> <code>grep</code>
+<li> <code>sort</code>
+<li> <code>echo</code>
+<li> <code>env</code>
+<li> <code>date</code>
+<li> <code>set</code>
+<li> <code>export</code>
+<li> <code>mkdir</code>
+<li> <code>cp</code>
+<li> <code>mv</code>
+<li> <code>rm</code>
+<li> <code>sh</code>
+<li> <code>chmod</code>
+</ul>
 <li> 空のディレクトリで、
 以下のコマンド列を実行すると何が表示されるか答えよ:
 <blockquote><pre>
-$ echo &gt; hello
-$ echo &gt; world
-$ echo *
+$ <strong>echo &gt; hello</strong>
+$ <strong>echo &gt; world</strong>
+$ <strong>echo *</strong>
 </pre></blockquote>
 </ol>
 </div>
 
-<h3>おすすめの本</h3>
-<ul>
-<li> <a href="https://www.amazon.co.jp/dp/429713148X/">［試して理解］Linuxのしくみ　―実験と図解で学ぶOS、仮想マシン、コンテナの基礎知識【増補改訂版】</a>
-- 最近評判のよい本。OS の内部まで学習したい人向け。
-<li> <a href="https://www.amazon.co.jp/dp/B00KRB9U8K/">詳解UNIXプログラミング 第3版</a>
-- 通称「Stevensの本」と呼ばれる歴史的名著。
-</ul>
-
-<h3>次回予告</h3>
-<ul>
-<li> シェルからのファイル操作
-<li> 実行モードの変更
-<li> シェルスクリプトの書き方
-<li> 繰り返し・条件分岐
-</ul>
 
 <hr>
 <address>Yusuke Shinyama</address>
