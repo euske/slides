@@ -26,9 +26,9 @@ u { color: #880000; font-weight: bold; }
 pre em { color: #008800; }
 code em { color: #000088; }
 .exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
-.exercise .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
 .file { outline: 2px solid black; padding: 1em; margin: 1em; }
-.file .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
+.file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
 .file pre { margin: 0; }
 --></style>
 </head>
@@ -75,7 +75,7 @@ Yusuke Shinyama<br>
   <li> <a href="#script-args">コマンドに与えられた引数を利用する</a>
   <li> <a href="#script-chmod">通常のコマンドとして使う</a>
 </ul>
-<li> <a href="#controls">繰り返し・条件分岐</a>
+<li> <a href="#controls">条件分岐・繰り返し</a>
 <li> <a href="#summary">まとめ</a>
 </ol>
 
@@ -1662,12 +1662,20 @@ $ <strong>mkdir foo</strong>
 <pre>
 $ <strong>cp a.txt b.txt</strong>
 <em>(a.txt を新しい b.txt という名前で複製する)</em>
-$ <strong>cp a.txt dist/</strong>
-<em>(a.txt を dist/ ディレクトリ内に同じ名前で複製する)</em>
-$ <strong>cp a.txt b.txt c.txt dist/</strong>
-<em>(a.txt, b.txt, c.txt の各ファイルを dist/ 内に同じ名前で複製する)</em>
-$ <strong>cp *.txt dist/</strong>
-<em>(〜.txt で終わるすべてのファイルを dist/ 内に同じ名前で複製する)</em>
+$ <strong>cp a.txt dest/</strong>
+<em>(a.txt を dest/ ディレクトリ内に同じ名前で複製する)</em>
+$ <strong>cp a.txt b.txt c.txt dest/</strong>
+<em>(a.txt, b.txt, c.txt の各ファイルを dest/ 内に同じ名前で複製する)</em>
+$ <strong>cp *.txt dest/</strong>
+<em>(〜.txt で終わるすべてのファイルを dest/ 内に同じ名前で複製する)</em>
+</pre>
+<p>
+<code>cp</code> で複製できるのは、通常はファイルのみである。
+あるディレクトリ内のファイルを (ディレクトリごと) 複製したい場合には
+<code>-r</code> オプションを使う:
+<pre>
+$ <strong>cp -r foo dest/</strong>
+<em>(foo ディレクトリ内とその中のファイルをすべて dest/ 内に複製する)</em>
 </pre>
 <p>
 <strong>注意:</strong>
@@ -1685,12 +1693,12 @@ $ <strong>cp -i a.txt b.txt</strong>
 <pre>
 $ <strong>mv a.txt b.txt</strong>
 <em>(a.txt を新しい b.txt という名前に変更する)</em>
-$ <strong>mv a.txt dist/</strong>
-<em>(a.txt を dist/ ディレクトリ内に移動する)</em>
-$ <strong>mv a.txt b.txt c.txt dist/</strong>
-<em>(a.txt, b.txt, c.txt の各ファイルを dist/ 内に移動する)</em>
-$ <strong>mv *.txt dist/</strong>
-<em>(〜.txt で終わるすべてのファイルを dist/ 内に移動する)</em>
+$ <strong>mv a.txt dest/</strong>
+<em>(a.txt を dest/ ディレクトリ内に移動する)</em>
+$ <strong>mv a.txt b.txt c.txt dest/</strong>
+<em>(a.txt, b.txt, c.txt の各ファイルを dest/ 内に移動する)</em>
+$ <strong>mv *.txt dest/</strong>
+<em>(〜.txt で終わるすべてのファイルを dest/ 内に移動する)</em>
 </pre>
 <p>
 <strong>注意:</strong>
@@ -1717,8 +1725,8 @@ $ <strong>rm *.txt</strong>
 あるディレクトリ内のファイルを (ディレクトリごと) 削除したい場合には
 <code>-r</code> オプションを使う:
 <pre>
-$ <strong>rm -r dist/</strong>
-<em>(dist/ ディレクトリ内とその中のファイルをすべて削除する)</em>
+$ <strong>rm -r dest/</strong>
+<em>(dest/ ディレクトリ内とその中のファイルをすべて削除する)</em>
 </pre>
 <p>
 <strong>注意:</strong>
@@ -1769,10 +1777,12 @@ $ <strong>cp -- -i a.txt</strong>
 <p>
 <u>シェルスクリプト</u>とは、シェルによって実行される簡単なプログラムである。
 もっとも基本的なシェルスクリプトは、単に実行するコマンド列を1行にひとつずつ
-並べたテキストファイルである:
+並べたテキストファイルである。
+(<code>#</code> 以降の文字列はコメントとして解釈される。)
 <div class=file>
 <div class=header>hello.sh</div>
 <pre>
+<em># 3つのコマンドを実行する。</em>
 echo Hello!
 date
 ls /etc
@@ -1792,12 +1802,137 @@ alpine-release        lynx.lss              services
 …
 </pre></blockquote>
 
-<h3 id="script-args">8.1. コマンドに与えられた引数を利用する</h3>
+<h3 id="script-args">8.1. シェルスクリプトに与えられた引数を利用する</h3>
+<p>
+シェルスクリプトには、通常のコマンドと同様に引数を渡すことができる。
+プロセス起動時に与えられた引数は、
+第0引数から順に <code>$0</code>、<code>$1</code> …
+というシェル変数として利用できる。
+<div class=file>
+<div class=header>showargs.sh</div>
+<pre>
+echo "Arg0: $0"
+echo "Arg1: $1"
+echo "Arg2: $2"
+</pre>
+</div>
+<p>
+上のシェルスクリプトを実行すると、以下のように表示される。
+第0引数はスクリプトの名前 (パス名) になっているのがわかる:
+<blockquote><pre>
+$ <strong>sh showargs.sh foo bar baz</strong>
+Arg0: showargs.sh  <em>(第0引数が表示される)</em>
+Arg1: foo          <em>(第1引数が表示される)</em>
+Arg2: bar          <em>(第2引数が表示される)</em>
+</pre></blockquote>
+
+<div class=exercise id="ex11">
+<div class=header>演習 11. シェルスクリプトの説明</div>
+以下のシェルスクリプトが何をするか説明せよ。
+<pre>
+# showhome.sh
+ls -l "/home/$1"
+</pre>
+</div>
 
 <h3 id="script-chmod">8.2. 通常のコマンドとして使う</h3>
+<p>
+UNIX では、通常実行するプログラムはその CPU 用にコンパイルされた
+命令列が含まれる<u>バイナリファイル</u>である。
+しかし UNIX ではそれ以外のファイル (テキストファイル) でも
+実行できるような仕組みが用意されている。あるテキストファイルの
+先頭が "<code>#!</code>" という特殊な 2バイトで始まっている場合、
+UNIX はその行をもとに別のコマンドを呼び出すことができる。
+<p>
+例をあげて説明しよう。
+たとえば、以下のようなテキストファイル <code>foobar</code> を作成する:
+<div class=file>
+<div class=header>foobar</div>
+<pre>
+#!/bin/cat
+foo
+bar
+</pre>
+</div>
+<p>
+UNIX では、実行するプログラム (ファイル) には必ず
+<u>実行可能フラグ</u>が有効になっていなければならない。
+そのため、まず <code>chmod</code> コマンドを使ってこのファイルの
+実行可能フラグを立てる:
+<blockquote><pre>
+$ <strong>chmod +x foobar</strong>  <em>(ファイル foobar を実行可能にする)</em>
+</pre></blockquote>
+<p>
+このファイルをシェルから実行すると、以下のように表示される:
+<blockquote><pre>
+$ <strong>./foobar</strong>
+#!/bin/cat
+foo
+bar
+</pre></blockquote>
+<p>
+一体、何が起こっているのか?
+実は <code>foobar</code> をシェルから「実行」すると、
+UNIX 内部では以下のコマンドが実行されている:
+<blockquote><pre>
+/bin/cat foobar
+</pre></blockquote>
+<p>
+ここで実際に実行されるプログラム (第0引数) は
+<code>/bin/cat</code> であり、
+またその第1引数としてファイル自体へのパス名 <code>foobar</code> が渡される。
+つまり <code>cat</code> に対して自分自身を表示するような
+プログラムになっているのである。
+<p>
+この機能を使うと、シェルスクリプトを (わざわざ <code>sh</code> を使って実行しなくても)
+通常のコマンドと同じように使うことができる。
+たとえば、先ほどの <code>hello.sh</code> を以下のように変更してみよう
+(拡張子は <code>.sh</code> でなくてもかまわない):
+<div class=file>
+<div class=header>hello</div>
+<pre>
+<em>#!/bin/sh</em>
+echo Hello!
+date
+ls /etc
+</pre>
+</div>
+<p>
+これを通常のコマンドとして実行するには、以下のようにする:
+<blockquote><pre>
+$ <strong>chmod +x hello</strong>
+$ <strong>./hello</strong>     <em>(/bin/sh hello と同様の結果が得られる)</em>
+Hello!
+Sun Nov 13 14:48:02 JST 2022
+...
+</pre></blockquote>
+<p>
+このファイルを環境変数 <code>PATH</code> で
+指定したディレクトリ内に置いておけば、いまやこのシェルスクリプトは
+通常のコマンドと同じように使えるわけである。
 
+<p>
+<strong>注意:</strong>
+シェルスクリプトは子プロセスとして実行される。UNIX では、
+子プロセスは親プロセスの環境変数やカレントディレクトリを
+変更することはできないので、シェルスクリプトの中で
+環境変数やカレントディレクトリを変更しても親プロセスには影響を与えない。
+したがって、それを呼び出したシェル (親プロセス) の
+<strong>環境変数やカレントディレクトリを変更するようなシェルスクリプトを
+書くことは不可能</strong>である:
+<blockquote><pre>
+$ <strong>cat gohome</strong>  <em>(シェルスクリプト gohome の内容を表示)</em>
+cd "${HOME}"
+$ <strong>cd /etc</strong>     <em>(カレントディレクトリを /etc に変更)</em>
+$ <strong>./gohome</strong>    <em>(gohome を実行する)</em>
+$ <strong>pwd</strong>         <em>(カレントディレクトリは依然として /etc のまま)</em>
+/etc
+</pre></blockquote>
 
-<h2 id="controls">9. 繰り返し・条件分岐</h2>
+<h2 id="controls">9. 条件分岐・繰り返し</h2>
+<p>
+さて、シェルスクリプトの真のうまみは条件分岐や繰り返しを使って
+コマンドを実行させることである。
 <p>
 シェルでは、コマンドの<u>終了状態</u>に応じた
 条件分岐を設定できる。
@@ -1807,8 +1942,8 @@ alpine-release        lynx.lss              services
 <p>
 本日紹介したコマンド・概念は以下のとおり (出てきた順):
 
-<div class=exercise id="ex11">
-<div class=header>演習 11. まとめ問題</div>
+<div class=exercise id="ex12">
+<div class=header>演習 12. まとめ問題</div>
 <ol>
 <li> 以下の用語の違いを説明せよ:
 <ul>
