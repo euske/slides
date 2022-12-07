@@ -74,6 +74,7 @@ Yusuke Shinyama<br>
 <ul>
   <li> <a href="#script-args">コマンドに与えられた引数を利用する</a>
   <li> <a href="#script-chmod">通常のコマンドとして使う</a>
+  <li> <a href="#script-exitcode">終了状態による分岐</a>
 </ul>
 <li> <a href="#controls">条件分岐・繰り返し</a>
 <li> <a href="#summary">まとめ</a>
@@ -1928,14 +1929,55 @@ $ <strong>./gohome</strong>    <em>(gohome を実行する)</em>
 $ <strong>pwd</strong>         <em>(カレントディレクトリは依然として /etc のまま)</em>
 /etc
 </pre></blockquote>
+<p>
+(ちなみに、<code>cd</code> コマンドはシェルの内部コマンドで
+プロセスを起動しない。そのためシェルのカレントディレクトリの変更が可能なのである。)
+
+<h3 id="script-exitcode">8.3. 終了状態による分岐</h3>
+<p>
+すべてのプロセスは、終了時に<u>終了状態</u>を返す。
+これは、関数の返り値のようなものである。
+UNIXの慣例では、正常終了した（成功した）プロセスは
+終了状態 <code>0</code> を返し、そうでないプロセスは <code>0</code>以外の
+終了状態を返すことになっている。
+あるコマンドの終了状態を見るには、コマンド実行直後に
+シェル変数 <code>$?</code> を表示すればよい:
+<blockquote><pre>
+$ <strong>ls /etc</strong>
+ImageMagick-7         logrotate.d           screenrc
+X11                   lynx.cfg              securetty
+alpine-release        lynx.lss              services
+…
+$ <strong>echo $?</strong>
+0          <em>(コマンドは成功したので終了状態は0)</em>
+$ <strong>ls /nonexistent</strong>
+ls: /nonexistent: No such file or directory
+$ <strong>echo $?</strong>
+1          <em>(エラーで終了したので終了状態は0)</em>
+</pre></blockquote>
+<p>
+さらに、シェルではコマンドの終了状態に応じて
+ふるまいを変更できる:
+<ul>
+  <li> <code>a &amp;&amp; b</code> … コマンド <code>a</code> が正常終了した (成功) 時にコマンド <code>b</code> を実行する。
+    <pre>cd /etc &amp;&amp; ls *.conf    <em>(/etcディレクトリにcdできたら、その中の .conf ファイル一覧を表示する)</em></pre>
+  <li> <code>a || b</code> … コマンド <code>a</code> が正常終了しなかった (失敗) 時にコマンド <code>b</code> を実行する。
+    <pre>cd /foo || echo "/foo does not exist"  <em>(/fooディレクトリにcdできなかったら、エラーを表示する)</em></pre>
+</ul>
+<p>
+さらにこれらの条件式は、他のプログラミング言語と同様に <code>(</code> … <code>)</code> を使ってグループ化できる。
+グループ化されたコマンド列の終了状態は、最後に実行されたコマンドの終了状態となる。
+したがって、次のような例も可能:
+<blockquote><pre>
+<em># /fooディレクトリにcdできれば *.conf一覧を表示し、そうでなければエラーを表示する。</em>
+( cd /foo && ls *.conf ) || echo "/foo does not exist"
+</pre></blockquote>
 
 <h2 id="controls">9. 条件分岐・繰り返し</h2>
 <p>
 さて、シェルスクリプトの真のうまみは条件分岐や繰り返しを使って
-コマンドを実行させることである。
-<p>
-シェルでは、コマンドの<u>終了状態</u>に応じた
-条件分岐を設定できる。
+コマンドを実行させることである。シェルでは、条件分岐や繰り返しをするときも
+上で述べたコマンドの終了状態を使う。
 
 
 <h2 id="summary">10. まとめ</h2>
