@@ -62,6 +62,7 @@ Yusuke Shinyama<br>
 <ul>
   <li> <a href="#shell-exp">コマンド引数の展開</a>
   <li> <a href="#filename-exp">ファイル名の展開</a>
+  <li> <a href="#command-exp">コマンド出力の展開</a>
 </ul>
 <li> <a href="#env">環境変数</a>
 <ul>
@@ -77,6 +78,12 @@ Yusuke Shinyama<br>
   <li> <a href="#script-exitcode">終了状態による分岐</a>
 </ul>
 <li> <a href="#controls">条件分岐・繰り返し</a>
+<ul>
+  <li> <a href="#control-test">test コマンド</a>
+  <li> <a href="#control-if">if … then 〜 fi文</a>
+  <li> <a href="#control-while">while … do 〜 done文</a>
+  <li> <a href="#control-for">for … do 〜 done文</a>
+</ul>
 <li> <a href="#summary">まとめ</a>
 </ol>
 
@@ -1303,6 +1310,40 @@ $ <strong>echo /etc/*.conf</strong>
 各プロセスが独立したマシン上で動いているかのように
 見せかけているだけなのである。
 
+<h3 id="command-exp">5.3. コマンド出力の展開</h3>
+<p>
+さらにシェルは、あるコマンドが (標準出力に) 出力した文字列を
+まるごと引数として展開することができる。
+<p>
+たとえば、<code>ls</code> コマンドが以下のような出力をしたとする:
+<blockquote><pre>
+$ <strong>ls</strong>
+a   bb   ccc
+</pre></blockquote>
+<p>
+このコマンドの出力は <code>a</code>, <code>bb</code>, <code>ccc</code> という
+3つの引数に展開される:
+<blockquote><pre>
+$ <strong>echo $(<mark>ls</mark>)</strong>
+a bb ccc
+</pre></blockquote>
+<p>
+ここでコマンドの出力からは、余分な空白が除かれていることに注意。
+これは通常のコマンドライン引数で
+<blockquote><pre>
+$ <strong>echo a   bb   ccc</strong>
+a bb ccc
+</pre></blockquote>
+とタイプしたのと同じことである。
+標準出力全体をひとつの文字列として扱うには、
+コマンド出力の展開部分を <code>"〜"</code> で囲めばよい:
+<blockquote><pre>
+$ <strong>echo "$(<mark>ls</mark>)"</strong>
+a
+bb
+ccc
+</pre></blockquote>
+
 
 <h2 id="env">6. 環境変数</h2>
 <p>
@@ -1978,7 +2019,58 @@ $ <strong>echo $?</strong>
 さて、シェルスクリプトの真のうまみは条件分岐や繰り返しを使って
 コマンドを実行させることである。シェルでは、条件分岐や繰り返しをするときも
 上で述べたコマンドの終了状態を使う。
+<ul>
+<li> 終了状態が <code>0</code> … そのコマンドの返り値は「真」として扱われる。
+<li> 終了状態が <code>0</code> 以外 … そのコマンドの返り値は「偽」として扱われる。
+</ul>
 
+<h3 id="control-test">9.1. testコマンド</h3>
+
+<h3 id="control-if">9.2. if … then 〜 fi文</h3>
+<dl>
+<dt> 書式:
+<dd> <pre>
+if <mark>条件式</mark>; then
+    <mark>処理</mark>
+fi
+</pre>
+ここでいう<code>条件式</code>とは、
+実際にはひとつのコマンドのことである。
+<dt> 例1:
+<dd> <pre>
+if <mark>cd /foo</mark>; then
+    echo "success"  <em># cd /foo に成功</em>
+fi
+</pre>
+<dt> 例2 (else節を追加):
+<dd> <pre>
+if <mark>cd /foo</mark>; then
+    echo "success"  <em># cd /foo に成功</em>
+else
+    echo "fail"     <em># cd /foo に失敗</em>
+fi
+</pre>
+</dl>
+
+<h3 id="control-while">9.3. while … do 〜 done文</h3>
+<dl>
+<dt> 書式:
+<dd> <pre>
+while <mark>条件式</mark>; do
+    <mark>処理</mark>
+end
+</pre>
+<dt> 例:
+<dd> <pre>
+while <mark>ls /foo/bar</mark>; then
+    <em># /foo/bar が存在している間メッセージを出力。</em>
+    <mark>echo "exists"</mark>
+    <mark>sleep 1</mark>
+fi
+</pre>
+</dl>
+
+<h3 id="control-for">9.4. for … do 〜 done文</h3>
 
 <h2 id="summary">10. まとめ</h2>
 <p>
