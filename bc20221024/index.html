@@ -48,6 +48,7 @@ Yusuke Shinyama<br>
 <li> <a href="#unix">UNIXとは</a>
 <ul>
   <li> <a href="#unix-os">オペレーティングシステム (OS) とは?</a>
+  <li> <a href="#linux-distro">Linuxディストリビューションとは?</a>
 </ul>
 <li> <a href="#filesystem">ファイルシステム</a>
 <ul>
@@ -70,7 +71,18 @@ Yusuke Shinyama<br>
   <li> <a href="#env-set">環境変数を設定する</a>
   <li> <a href="#env-path">重要な環境変数: PATHとHOME</a>
 </ul>
-<li> <a href="#fileops">ファイル操作</a>
+<li> <a href="#fileops">ファイル操作コマンド</a>
+<ul>
+  <li> <a href="#cmd-ls">ls</a>
+  <li> <a href="#cmd-cd">cd</a>
+  <li> <a href="#cmd-pwd">pwd</a>
+  <li> <a href="#cmd-cat">cat・less</a>
+  <li> <a href="#cmd-mkdir">mkdir</a>
+  <li> <a href="#cmd-cp">cp</a>
+  <li> <a href="#cmd-mv">mv</a>
+  <li> <a href="#cmd-rm">rm</a>
+  <li> <a href="#cmd-du">du</a>
+</ul>
 <li> <a href="#scripting">シェルスクリプトの基礎</a>
 <ul>
   <li> <a href="#script-args">コマンドに与えられた引数を利用する</a>
@@ -84,6 +96,7 @@ Yusuke Shinyama<br>
   <li> <a href="#control-while">while … do 〜 done文</a>
   <li> <a href="#control-for">for … do 〜 done文</a>
 </ul>
+<li> <a href="#oneliner">ワンライナー (one-liner) を書く時の注意点</a>
 <li> <a href="#summary">まとめ</a>
 </ol>
 
@@ -191,6 +204,21 @@ Yusuke Shinyama<br>
 </svg>
 </div>
 
+<h3 id="linux-distro">1.2. Linuxディストリビューションとは?</h3>
+<p>
+Linuxの世界では、実際には "RedHat", "Ubuntu", "Debian" といった
+複数の異なる "Linux" が存在している。<strong>これらは厳密には Linux ではなく、
+異なる Linux の <u>ディストリビューション</u> と呼ばれている</strong>。
+本来 "Linux" は OSの核となる部分 (カーネル) をさしており「生の Linuxだけを使う」
+ということはあり得ない。核となる Linux カーネルにさまざまな部品
+ (ファイルシステム、パッケージ管理など) を追加して一般的な OS として
+ 使えるようにしたものが「ディストリビューション」である。
+ <p>
+Linuxの各ディストリビューションのおもな違いはファイルシステムの構造の差異
+(/etc以下にある設定ファイルの違いなど) およびシステム管理の方法の差異である。
+とくに、パッケージ管理方式は各ディストリビューションによって大きく違っている。
+しかしこの記事では UNIXのシステム管理の方法までは扱わないので、
+内容の大部分はどのディストリビューションにもあてはまる。
 
 <h2 id="filesystem">2. ファイルシステム</h2>
 <p>
@@ -774,7 +802,7 @@ UNIX の各プロセスは、<code>init</code> から先祖-子孫関係が存�
 <blockquote><pre>
 $ <strong>pstree</strong>
 systemd─┬─agetty
-        ├─automount───3*[{automount}]
+        ├─automount───3&ast;[{automount}]
         ├─avahi-daemon───avahi-daemon
         ├─crond
         ├─dbus-daemon
@@ -1239,9 +1267,9 @@ ls -l: command not found
 $ <strong>ls</strong>
 a   bb   ccc
 </pre></blockquote>
-以下の <code>*</code> (<u>ワイルドカード</u>) を指定すると
+以下の <code>&ast;</code> (<u>ワイルドカード</u>) を指定すると
 <blockquote><pre>
-$ <strong>cat *</strong>
+$ <strong>cat &ast;</strong>
 </pre></blockquote>
 以下の引数を与えたのと同じである:
 <blockquote><pre>
@@ -1259,7 +1287,7 @@ drwxr-xr-x    2 root     root           520 Jul  5  2020 conf.d
 </pre></blockquote>
 以下のパターンは
 <blockquote><pre>
-$ <strong>cat /etc/*.conf</strong>
+$ <strong>cat /etc/&ast;.conf</strong>
 </pre></blockquote>
 以下のような引数に展開される:
 <blockquote><pre>
@@ -1274,7 +1302,7 @@ $ <strong>cat /etc/ca-certificates<mark>.conf</mark> /etc/dhcpcd<mark>.conf</mar
 ここで、<code>echo</code> コマンドは
 シェルが各引数をどのように展開したかを表示するのに使える:
 <blockquote><pre>
-$ <strong>echo /etc/*.conf</strong>
+$ <strong>echo /etc/&ast;.conf</strong>
 /etc/ca-certificates.conf /etc/dhcpcd.conf …
 </pre></blockquote>
 
@@ -1290,11 +1318,11 @@ $ <strong>echo /etc/*.conf</strong>
 カレント・ディレクトリも <code>/etc</code> であるとして、
 以下のコマンドラインの出力を答えよ:
 <ol class=spacy>
-<li> <code>echo *</code>
-<li> <code>echo *.conf</code>
-<li> <code>echo *.conf /etc/*</code>
-<li> <code>echo /etc/issue*</code>
-<li> <code>echo "*"</code>
+<li> <code>echo &ast;</code>
+<li> <code>echo &ast;.conf</code>
+<li> <code>echo &ast;.conf /etc/&ast;</code>
+<li> <code>echo /etc/issue&ast;</code>
+<li> <code>echo "&ast;"</code>
 </ol>
 </div>
 
@@ -1354,19 +1382,19 @@ UNIX では、各プロセスに<u>環境変数</u> (environment variable) と�
 現在の環境変数一覧を見るためには <code>env</code>コマンドを使う:
 <blockquote><pre>
 $ <strong>env</strong>
-SHELL=/bin/bash
-WINDOWID=4194316
-TMUX=/tmp/tmux-1000/default,366,0
-EDITOR=vi
+SHLVL=3
+HOME=/root
+OLDPWD=/root
+PAGER=less
 …
 </pre></blockquote>
 <p>
 順序がばらばらで見にくいので <code>sort</code>で並べ変えてみる:
 <blockquote><pre>
 $ <strong>env | sort</strong>
-DISPLAY=:1
-EDITOR=vi
-HOME=/home/euske
+HOME=/root
+OLDPWD=/root
+PAGER=less
 …
 </pre></blockquote>
 <p>
@@ -1657,11 +1685,11 @@ UNIX におけるホームディレクトリとは、つまるところ:
 だけのものなのである。
 
 
-<h2 id="fileops">7. ファイル操作</h2>
+<h2 id="fileops">7. ファイル操作コマンド</h2>
 <p>
 シェル上でファイル操作を行うためのおもなコマンドは以下のとおり:
 <dl>
-<dt> <code>ls</code>
+<dt id="cmd-ls"> <code>ls</code>
 <dd> 指定したディレクトリに含まれるファイル一覧を表示する。
 <pre>
 $ <strong>ls</strong>
@@ -1669,7 +1697,8 @@ $ <strong>ls</strong>
 $ <strong>ls /etc</strong>
 …  <em>(ディレクトリ /etc のファイル一覧を表示)</em>
 </pre>
-<dt> <code>cd</code> (Change Directory)
+
+<dt id="cmd-cd"> <code>cd</code> (Change Directory)
 <dd> カレント・ディレクトリを変更する。
 <pre>
 $ <strong>cd /etc</strong>
@@ -1677,13 +1706,15 @@ $ <strong>cd /etc</strong>
 $ <strong>cd</strong>
 <em>(カレント・ディレクトリを自分のホームディレクトリに変更)</em>
 </pre>
-<dt> <code>pwd</code> (Print Working Directory)
+
+<dt id="cmd-pwd"> <code>pwd</code> (Print Working Directory)
 <dd> カレント・ディレクトリのパス名を表示する。
 <pre>
 $ <strong>pwd</strong>
 <em>(現在のパス名を表示)</em>
 </pre>
-<dt> <code>cat</code> ・ <code>less</code>
+
+<dt id="cmd-cat"> <code>cat</code> ・ <code>less</code>
 <dd> ファイルの内容を表示する。
 もともと <code>cat</code> は
 複数のファイルを連結 (conCATenate) するためのコマンドだった。
@@ -1693,13 +1724,15 @@ $ <strong>less /etc/services</strong>
 $ <strong>cat /etc/hosts /etc/services</strong>
 <em>(/etc/hosts の内容と /etc/services の内容を連結して表示)</em>
 </pre>
-<dt> <code>mkdir</code> (MaKe DIRectory)
+
+<dt id="cmd-mkdir"> <code>mkdir</code> (MaKe DIRectory)
 <dd> 空のディレクトリを新規作成する。
 <pre>
 $ <strong>mkdir foo</strong>
 <em>(カレント・ディレクト下に foo を作成)</em>
 </pre>
-<dt> <code>cp</code> (CoPy)
+
+<dt id="cmd-cp"> <code>cp</code> (CoPy)
 <dd> 指定したファイルを宛先パス名に複製する。
 <pre>
 $ <strong>cp a.txt b.txt</strong>
@@ -1708,7 +1741,7 @@ $ <strong>cp a.txt dest/</strong>
 <em>(a.txt を dest/ ディレクトリ内に同じ名前で複製する)</em>
 $ <strong>cp a.txt b.txt c.txt dest/</strong>
 <em>(a.txt, b.txt, c.txt の各ファイルを dest/ 内に同じ名前で複製する)</em>
-$ <strong>cp *.txt dest/</strong>
+$ <strong>cp &ast;.txt dest/</strong>
 <em>(〜.txt で終わるすべてのファイルを dest/ 内に同じ名前で複製する)</em>
 </pre>
 <p>
@@ -1730,7 +1763,8 @@ $ <strong>cp -i a.txt b.txt</strong>
 <em>(a.txt を新しい b.txt という名前で複製するが、
  すでに同名のファイルがある場合は確認する)</em>
 </pre>
-<dt> <code>mv</code> (MoVe)
+
+<dt id="cmd-mv"> <code>mv</code> (MoVe)
 <dd> 指定したファイルを宛先パス名に変更あるいは移動する。
 <pre>
 $ <strong>mv a.txt b.txt</strong>
@@ -1739,7 +1773,7 @@ $ <strong>mv a.txt dest/</strong>
 <em>(a.txt を dest/ ディレクトリ内に移動する)</em>
 $ <strong>mv a.txt b.txt c.txt dest/</strong>
 <em>(a.txt, b.txt, c.txt の各ファイルを dest/ 内に移動する)</em>
-$ <strong>mv *.txt dest/</strong>
+$ <strong>mv &ast;.txt dest/</strong>
 <em>(〜.txt で終わるすべてのファイルを dest/ 内に移動する)</em>
 </pre>
 <p>
@@ -1754,12 +1788,12 @@ $ <strong>mv -i a.txt b.txt</strong>
  すでに同名のファイルがある場合は確認する)</em>
 </pre>
 
-<dt> <code>rm</code> (ReMove)
+<dt id="cmd-rm"> <code>rm</code> (ReMove)
 <dd> 指定したファイルを削除する。
 <pre>
 $ <strong>rm a.txt</strong>
 <em>(ファイル a.txt を削除する)</em>
-$ <strong>rm *.txt</strong>
+$ <strong>rm &ast;.txt</strong>
 <em>(〜.txt で終わるすべてのファイルを削除する)</em>
 </pre>
 <p>
@@ -1777,8 +1811,17 @@ UNIX は無愛想な OS なので、
 削除するファイルをひとつずつ確認するためには
 <code>-i</code> オプションを使う:
 <pre>
-$ <strong>rm -i *.txt</strong>
+$ <strong>rm -i &ast;.txt</strong>
 <em>(〜.txt で終わる各ファイルを yes/no で確認しながら削除する)</em>
+</pre>
+
+<dt id="cmd-du"> <code>du</code> (DiskUse)
+<dd> 指定したディレクトリのファイル使用量を表示する。
+<pre>
+$ <strong>du ~</strong>
+<em>(ホームディレクトリの使用量を各ディレクトリごとに表示する)</em>
+$ <strong>du -s .</strong>
+<em>(カレントディレクトリの総使用量のみを表示する)</em>
 </pre>
 
 </dl>
@@ -2001,7 +2044,7 @@ $ <strong>echo $?</strong>
 ふるまいを変更できる:
 <ul>
   <li> <code>a &amp;&amp; b</code> … コマンド <code>a</code> が正常終了した (成功) 時にコマンド <code>b</code> を実行する。
-    <pre>cd /etc &amp;&amp; ls *.conf    <em>(/etcディレクトリにcdできたら、その中の .conf ファイル一覧を表示する)</em></pre>
+    <pre>cd /etc &amp;&amp; ls &ast;.conf    <em>(/etcディレクトリにcdできたら、その中の .conf ファイル一覧を表示する)</em></pre>
   <li> <code>a || b</code> … コマンド <code>a</code> が正常終了しなかった (失敗) 時にコマンド <code>b</code> を実行する。
     <pre>cd /foo || echo "/foo does not exist"  <em>(/fooディレクトリにcdできなかったら、エラーを表示する)</em></pre>
 </ul>
@@ -2010,8 +2053,8 @@ $ <strong>echo $?</strong>
 グループ化されたコマンド列の終了状態は、最後に実行されたコマンドの終了状態となる。
 したがって、次のような例も可能:
 <blockquote><pre>
-<em># /fooディレクトリにcdできれば *.conf一覧を表示し、そうでなければエラーを表示する。</em>
-( cd /foo && ls *.conf ) || echo "/foo does not exist"
+<em># /fooディレクトリにcdできれば &ast;.conf一覧を表示し、そうでなければエラーを表示する。</em>
+( cd /foo && ls &ast;.conf ) || echo "/foo does not exist"
 </pre></blockquote>
 
 <h2 id="controls">9. 条件分岐・繰り返し</h2>
@@ -2023,10 +2066,36 @@ $ <strong>echo $?</strong>
 <li> 終了状態が <code>0</code> … そのコマンドの返り値は「真」として扱われる。
 <li> 終了状態が <code>0</code> 以外 … そのコマンドの返り値は「偽」として扱われる。
 </ul>
+<p>
+このため UNIX では、ある条件に応じて終了状態を変化させるため<strong>だけ</strong>のコマンド
+<code>test</code> が存在する。
 
 <h3 id="control-test">9.1. testコマンド</h3>
+<p>
+<code>test</code> コマンドは与えられた条件に応じて真偽値に対応する終了状態を返す:
+<ul>
+  <li> <code>test -f <mark>パス名</mark></code>: 与えられた <mark>パス名</mark> にファイルが存在すれば真。
+  <li> <code>test -d <mark>パス名</mark></code>: 与えられた <mark>パス名</mark> にディレクトリが存在すれば真。
+  <li> <code>test <mark>引数A</mark> = <mark>引数B</mark></code>: 与えられた <mark>引数A</mark> と <mark>引数B</mark> が同一であれば真。
+  <li> ...
+</ul>
+<p>
+なお、見やすさのため、<code>test</code>コマンドと同様の機能をもつ
+<code>&lbrack;</code> というコマンドが用意されている。
+この場合は、以下のように記述する:
+<ul>
+  <li> <code>[ -f <mark>パス名</mark> ]</code>: 与えられた <mark>パス名</mark> にファイルが存在すれば真。
+  <li> <code>[ -d <mark>パス名</mark> ]</code>: 与えられた <mark>パス名</mark> にディレクトリが存在すれば真。
+  <li> <code>[ <mark>引数A</mark> = <mark>引数B</mark> ]</code>: 与えられた <mark>引数A</mark> と <mark>引数B</mark> が同一であれば真。
+  <li> ...
+</ul>
+<p>
+<code>test</code>コマンドはこれ以外にも多くの演算や条件式の組み合わせが可能である。
+詳しくは <code>man test</code> を参照のこと。
 
 <h3 id="control-if">9.2. if … then 〜 fi文</h3>
+<p>
+if文の使い方は、通常のプログラミング言語とほとんど同じである。
 <dl>
 <dt> 書式:
 <dd> <pre>
@@ -2036,6 +2105,10 @@ fi
 </pre>
 ここでいう<code>条件式</code>とは、
 実際にはひとつのコマンドのことである。
+<div class=note>
+<strong>注意:</strong>
+条件式の最後の <code>;</code> を忘れないように!
+</div>
 <dt> 例1:
 <dd> <pre>
 if <mark>cd /foo</mark>; then
@@ -2053,26 +2126,118 @@ fi
 </dl>
 
 <h3 id="control-while">9.3. while … do 〜 done文</h3>
+<p>
+これも通常のプログラミング言語におけるwhile文とほとんど同じである。
 <dl>
 <dt> 書式:
 <dd> <pre>
 while <mark>条件式</mark>; do
     <mark>処理</mark>
-end
+done
 </pre>
+<div class=note>
+<strong>注意:</strong>
+条件式の最後の <code>;</code> を忘れないように!
+</div>
 <dt> 例:
 <dd> <pre>
-while <mark>ls /foo/bar</mark>; then
-    <em># /foo/bar が存在している間メッセージを出力。</em>
-    <mark>echo "exists"</mark>
+while <mark>[ -d /foo/bar ]</mark>; do
+    <em># フォルダ /foo/bar が存在している間はメッセージを出力。</em>
+    <mark>echo "/foo/bar exists"</mark>
     <mark>sleep 1</mark>
-fi
+done
 </pre>
 </dl>
 
 <h3 id="control-for">9.4. for … do 〜 done文</h3>
+<p>
+シェルスクリプトの for文は、与えられた各引数を指定された変数に代入しながら
+繰り返し処理を実行する。
+Python における <code>for</code>文、
+あるいは JavaScript における <code>for … of</code>構文に似ている。
+<dl>
+<dt> 書式:
+<dd> <pre>
+for <mark>変数名</mark> in <mark>引数1 引数2 …</mark>; do
+    <mark>処理</mark>
+done
+</pre>
+<div class=note>
+<strong>注意:</strong>
+引数の最後の <code>;</code> を忘れないように!
+</div>
+<dt> 例1:
+<dd> <pre>
+for <mark>file</mark> in <mark>&ast;.txt</mark>; do
+    <em># &ast;.txtで終わる各ファイルを &ast;.txt.orig に名前変更する。</em>
+    <mark>echo "Renaming: ${file}"</mark>
+    <mark>mv ${file} ${file}.orig</mark>
+done
+</pre>
+<dt> 例2:
+<dd> <pre>
+for <mark>name</mark> in <mark>$(cat files.txt)</mark>; do
+    <em># files.txtの各行をファイル名一覧とみなし、それらのファイルの内容を表示する。</em>
+    <mark>echo "--- ${name} ---"</mark>
+    <mark>cat ${name}</mark>
+done
+</pre>
+</dl>
 
-<h2 id="summary">10. まとめ</h2>
+<div class=note>
+<strong>注意:</strong>
+複数のファイルを一括変更するような処理の場合、
+<strong>入力ファイルと出力ファイルを同じにしない</strong>こと!
+<pre>
+for file in &ast;.txt; do 
+    <em># ❌ ${file} を読む前に ${file} が上書きされてしまう。</em>
+    cat <mark>${file}</mark> footer.txt &gt; <mark>${file}</mark>
+done
+</pre>
+<p>
+このような場合は、ファイルを一度別の名前に移してから処理をおこなう。
+(あるいは一時ファイルを作成し、それを元のファイルに上書きする。)
+<pre>
+  for file in &ast;.txt; do 
+    <em># まず ${file} を ${file}.orig に名前変更する。</em>
+    mv <mark>${file}</mark> <u>${file}.orig</u>
+    <em># ${file}.orig に加えた変更をもとのファイルとして保存する。</em>
+    cat <u>${file}.orig</u> footer.txt &gt; <mark>${file}</mark>
+done
+</pre>
+</div>
+
+
+<h2 id="oneliner">10. ワンライナー (one-liner) を書く時の注意点</h2>
+<p>
+UNIXでは、ちょっとした作業をするために１行のシェルスクリプト (ワンライナー) を
+即席で書いて実行することがある。よくあるのが各ファイルについて何らかの
+処理をおこなうというものである:
+
+<blockquote><pre>
+for file in myfiles/&ast;; do
+    <em># ...${file}に対してなんらかの処理をおこなう...</em>
+done
+</pre></blockquote>
+<p>
+しかしこのような処理は多くのファイルを一度に変更することが多く、危険である。
+このようなとき、おすすめの安全策がある。
+
+<ol>
+  <li> 危険なコマンドを <code>echo</code> で表示するだけにしておく。
+<pre>
+<em># dir1/の各.txtファイルに footer.txt を追加して dir2/ に保存する。</em>
+<em># 注意: &gt; が入っているのでコマンドライン全体を "〜" で囲むこと。</em>
+for file in dir1/&ast;.txt; do <mark>echo</mark> "cat ${file} footer.txt &gt; dir2/${file}"; done
+</pre>
+  <li> 出力が正しいことを確認したら、このシェルスクリプト全体を <code>sh</code> に通す。
+<pre>
+for file in dir1/&ast;.txt; do echo "cat ${file} footer.txt &gt; dir2/${file}"; done <mark>| sh</mark>
+</pre>
+</ol>
+
+
+<h2 id="summary">11. まとめ</h2>
 <p>
 本日紹介したコマンド・概念は以下のとおり (出てきた順):
 
@@ -2087,25 +2252,15 @@ fi
 </ul>
 <li> 以下のコマンドがそれぞれ何をするか簡単に説明せよ:
 <ul>
-<li> <code>ls</code>
-<li> <code>cat</code>
 <li> <code>less</code>
-<li> <code>cd</code>
 <li> <code>pwd</code>
 <li> <code>ps</code>
 <li> <code>kill</code>
 <li> <code>grep</code>
-<li> <code>sort</code>
 <li> <code>echo</code>
-<li> <code>env</code>
-<li> <code>date</code>
-<li> <code>set</code>
 <li> <code>export</code>
-<li> <code>mkdir</code>
-<li> <code>cp</code>
 <li> <code>mv</code>
 <li> <code>rm</code>
-<li> <code>sh</code>
 <li> <code>chmod</code>
 </ul>
 <li> 空のディレクトリで、
@@ -2113,7 +2268,7 @@ fi
 <blockquote><pre>
 $ <strong>echo &gt; hello</strong>
 $ <strong>echo &gt; world</strong>
-$ <strong>echo *</strong>
+$ <strong>echo &ast;</strong>
 </pre></blockquote>
 </ol>
 </div>
