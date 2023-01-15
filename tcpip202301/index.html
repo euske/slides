@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TCP/IP ネットワーク入門</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000088; }
+h2 { border-bottom: solid 2px #000088; }
+h3 { border-bottom: solid 1px #000088; }
+table { border-collapse: collapse; }
+td { padding: 4px; }
+kbd { outline: 1px solid black; padding: 2px; }
+pre { outline: 1px solid black; padding: 4px; overflow: auto; }
+mark { font-weight: bold; }
+pre, code { background: #ddd; font-size: 150%; font-family: courier; }
+img { max-width: 80vw; height: auto; }
+dt { text-decoration: underline; font-weight: bold; }
+u { color: #880000; font-weight: bold; }
+.author { text-align: right; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
+.notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
+.formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+.note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+pre em { color: #008800; }
+code em { color: #000088; }
+.exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
+.exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.file { outline: 2px solid black; padding: 1em; margin: 1em; }
+.file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
+.file pre { margin: 0; }
+
+.g { background: #eeeeee; }
+.bgr { background: #ffbbff; }
+.bgg { background: #88ff88; }
+.bgb { background: #88ffff; }
+.bgy { background: #ffff88; }
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>TCP/IP ネットワーク入門</h1>
+
+<div class=author>
+Yusuke Shinyama, Jan. 2023
+</div>
+
+<ol>
+<li> <a href="#internet">インターネットの作り方・概要</a>
+<li> <a href="#datalink">データリンク層のしくみ</a>
+<li> <a href="#ip">IP層 (ネットワーク層) のしくみ</a>
+<li> <a href="#tcp">TCP層 (トランスポート層) のしくみ</a>
+</ol>
+
+
+<h2 id="internet">1. インターネットの作り方・概要</h2>
+
+<h3 id="internet-basic">1.1. ネットワーク通信の原理</h3>
+<p>
+インターネットに接続されている各コンピュータのことを
+<u>ホスト</u> (host) と呼ぶ。
+インターネットでは、信号線は基本的に 1本しかなくても、
+複数のホストどうしが同時に双方向で通信できる。
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="400" height="220">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <symbol id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </symbol>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" transform="translate(10,100)" />
+      <use xlink:href="#computer" transform="translate(100,40)" />
+      <use xlink:href="#computer" transform="translate(120,120)" />
+      <use xlink:href="#computer" transform="translate(200,160)" />
+      <use xlink:href="#computer" transform="translate(210,50)" />
+      <use xlink:href="#computer" transform="translate(280,100)" />
+      <use xlink:href="#computer" transform="translate(290,10)" />
+      <line x1="50" y1="120" x2="130" y2="140" />
+      <line x1="140" y1="130" x2="120" y2="80" />
+      <line x1="140" y1="60" x2="220" y2="70" />
+      <line x1="150" y1="160" x2="210" y2="180" />
+      <line x1="230" y1="170" x2="240" y2="90" />
+      <line x1="240" y1="180" x2="300" y2="140" />
+      <line x1="305" y1="110" x2="310" y2="50" />
+      <path d="M 70,150 C 80,150 120,150 140,170 C 160,200 200,210 230,210 C 270,210 290,170 300,150" marker-end="url(#arrow)" stroke="blue" />
+      <path d="M 290,60 C 290,70 290,110 280,130 C 270,150 240,160 230,160 C 210,160 170,140 150,120 C 140,110 140,90 140,90" marker-end="url(#arrow)" stroke="blue" />
+    </g>
+  </svg>
+</div>
+
+<p>
+これを実現するには、2通りの方法がある:
+<a target="_blank" href="https://www.youtube.com/embed/-uuNf3_FZH0">回線交換</a> と
+<u>パケット通信</u>。
+インターネットを含む現在のコンピュータネットワークでは、
+パケット通信を使っている。
+
+<h4>インターネット以外に使われている (いた) ネットワーク規格</h4>
+<ul>
+<li> ATM (国内のみ)
+<li> AppleTalk (LAN のみ)
+<li> <u>OSI</u> (Open Systems Interconnection)
+<li> ...
+</ul>
+
+<h3 id="internet-layers">1.2. ネットワークの「階層」</h3>
+<p>
+ネットワークは構築するのが大変だ。(道路と同じ)
+<ul>
+<li> いろいろな端末・機器を変えたい。 =  送信機・受信機 (クライアント/端末) の自由
+<li> いろいろな用途に使いたい。 = 伝えたい「内容」 (アプリケーション) の自由
+<li> いろいろな伝送経路を使いたい。 = 伝送媒体 (メディア、“土管”) の自由
+</ul>
+
+<p>
+いくつかの取り替え可能な「部品」から作る。(ソフトウェアと同じ)
+あるレイヤーを使っている人は、その下の階層をよく知らない。
+そのため揶揄的に“土管”などと呼ばれる。
+
+<h4>OSIの7階層モデル</h3>
+<p>
+OSI はネットワーク規格としては普及しなかったが、
+その階層モデルはいまだ説明用によく言及されている。
+<ul>
+<li> ハードウェアおよびソフトウェアが 7つの層 (レイヤー) に分けて設計されている。
+<li> 各層 (レイヤー) の機能は、その下の層の機能に依存している。
+</ul>
+
+<ol>
+<li> 物理層
+<li> データリンク層
+<li> ネットワーク層 (= IP層に相当)
+<li> トランスポート層 (= TCP層に相当)
+<li> セッション層
+<li> プレゼンテーション層
+<li> アプリケーション層 (= アプリケーション層に相当)
+</ol>
+
+<h4>TCP/IPの4階層モデル</h4>
+<ul>
+<li> データリンク層 (レイヤー2)
+<li> IP層 (レイヤー3)
+<li> TCP層 (レイヤー4)
+<li> アプリケーション層 (レイヤー7)
+</ul>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="150" transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" />
+      <rect x="0" y="30" width="120" height="30" />
+      <rect x="0" y="60" width="120" height="30" />
+      <rect x="0" y="90" width="120" height="30" />
+      <line x1="60" y1="120" x2="60" y2="140" />
+      <line x1="-50" y1="140" x2="170" y2="140" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">アプリケーション層</text>
+      <text x="60" y="45" dy="0.5em">TCP層</text>
+      <text x="60" y="75" dy="0.5em">IP層</text>
+      <text x="60" y="105" dy="0.5em">データリンク層</text>
+      <text x="170" y="128" dy="0.5em">ケーブル</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+インターネットではデータリンク層と物理層を区別していない。
+また、アプリケーション層から上は「使う人が勝手に決める」。
+
+<p>
+テレビなどと比較すると、インターネットでは上の要素はどれも可変である。
+唯一の規格は送受信の方式だけ。そのため、
+インターネットは「自由なネットワークだ」といわれる。
+
+<h3 id="internet-datalink">1.3. データリンク層</h3>
+<p>
+すべての通信では、まずデータ (0/1 の列) をどうにかして
+別のコンピュータに送らねばならない。
+これがデータリンク層の役割である。
+<ul>
+<li> 長所: 伝送エラーがあった場合は自動的に再送される。
+<li> 短所: すぐ隣のホスト間でしか情報を送れない。
+</ul>
+
+いくつかの方法がある。
+
+<h4>イーサネット (Ethernet)</h4>
+<p>
+よく使われている方式のひとつ。
+電線あるいは光ファイバーを使って、
+接続されているすべてのホストに
+同じ情報を一斉に送る (ブロードキャスト)。
+
+<h4>無線LAN</h4>
+<p>
+電波を使って、すべてのホストに
+同じ情報を一斉に送る (ブロードキャスト)。
+そのためこれは電線を使わないイーサネットの一種とみなされている。
+
+<h4>海底ケーブル</h4>
+<p>
+ひとつ隣のホストは別の国である。
+
+<ul>
+<li> <a target="_blank" href="https://www.telegeography.com/telecom-resources/map-gallery/index.html">海底ケーブル地図</a>
+<li> <a target="_blank" href="https://en.wikipedia.org/wiki/SEA-ME-WE_3_%28cable_system%29">SEA-ME-WE</a>
+(全長39,000キロ、世界最長, 960Gbps)
+<li> <a target="_blank" href="https://web.archive.org/web/20210307133640/https://jpn.nec.com/info-square/mitatv/discover/01_sequel/index.html">海底ケーブルの秘密に迫る</a> (NEC)
+</ul>
+
+<h4>伝書鳩</h4>
+<p>
+どうにかして 0と1 さえ送れれば、電気を使わなくてもかまわない:
+<a target="_blank" href="https://web.archive.org/web/20160305114607/http://www.blug.linux.no/rfc1149/">http://www.blug.linux.no/rfc1149/</a>
+
+<h3 id="internet-ip">1.4. IP層 (ネットワーク層)</h3>
+<P>
+IP (Internet Protocol) 層の役割は、
+データリンク層の機能を使って、
+複数のホストを経由して離れたホストに<u>パケット</u>を送ることである。
+
+<ul>
+<li> 長所: 遠隔地のホストに情報を送れる。
+<li> 短所1: 1度に送れる情報は短いパケットだけ。
+<li> 短所2: パケットが正しく届けられる保証はない。
+</ul>
+
+<p>
+インターネット上のある「地点」とは、
+<u>IPアドレス</u> によって表現される。
+これは物理的な場所とは何の関係もない。
+IPアドレスは、4つの 8ビットの数で表す = 全世界で 8×4 = 32ビット。
+
+<h4>IPアドレスの例</h4>
+<ul>
+<li> <code>127.0.0.1</code>
+<li> <code>58.158.55.222</code>
+<li> <code>255.255.255.255</code>
+</ul>
+
+<h4>ルータ</h4>
+<p>
+IPパケットは、複数台のコンピュータを経由して転送される。
+このようなIPパケットを中継するコンピュータを
+<u>ルータ</u> (router) とよぶ。
+ルータは受けとったパケットをいったんメモリに保管し、
+適切な送り先に向けて送信する。
+
+<h3 id="internet-tcp">1.5. TCP層 (トランスポート層)</h3>
+<p>
+TCP (Transmission Control Protocol) 層は、
+IP層の機能を使って、
+送られてきたパケットをうまくつなぎ合わせて、長い 0/1 の列を送る。
+この機能を<u>仮想回線</u> (virtual circuit) という。
+<ul>
+<li> 長所1: 長い情報を遠隔地のホストに送れる。
+<li> 長所2: 途中で紛失したパケットは自動的に再送される。
+<li> 短所: 0/1 の列は送れるが、それ自体には意味がない。
+</ul>
+
+<p>
+パケットは途中で失われたり、二度届いたりする。
+TCP 層は途中で失われたパケットを再度、送ってもらうよう要求する。
+ここまでくると、インターネット上のあるコンピュータから別のコンピュータに
+「任意の長さの 0 と 1 の列」を送れるようになる。
+しかし、それをどう使うかはまだ決まっていない。
+
+<h3 id="internet-application">1.6. アプリケーション層</h3>
+<p>
+最後にアプリケーション層が、
+TCP層の機能を使って、
+0/1 の列を実際に意味がある方法で使う。
+例: ブラウザ、LINE、ゲームなど。
+<ul>
+<li> 長所: 最終的にユーザにとって意味のある「インターネット」になる。
+<li> 短所: 悪意あるルータがパケットを盗聴・なりすましをしてもわからない。
+</ul>
+
+
+<h2 id="datalink">2. データリンク層のしくみ</h2>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="150" transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" />
+      <rect x="0" y="30" width="120" height="30" />
+      <rect x="0" y="60" width="120" height="30" />
+      <rect x="0" y="90" width="120" height="30" fill="#88ff88" />
+      <line x1="60" y1="120" x2="60" y2="140" />
+      <line x1="-50" y1="140" x2="170" y2="140" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">アプリケーション層</text>
+      <text x="60" y="45" dy="0.5em">TCP層</text>
+      <text x="60" y="75" dy="0.5em">IP層</text>
+      <text x="60" y="105" dy="0.5em">データリンク層</text>
+      <text x="170" y="128" dy="0.5em">ケーブル</text>
+    </g>
+  </svg>
+</div>
+<p>
+過去には、FDDI や Token Ring など、いろいろな方式があった。
+現在ではおもに <u>イーサネット</u> (Ethernet) が使われている。
+これは "IEEE 802" という規格で定義されている。
+
+<h3 id="datalink-mac">2.1. 物理アドレス (MACアドレス)</h3>
+<p>
+Ethernet では、接続されている各機器はホストではなく
+「<u>ノード</u>」
+と呼ぶ。各機器には固有の物理アドレス
+(あるいは <u>MACアドレス</u>) がついており、
+これは製造時に決まっている。
+MACアドレスは 48ビット (8ビット×6) で、これは
+<code>08-00-27-16-f3-c3</code> のように 6組の 16進数で表される。
+
+<div class=exercise id="ex-1">
+<div class=header>演習 1.</div>
+<p>
+自分のパソコンについている Ethernet の MAC アドレスを調べよ。
+</div>
+
+<h3 id="datalink-duplex">2.2. 通信方式</h3>
+<p>
+Ethernet ではおもに 2つの通信方式がある:
+<ul>
+<li> 半二重 (Half-duplex) … 共有のケーブルを使った通信。
+<li> 全二重 (Full-duplex) … 1対1の通信 (現在の主流)。
+</ul>
+<p>
+1本のケーブルを複数のノードで共有している場合は、
+<u>ブロードキャスト</u>が基本である。
+
+<h4>Ethernetのルール (半二重)</h4>
+<ol>
+<li> 喋りたいときに「あの〜」と言う。
+<li> 他の誰か喋ってたら、喋るのをやめてしばらく待つ。
+</ol>
+
+<h4>Ethernetのルール (全二重)</h4>
+<ol>
+<li> 喋りたいときに喋り、そのまま喋り続けてよい。
+<li> 通信は <u>スイッチング・ハブ</u> (switching hub)
+または単に <u>スイッチ</u> あるいは <u>ハブ</u>
+と呼ばれる機器で中継される。
+</ol>
+
+<div class=notice>
+注意:
+中継器はホストではない。
+これ自体はMACアドレスを持っていないし、通信もできない。
+</div>
+
+<h3 id="datalink-frame">2.3. Ethernetフレーム</h3>
+<p>
+Ethernet を使って別のノードにデータを送るときは、
+以下のような順序で 0 と 1 を送ることになっている。
+このような決まりを<u>プロトコル</u> (Protocol, 規約) という。
+なぜか Ethernet では「パケット」ではなく
+<u>フレーム</u> と呼ばれている。
+通常、Ethernet で一度に送れるフレームは最高 1500バイトまてである。
+
+<h4>Ethernet フレームの構造</h4>
+<table border>
+<tr>
+<td class=bits>10101010</td>
+<td>...</td>
+<td class=bits>10101011</td>
+<td class=bgb>送信先アドレス<br>(6バイト)</td>
+<td class=bgy>送信元アドレス<br>(6バイト)</td>
+<td>データ長<br>(2バイト)</td>
+<td class=bgr>実際のデータ<br>(46〜1500バイト)</td>
+<td class=bgg>CRC<br>(4バイト)</td>
+<td class=bits>00000000</td>
+</tr>
+</table>
+
+<ol>
+<li> 最初の 010101... (56回) が以後のクロックの代わりになる。
+<li> <span class=bgb>送信先アドレス</span> は MAC アドレスである
+(例. <code>aa-bb-cc-dd-ee-ff</code> など)。
+<li> <span class=bgy>送信元アドレス</span> は MAC アドレスである
+(例. <code>01-02-03-04-05-06</code> など)。
+<li> その後、データの長さを 2バイト (=16 ビット) で送る。
+(実際にはデータの長さが直接指定される場合と、
+「パケットの種類」を指定する場合がある。)
+<li> その後、<span class=bgr>実際のデータ</span> を送る。
+<li> 最後に、エラー検査のための <span class=bgg>CRC</span> を送る。
+</ol>
+</div>
+
+<div class=exercise id="ex-2">
+<div class=header>演習 2.</div>
+<p>以下の Ethernet フレームについて問いに答えよ:
+<blockquote><pre>
+06 e6 76 53 06 c8 04 e6 76 53 06 c8 00 05 11 22 33 44 55 aa bb cc dd
+</pre></blockquote>
+  <ol type=a>
+    <li> 送信元MACアドレスは何か?
+    <li> 送信先MACアドレスは何か?
+    <li> 実際のデータは何バイトか?
+    <li> そのデータは何か?
+    <li> CRCの値は何か?
+  </ol>
+</div>
+
+<h2 id="ip">3. IP層 (ネットワーク層) のしくみ</h2>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="150" transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" />
+      <rect x="0" y="30" width="120" height="30" />
+      <rect x="0" y="60" width="120" height="30" fill="#88ff88" />
+      <rect x="0" y="90" width="120" height="30" />
+      <line x1="60" y1="120" x2="60" y2="140" />
+      <line x1="-50" y1="140" x2="170" y2="140" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">アプリケーション層</text>
+      <text x="60" y="45" dy="0.5em">TCP層</text>
+      <text x="60" y="75" dy="0.5em">IP層</text>
+      <text x="60" y="105" dy="0.5em">データリンク層</text>
+      <text x="170" y="128" dy="0.5em">ケーブル</text>
+    </g>
+  </svg>
+</div>
+<p>
+データリンク層 (Ethernet) の機能を使うと、
+データを (1500 バイト以下ならば) 信頼できる方法で
+隣のホストに送信できることがわかった。
+Ethernet では基本的にどんなデータを送ってもよいが、
+たいていは以下で説明する
+<u>IPパケット</u> の内容が送られている。
+
+<table border>
+<tr>
+<td class=bits>10101010</td>
+<td>...</td>
+<td class=bits>10101011</td>
+<td>送信元アドレス</td>
+<td>送信先アドレス</td>
+<td>データ
+長</td>
+<td class=bgr>IPパケット</td>
+<td>CRC</td>
+<td class=bits>00000000</td>
+</tr>
+</table>
+
+<p>
+データリンク層の機能を使って IP パケットの 0/1 を受けとったら、
+つぎにこれを次々に隣のホストに転送していくのが IP層 (ネットワーク層) の
+役割である。
+
+<h3 id="ip-addr">3.1. IPアドレス</h3>
+<p>
+IP アドレスは 32ビットで表現する。
+これはふつう 4つの8ビット数 (0〜255) の組として表記する。
+<ul>
+<li> <code>127.0.0.1</code>
+<li> <code>58.158.55.222</code>
+<li> <code>255.255.255.255</code>
+<li> <code>343.45.687.90</code> (間違い)
+</ul>
+
+<div class=notice>
+注意:
+MACアドレスが通常ホストごとに固有なのに対して、
+IPアドレスは変化する。
+</div>
+
+<div class=exercise id="ex-3">
+<div class=header>演習 3.</div>
+<p>
+自分のパソコンについている IP アドレスを調べよ。
+</div>
+
+<h3 id="ip-packet">3.2. IPパケット</h3>
+
+<h4>IP パケットの構造:</h4>
+<table border>
+<tr>
+<th></th>
+<th style="width:8em;">0</th>
+<th style="width:8em;">1</th>
+<th style="width:8em;">2</th>
+<th style="width:8em;">3</th>
+</tr>
+<tr>
+<th>0</th>
+<td align=center>バージョン/ヘッダ長</td>
+<td align=center>タイプ</td>
+<td align=center colspan="2">パケット長</td>
+</tr>
+<tr>
+<th>4</th>
+<td align=center colspan="2">識別子</td>
+<td align=center colspan="2">フラグ</td>
+</tr>
+<tr>
+<th>8</th>
+<td align=center>TTL</td>
+<td align=center>プロトコル番号</td>
+<td align=center colspan="2">チェックサム</td>
+</tr>
+<tr>
+<th>12</th>
+<td align=center colspan="4">送信元アドレス</td>
+</tr>
+<tr>
+<th>16</th>
+<td align=center colspan="4">送信先アドレス</td>
+</tr>
+<tr>
+<th>20</th>
+<td align=center colspan="3">オプション</td>
+<td align=center>パディング</td>
+</tr>
+<tr>
+<th>24</th>
+<td align=center colspan="4">実際のデータ<br>...</td>
+</tr>
+</table>
+</div>
+
+<p>
+各IPパケットにはデータ以外の余分な情報 (宛先など) がついている。
+これを <u>IPヘッダ</u> という。
+ヘッダは毎回かならず一定の大きさであり、すべてのパケットに含まれる。
+
+<h3 id="ip-routing">3.3. ルーティング (Routing)</h3>
+<p>
+IPパケットは、複数台のコンピュータを経由して転送される。
+このようなIPパケットを転送するコンピュータを「ルータ (router)」とよぶ。
+<p>
+ルータは受けとったパケットをいったんメモリに保管し、
+適切な送り先に向けて送信する。
+<ul>
+<li> 家庭用のルータ (1つの回線からくるパケットを複数台のPCに転送する)
+<li> 業務用ルータ (複数の回線とつなぐ、ISPなどで使われる)<br>
+たとえば
+<a target="_blank" href="https://www.cisco.com/c/en/us/products/routers/8000-series-routers/index.html">Cisco 8000</a>
+など。(10Tbps〜200Tbps)
+</ul>
+<p>
+MACアドレスは各機器に固有なのに対して、
+IPアドレスはそのホストが「勝手に名乗っているだけ」である。
+つまり、世界中のどこにいるかわからないホストに対して、
+ルータはIPパケットを正確に転送しなければならない。
+しかも、コンピュータから見ると、インターネットの
+世界の正確な全体像はわからない。
+<div class=nop>
+<ul>
+<li> <a target="_blank" href="https://personalpages.manchester.ac.uk/staff/m.dodge/cybergeography/atlas/topology.html">Atlas of Cyberspaces</a>
+<li> <a target="_blank" href="https://www.opte.org/the-internet">The Internet 1997 - 2021</a>
+</ul>
+</div>
+
+<h3 id="ip-cidr">3.4. CIDR 方式</h3>
+<p>
+小さな組織 (自宅・会社・学校) で、ネットワークが
+階層構造 (ツリー構造) になっているときに使える方法。
+<p>
+各ホストは、以下の情報をあらかじめ知っている (設定してある):
+<ul>
+<li> 「送り先がこの範囲の IPアドレスなら、この Ethernet に送るべし」
+<li> 「送り先がそれ以外なら、この特定のホストに送るべし」
+</ul>
+<p>
+ある範囲の IPアドレスのことを、
+サブネットワークまたは <u>サブネット</u> (subnet) という。
+
+<h4>末端の (ルータでない) ホストの場合:</h4>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="340" height="120">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="60" y="0" />
+      <use xlink:href="#computer" x="10" y="60" />
+      <use xlink:href="#computer" x="100" y="60" />
+      <use xlink:href="#computer" x="190" y="60" />
+      <line x1="0" y1="55" x2="260" y2="55" />
+      <line x1="35" y1="65" x2="35" y2="55" />
+      <line x1="125" y1="65" x2="125" y2="55" />
+      <line x1="215" y1="65" x2="215" y2="55" />
+      <line x1="85" y1="45" x2="85" y2="55" />
+    </g>
+    <g style="font-size: 80%;">
+      <text x="110" y="30">ルータ</text>
+      <text x="110" y="10">192.168.1.1</text>
+      <text x="270" y="60">192.168.1.0</text>
+      <text x="250" y="90">ホスト</text>
+      <g text-anchor="middle">
+	<text x="35" y="120">192.168.1.2</text>
+	<text x="125" y="120">192.168.1.3</text>
+	<text x="215" y="120">192.168.1.4</text>
+      </g>
+    </g>
+  </svg>
+</div>
+
+<p>
+末端のホストは、ひとつのサブネットに接続している。
+これは次のような方法でIPパケットを転送する:
+<ul>
+<li> もし、送り先のIPアドレスが自分と同じサブネット上にある場合は、
+そのまま Ethernet に送る。
+<li> 送り先のIPアドレスがそれ以外の場合は、
+<u>デフォルト ゲートウェイ</u> に送る。
+</ul>
+
+<div class=figure>
+<img src="netcpl.png">
+</div>
+
+<h4>ルータの場合:</h4>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="340" height="120">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="40" y="-5" />
+      <use xlink:href="#computer" x="120" y="60" />
+      <line x1="0" y1="115" x2="260" y2="115" />
+      <line x1="0" y1="50" x2="260" y2="50" />
+      <line x1="145" y1="105" x2="145" y2="115" />
+      <line x1="145" y1="65" x2="145" y2="50" />
+      <line x1="65" y1="40" x2="65" y2="50" />
+    </g>
+    <g style="font-size: 80%;">
+      <text x="180" y="95">ルータ</text>
+      <text x="180" y="75">192.168.1.1</text>
+      <text x="270" y="120">192.168.1.0</text>
+      <text x="270" y="50">192.168.2.0</text>
+      <text x="100" y="10">192.168.2.1</text>
+      <text x="100" y="30">ルータ</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+ルータは、少なくとも 2つのサブネットに接続している。
+これは次のような方法でIPパケットを転送する:
+<ul>
+<li> もし、送り先のIPアドレスが自分に接続されているサブネットの
+どれかにある場合は、その Ethernet に送る。
+<li> それ以外の場合は、<u>デフォルト ゲートウェイ</u> に送る。
+</ul>
+
+<!--
+<h4>Ethernet のブロードキャストと ARP</h4>
+<p>
+Ethernet の送信先アドレスとして、
+<code>ff-ff-ff-ff-ff-ff</code> という MAC アドレスを使うと、
+ハブにつながっているすべてのノードに対して送信したことになる
+(ブロードキャスト)。
+Ethernet 上の各ノードは、
+一定時間ごとに、ARP (Address Resolution Protocol) と呼ばれるパケットを
+Ethernet の全ノード対して送る。ここには、そのノードの MAC アドレスと、
+そのコンピュータの IP アドレスが含まれており、各ホストは
+その情報を覚えておいて IP パケット送信時に使う。
+-->
+
+<h4>サブネット・マスクとネットワーク・アドレス</h4>
+<p>
+あるIPアドレスが特定の「サブネット」に所属しているかどうかは、
+以下のようにして決定する:
+<ol>
+<li> そのIPアドレスを 32ビットの 2進数表記にする。
+<li> <u>サブネット・マスク</u>
+ (subnet mask あるいは netmask) の 32ビット値と AND をとる。<br>
+  (つまり、マスクが 0 になっている部分のビットを無視する)
+<li> 残ったアドレスがその IPアドレスの
+  <u>ネットワーク・アドレス</u> (network address) である。
+  これがそのサブネットのアドレスに等しければ、
+  その IP アドレスはサブネットに属する。
+</ol>
+
+<table border><tr>
+<th>IP アドレス</th>
+<td><code>11110000 10101000 00000001 00000010</code></td>
+<td>(192.168.1.2)</td>
+</tr><tr>
+<th>サブネット・マスク</th>
+<td><code>11111111 11111111 11111111 00000000</code></td>
+<td>(255.255.255.0)</td>
+</tr><tr>
+<th>ネットワーク・アドレス</th>
+<td><code>11110000 10101100 00000001 00000000</code></td>
+<td>(192.168.1.0)</td>
+</tr></table>
+
+<p>
+サブネット・マスクは基本的には IP アドレスと同様に4組の 10進数で表す。
+しかし、基本的には「1の部分」と「0の部分」だけなので、
+ただ単に 1の個数を「<code>/24</code>」のように表すことも多い。
+<ul>
+<li> 表記1 … <code>255.255.255.0</code>
+<li> 表記2 … <code>/24</code>
+</ul>
+
+<div class=formula>
+基本的には、IPアドレスの先頭部分がネットワーク・アドレスである。
+</div>
+
+<div class=exercise id="ex-4">
+<div class=header>演習 4.</div>
+<p>
+以下の IP アドレスに対するネットワークアドレスを求めよ。
+<ul>
+<li> 10.0.1.3/8
+<li> 128.122.100.181/16 (255.255.0.0)
+<li> 192.168.1.9/24 (255.255.255.0)
+<li> 166.84.7.52/30 (255.255.255.252)
+</ul>
+</div>
+
+<h3 id="ip-wan">3.5. 広域レベルでのルーティング</h3>
+<p>
+ネットワークがさらに複雑な場合は、
+各ルータが「このネットワークはこっち」という<u>経路情報</u>
+(ルーティング情報) をたえず交換している。
+ちなみに、この情報もまた TCP/IP を使って送られる。
+おもに 2つの方式がある:
+<ul>
+<li> リンク・ステート方式 (Link state routing)
+<li> 経路ベクトル方式 (Path vector routing)
+</ul>
+
+<h4>リンク・ステート方式</h4>
+<p>
+中規模の組織で利用される。各ルータは、ネットワーク上のホストが
+どのように接続されているか定期的に調査し、ネットワークの「地図」を作成する。
+ここから各ホスト間の最短経路を計算する。
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="220" height="220">
+<g transform="translate(10,10)">
+<g fill="none" stroke="black" stroke-width="2">
+ <line x1="153" y1="144" x2="149" y2="37" />
+ <line x1="153" y1="144" x2="76" y2="171" />
+ <line x1="85" y1="71" x2="76" y2="171" />
+ <line x1="153" y1="144" x2="85" y2="71" />
+ <line x1="190" y1="190" x2="149" y2="37" />
+ <line x1="10" y1="10" x2="34" y2="50" />
+ <line x1="76" y1="171" x2="34" y2="50" />
+ <line x1="190" y1="190" x2="153" y2="144" />
+ <line x1="190" y1="190" x2="76" y2="171" />
+ <line x1="10" y1="10" x2="22" y2="105" />
+ <line x1="149" y1="37" x2="34" y2="50" />
+ <line x1="10" y1="10" x2="149" y2="37" />
+ <line x1="85" y1="71" x2="34" y2="50" />
+</g>
+<g fill="white" stroke="black">
+ <circle cx="10" cy="10" r="4" />
+ <circle cx="22" cy="105" r="4" />
+ <circle cx="34" cy="50" r="4" />
+ <circle cx="76" cy="171" r="4" />
+ <circle cx="85" cy="71" r="4" />
+ <circle cx="149" cy="37" r="4" />
+ <circle cx="153" cy="144" r="4" />
+ <circle cx="190" cy="190" r="4" />
+</g>
+<g text-anchor="middle">
+<g fill="blue" style="font-weight:bold;">
+<text x="0" y="10">A</text>
+<text x="20" y="125">B</text>
+<text x="30" y="70">C</text>
+<text x="70" y="190">D</text>
+<text x="85" y="65">E</text>
+<text x="160" y="30">F</text>
+<text x="135" y="145">G</text>
+<text x="200" y="200">Z</text>
+</g>
+<text x="10" y="67">4</text>
+<text x="25" y="30">2</text>
+<text x="45" y="105">8</text>
+<text x="59" y="65">2</text>
+<text x="75" y="121">5</text>
+<text x="79" y="23">7</text>
+<text x="91" y="43">4</text>
+<text x="119" y="100">4</text>
+<text x="114" y="157">4</text>
+<text x="133" y="178">3</text>
+<text x="145" y="90">5</text>
+<text x="173" y="165">5</text>
+<text x="175" y="113">7</text>
+</g>
+</g>
+</svg>
+</div>
+
+<h4>経路ベクトル方式</h4>
+<p>
+さらに大規模なルーティングに使われる方式。
+インターネットを各自律システム (<u>Autonomous System</u>, AS) に分け、
+AS 間での経路情報を交換する。世界には約5万のASがあり、相互に協力している。
+
+<ul class=nop>
+<li> <a target="_blank" href="https://en.wikipedia.org/wiki/File:SRI_First_Internetworked_Connection_diagram.jpg">初期のインターネットの構造</a>
+<li> <a target="_blank" href="http://www.topology-zoo.org/explore.html">各ASの物理的な配線</a>
+<li> <a target="_blank" href="https://www.cidr-report.org/as2.0/">全世界におけるAS情報</a>
+<li> <a target="_blank" href="https://atlas.ripe.net/results/maps/">RIPE Atlas</a>
+</ul>
+
+<p>
+各ASは <u>BGP</u> (Border Gateway Protocol) という手順で
+「このネットワークはこっち」という経路情報を交換している。
+全世界の細かい地図を把握できるわけではなく、
+「だいたいこっちの方に送れば正しいだろう」という程度の情報しかわからない。
+
+<h4>大規模なルータに要求される性能</h4>
+<ul>
+ <li> 1Tbps = 毎秒100Gバイト消費。
+ <li> 最高30秒間保持する = 3Tバイトのメモリが必要。
+ <li> 1パケット 1000バイトとすると、毎秒 1Gパケット。
+ <li> 毎秒1G回: 32ビットアドレスを照合 (32Gバイトのメモリ比較)。
+ <li> 絶対に止まってはいけない。
+</ul>
+<p>
+業務用ルータ1台は、通常のパソコン数百台分の性能をもっている。
+アドレスの照合のために、TCAMという特別なメモリが使われている。
+
+<div class=exercise id="ex-5">
+<div class=header>演習 5.</div>
+<p>
+以下は Ethernet 上で送られるフレームに含まれる
+IPパケットの実際のデータを表したものである (<span class=bgy>黄色部分</span>)。
+<a href="#ip-packet">上の図</a>を参考にして、以下の情報を求めよ:
+<blockquote><pre>
+0000 94 09 37 28 5b d5 00 23 81 1a f2 8d 08 00 <span class=bgy>45 00
+0010 00 34 6b 7f 40 00 80 06 00 00 c0 a8 00 0c c0 a8
+0020 01 01 c9 34 00 17 25 d0 1e c0 00 00 00 00 80 02
+0030 20 00 82 84 00 00 02 04 05 b4 01 03 03 08 01 01
+0040 04 02</span>
+</pre></blockquote>
+<ol type=a>
+<li> 送信元の IPアドレス
+<li> 送信先の IPアドレス
+<li> IP パケットの大きさ (バイト数)
+</ol>
+</div>
+
+
+<h2 id="tcp">4. TCP層 (トランポート層) のしくみ</h2>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="150" transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" />
+      <rect x="0" y="30" width="120" height="30" fill="#88ff88" />
+      <rect x="0" y="60" width="120" height="30" />
+      <rect x="0" y="90" width="120" height="30" />
+      <line x1="60" y1="120" x2="60" y2="140" />
+      <line x1="-50" y1="140" x2="170" y2="140" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">アプリケーション層</text>
+      <text x="60" y="45" dy="0.5em">TCP層</text>
+      <text x="60" y="75" dy="0.5em">IP層</text>
+      <text x="60" y="105" dy="0.5em">データリンク層</text>
+      <text x="170" y="128" dy="0.5em">ケーブル</text>
+    </g>
+  </svg>
+</div>
+<p>
+IP層の機能を使うと、世界の離れた場所にパケットを送ることができる。
+しかしこれはまだ信頼性がなく、長いデータも送れない。
+そこで IPパケットをうまくつなぎ合わせて、長い 0/1 の列を送る仕組みを考える。
+これが TCP 層の機能である。IPパケットの中には、そのための
+TCPパケットがさらに入っている。
+
+<h4>TCP パケットの構造:</h4>
+<table border>
+<tr>
+<th></th>
+<th style="width:8em;">0</th>
+<th style="width:8em;">1</th>
+<th style="width:8em;">2</th>
+<th style="width:8em;">3</th>
+</tr>
+<tr>
+<th>0</th>
+<td align=center colspan="2">送り元ポート</td>
+<td align=center colspan="2">送り先ポート</td>
+</tr>
+<tr>
+<th>4</th>
+<td align=center colspan="4">シーケンス番号</td>
+</tr>
+<tr>
+<th>8</th>
+<td align=center colspan="4">確認応答(ACK)番号</td>
+</tr>
+<tr>
+<th>12</th>
+<td align=center colspan="2">フラグ</td>
+<td align=center colspan="2">ウィンドウサイズ</td>
+</tr>
+<tr>
+<th>16</th>
+<td align=center colspan="2">チェックサム</td>
+<td align=center colspan="2">緊急ポインタ</td>
+</tr>
+<tr>
+<th>20</th>
+<td align=center colspan="4">オプション</td>
+</tr>
+<tr>
+<th>24</th>
+<td align=center colspan="4">実際のデータ<br>...</td>
+</tr>
+</table>
+</div>
+
+<p>
+TCP 層では、<u>シーケンス番号</u>
+(sequence number) により長いデータのパケットを区別する。
+さらに各通信は <u>送り元ポート番号</u> と
+<u>送り先ポート番号</u> によって区別されており、
+これらが違うパケットは別々の列とみなされる。
+
+<div class=exercise id="ex-5">
+<div class=header>演習 6.</div>
+<p>
+上の IPパケットから TCP パケットの部分
+(<span class=bgy>緑色部分</span>) を抜き出し、
+以下の情報を求めよ:
+<blockquote><pre>
+0000 94 09 37 28 5b d5 00 23 81 1a f2 8d 08 00 45 00
+0010 00 34 6b 7f 40 00 80 06 00 00 c0 a8 00 0c c0 a8
+0020 01 01 <span class=bgg>c9 34 00 17 25 d0 1e c0 00 00 00 00 80 02
+0030 20 00 82 84 00 00 02 04 05 b4 01 03 03 08 01 01
+0040 04 02</span>
+</pre></blockquote>
+<ol type=a>
+<li> 送信元ポート
+<li> 送信先ポート
+<li> シーケンス番号
+</ol>
+</div>
+
+<h3 id="tcp-details">4.1 TCPの詳細</h3>
+
+<h4>TCP ACKパケット</h4>
+<p>
+TCP で通信をしていると、
+実際には一方的にデータを受けとっているときでも
+帰りのパケットが送られている。これが
+TCP <u>ACK</u> パケット
+(あるいは <u>確認応答</u> パケット) である。
+
+<ul>
+<li> 送り側のホストは、「ここまで送った」という
+<u>シーケンス番号</u> (<u>seq</u>uence number)
+をつけてパケットを送る。
+<li> 受け側のホストは、「ここまで受けとった」という
+<u>確認応答番号</u> (<u>ack</u>nowledge number)
+をつけたパケットを返す。
+<table border>
+<tr>
+<th></th>
+<th style="width:4em;">0</th>
+<th style="width:4em;">1</th>
+<th style="width:4em;">2</th>
+<th style="width:4em;">3</th>
+</tr>
+<tr>
+<th>4</th>
+<td class=bgg align=center colspan="4">シーケンス番号</td>
+</tr>
+<tr>
+<th>8</th>
+<td class=bgg align=center colspan="4">確認応答(ACK)番号</td>
+</tr>
+</table>
+<li> しばらくの間、確認応答パケットが来なかったら、
+  送り側は届かなかったパケットをまた送り直す。
+</ul>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="350" height="88">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="0" y="0" />
+      <use xlink:href="#computer" x="300" y="0" />
+      <line x1="60" y1="32" x2="290" y2="32" />
+      <rect x="100" y="2" width="30" height="20" />
+      <rect x="150" y="2" width="30" height="20" />
+      <rect x="200" y="2" width="30" height="20" stroke-dasharray="2,2" />
+      <rect x="250" y="2" width="30" height="20" />
+      <rect x="180" y="42" width="30" height="20" />
+      <rect x="130" y="62" width="30" height="20" />
+      <g marker-end="url(#arrow)" stroke-width="4">
+        <line x1="90" x2="70" y1="12" y2="12" />
+        <line x1="220" x2="240" y1="52" y2="52" />
+        <line x1="170" x2="190" y1="72" y2="72" />
+      </g>
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="115" y="12" dy="0.5em">1</text>
+      <text x="165" y="12" dy="0.5em">8</text>
+      <text x="215" y="12" dy="0.5em">13</text>
+      <text x="265" y="12" dy="0.5em">29</text>
+      <text x="195" y="52" dy="0.5em">1</text>
+      <text x="145" y="72" dy="0.5em">8</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+実際には、TCPの通信では双方向にパケットが送られる。
+<table border>
+<tr><td>seq=<u>1</u>, ack=1, (10バイト) →</td><td></td></tr>
+<tr><td></td><td>← seq=1, ack=<u>11</u>, (5バイト)</td></tr>
+<tr><td>seq=<u>11</u>, ack=<u>6</u>, (0バイト) →</td><td></td></tr>
+<tr><td></td><td>← seq=<u>6</u>, ack=<u>11</u>, (3バイト)</td></tr>
+<tr><td>seq=<u>11</u>, ack=<u>9</u>, (1バイト) →</td><td></td></tr>
+<tr><td></td><td>← seq=<u>9</u>, ack=<u>12</u>, (0バイト)</td></tr>
+</table>
+
+<h4>TCP SYN パケットとハンドシェイク</h4>
+<p>
+実際の長いデータには、始まりと終わりがある。
+TCP パケットには、データの「始まり」を示す
+特別なパケット (SYNパケット) がある。
+これは TCP パケットの「フラグ」部分にある
+「SYN」ビットを 1 にしたパケットを使う。
+<table border>
+<tr>
+<th></th>
+<th style="width:4em;">0</th>
+<th style="width:4em;">1</th>
+<th style="width:4em;">2</th>
+<th style="width:4em;">3</th>
+</tr>
+<tr>
+<th>12</th>
+<td align=center class=bgg colspan="2">フラグ</td>
+<td align=center colspan="2">ウィンドウサイズ</td>
+</tr>
+</table>
+
+<p>
+実際のTCP通信は、以下のようにして開始する。
+この処理を <u>TCPハンドシェイク</u>
+(TCP 握手) という。
+
+<ol>
+<li> 送り側が TCP SYN パケットを送る。
+<li> 受け側が TCP SYN+ACK パケットを送る。
+<li> 送り側が TCP ACK パケットを送る。
+<li> 送り側、受け側ともに seq=1, ack=1 で通信を始める。
+</ol>
+
+<div class=notice>
+注意: ここでいう「ACKフラグ」は、
+各パケットに含まれる確認応答(ACK)番号とは別である。
+</div>
+
+<h3 id="tcp-udp">4.2. UDP層</h3>
+<p>
+TCP層は便利だが、いくつか欠点がある:
+<ul>
+<li> 最初のハンドエシェイクに時間がかかる。
+<li> あるパケットが届かなかったら、絶対に送り直さねばならない。
+</ul>
+
+<p>
+これに対して、TCP層のかわりに
+<u>UDP</u> (User Datagram Protocol)
+層というものを使うこともできる。
+これはIP層を使っているが、
+TCPとは別の方法で通信をおこなう。
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="150" transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" />
+      <rect x="0" y="30" width="60" height="30" fill="#ffaaff" />
+      <rect x="60" y="30" width="60" height="30" fill="#aaffff" />
+      <rect x="0" y="60" width="120" height="30" />
+      <rect x="0" y="90" width="120" height="30" />
+      <line x1="60" y1="120" x2="60" y2="140" />
+      <line x1="-50" y1="140" x2="170" y2="140" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">アプリケーション層</text>
+      <text x="30" y="45" dy="0.5em">TCP層</text>
+      <text x="90" y="45" dy="0.5em">UDP層</text>
+      <text x="60" y="75" dy="0.5em">IP層</text>
+      <text x="60" y="105" dy="0.5em">データリンク層</text>
+      <text x="170" y="128" dy="0.5em">ケーブル</text>
+    </g>
+  </svg>
+</div>
+
+<h4>UDPの用途</h4>
+<ul>
+<li> 動画の実況中継など、パケットを落とすよりもリアルタイム性が重要なもの。
+<li> ゲームなど、速い反応が要求されるもの。
+</ul>
+
+<h4>UDPの欠点</h4>
+<ul>
+<li> 信頼性がない。(ロスしたらそれで終わり)
+<li> 大きなデータは送れない。
+</ul>
+
+<h4>TCPパケットの場合</h4>
+<table border>
+<tr>
+<th></th>
+<th style="width:8em;">0</th>
+<th style="width:8em;">1</th>
+<th style="width:8em;">2</th>
+<th style="width:8em;">3</th>
+</tr>
+<tr>
+<th>8</th>
+<td align=center>TTL</td>
+<td class=bgg align=center>プロトコル番号 (6)</td>
+<td align=center colspan="2">チェックサム</td>
+</tr>
+</table>
+</div>
+
+<h4>UDPパケットの場合</h4>
+<table border>
+<tr>
+<th></th>
+<th style="width:8em;">0</th>
+<th style="width:8em;">1</th>
+<th style="width:8em;">2</th>
+<th style="width:8em;">3</th>
+</tr>
+<tr>
+<th>8</th>
+<td align=center>TTL</td>
+<td class=bgg align=center>プロトコル番号 (17)</td>
+<td align=center colspan="2">チェックサム</td>
+</tr>
+</table>
+</div>
+
+
+<hr>
+<address>Yusuke Shinyama</address>
