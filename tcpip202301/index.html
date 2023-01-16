@@ -9,7 +9,7 @@ body { line-height: 1.5; }
 h1 { border-bottom: solid 4px #000088; }
 h2 { border-bottom: solid 2px #000088; }
 h3 { border-bottom: solid 1px #000088; }
-table { border-collapse: collapse; }
+table { border-collapse: collapse; margin-left: auto; margin-right: auto; }
 td { padding: 4px; }
 kbd { outline: 1px solid black; padding: 2px; }
 pre { outline: 1px solid black; padding: 4px; overflow: auto; }
@@ -53,6 +53,7 @@ Yusuke Shinyama, Jan. 2023
 <li> <a href="#datalink">データリンク層のしくみ</a>
 <li> <a href="#ip">IP層 (ネットワーク層) のしくみ</a>
 <li> <a href="#tcp">TCP層 (トランスポート層) のしくみ</a>
+<li> <a href="#application">アプリケーション層</a>
 </ol>
 
 
@@ -326,8 +327,8 @@ Ethernet では、接続されている各機器はホストではなく
 MACアドレスは 48ビット (8ビット×6) で、これは
 <code>08-00-27-16-f3-c3</code> のように 6組の 16進数で表される。
 
-<div class=exercise id="ex-1">
-<div class=header>演習 1.</div>
+<div class=exercise id="ex-mac-addr">
+<div class=header>演習. MACアドレスを調べる</div>
 <p>
 自分のパソコンについている Ethernet の MAC アドレスを調べよ。
 </div>
@@ -369,7 +370,7 @@ Ethernet を使って別のノードにデータを送るときは、
 以下のような順序で 0 と 1 を送ることになっている。
 このような決まりを<u>プロトコル</u> (Protocol, 規約) という。
 なぜか Ethernet では「パケット」ではなく
-<u>フレーム</u> と呼ばれている。
+<u>フレーム</u> (frame) と呼ばれている。
 通常、Ethernet で一度に送れるフレームは最高 1500バイトまてである。
 
 <h4>Ethernet フレームの構造</h4>
@@ -401,8 +402,8 @@ Ethernet を使って別のノードにデータを送るときは、
 </ol>
 </div>
 
-<div class=exercise id="ex-2">
-<div class=header>演習 2.</div>
+<div class=exercise id="ex-ethernet-frame">
+<div class=header>演習. Ethernetフレームの中身</div>
 <p>以下の Ethernet フレームについて問いに答えよ:
 <blockquote><pre>
 06 e6 76 53 06 c8 04 e6 76 53 06 c8 00 05 11 22 33 44 55 aa bb cc dd
@@ -483,8 +484,8 @@ MACアドレスが通常ホストごとに固有なのに対して、
 IPアドレスは変化する。
 </div>
 
-<div class=exercise id="ex-3">
-<div class=header>演習 3.</div>
+<div class=exercise id="ex-ip-addr">
+<div class=header>演習. 自分のIPアドレスを調べる</div>
 <p>
 自分のパソコンについている IP アドレスを調べよ。
 </div>
@@ -541,6 +542,26 @@ IPアドレスは変化する。
 各IPパケットにはデータ以外の余分な情報 (宛先など) がついている。
 これを <u>IPヘッダ</u> という。
 ヘッダは毎回かならず一定の大きさであり、すべてのパケットに含まれる。
+
+<div class=exercise id="ex-ip-packet">
+<div class=header>演習. IPパケットの中身</div>
+<p>
+以下は Ethernet 上で送られるフレームに含まれる
+IPパケットの実際のデータを表したものである (<span class=bgy>黄色部分</span>)。
+<a href="#ip-packet">上の図</a>を参考にして、以下の情報を求めよ:
+<blockquote><pre>
+0000 94 09 37 28 5b d5 00 23 81 1a f2 8d 08 00 <span class=bgy>45 00
+0010 00 34 6b 7f 40 00 80 06 00 00 c0 a8 00 0c c0 a8
+0020 01 01 c9 34 00 17 25 d0 1e c0 00 00 00 00 80 02
+0030 20 00 82 84 00 00 02 04 05 b4 01 03 03 08 01 01
+0040 04 02</span>
+</pre></blockquote>
+<ol type=a>
+<li> 送信元の IPアドレス
+<li> 送信先の IPアドレス
+<li> IP パケットの大きさ (バイト数)
+</ol>
+</div>
 
 <h3 id="ip-routing">3.3. ルーティング (Routing)</h3>
 <p>
@@ -736,16 +757,37 @@ Ethernet の全ノード対して送る。ここには、そのノードの MAC 
 基本的には、IPアドレスの先頭部分がネットワーク・アドレスである。
 </div>
 
-<div class=exercise id="ex-4">
-<div class=header>演習 4.</div>
+<div class=exercise id="ex-network-addr">
+<div class=header>演習. ネットワークアドレスを求める</div>
 <p>
 以下の IP アドレスに対するネットワークアドレスを求めよ。
+<ol type=a>
+<li> <code>10.0.1.3/8</code>
+<li> <code>128.122.100.181/16 (255.255.0.0)</code>
+<li> <code>192.168.1.9/24 (255.255.255.0)</code>
+<li> <code>166.84.7.52/30 (255.255.255.252)</code>
+</ol>
+</div>
+
+<div class=exercise id="ex-routing">
+<div class=header>演習. ルーティングの実際</div>
+<p>
+あるルータが以下のIPアドレスをもっている。
+これらは2つのサブネットに接続しており、
+そのうちのひとつはデフォルト・ゲートウェイである。
 <ul>
-<li> 10.0.1.3/8
-<li> 128.122.100.181/16 (255.255.0.0)
-<li> 192.168.1.9/24 (255.255.255.0)
-<li> 166.84.7.52/30 (255.255.255.252)
+<li> IPアドレス1 : <code>10.0.2.2/16</code> (サブネットA)
+<li> IPアドレス2 : <code>192.168.3.1/24</code> (サブネットB)
+<li> デフォルト・ゲートウェイ : <code>10.0.2.1</code>
 </ul>
+<p>
+以下のIPパケットが来た場合、ルータはパケットを
+どのように転送すればよいか?
+<ol type=a>
+<li> 送信元: <code>10.0.3.4</code> → 送信先: <code>192.168.3.2</code>
+<li> 送信元: <code>192.168.3.3</code> → 送信先: <code>10.0.3.1</code>
+<li> 送信元: <code>192.168.3.3</code> → 送信先: <code>10.1.3.1</code>
+</ol>
 </div>
 
 <h3 id="ip-wan">3.5. 広域レベルでのルーティング</h3>
@@ -854,26 +896,6 @@ AS 間での経路情報を交換する。世界には約5万のASがあり、�
 業務用ルータ1台は、通常のパソコン数百台分の性能をもっている。
 アドレスの照合のために、TCAMという特別なメモリが使われている。
 
-<div class=exercise id="ex-5">
-<div class=header>演習 5.</div>
-<p>
-以下は Ethernet 上で送られるフレームに含まれる
-IPパケットの実際のデータを表したものである (<span class=bgy>黄色部分</span>)。
-<a href="#ip-packet">上の図</a>を参考にして、以下の情報を求めよ:
-<blockquote><pre>
-0000 94 09 37 28 5b d5 00 23 81 1a f2 8d 08 00 <span class=bgy>45 00
-0010 00 34 6b 7f 40 00 80 06 00 00 c0 a8 00 0c c0 a8
-0020 01 01 c9 34 00 17 25 d0 1e c0 00 00 00 00 80 02
-0030 20 00 82 84 00 00 02 04 05 b4 01 03 03 08 01 01
-0040 04 02</span>
-</pre></blockquote>
-<ol type=a>
-<li> 送信元の IPアドレス
-<li> 送信先の IPアドレス
-<li> IP パケットの大きさ (バイト数)
-</ol>
-</div>
-
 
 <h2 id="tcp">4. TCP層 (トランポート層) のしくみ</h2>
 <div class=figure>
@@ -902,9 +924,9 @@ IP層の機能を使うと、世界の離れた場所にパケットを送るこ
 しかしこれはまだ信頼性がなく、長いデータも送れない。
 そこで IPパケットをうまくつなぎ合わせて、長い 0/1 の列を送る仕組みを考える。
 これが TCP 層の機能である。IPパケットの中には、そのための
-TCPパケットがさらに入っている。
+TCPパケット (<u>TCPセグメント</u>) がさらに入っている。
 
-<h4>TCP パケットの構造:</h4>
+<h4>TCP セグメントの構造:</h4>
 <table border>
 <tr>
 <th></th>
@@ -949,15 +971,15 @@ TCPパケットがさらに入っている。
 
 <p>
 TCP 層では、<u>シーケンス番号</u>
-(sequence number) により長いデータのパケットを区別する。
+(sequence number) により長いデータのセグメントを区別する。
 さらに各通信は <u>送り元ポート番号</u> と
 <u>送り先ポート番号</u> によって区別されており、
-これらが違うパケットは別々の列とみなされる。
+これらが違うセグメントは別々の通信とみなされる。
 
-<div class=exercise id="ex-5">
-<div class=header>演習 6.</div>
+<div class=exercise id="ex-tcp-segment">
+<div class=header>演習. TCP セグメントの中身</div>
 <p>
-上の IPパケットから TCP パケットの部分
+上の IPパケットから TCP セグメントの部分
 (<span class=bgy>緑色部分</span>) を抜き出し、
 以下の情報を求めよ:
 <blockquote><pre>
@@ -1066,9 +1088,9 @@ TCP <u>ACK</u> パケット
 <h4>TCP SYN パケットとハンドシェイク</h4>
 <p>
 実際の長いデータには、始まりと終わりがある。
-TCP パケットには、データの「始まり」を示す
+TCP セグメントには、データの「始まり」を示す
 特別なパケット (SYNパケット) がある。
-これは TCP パケットの「フラグ」部分にある
+これは TCP セグメントの「フラグ」部分にある
 「SYN」ビットを 1 にしたパケットを使う。
 <table border>
 <tr>
@@ -1099,15 +1121,81 @@ TCP パケットには、データの「始まり」を示す
 
 <div class=notice>
 注意: ここでいう「ACKフラグ」は、
-各パケットに含まれる確認応答(ACK)番号とは別である。
+各セグメントに含まれる確認応答(ACK)番号とは別である。
 </div>
+
+<h3>4.3. TCPの「クライアント」と「サーバ」</h3>
+<p>
+IP層においては、すべてのホストはパケットを送受信するという役割は同じであった。
+しかし TCP層の通信では、2種類の役割が必ず存在する。
+<u>クライアント</u> (電話をかける側) と<u>サーバ</u> (電話をかけられる側) である。
+TCP ハンドシェイクが行われるときには、必ず最初に
+TCPクライアント のTCPポートから
+TCPサーバ のTCPポートに対して
+TCP SYN パケットが送られる。
+<ul>
+<li> TCPクライアント …
+  客。いつサーバを呼び出してもよいし、呼び出さなくてもよい。
+<li> TCPサーバ …
+  店。いつクライアントに呼ばれてもいいように 24時間待機していなければならない。
+</ul>
+
+<p>
+TCPクライアントとTCPサーバはどう違うのか?
+TCPサーバとは特定のTCPポートを
+<u>Listen</u> (待ち受け) 状態にしている
+ホスト (プロセス) のことである。
+
+<h4>TCPサーバ側の手順:</h4>
+<ol>
+<li> そのホスト上の特定のTCPポート (たとえば80番) を Listen状態にする。
+  (同一ホスト上の別のプログラムがすでに同じポートを使っているときは、
+  そのポートはListenできない)
+<li> TCPクライアントがそのポートに対して TCP SYN パケットを送ってくるのを待つ。
+<li> TCP SYN パケットが送られてきたら TCP SYN+ACKパケットを返し、
+  TCPハンドシェイク開始する。
+  ハンドシェイクが成功すると、そのポートは
+  <u>Established</u> (確立) 状態になる。
+<li> 以後、TCP RST パケットが送られてくるまでそのクライアントと双方向で通信する。
+</ol>
+
+<h4>TCPクライアント側の手順</h4>
+<ol>
+<li> 通信したいサーバの IPアドレス と TCPポート番号 を選ぶ。
+  (クライアント側のTCPポート番号は適当に選ばれる)
+<li> そのサーバの特定の TCPポートに向けて TCP SYN パケットを送り、
+  TCPハンドシェイクをおこなう。
+  ハンドシェイクが成功すると、そのポートは Established (確立) 状態になる。
+<li> 以後、サーバと双方向で通信する。
+  通信を終了したい場合は TCP RST パケットを送る。
+<li> もし間違った IPアドレスや TCPポート番号が指定された場合、
+  その通信は<u>タイムアウト</u>するか、あるいは接続拒否 (<u>Rejected</u>)
+  エラーが返される。
+</ol>
+
+<p>
+TCPクライアントとサーバが双方向で通信可能な状態になっている状態を
+<u>TCP接続</u> (connection) という。
+ひとつのTCP接続では、次のものが決まっている:
+<ul>
+<li> クライアント側のIPアドレス
+<li> サーバ側のIPアドレス
+<li> クライアント側のTCPポート
+<li> サーバ側のTCPポート
+</ul>
+
+<p>
+1台のサーバは、複数のTCPポートを Listen状態にすることができる。
+また、1台のクライアントは、複数のTCPサーバに同時に接続することができる。
+<code>netstat</code>コマンドを実行すると、現在その PC上で
+Listen/Established状態になっている TCPポート一覧を見ることができる。
 
 <h3 id="tcp-udp">4.2. UDP層</h3>
 <p>
 TCP層は便利だが、いくつか欠点がある:
 <ul>
 <li> 最初のハンドエシェイクに時間がかかる。
-<li> あるパケットが届かなかったら、絶対に送り直さねばならない。
+<li> あるセグメントが届かなかったら、絶対に送り直さねばならない。
 </ul>
 
 <p>
@@ -1188,6 +1276,176 @@ TCPとは別の方法で通信をおこなう。
 </tr>
 </table>
 </div>
+
+
+<h2 id="application">5. アプリケーション層</h2>
+<p>
+普通、TCP/IPのデータリンク層・IP層・TCP層はすべて OS が提供している。
+アプリケーション層は、TCP層の機能を使って実際に人間に意味のある
+情報を送受信するソフトウェアの部分である。一般の人が書く
+プログラムのほとんどは、このアプリケーション層に位置している。
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="150" transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" fill="#88ff88" />
+      <rect x="0" y="30" width="120" height="30" />
+      <rect x="0" y="60" width="120" height="30" />
+      <rect x="0" y="90" width="120" height="30" />
+      <line x1="60" y1="120" x2="60" y2="140" />
+      <line x1="-50" y1="140" x2="170" y2="140" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">アプリケーション層</text>
+      <text x="60" y="45" dy="0.5em">TCP層</text>
+      <text x="60" y="75" dy="0.5em">IP層</text>
+      <text x="60" y="105" dy="0.5em">データリンク層</text>
+      <text x="170" y="128" dy="0.5em">ケーブル</text>
+    </g>
+  </svg>
+</div>
+
+<h3 id="app-dns">5.1. ドメイン名検索 (DNS)</h3>
+<p>
+IP アドレスはそのままでは人間にとって覚えにくいので、
+実際には各ホストに名前 (文字列) をつけて、IPアドレスの代わりに
+その文字列を使うことができる。この仕組みを
+<nobr><span class=bl>ドメイン・ネーム・システム</span></nobr> (あるいは
+<nobr><span class=bl>DNS</span></nobr>) といい、
+各ホストにつけられた名前を<nobr><span class=bl>ホスト名</span></nobr> という。
+たとえば、以下の2つは同じ意味である:
+<blockquote><pre>
+C:\&gt; <strong>ping 93.184.216.34</strong>
+C:\&gt; <strong>ping www.example.com</strong>
+</pre></blockquote>
+<p>
+DNS は TCP/IP の機能を使って、<code>www.example.com</code> などの
+文字列から <code>93.184.216.34</code> などの IPアドレスを検索する
+一種の分散データベースである。DNS を使ってホスト名から IPアドレスを得ることを
+「ホスト名の解決 (resolution)」という。
+<p>
+なお DNSサーバは
+「ホスト名 → IPアドレス」の解決 (<u>正引き</u>) だけでなく、
+「IPアドレス → ホスト名」の解決 (<u>逆引き</u>) もサポートしている。
+<code>ping</code> などで IPアドレスを指定したのに
+名前が表示されるのはこのためである。
+なお、ひとつの IPアドレスに複数の名前がついていることもある。
+
+<h4>DNSのしくみ</h4>
+<p>
+DNS は以下のような機構になっている:
+<ul>
+<li> まず、インターネット上のすべてのホストを<u>ドメイン</u> (domain) という区切りに分ける。
+  たとえば <code>www.example.com</code> というホスト名は
+  <code>.com</code>ドメインと、
+  <code>.example.com</code>ドメイン
+  分割される。
+<li> 各ドメインについて、そのドメイン内のホスト名について責任を負う
+  <u>ネームサーバ</u> (name server) のIPアドレスを定める。
+  たとえば <code>.com</code> ドメインのネームサーバは
+  <code>192.5.6.30</code>
+  である。
+<li> 世界 13箇所に<a href="https://ja.wikipedia.org/wiki/%E3%83%AB%E3%83%BC%E3%83%88%E3%82%B5%E3%83%BC%E3%83%90">ルートネームサーバ</a> (root name server) をおく。
+  このサーバは各トップレベルドメイン (<code>.com</code>など) の
+  ネームサーバのIPアドレスを記憶している。
+</ul>
+<p>
+このようなサーバを用意したあとで、各ホストは次のようにして
+ホスト名の解決をおこなう:
+
+<ol type=a>
+<li> まず、すべてのホストは、13個のルートネームサーバの IPアドレスを知っている
+  (たとえばルートサーバ A の IPアドレスは <code>198.41.0.4</code> など)。
+  ホストは最初にルートサーバに対して、解決したいホスト名の
+  最初のドメイン (トップレベルドメイン、TLD) の
+  ネームサーバの IP アドレスを問い合わせる。
+<li> つぎに、そのネームサーバに対して、それ以下のドメイン (サブドメイン) の
+  ネームサーバの IP アドレスを問い合わせる。以下、繰り返し。
+<li> 最後のネームサーバの IPアドレスが判明したら、それに対して
+  目的のホスト名の IP アドレスを問い合わせる。完了。
+</ol>
+
+<h4>DNSの欠点</h4>
+<p>
+ネームサーバとの通信が正しくできないと、
+IPアドレスがわからないので、そもそも通信ができなくなる。
+また、ネームサーバが間違ったアドレスを返すと関係ないホストに対して
+通信してしまう。そのためネームサーバはふつう複数個用意されていることが多く、
+世界のルートサーバはどれも厳重に管理されている。
+
+<h4>localhost</h4>
+<p>
+<nobr><span class=bl><code>127.0.0.1</code></span></nobr> は
+特別な IPアドレスであり、これはつねに「自分自身のホスト」をあらわす。
+これをループバックアドレスという。
+なお、ホスト名 <nobr><span class=bl><code>localhost</code></span></nobr> は
+つねにループバックアドレスに解決される。
+
+<h4>DNS の動作例</h4>
+<p>
+ホスト <code>www.example.com</code> の IPアドレスを求める…
+<ol>
+<li> ルートサーバ (<code>198.41.0.4</code>) に
+  <code>.com</code> ネームサーバのIPアドレスを問い合わせる →
+  <code>192.5.6.30</code>
+<li> <code>.com</code> ネームサーバに
+  <code>.example.com</code> ネームサーバのIPアドレスを問い合わせる →
+  <code>199.43.133.54</code>
+<li> <code>.example.com</code> ネームサーバに
+  <code>www.example.com</code> のIPアドレスを問い合わせる →
+  <code>93.184.216.34</code>
+<li> 完了。
+</ol>
+
+<p>
+TCP/IPに対応している多くのプログラムでは、
+ふつう IPアドレスの代わりにホスト名を指定してもよい。
+<div class=question>
+<u>演習.</u>
+<code>ping</code> コマンドを使って、
+自分がよく知っているホスト名の IPアドレスを求めよ。
+<pre>
+C:\&gt; <strong>ping <u>ホスト名</u></strong>
+</pre>
+</div>
+
+<h3 id="app-web">5.2. ウェブ (HTTP)</h3>
+<p>
+TCP 層の機能を使って、特定のサーバの TCP 80番ポートに
+特定の規約でデータを送ると、ウェブページを閲覧することができる。
+サーバから送られてくるデータはテキスト型式で、
+<nobr><span class=bl>HTML</span></nobr> と呼ばれる型式で書かれている。
+この「規約」は HTML データを転送するという意味で
+<u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol
+(<nobr><span class=bl>HTTP</span></nobr>) と呼ばれる。
+<blockquote><pre>
+C:\&gt; <strong>telnet www.yahoo.co.jp 80</strong>
+<strong>GET / HTTP/1.0</strong>
+<strong>Host: www.yahoo.co.jp</strong>
+
+&lt;html&gt;...
+</pre></blockquote>
+
+<h3 id="app-email">5.3. 電子メール (SMTP)</h3>
+<p>
+TCP 層の機能を使って、特定のサーバの TCP 25番ポートに
+特定の規約でデータを送ると、電子メールを送ることができる。
+この「規約」は <u>S</u>imple <u>M</u>ail <u>T</u>ransfer <u>P</u>rotocol
+(SMTP) と呼ばれている。
+<blockquote><pre>
+C:\&gt; <strong>telnet gmail-smtp-in.l.google.com 25</strong>
+MAIL FROM:&lt;<u>送り元メールアドレス</u>&gt;
+RCPT TO:&lt;<u>xxx@gmail.com</u>&gt;
+DATA
+From: &lt;<u>送り元メールアドレス</u>&gt;
+To: &lt;<u>xxx@gmail.com</u>&gt;
+Subject: test
+
+Hello, this is test!
+.
+</pre></blockquote>
 
 
 <hr>
