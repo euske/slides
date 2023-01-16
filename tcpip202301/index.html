@@ -1421,11 +1421,18 @@ TCP 層の機能を使って、特定のサーバの TCP 80番ポートに
 <u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol
 (<nobr><span class=bl>HTTP</span></nobr>) と呼ばれる。
 <blockquote><pre>
-C:\&gt; <strong>telnet www.yahoo.co.jp 80</strong>
+C:\&gt; <strong>nc www.google.com 80</strong>
 <strong>GET / HTTP/1.0</strong>
-<strong>Host: www.yahoo.co.jp</strong>
+<strong>Host: www.google.com</strong>
 
-&lt;html&gt;...
+HTTP/1.0 200 OK
+Date: Mon, 16 Jan 2023 05:38:05 GMT
+Expires: -1
+Server: gws
+...
+
+&lt;!doctype html&gt;
+...
 </pre></blockquote>
 
 <h3 id="app-email">5.3. 電子メール (SMTP)</h3>
@@ -1435,16 +1442,26 @@ TCP 層の機能を使って、特定のサーバの TCP 25番ポートに
 この「規約」は <u>S</u>imple <u>M</u>ail <u>T</u>ransfer <u>P</u>rotocol
 (SMTP) と呼ばれている。
 <blockquote><pre>
-C:\&gt; <strong>telnet gmail-smtp-in.l.google.com 25</strong>
-MAIL FROM:&lt;<u>送り元メールアドレス</u>&gt;
-RCPT TO:&lt;<u>xxx@gmail.com</u>&gt;
-DATA
-From: &lt;<u>送り元メールアドレス</u>&gt;
-To: &lt;<u>xxx@gmail.com</u>&gt;
-Subject: test
+C:\&gt; <strong>nc gmail-smtp-in.l.google.com 25</strong>
+220 mx.google.com ESMTP
+<strong>HELO mail.example.com</strong>
+250 mx.google.com at your service
+<strong>MAIL FROM:&lt;<u>送り元メールアドレス</u>&gt;</strong>
+250 2.1.0 OK
+<strong>RCPT TO:&lt;<u>xxx@gmail.com</u>&gt;</strong>
+250 2.1.5 OK
+<strong>DATA</strong>
+354  Go ahead zz-1234 - gsmtp
+<strong>From: &lt;<u>送り元メールアドレス</u>&gt;</strong>
+<strong>To: &lt;<u>xxx@gmail.com</u>&gt;</strong>
+<strong>Message-Id: &lt;zz12345678@mail.example.com&gt;</strong>
+<strong>Subject: test</strong>
 
-Hello, this is test!
-.
+<strong>Hello, this is test!</strong>
+<strong>.</strong>
+250 2.0.0 OK
+<strong>QUIT</strong>
+221 2.0.0 closing connection
 </pre></blockquote>
 
 
