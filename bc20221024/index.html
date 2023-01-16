@@ -20,11 +20,11 @@ dt { text-decoration: underline; font-weight: bold; }
 u { color: #880000; font-weight: bold; }
 .author { text-align: right; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
-.notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 pre em { color: #008800; }
 code em { color: #000088; }
+.blank { color: transparent; font-size: 120%; outline: 1px solid black; }
 .exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
 .exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
 .file { outline: 2px solid black; padding: 1em; margin: 1em; }
@@ -88,6 +88,7 @@ Yusuke Shinyama<br>
   <li> <a href="#script-args">コマンドに与えられた引数を利用する</a>
   <li> <a href="#script-chmod">通常のコマンドとして使う</a>
   <li> <a href="#script-exitcode">終了状態による分岐</a>
+  <li> <a href="#script-subst">文字列の置換</a>
 </ul>
 <li> <a href="#controls">条件分岐・繰り返し</a>
 <ul>
@@ -95,6 +96,7 @@ Yusuke Shinyama<br>
   <li> <a href="#control-if">if … then 〜 fi文</a>
   <li> <a href="#control-while">while … do 〜 done文</a>
   <li> <a href="#control-for">for … do 〜 done文</a>
+  <li> <a href="#control-args">$* 引数</a>
 </ul>
 <li> <a href="#oneliner">ワンライナー (one-liner) を書く時の注意点</a>
 <li> <a href="#summary">まとめ</a>
@@ -1359,7 +1361,7 @@ a bb ccc
 ここでコマンドの出力からは、余分な空白が除かれていることに注意。
 これは通常のコマンドライン引数で
 <blockquote><pre>
-$ <strong>echo a   bb   ccc</strong>
+$ <strong>echo <mark>a   bb   ccc</mark></strong>
 a bb ccc
 </pre></blockquote>
 とタイプしたのと同じことである。
@@ -1397,8 +1399,10 @@ OLDPWD=/root
 PAGER=less
 …
 </pre></blockquote>
-<p>
-注意: Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
+
+<div class=note>
+<strong>注意:</strong>
+Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
 <strong>UNIXにおける環境変数は各プロセスごとに独立している</strong>。
 あるプロセスの環境変数を別のプロセスの環境変数にすることはできない。
 ただし、<strong>親プロセスの環境変数は、子プロセスに引きつがれる</strong>ため、
@@ -1433,29 +1437,28 @@ PAGER=less
   </g>
 </svg>
 </div>
+</div>
 
 <h3 id="env-use">6.1. 環境変数を使う</h3>
 <p>
 各プロセスにおける環境変数は、
 プログラム中のどこからでも文字列値として
-アクセス可能である:
+アクセス可能である。
+たとえば、環境変数 <code>USER</code> の値を取得したいとき:
 
 <h4>Node (JavaScript) の場合</h4>
 <blockquote><pre>
-<em>// 環境変数USERの値を取得する。</em>
-const user = process.env['USER']
+const user = process.env['<mark>USER</mark>']
 </pre></blockquote>
 
 <h4>Java の場合</h4>
 <blockquote><pre>
-<em>// 環境変数USERの値を取得する。</em>
-String user = System.getenv("USER");
+String user = System.getenv("<mark>USER</mark>");
 </pre></blockquote>
 
 <h4>Kotlin の場合</h4>
 <blockquote><pre>
-<em>// 環境変数USERの値を取得する。</em>
-val user: String? = System.getenv("USER")
+val user: String? = System.getenv("<mark>USER</mark>")
 </pre></blockquote>
 
 <p>
@@ -1752,7 +1755,7 @@ $ <strong>cp &ast;.txt dest/</strong>
 $ <strong>cp -r foo dest/</strong>
 <em>(foo ディレクトリ内とその中のファイルをすべて dest/ 内に複製する)</em>
 </pre>
-<p>
+<div class=note>
 <strong>注意:</strong>
 UNIX は無愛想な OS なので、
 コピー先としてうっかり存在するファイル名を指定してしまうと、
@@ -1763,6 +1766,7 @@ $ <strong>cp -i a.txt b.txt</strong>
 <em>(a.txt を新しい b.txt という名前で複製するが、
  すでに同名のファイルがある場合は確認する)</em>
 </pre>
+</div>
 
 <dt id="cmd-mv"> <code>mv</code> (MoVe)
 <dd> 指定したファイルを宛先パス名に変更あるいは移動する。
@@ -1776,7 +1780,7 @@ $ <strong>mv a.txt b.txt c.txt dest/</strong>
 $ <strong>mv &ast;.txt dest/</strong>
 <em>(〜.txt で終わるすべてのファイルを dest/ 内に移動する)</em>
 </pre>
-<p>
+<div class=note>
 <strong>注意:</strong>
 UNIX は無愛想な OS なので、
 移動先としてうっかり存在するファイル名を指定してしまうと、
@@ -1787,6 +1791,7 @@ $ <strong>mv -i a.txt b.txt</strong>
 <em>(a.txt を新しい b.txt という名前に変更するが、
  すでに同名のファイルがある場合は確認する)</em>
 </pre>
+</div>
 
 <dt id="cmd-rm"> <code>rm</code> (ReMove)
 <dd> 指定したファイルを削除する。
@@ -1804,7 +1809,7 @@ $ <strong>rm &ast;.txt</strong>
 $ <strong>rm -r dest/</strong>
 <em>(dest/ ディレクトリ内とその中のファイルをすべて削除する)</em>
 </pre>
-<p>
+<div class=note>
 <strong>注意:</strong>
 UNIX は無愛想な OS なので、
 <code>rm</code> コマンドは削除が成功しても何も表示しない。
@@ -1814,6 +1819,7 @@ UNIX は無愛想な OS なので、
 $ <strong>rm -i &ast;.txt</strong>
 <em>(〜.txt で終わる各ファイルを yes/no で確認しながら削除する)</em>
 </pre>
+</div>
 
 <dt id="cmd-du"> <code>du</code> (DiskUse)
 <dd> 指定したディレクトリのファイル使用量を表示する。
@@ -1913,7 +1919,8 @@ Arg2: bar          <em>(第2引数が表示される)</em>
 
 <div class=exercise id="ex11">
 <div class=header>演習 11. シェルスクリプトの説明</div>
-以下のシェルスクリプトが何をするか説明せよ。
+<p>
+以下のシェルスクリプトが何をするか推測せよ。
 <pre>
 # showhome.sh
 ls -l "/home/$1"
@@ -1951,7 +1958,7 @@ $ <strong>chmod +x foobar</strong>  <em>(ファイル foobar を実行可能に�
 このファイルをシェルから実行すると、以下のように表示される:
 <blockquote><pre>
 $ <strong>./foobar</strong>
-#!/bin/cat
+<mark>#!/bin/cat</mark>
 foo
 bar
 </pre></blockquote>
@@ -1996,7 +2003,7 @@ Sun Nov 13 14:48:02 JST 2022
 指定したディレクトリ内に置いておけば、いまやこのシェルスクリプトは
 通常のコマンドと同じように使えるわけである。
 
-<p>
+<div class=note>
 <strong>注意:</strong>
 シェルスクリプトは子プロセスとして実行される。UNIX では、
 子プロセスは親プロセスの環境変数やカレントディレクトリを
@@ -2016,6 +2023,25 @@ $ <strong>pwd</strong>         <em>(カレントディレクトリは依然と�
 <p>
 (ちなみに、<code>cd</code> コマンドはシェルの内部コマンドで
 プロセスを起動しない。そのためシェルのカレントディレクトリの変更が可能なのである。)
+</div>
+
+<div class=exercise id="ex12">
+<div class=header>演習 12. スクリプトファイル</div>
+<p>
+以下のスクリプトファイル <code>greet</code> が実行可能であるとする。
+<code>./greet</code> を実行すると何が起きるか?
+<div class=file>
+<div class=header>greet</div>
+<pre>
+#!/usr/bin/python3
+import random
+if random.random() &lt; 0.5:
+    print("Good morning")
+else:
+    print("Good evening")
+</pre>
+</div>
+</div>
 
 <h3 id="script-exitcode">8.3. 終了状態による分岐</h3>
 <p>
@@ -2056,6 +2082,35 @@ $ <strong>echo $?</strong>
 <em># /fooディレクトリにcdできれば &ast;.conf一覧を表示し、そうでなければエラーを表示する。</em>
 ( cd /foo && ls &ast;.conf ) || echo "/foo does not exist"
 </pre></blockquote>
+
+<h3 id="script-subst">8.4. 文字列の操作</h3>
+<p>
+シェルでは文字列処理をおこなうための展開がいくつか用意されている。
+代表的なものを以下にあげる:
+<dl>
+<dt> コマンド展開を使った置換
+<dd> <a href="#command-exp">コマンド出力の展開</a> を参照。
+<blockquote><pre>
+<em># ファイルの個数を取得する。</em>
+files=$(<mark>ls | wc -l</mark>)
+</pre></blockquote>
+
+<dt> ${変数名/文字列1/文字列2}
+<dd> <em>文字列1</em> を <em>文字列2</em> に置換する:
+<pre>
+name=foo.csv
+echo ${name/<mark>.csv</mark>/<mark>.txt</mark>}  <em># foo.txt</em>
+</pre>
+
+<dt> ${変数名:-デフォルト値}
+<dd> 変数名が定義されていない (あるいは空文字列の) ときに <em>デフォルト値</em> に置換される:
+<pre>
+<em># 環境変数FILENAMEが定義されていればその値、なければ "default.txt"</em>
+path=${FILENAME:-default.txt}
+</pre>
+
+</dl>
+
 
 <h2 id="controls">9. 条件分岐・繰り返し</h2>
 <p>
@@ -2125,6 +2180,26 @@ fi
 </pre>
 </dl>
 
+<div class=exercise id="ex13">
+<div class=header>演習 13. dog</div>
+<p>
+与えられたパス名に対して、
+それがファイルであれば <code>cat</code> を実行し、
+ディレクトリであれば <code>ls</code> を実行するコマンド
+<code>dog</code> を作りたい。以下のシェルスクリプトを完成させよ:
+<div class=file>
+<div class=header>dog</div>
+<pre>
+#!/bin/sh
+if <nobr><span class=blank>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></nobr>; then
+    cat $1
+else
+    ls $1
+fi
+</pre>
+</div>
+</div>
+
 <h3 id="control-while">9.3. while … do 〜 done文</h3>
 <p>
 これも通常のプログラミング言語におけるwhile文とほとんど同じである。
@@ -2182,14 +2257,46 @@ for <mark>name</mark> in <mark>$(cat files.txt)</mark>; do
     <mark>cat ${name}</mark>
 done
 </pre>
+<dt> 例3:
+<dd> 変数 <code>$*</code> は、シェルのすべての引数
+ (<code>$1</code>, <code>$2</code>, <code>$3</code>, ...) の一覧に展開される。
+ (なお、変数 <code>$#</code> は、引数の<strong>個数</strong>に展開される。)
+<pre>
+for <mark>arg</mark> in <mark>$*</mark>; do
+    <em># シェルの各引数をひとつずつ表示する。</em>
+    <mark>echo "Arg: ${arg}"</mark>
+done
+</pre>
 </dl>
+
+<div class=exercise id="ex14">
+<div class=header>演習 14. for文の演習</div>
+<p>
+いくつかのディレクトリの中に、
+<code>list.txt</code> というファイルが入っているとする。
+各ディレクトリ中の <code>list.txt</code> を
+<code><em>ディレクトリ名</em>_list.txt</code> という名前に変更したい。
+そのため、以下のようなスクリプトを書いた:
+<blockquote><pre>
+#!/bin/sh
+for name in $*; do
+    echo "Renaming: ${name}/list.txt −&gt; ./${name}_list.txt"
+    mv ${name}/list.txt ./${name}_list.txt
+done
+</pre></blockquote>
+<ul>
+<li> このスクリプトの使い方を説明せよ。何を引数として与えると、どうなるか?
+<li> このスクリプトは <code>mv</code> コマンドを使ってファイル名を変更している。
+  これにともなうリスクを説明せよ。
+</ul>
+</div>
 
 <div class=note>
 <strong>注意:</strong>
 複数のファイルを一括変更するような処理の場合、
 <strong>入力ファイルと出力ファイルを同じにしない</strong>こと!
 <pre>
-for file in &ast;.txt; do 
+for file in &ast;.txt; do
     <em># ❌ ${file} を読む前に ${file} が上書きされてしまう。</em>
     cat <mark>${file}</mark> footer.txt &gt; <mark>${file}</mark>
 done
@@ -2198,7 +2305,7 @@ done
 このような場合は、ファイルを一度別の名前に移してから処理をおこなう。
 (あるいは一時ファイルを作成し、それを元のファイルに上書きする。)
 <pre>
-  for file in &ast;.txt; do 
+  for file in &ast;.txt; do
     <em># まず ${file} を ${file}.orig に名前変更する。</em>
     mv <mark>${file}</mark> <u>${file}.orig</u>
     <em># ${file}.orig に加えた変更をもとのファイルとして保存する。</em>
@@ -2270,6 +2377,34 @@ $ <strong>echo &gt; hello</strong>
 $ <strong>echo &gt; world</strong>
 $ <strong>echo &ast;</strong>
 </pre></blockquote>
+<li> TODO リストを管理するための簡単なスクリプト todo を作りたい。
+これは特定のテキストファイルにやることの一覧を記録する。
+以下のように使うものとする:
+<ul>
+<li> <code>todo</code> だけを実行すると、そのテキストファイルが表示される。
+<li> <code>todo edit</code> と実行すると、そのテキストファイルが
+何らかのテキストエディタ (なんでもよい) で編集可能になる。
+<li> <code>todo <em>やること</em></code> と実行すると、文字列「<code>やること</code>」が
+テキストファイルに追加される。
+<li> そのテキストファイルの位置は、環境変数 <code>TODOFILE</code> によって
+決まるものとする。
+</ul>
+<div class=file>
+<div class=header>todo</div>
+<pre>
+#!/bin/sh
+if [ $# = 0 ]; then
+    <em># 引数がない場合は、テキストファイルの内容を表示。</em>
+    cat <nobr><span class=blank>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></nobr>
+elif [ $1 = "edit" ]; then
+    <em># 引数が "edit" の場合は、テキストファイルを編集。</em>
+    <nobr><span class=blank>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></nobr>
+else
+    <em># 引数がそれ以外の場合は、テキストファイルに内容を追加。</em>
+    <nobr>cat "$*" &gt;&gt; <span class=blank>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></nobr>
+fi
+</pre>
+</div>
 </ol>
 </div>
 
