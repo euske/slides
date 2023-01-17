@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>証明書とは何か?</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000088; }
+h2 { border-bottom: solid 2px #000088; }
+h3 { border-bottom: solid 1px #000088; }
+table { border-collapse: collapse; margin-left: auto; margin-right: auto; }
+td { padding: 4px; }
+kbd { outline: 1px solid black; padding: 2px; }
+pre { outline: 1px solid black; padding: 4px; overflow: auto; }
+mark { font-weight: bold; }
+pre, code { background: #ddd; font-size: 150%; font-family: courier; }
+img { max-width: 80vw; height: auto; }
+dt { text-decoration: underline; font-weight: bold; }
+u { color: #880000; font-weight: bold; }
+.author { text-align: right; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
+.notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
+.formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+.note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+pre em { color: #0000dd; }
+code em { color: #000088; }
+.exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
+.exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.file { outline: 2px solid black; padding: 1em; margin: 1em; }
+.file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
+.file pre { margin: 0; }
+
+.g { background: #eeeeee; }
+.bgr, .cert0 { background: #ffbbff; }
+.bgg, .cert1 { background: #88ff88; }
+.bgy, .cert2 { background: #ffff88; }
+.bgb { background: #88ffff; }
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>証明書とは何か?</h1>
+
+<div class=author>
+Yusuke Shinyama, Jan. 2023
+</div>
+
+<ol>
+</ol>
+
+
+<h2 id="what">1. 証明書 (certificate) とは何か?</h2>
+<p>
+デジタル証明書 (digital certificate)、
+公開鍵証明書 (public key certificate) あるいは
+単に <u>証明書 (certificate)</u> とは、
+以下のデータが記されている文書である:
+</p>
+<blockquote><pre>
+以下の公開鍵
+  <em>XXX</em>
+の所有者は
+  <em>YYY</em>
+である。
+-- 署名 <em>ZZZ</em>
+</pre></blockquote>
+
+<p>
+証明書は、通常インターネット上の Webサーバで使われており、ブラウザ上で見ることができる:   
+</p>
+
+<div class="figure">
+<img src="certs.png">
+</div>
+
+<p>
+実際にWebサーバが証明書を送っているところは、<code>openssl</code> コマンドを使うと見ることができる。  
+</p>
+<blockquote><pre>
+$ <strong>openssl s_client -showcerts -servername www.google.com -connect www.google.com:443</strong>
+CONNECTED(00000005)
+...
+---
+Certificate chain
+<div class="cert0"> 0 s:/CN=www.google.com
+   i:/C=US/O=Google Trust Services LLC/CN=GTS CA 1C3
+-----BEGIN CERTIFICATE-----
+MIIEiDCCA3CgAwIBAgIRAI/Wbxh84E0gEre31m3+iM0wDQYJKoZIhvcNAQELBQAw
+...
+-----END CERTIFICATE-----</div>
+<div class="cert1"> 1 s:/C=US/O=Google Trust Services LLC/CN=GTS CA 1C3
+   i:/C=US/O=Google Trust Services LLC/CN=GTS Root R1
+-----BEGIN CERTIFICATE-----
+MIIFljCCA36gAwIBAgINAgO8U1lrNMcY9QFQZjANBgkqhkiG9w0BAQsFADBHMQsw
+...
+-----END CERTIFICATE-----</div>
+<div class="cert2"> 2 s:/C=US/O=Google Trust Services LLC/CN=GTS Root R1
+   i:/C=BE/O=GlobalSign nv-sa/OU=Root CA/CN=GlobalSign Root CA
+-----BEGIN CERTIFICATE-----
+MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
+...
+-----END CERTIFICATE-----</div>
+...
+</pre></blockquote>
+
+<p>
+実際の証明書は「チェーン」になっている。
+上の証明書チェーンは、以下の情報を表している。
+</p>
+<blockquote><pre>
+<div class="cert0">0. 以下の公開鍵
+  <em>MIIEiDCCA3C...</em>
+の所有者は
+  <em>www.google.com</em>
+である。
+-- 署名 <em>GTS CA 1C3</em></div>
+<div class="cert1">1. 以下の公開鍵
+  <em>MIIFljCCA36...</em>
+の所有者は
+  <em>GTS CA 1C3</em>
+である。
+-- 署名 <em>GTS Root R1</em></div>
+<div class="cert2">2. 以下の公開鍵
+  <em>MIIFYjCCBEq...</em>
+の所有者は
+  <em>GTS Root R1</em>
+である。
+-- 署名 <em>GlobalSign Root CA</em></div>
+</pre></blockquote>
+
+<h2 id="why">2. 何のために使うのか?</h2>
+
+<h2 id="how">3. なぜチェーンが必要なのか?</h2>
+
+<h2 id="gotchas">4. 証明書を使うときに注意すること</h2>
+
+<hr>
+<address>Yusuke Shinyama</address>
