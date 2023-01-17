@@ -2129,9 +2129,12 @@ path=${FILENAME:-default.txt}
 <p>
 <code>test</code> コマンドは与えられた条件に応じて真偽値に対応する終了状態を返す:
 <ul>
-  <li> <code>test -f <mark>パス名</mark></code>: 与えられた <mark>パス名</mark> にファイルが存在すれば真。
-  <li> <code>test -d <mark>パス名</mark></code>: 与えられた <mark>パス名</mark> にディレクトリが存在すれば真。
+  <li> <code>test -f <mark>パス名</mark></code>: 与えられた <mark>パス名</mark> にファイルが存在したら真。
+  <li> <code>test -d <mark>パス名</mark></code>: 与えられた <mark>パス名</mark> にディレクトリが存在したら真。
   <li> <code>test <mark>引数A</mark> = <mark>引数B</mark></code>: 与えられた <mark>引数A</mark> と <mark>引数B</mark> が同一であれば真。
+  <li> <code>test ! -f <mark>パス名</mark></code>: 与えられた <mark>パス名</mark> にファイルが存在しなかったら真。
+  <li> <code>test ! -d <mark>パス名</mark></code>: 与えられた <mark>パス名</mark> にディレクトリが存在しなかったら真。
+  <li> <code>test <mark>引数A</mark> != <mark>引数B</mark></code>: 与えられた <mark>引数A</mark> と <mark>引数B</mark> が同一でなければ真。
   <li> ...
 </ul>
 <p>
@@ -2139,9 +2142,12 @@ path=${FILENAME:-default.txt}
 <code>&lbrack;</code> というコマンドが用意されている。
 この場合は、以下のように記述する:
 <ul>
-  <li> <code>[ -f <mark>パス名</mark> ]</code>: 与えられた <mark>パス名</mark> にファイルが存在すれば真。
-  <li> <code>[ -d <mark>パス名</mark> ]</code>: 与えられた <mark>パス名</mark> にディレクトリが存在すれば真。
+  <li> <code>[ -f <mark>パス名</mark> ]</code>: 与えられた <mark>パス名</mark> にファイルが存在したら真。
+  <li> <code>[ -d <mark>パス名</mark> ]</code>: 与えられた <mark>パス名</mark> にディレクトリが存在したら真。
   <li> <code>[ <mark>引数A</mark> = <mark>引数B</mark> ]</code>: 与えられた <mark>引数A</mark> と <mark>引数B</mark> が同一であれば真。
+  <li> <code>[ ! -f <mark>パス名</mark> ]</code>: 与えられた <mark>パス名</mark> にファイルが存在しなかったら真。
+  <li> <code>[ ! -d <mark>パス名</mark> ]</code>: 与えられた <mark>パス名</mark> にディレクトリが存在しなかったら真。
+  <li> <code>[ <mark>引数A</mark> != <mark>引数B</mark> ]</code>: 与えられた <mark>引数A</mark> と <mark>引数B</mark> が同一でなければ真。
   <li> ...
 </ul>
 <p>
