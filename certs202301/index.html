@@ -64,12 +64,17 @@ Yusuke Shinyama, Jan. 2023
   <em>XXX</em>
 の所有者は
   <em>YYY</em>
+であり、その有効期間は
+  <em>AAA 〜 BBB</em>
 である。
 -- 署名 <em>ZZZ</em>
 </pre></blockquote>
 
 <p>
-証明書は、通常インターネット上の Webサーバで使われており、ブラウザ上で見ることができる:   
+証明書の書式は、
+<a href="https://ja.wikipedia.org/wiki/X.509">X.509</a>
+と呼ばれる規格に準拠している。
+証明書は通常インターネット上の Webサーバで使われており、ブラウザ上で見ることができる:   
 </p>
 
 <div class="figure">
@@ -115,27 +120,51 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
   <em>MIIEiDCCA3C...</em>
 の所有者は
   <em>www.google.com</em>
+であり、その有効期間は
+  <em>2022/12/12 〜 2023/03/06</em>
 である。
 -- 署名 <em>GTS CA 1C3</em></div>
 <div class="cert1">1. 以下の公開鍵
   <em>MIIFljCCA36...</em>
 の所有者は
   <em>GTS CA 1C3</em>
+であり、その有効期間は
+  <em>2020/08/13 〜 2027/09/30</em>
 である。
 -- 署名 <em>GTS Root R1</em></div>
 <div class="cert2">2. 以下の公開鍵
   <em>MIIFYjCCBEq...</em>
 の所有者は
   <em>GTS Root R1</em>
+であり、その有効期間は
+  <em>2020/06/19 〜 2028/01/28</em>
 である。
 -- 署名 <em>GlobalSign Root CA</em></div>
 </pre></blockquote>
 
 <h2 id="why">2. 何のために使うのか?</h2>
+<p>
+インターネットにおいては、情報が正当かどうかを確認するために
+<u>デジタル署名</u> (digital signature) がよく使われる。
+これは、ある個人・組織が固有の<u>秘密鍵</u>を用いてデータを「署名 (sign)」し、
+その秘密鍵に対応する<u>公開鍵</u>を用いて署名を「検証 (verify)」する。
+しかし、情報が本当に正しいことを確認するためには、
+署名に使われた鍵が特定の個人・組織に所属するという証明が必要である。
+このために「証明書」が使われる。
+</p>
 
 <h2 id="how">3. なぜチェーンが必要なのか?</h2>
 
 <h2 id="gotchas">4. 証明書を使うときに注意すること</h2>
+<ul>
+  <li> すべての証明書には必ず有効期間がある。有効期間をすぎた (失効した) 証明書はもう信頼されないので注意。</li>
+  <li> 証明書に使う秘密鍵は、絶対に外部に持ち出してはならない。</li>
+  <ul>
+    <li> 個人の秘密鍵であれば、秘密鍵ファイルは絶対そのPCからネットに送信しない。</li>
+    <li> 組織の秘密鍵であれば、それが入っているPCはそもそもネットに接続しない。</li>
+  </ul>
+  <li> あやしげな発行元の証明書を信用してはならない。</li>
+</ul>
 
 <hr>
 <address>Yusuke Shinyama</address>
