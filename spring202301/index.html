@@ -42,7 +42,7 @@ code em { color: #000088; }
 <div class=nav>
 <a href="../index.html">&lt; もどる</a>
 </div>
-<h1>Spring (Boot) のコンセプト</h1>
+<h1>Spring (Boot) の考え方</h1>
 
 <div class=author>
 Yusuke Shinyama, Jan. 2023
@@ -61,18 +61,34 @@ Yusuke Shinyama, Jan. 2023
 <li>保守しやすく、拡張性にも優れている</li>
 </ul>
 
-<p>しかし上のような目標はとてつもなく難しい。
-それは、ソフトウェアというものが非常に複雑だからである。
-そのため、人々はこの複雑さに対処するためのさまざまな技法をあみだしてきた。
-プログラミング言語やフレームワークの歴史とは、基本的に「分離の歴史」である。
+<div style="display: flex; justify-content: center; align-items: flex-end;">
+<div class=figure>
+    <img width="243" height="275" src="bad.svg">
+    <div class=caption>こんなのは嫌だ</div>
+</div>
+<div class=figure>
+    <img width="266" height="237" src="good.svg">
+    <div class=caption>こんなのを作りたい</div>
+</div>
+</div>
+
+<p>
+しかしこれはとてつもなく難しい。
+なぜなら、ソフトウェアというものは非常に複雑だからである。
+この複雑さは、そもそもソフトウェアが扱っている問題（社会）の複雑さに起因する。
+過去数十年、ソフトウェアの先人達はこの複雑なシステムを分解
+(<a href="https://ja.wikipedia.org/wiki/%E9%96%A2%E5%BF%83%E3%81%AE%E5%88%86%E9%9B%A2">separation of concerns</a>) し、
+人間の小さい脳が扱えるようにするために、さまざまな技法をあみだしてきた。
+プログラミング技術の歴史とは、ほとんど「分解する技術の歴史」といってもいい。
 </p>
 
 <ul>
-<li> 構造化（モジュール化）</li>
-<li> OOP (カプセル化、データ抽象)</li>
-<li> AOP (複数箇所をまとめる)</li>
-<li> 関数型 (状態の除去)</li>
-<li> ...IoC</li>
+<li> 1970年代: 構造化（モジュール化）</li>
+<li> 1980年代: OOP (カプセル化、データ抽象)</li>
+<li> 1990年代: AOP (複数箇所をまとめる)</li>
+<li> 1980年代: 関数型 (状態の除去)</li>
+<li> 2000年代: フレームワーク, TDD (IoC, DI, etc.)</li>
+<li> ... </li>
 </ul>
 
 
@@ -80,7 +96,7 @@ Yusuke Shinyama, Jan. 2023
 
 <p>
 結論から言ってしまうと、Spring Framework を使うと
-以下のようなコードが
+以下のようなコードが:
 </p>
 
 <blockquote><pre>
@@ -130,6 +146,13 @@ class App {
     }
 }
 </pre></blockquote>
+
+<p>
+    ソフトウェアにおける「フレームワーク」とは、
+    処理の流れがプログラム本体に書かれておらず、外から制御されるような
+    構造のことである。
+    (<a href="https://www.martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>)
+</p>
 
 <ul>
     <li> 各制御フロー、データフローが「ぶった切られている」</li>
