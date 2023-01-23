@@ -490,6 +490,21 @@ IPアドレスは変化する。
 自分のパソコンについている IP アドレスを調べよ。
 </div>
 
+<div class=exercise id="ex-ping">
+<div class=header>演習. ping コマンドを使う</div>
+<p>
+<code>ping</code> コマンドは、与えられた IP アドレスの
+ホストが起動しているか (IP パケットに応答できるか) 否かを調べるものである。
+以下のホストに <code>ping</code> コマンドを実行して、
+応答があるかどうかを確認せよ:
+<blockquote><pre>
+C:\&gt; <strong>ping <em>自分のIPアドレス</em></strong>
+C:\&gt; <strong>ping 127.0.0.1</strong>
+C:\&gt; <strong>ping 192.0.2.1</strong>
+C:\&gt; <strong>ping 1.1.1.1</strong>
+</pre></blockquote>
+</div>
+
 <h3 id="ip-packet">3.2. IPパケット</h3>
 
 <h4>IP パケットの構造:</h4>
@@ -596,7 +611,8 @@ IPアドレスはそのホストが「勝手に名乗っているだけ」であ
 小さな組織 (自宅・会社・学校) で、ネットワークが
 階層構造 (ツリー構造) になっているときに使える方法。
 <p>
-各ホストは、以下の情報をあらかじめ知っている (設定してある):
+各ホストは、<u>ルーティングテーブル</u>と呼ばれる情報を持っている。
+ここには以下のことがあらかじめ記載 (設定) されている:
 <ul>
 <li> 「送り先がこの範囲の IPアドレスなら、この Ethernet に送るべし」
 <li> 「送り先がそれ以外なら、この特定のホストに送るべし」
@@ -770,7 +786,7 @@ Ethernet の全ノード対して送る。ここには、そのノードの MAC 
 </div>
 
 <div class=exercise id="ex-routing">
-<div class=header>演習. ルーティングの実際</div>
+<div class=header>演習. ルーティングテーブルの実装</div>
 <p>
 あるルータが以下のIPアドレスをもっている。
 これらは2つのサブネットに接続しており、
@@ -895,6 +911,18 @@ AS 間での経路情報を交換する。世界には約5万のASがあり、�
 <p>
 業務用ルータ1台は、通常のパソコン数百台分の性能をもっている。
 アドレスの照合のために、TCAMという特別なメモリが使われている。
+
+<div class=exercise id="ex-traceroute">
+<div class=header>演習. 広域ルーティングの実際</div>
+<p>
+ニューヨークのとあるサーバの IP アドレスは 166.84.7.55 である。
+<code>traceroute</code> コマンド (Windows の場合は、<code>tracert</code> コマンド) を使って、
+ここに行くまでの経路を調べよ。
+<blockquote><pre>
+$ <strong>traceroute 166.84.7.55</strong>
+C:\&gt; <strong>tracert 166.84.7.55</strong>
+</pre></blockquote>
+</div>
 
 
 <h2 id="tcp">4. TCP層 (トランポート層) のしくみ</h2>
@@ -1109,8 +1137,7 @@ TCP セグメントには、データの「始まり」を示す
 
 <p>
 実際のTCP通信は、以下のようにして開始する。
-この処理を <u>TCPハンドシェイク</u>
-(TCP 握手) という。
+この処理を <a href="https://ja.wikipedia.org/wiki/3%E3%82%A6%E3%82%A7%E3%82%A4%E3%83%BB%E3%83%8F%E3%83%B3%E3%83%89%E3%82%B7%E3%82%A7%E3%82%A4%E3%82%AF">3ウェイ・ハンドシェイク</a> という。
 
 <ol>
 <li> 送り側が TCP SYN パケットを送る。
@@ -1153,7 +1180,7 @@ TCPサーバとは特定のTCPポートを
   そのポートはListenできない)
 <li> TCPクライアントがそのポートに対して TCP SYN パケットを送ってくるのを待つ。
 <li> TCP SYN パケットが送られてきたら TCP SYN+ACKパケットを返し、
-  TCPハンドシェイク開始する。
+  TCPハンドシェイクを開始する。
   ハンドシェイクが成功すると、そのポートは
   <u>Established</u> (確立) 状態になる。
 <li> 以後、TCP RST パケットが送られてくるまでそのクライアントと双方向で通信する。
@@ -1173,6 +1200,24 @@ TCPサーバとは特定のTCPポートを
   エラーが返される。
 </ol>
 
+<div class=exercise id="ex-tcp-connection">
+<div class=header>演習. TCP で通信する</div>
+<ol>
+<li> まず、サーバ側の PC とクライアント側の PC を用意する
+(どちらも仮想マシンでよい)。
+<li> サーバ側PCで、以下のコマンドを実行する:
+<blockquote><pre>
+$ <strong>nc -l -p 10000</strong>
+</pre></blockquote>
+<li> クライアント側PCで、以下のコマンドを実行する:
+<blockquote><pre>
+$ <strong>nc <em>サーバIPアドレス</em> 10000</strong>
+</pre></blockquote>
+<li> サーバ・クライアント側ともに何らかのテキストを入力し、
+相手の端末にそれが送信されていることを確認せよ。
+</ol>
+</div>
+
 <p>
 TCPクライアントとサーバが双方向で通信可能な状態になっている状態を
 <u>TCP接続</u> (connection) という。
@@ -1189,6 +1234,30 @@ TCPクライアントとサーバが双方向で通信可能な状態になっ�
 また、1台のクライアントは、複数のTCPサーバに同時に接続することができる。
 <code>netstat</code>コマンドを実行すると、現在その PC上で
 Listen/Established状態になっている TCPポート一覧を見ることができる。
+
+<div class=exercise id="ex-netstat">
+<div class=header>演習. TCP 接続の状態を確認する</div>
+<p>
+<a href="#ex-tcp-connection">上の演習</a> を実行中に、
+サーバ・クライアントの両方で別のウィンドウを開き、
+以下のコマンドを実行せよ。
+<blockquote><pre>
+$ <strong>netstat -n -t</strong>
+</pre></blockquote>
+現在通信中のポートが表示されていることを確認せよ。
+</div>
+
+<div class=exercise id="ex-wireshark">
+<div class=header>演習. Wireshark を使って TCP パケットの詳細を確認する</div>
+<ol>
+<li> まず <a href="https://www.wireshark.org/">Wireshark</a> をダウンロードし、
+インストールせよ。
+<li> <a href="#ex-tcp-connection">上の演習</a> を実行中に、
+Wireshark を起動後、パケットキャプチャーを開始し、
+フィルタバーに <code>ip.addr == <em>対象のIPアドレス</em></code> と入力せよ。
+<li> TCP の 3ウェイハンドシェイクが行われていることを確認せよ。
+</ol>
+</div>
 
 <h3 id="tcp-udp">4.2. UDP層</h3>
 <p>
@@ -1400,15 +1469,18 @@ IPアドレスがわからないので、そもそも通信ができなくなる
 </ol>
 
 <p>
-TCP/IPに対応している多くのプログラムでは、
-ふつう IPアドレスの代わりにホスト名を指定してもよい。
-<div class=question>
-<u>演習.</u>
+TCP/IPに対応している多くのプログラム
+(<code>ping</code>, <code>traceroute</code>, <code>nc</code> など) では、
+IPアドレスの代わりにホスト名を直接指定してもよい。
+
+<div class=exercise id="ex-nslookup">
+<div class=header>演習. ホスト名から IP アドレスを求める</div>
+<p>
 <code>ping</code> コマンドを使って、
 自分がよく知っているホスト名の IPアドレスを求めよ。
-<pre>
-C:\&gt; <strong>ping <u>ホスト名</u></strong>
-</pre>
+<blockquote><pre>
+C:\&gt; <strong>ping <em>ホスト名</em></strong>
+</pre></blockquote>
 </div>
 
 <h3 id="app-web">5.2. ウェブ (HTTP)</h3>
@@ -1420,20 +1492,52 @@ TCP 層の機能を使って、特定のサーバの TCP 80番ポートに
 この「規約」は HTML データを転送するという意味で
 <u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol
 (<nobr><span class=bl>HTTP</span></nobr>) と呼ばれる。
+
+<div class=exercise id="ex-human-http-client">
+<div class=header>演習. 人間HTTPクライアント</div>
+<p>
+<code>nc</code> コマンドを使って、
+<a href="https://www.example.com/">www.example.com</a> サーバに
+「人間HTTPクライアント」としてリクエストを送り、
+返答を確認せよ。
 <blockquote><pre>
-C:\&gt; <strong>nc www.google.com 80</strong>
+$ <strong>nc www.example.com 80</strong>
 <strong>GET / HTTP/1.0</strong>
-<strong>Host: www.google.com</strong>
+<strong>Host: www.example.com</strong>
 
 HTTP/1.0 200 OK
-Date: Mon, 16 Jan 2023 05:38:05 GMT
-Expires: -1
-Server: gws
+Content-Type: text/html; charset=UTF-8
+Date: Mon, 23 Jan 2023 13:39:22 GMT
 ...
 
 &lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
 ...
 </pre></blockquote>
+</div>
+
+<div class=exercise id="ex-human-http-server">
+<div class=header>演習. 人間HTTPサーバ</div>
+<p>
+<code>nc</code> コマンドを使って、
+「人間HTTPサーバ」としてブラウザからの
+リクエストに返答せよ。
+<blockquote><pre>
+$ <strong>nc -l -p 8080</strong>
+GET / HTTP/1.1
+User-Agent: Mozilla/5.0
+...
+
+<strong>HTTP/1.0 200 OK</strong>
+<strong>Content-Type: text/plain</strong>
+
+<strong>Hello.</strong>
+
+^C
+</pre></blockquote>
+</div>
+
 
 <h3 id="app-email">5.3. 電子メール (SMTP)</h3>
 <p>
@@ -1442,7 +1546,7 @@ TCP 層の機能を使って、特定のサーバの TCP 25番ポートに
 この「規約」は <u>S</u>imple <u>M</u>ail <u>T</u>ransfer <u>P</u>rotocol
 (SMTP) と呼ばれている。
 <blockquote><pre>
-C:\&gt; <strong>nc gmail-smtp-in.l.google.com 25</strong>
+$ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 220 mx.google.com ESMTP
 <strong>HELO mail.example.com</strong>
 250 mx.google.com at your service
