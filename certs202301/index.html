@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>証明書とは何か?</title>
+<title>デジタル証明書とは何か?</title>
 <style><!--
 body { line-height: 1.5; }
 h1 { border-bottom: solid 4px #000088; }
@@ -42,7 +42,7 @@ code em { color: #000088; }
 <div class=nav>
 <a href="../index.html">&lt; もどる</a>
 </div>
-<h1>証明書とは何か?</h1>
+<h1>デジタル証明書とは何か?</h1>
 
 <div class=author>
 Yusuke Shinyama, Jan. 2023
@@ -72,9 +72,9 @@ Yusuke Shinyama, Jan. 2023
 
 <p>
 証明書の書式は、
-<a href="https://ja.wikipedia.org/wiki/X.509">X.509</a>
+<a target="_blank" href="https://ja.wikipedia.org/wiki/X.509">X.509</a>
 と呼ばれる規格に準拠している。
-証明書は通常インターネット上の Webサーバで使われており、ブラウザ上で見ることができる:   
+証明書は通常インターネット上の Webサーバで使われており、ブラウザ上で見ることができる:
 </p>
 
 <div class="figure">
@@ -82,7 +82,7 @@ Yusuke Shinyama, Jan. 2023
 </div>
 
 <p>
-実際にWebサーバが証明書を送っているところは、<code>openssl</code> コマンドを使うと見ることができる。  
+実際にWebサーバが証明書を送っているところは、<code>openssl</code> コマンドを使うと見ることができる。
 </p>
 <blockquote><pre>
 $ <strong>openssl s_client -showcerts -servername www.google.com -connect www.google.com:443</strong>
@@ -146,24 +146,131 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
 <p>
 インターネットにおいては、情報が正当かどうかを確認するために
 <u>デジタル署名</u> (digital signature) がよく使われる。
-これは、ある個人・組織が固有の<u>秘密鍵</u>を用いてデータを「署名 (sign)」し、
-その秘密鍵に対応する<u>公開鍵</u>を用いて署名を「検証 (verify)」する。
-しかし、情報が本当に正しいことを確認するためには、
-署名に使われた鍵が特定の個人・組織に所属するという証明が必要である。
-このために「証明書」が使われる。
+これは暗号化通信において、とくに重要である。
+悪者も暗号は使えるので、たとえば正当な相手のフリをして
+自分と暗号を使って通信すれば、結局のところ情報は悪者の手に渡ってしまう。
+(中間者攻撃)
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="500" height="120"
+       transform="scale(1,1)">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="user" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+    <g id="baddie" fill="black" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+    </defs>
+    <use xlink:href="#user" x="10" y="20" />
+    <use xlink:href="#baddie" x="260" y="20" />
+    <use xlink:href="#user" x="410" y="20" />
+    <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
+      <line x1="80" x2="240" y1="40" y2="40" />
+      <line x1="240" x2="80" y1="60" y2="60" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle">
+      <text x="160" y="30">暗号</text>
+      <text x="35" y="90">自分</text>
+      <text x="285" y="90">悪者</text>
+      <text x="285" y="90" dy="1.1em">(中間者)</text>
+      <text x="435" y="90">本当に通信したい相手</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+これを防ぐために、ウェブブラウザでは通信相手のサーバ名が正しいかどうかを
+<u>認証局 (CA)</u> と呼ばれる第三者機関に確認してもらうことによっ
+て「安全」というお墨付きを得ている。
+いわゆる「鍵マーク」は、このお墨付きによるものである。
+この確認処理は、ある個人・組織が固有の「<u>署名</u>」をブラウザに送り、
+ブラウザがその署名を「<u>検証</u>」することによって行われる。
+具体的には:
+</p>
+
+<ol>
+<li> 特定の個人・組織が固有の<u>秘密鍵</u>を用いて署名データを作成する。
+<li> ブラウザは、その秘密鍵に対応する<u>公開鍵</u>を使ってデータを検証する。
+</ol>
+
+<p>
+デジタル証明書は、ここで使われる公開鍵が本当にその個人・組織に
+所属するという証明として使われる。
+</p>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="200"
+       transform="scale(1,1)">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="user" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+    <g id="ca" fill="none" stroke="black" stroke-width="2">
+      <rect x="5" y="0" width="40" height="50" />
+      <path d="M10,10 l0,40 M15,10 l0,40 M20,10 l0,40 M25,10 l0,40 M30,10 l0,40 M35,10 l0,40 M40,10 l0,40" />
+    </g>
+    <g id="site" fill="none" stroke="black" stroke-width="2">
+      <rect x="15" y="0" width="20" height="50" />
+      <rect x="0" y="20" width="50" height="30" />
+    </g>
+    <g id="key" fill="none" stroke="green" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    </defs>
+    <use xlink:href="#user" x="10" y="120" />
+    <use xlink:href="#ca" x="160" y="20" />
+    <use xlink:href="#site" x="310" y="120" />
+    <use xlink:href="#key" x="75" y="80" />
+    <use xlink:href="#key" x="200" y="180" />
+    <g stroke="black" fill="none" stroke-width="1">
+      <rect x="20" y="50" width="85" height="40" />
+      <rect x="18" y="48" width="89" height="44" />
+    </g>
+    <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
+      <line x1="280" x2="80" y1="150" y2="150" />
+      <line x1="150" y1="60" x2="80" y2="120" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle">
+      <text x="185" y="85">認証局 (CA)</text>
+      <text x="35" y="185">ブラウザ</text>
+      <text x="335" y="185">www.google.com</text>
+    </g>
+    <g style="font-size: 75%;">
+      <text x="40" y="65">証明書</text>
+      <text x="25" y="85">Google:</text>
+      <text x="140" y="170">署名:</text>
+      <text x="170" y="170" style="font-size: 125%; font-weight: bold; font-style: italic;">Google</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+認証局は<a target="_blank" href="https://ccadb-public.secure.force.com/mozilla/CACertificatesInFirefoxReport">世界に100箇所以上</a>ある。
+これらの認証局自体をどうやって信頼するのか? というと、
+実はインターネットに接続するすべての機器・ソフトウェアには
+これらの認証局のデジタル証明書が最初から内蔵されている。
+したがって、パソコンやスマートフォンを買った時点で、
+これらの認証局を信用したことになる。
 </p>
 
 <h2 id="how">3. なぜチェーンが必要なのか?</h2>
 
 <h2 id="gotchas">4. 証明書を使うときに注意すること</h2>
 <ul>
-  <li> すべての証明書には必ず有効期間がある。有効期間をすぎた (失効した) 証明書はもう信頼されないので注意。</li>
+  <li> あやしげな発行元の証明書を信用してはならない。</li>
+  <li> すべての証明書には必ず<u>有効期間</u>がある。有効期間をすぎた (失効した) 証明書はもう信頼されないので注意。</li>
   <li> 証明書に使う秘密鍵は、絶対に外部に持ち出してはならない。</li>
   <ul>
     <li> 個人の秘密鍵であれば、秘密鍵ファイルは絶対そのPCからネットに送信しない。</li>
     <li> 組織の秘密鍵であれば、それが入っているPCはそもそもネットに接続しない。</li>
   </ul>
-  <li> あやしげな発行元の証明書を信用してはならない。</li>
 </ul>
 
 <hr>
