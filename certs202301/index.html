@@ -19,7 +19,7 @@ img { max-width: 80vw; height: auto; }
 dt { text-decoration: underline; font-weight: bold; }
 u { color: #880000; font-weight: bold; }
 .author { text-align: right; }
-.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; }
 .notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
@@ -202,7 +202,7 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
 所属するという証明として使われる。
 </p>
 
-<div class=figure style="display: flex; justify-content: center; align-items: flex-end;">
+<div class=figure style="align-items: flex-end;">
   <img src="key.png" width="389" height="131">
   
   <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="200"
@@ -255,15 +255,72 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
 </div>
 
 <p>
-認証局は<a target="_blank" href="https://ccadb-public.secure.force.com/mozilla/CACertificatesInFirefoxReport">世界に100箇所以上</a>ある。
+認証局はいくつかのグレードに分かれているが、もっとも重要なルート認証局は
+<a target="_blank" href="https://ccadb-public.secure.force.com/mozilla/CACertificatesInFirefoxReport">世界に100箇所以上</a>ある。
 これらの認証局自体をどうやって信頼するのか? というと、
 実はインターネットに接続するすべての機器・ソフトウェアには
-これらの認証局のデジタル証明書が最初から内蔵されている。
+これらの認証局のデジタル証明書が最初から「信頼できる証明書」として内蔵されている。
 したがって、パソコンやスマートフォンを買った時点で、
 これらの認証局を信用したことになる。
 </p>
 
+<p>
+なお、デジタル証明書は通信だけでなく、
+ソフトウェアの発行元の正当性を証明するのにも使われる
+(コードサイニング証明書)。
+</p>
+
+
 <h2 id="how">3. なぜチェーンが必要なのか?</h2>
+<p>
+一般的に、証明書は単一で使われることは少なく、複数の証明書がつながった「チェーン」になっている。
+これは<strong>リスク分散</strong>のためである。
+ひとつの認証局が多くの証明書を発行することはリスクをともなう。
+証明書を作成するにはその認証局の秘密鍵が必要なため、多くの証明書を発行すれば
+それだけ秘密鍵が漏洩・悪用されるリスクが高まるためである。
+</p>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="160"
+       transform="scale(1,1)">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="ca" fill="none" stroke="black" stroke-width="2">
+      <rect x="5" y="0" width="40" height="50" />
+      <path d="M10,10 l0,40 M15,10 l0,40 M20,10 l0,40 M25,10 l0,40 M30,10 l0,40 M35,10 l0,40 M40,10 l0,40" />
+    </g>
+    </defs>
+    <use xlink:href="#ca" x="170" y="15" />
+    <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
+      <line x1="180" y1="70" x2="30" y2="120" />
+      <line x1="190" y1="70" x2="80" y2="120" />
+      <line x1="200" y1="70" x2="130" y2="120" />
+      <line x1="220" y1="70" x2="370" y2="120" />
+    </g>
+    <g stroke="black" fill="none" stroke-width="1">
+      <rect x="10" y="130" width="40" height="20" />
+      <rect x="60" y="130" width="40" height="20" />
+      <rect x="110" y="130" width="40" height="20" />
+      <rect x="350" y="130" width="40" height="20" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle">
+      <text x="190" y="12">認証局 (CA)</text>
+      <text x="30" y="145">証明書</text>
+      <text x="80" y="145">証明書</text>
+      <text x="130" y="145">証明書</text>
+      <text x="180" y="145">...</text>
+      <text x="370" y="145">証明書</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+これを解決するために、認証局はいくつかの階層に分けられている。
+ふつうルート認証局は途中にある「中間認証局」の証明書のみを発行し、
+中間認証局が最終的なウェブサイトの証明書を発行する。
+</p>
 
 <h2 id="gotchas">4. 証明書を使うときに注意すること</h2>
 <ul>
