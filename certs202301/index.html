@@ -14,6 +14,7 @@ td { padding: 4px; }
 kbd { outline: 1px solid black; padding: 2px; }
 pre { outline: 1px solid black; padding: 4px; overflow: auto; }
 mark { font-weight: bold; }
+blockquote { outline: 1px solid black; }
 pre, code { background: #ddd; font-size: 150%; font-family: courier; }
 img { max-width: 80vw; height: auto; }
 dt { text-decoration: underline; font-weight: bold; }
@@ -36,6 +37,11 @@ code em { color: #000088; }
 .bgg, .cert1 { background: #88ff88; }
 .bgy, .cert2 { background: #ffff88; }
 .bgb { background: #88ffff; }
+
+.caa { color: black; }
+.cab { color: red; }
+.cac { color: blue; }
+.cad { color: green; }
 --></style>
 </head>
 <body>
@@ -66,7 +72,7 @@ Yusuke Shinyama, Jan. 2023
   <em>YYY</em>
 であり、その有効期間は
   <em>AAA 〜 BBB</em>
-である。
+であることを証明する。
 -- 署名 <em>ZZZ</em>
 </pre></blockquote>
 
@@ -122,7 +128,7 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
   <em>www.google.com</em>
 であり、その有効期間は
   <em>2022/12/12 〜 2023/03/06</em>
-である。
+であることを証明する。
 -- 署名 <em>GTS CA 1C3</em></div>
 <div class="cert1">1. 以下の公開鍵
   <em>MIIFljCCA36...</em>
@@ -130,7 +136,7 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
   <em>GTS CA 1C3</em>
 であり、その有効期間は
   <em>2020/08/13 〜 2027/09/30</em>
-である。
+であることを証明する。
 -- 署名 <em>GTS Root R1</em></div>
 <div class="cert2">2. 以下の公開鍵
   <em>MIIFYjCCBEq...</em>
@@ -138,7 +144,7 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
   <em>GTS Root R1</em>
 であり、その有効期間は
   <em>2020/06/19 〜 2028/01/28</em>
-である。
+であることを証明する。
 -- 署名 <em>GlobalSign Root CA</em></div>
 </pre></blockquote>
 
@@ -198,7 +204,8 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
 </ol>
 
 <p>
-デジタル証明書は、ここで使われる公開鍵が本当にその個人・組織に
+デジタル証明書は認証局が発行し、
+ここで使われる公開鍵が本当にその個人・組織に
 所属するという証明として使われる。
 </p>
 
@@ -222,7 +229,7 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
       <rect x="15" y="0" width="20" height="50" />
       <rect x="0" y="20" width="50" height="30" />
     </g>
-    <g id="key" fill="none" stroke="green" stroke-width="3">
+    <g id="keyg" fill="none" stroke="green" stroke-width="3">
       <circle cx="20" cy="0" r="5" />
       <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
     </g>
@@ -230,8 +237,8 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
     <use xlink:href="#user" x="10" y="120" />
     <use xlink:href="#ca" x="160" y="20" />
     <use xlink:href="#site" x="310" y="120" />
-    <use xlink:href="#key" x="75" y="80" />
-    <use xlink:href="#key" x="200" y="180" />
+    <use xlink:href="#keyg" x="75" y="80" />
+    <use xlink:href="#keyg" x="370" y="150" />
     <g stroke="black" fill="none" stroke-width="1">
       <rect x="20" y="50" width="85" height="40" />
       <rect x="18" y="48" width="89" height="44" />
@@ -243,31 +250,21 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
     <g style="font-size: 75%;" text-anchor="middle">
       <text x="185" y="85">認証局 (CA)</text>
       <text x="35" y="185">ブラウザ</text>
-      <text x="335" y="185">www.google.com</text>
+      <text x="335" y="185" fill="green">www.google.com</text>
     </g>
     <g style="font-size: 75%;">
       <text x="40" y="65">証明書</text>
       <text x="25" y="85">Google:</text>
       <text x="140" y="170">署名:</text>
-      <text x="170" y="170" style="font-size: 125%; font-weight: bold; font-style: italic;">Google</text>
+      <text x="170" y="170" fill="green" style="font-size: 125%; font-weight: bold; font-style: italic;">Google</text>
     </g>
   </svg>
 </div>
 
 <p>
-認証局はいくつかのグレードに分かれているが、もっとも重要なルート認証局は
-<a target="_blank" href="https://ccadb-public.secure.force.com/mozilla/CACertificatesInFirefoxReport">世界に100箇所以上</a>ある。
-これらの認証局自体をどうやって信頼するのか? というと、
-実はインターネットに接続するすべての機器・ソフトウェアには
-これらの認証局のデジタル証明書が最初から「信頼できる証明書」として内蔵されている。
-したがって、パソコンやスマートフォンを買った時点で、
-これらの認証局を信用したことになる。
-</p>
-
-<p>
-なお、デジタル証明書は通信だけでなく、
-ソフトウェアの発行元の正当性を証明するのにも使われる
-(コードサイニング証明書)。
+なお、通信相手ではなく
+ソフトウェアの発行元の正当性を証明するのに
+使われるデジタル証明書 (コードサイニング証明書) もある。
 </p>
 
 
@@ -276,7 +273,7 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
 一般的に、証明書は単一で使われることは少なく、複数の証明書がつながった「チェーン」になっている。
 これは<strong>リスク分散</strong>のためである。
 ひとつの認証局が多くの証明書を発行することはリスクをともなう。
-証明書を作成するにはその認証局の秘密鍵が必要なため、多くの証明書を発行すれば
+証明書を作成するには秘密鍵を使う必要があるため、多くの証明書を発行すれば
 それだけ秘密鍵が漏洩・悪用されるリスクが高まるためである。
 </p>
 
@@ -291,8 +288,13 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
       <rect x="5" y="0" width="40" height="50" />
       <path d="M10,10 l0,40 M15,10 l0,40 M20,10 l0,40 M25,10 l0,40 M30,10 l0,40 M35,10 l0,40 M40,10 l0,40" />
     </g>
+    <g id="key" fill="none" stroke="black" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
     </defs>
     <use xlink:href="#ca" x="170" y="15" />
+    <use xlink:href="#key" x="230" y="40" />
     <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
       <line x1="180" y1="70" x2="30" y2="120" />
       <line x1="190" y1="70" x2="80" y2="120" />
@@ -310,17 +312,120 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
       <text x="30" y="145">証明書</text>
       <text x="80" y="145">証明書</text>
       <text x="130" y="145">証明書</text>
-      <text x="180" y="145">...</text>
       <text x="370" y="145">証明書</text>
     </g>
+    <text x="170" y="145">...</text>
   </svg>
 </div>
 
 <p>
 これを解決するために、認証局はいくつかの階層に分けられている。
-ふつうルート認証局は途中にある「中間認証局」の証明書のみを発行し、
-中間認証局が最終的なウェブサイトの証明書を発行する。
+まず、もっとも上位にある「ルート認証局」が、その下位の「中間認証局」の証明書を発行し、
+いくつかの段階をへて、中間認証局が最終的なウェブサイトの証明書を発行する。
+たとえば、以下のような証明書チェーンを考える:
 </p>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="300"
+       transform="scale(1,1)">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="ca" fill="none" stroke="black" stroke-width="2">
+      <rect x="5" y="0" width="40" height="50" />
+      <path d="M10,10 l0,40 M15,10 l0,40 M20,10 l0,40 M25,10 l0,40 M30,10 l0,40 M35,10 l0,40 M40,10 l0,40" />
+    </g>
+    <g id="site" fill="none" stroke="black" stroke-width="2">
+      <rect x="15" y="0" width="20" height="50" />
+      <rect x="0" y="20" width="50" height="30" />
+    </g>
+    <g id="key" fill="none" stroke="black" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="keyr" fill="none" stroke="red" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="keyb" fill="none" stroke="blue" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="keyg" fill="none" stroke="green" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="cert">
+      <rect stroke="black" fill="none" stroke-width="1" x="0" y="0" width="70" height="20" />
+      <text stroke="none" fill="black" style="font-size: 75%;" x="2" y="15">証明書</text>
+    </g>
+    </defs>
+    <use xlink:href="#ca" x="300" y="15" />
+    <use xlink:href="#ca" x="200" y="85" />
+    <use xlink:href="#ca" x="100" y="155" />
+    <use xlink:href="#site" x="20" y="225" />
+    <use xlink:href="#key" x="360" y="40" />
+    <use xlink:href="#keyr" x="260" y="120" />
+    <use xlink:href="#keyb" x="160" y="190" />
+    <use xlink:href="#keyg" x="80" y="260" />
+    <use xlink:href="#cert" x="230" y="40" />
+    <use xlink:href="#keyr" x="270" y="50" />
+    <use xlink:href="#cert" x="130" y="110" />
+    <use xlink:href="#keyb" x="170" y="120" />
+    <use xlink:href="#cert" x="30" y="180" />
+    <use xlink:href="#keyg" x="70" y="190" />
+    <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
+      <path d="M305,70 l-50,20" />
+      <path d="M320,70 l-30,20" />
+      <path d="M340,70 l30,20" />
+      <path d="M205,140 l-50,20" />
+      <path d="M220,140 l-30,20" />
+      <path d="M240,140 l30,20" />
+      <path d="M105,210 l-40,20" />
+      <path d="M120,210 l-20,20" />
+      <path d="M140,210 l30,20" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle">
+      <text x="320" y="12">ルート認証局A</text>
+      <text x="220" y="82" fill="red">中間認証局B</text>
+      <text x="120" y="152" fill="blue">中間認証局C</text>
+      <text x="60" y="290" fill="green">www.example.com</text>
+    </g>
+    <text x="320" y="90">...</text>
+    <text x="220" y="160">...</text>
+    <text x="120" y="240">...</text>
+  </svg>
+</div>
+
+<blockquote>
+<ul>
+<li><span class=caa>認証局A</span>: <span class=cab>公開鍵X</span>の所有者は認証局Bであることを証明する。</li>
+<li><span class=cab>認証局B</span>: <span class=cac>公開鍵Y</span>の所有者は認証局Cであることを証明する。</li>
+<li>...</li>
+<li><span class=cac>認証局C</span>: <span class=cad>公開鍵Z</span>の所有者は <code>www.example.com</code> であることを証明する。</li>
+</ul>
+</blockquote>
+
+<p>
+ルート認証局は、秘密鍵の安全を保つため、
+エンドユーザであるサイト向けの証明書は直接発行しない。しかし
+<u>信頼の連鎖</u>により、ルート認証局である認証局Aを信頼していれば、
+最終的に <code>www.example.com</code> を信頼できることになる。
+たとえ認証局Cの秘密鍵が漏洩・悪用された場合でも、被害を受けるサイトは
+その認証局以下だけに限定することができる。
+</p>
+
+<p>
+ルート認証局は
+<a target="_blank" href="https://ccadb-public.secure.force.com/mozilla/CACertificatesInFirefoxReport">世界に100箇所以上</a>ある。
+では、ルート認証局自体はどうやって信頼するのか?
+実はインターネットに接続するすべての機器・ソフトウェアには
+<strong>ルート認証局のデジタル証明書が最初から内蔵されている</strong>。
+したがって、パソコンやスマートフォンを買った時点で、
+これらのルート認証局を信用したことになる。
+</p>
+
 
 <h2 id="gotchas">4. 証明書を使うときに注意すること</h2>
 <ul>
