@@ -211,7 +211,7 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
 
 <div class=figure style="align-items: flex-end;">
   <img src="key.png" width="389" height="131">
-  
+
   <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="200"
        transform="scale(1,1)">
     <defs>
@@ -427,13 +427,24 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
 </p>
 
 
-<h2 id="gotchas">4. 証明書を使うときに注意すること</h2>
+<h2 id="issue">4. 証明書を発行してもらうには</h2>
+<p>
+通常は、エンドユーザがとくにデジタル証明書を意識することはない。
+しかしサイトを管理する場合 (あるいはソフトウェアを配布する場合) は
+認証局から証明書を発行してもらう必要がある:
+</p>
+<ol>
+  <li> 秘密鍵と公開鍵を作成する。
+  <li> 公開鍵を認証局に送る。
+  <li> 認証局が署名した証明書を受け取り、サーバに設定する。
+</ol>
+<p>
+このときに注意すべきこととして:
 <ul>
-  <li> あやしげな発行元の証明書を信用してはならない。</li>
-  <li> すべての証明書には必ず<u>有効期間</u>がある。有効期間をすぎた (失効した) 証明書はもう信頼されないので注意。</li>
-  <li> 証明書に使う秘密鍵は、絶対に外部に持ち出してはならない。</li>
+  <li> すべての証明書には<u>有効期間</u>がある。有効期間をすぎた (失効した) 証明書は信頼されないので、定期的に更新する必要がある。</li>
+  <li> 証明書に使う秘密鍵は、外部に持ち出してはならない。</li>
   <ul>
-    <li> 個人の秘密鍵であれば、秘密鍵ファイルは絶対そのPCからネットに送信しない。</li>
+    <li> 個人の秘密鍵であれば、秘密鍵ファイルはそのPCから持ち出さない。</li>
     <li> 組織の秘密鍵であれば、それが入っているPCはそもそもネットに接続しない。</li>
   </ul>
 </ul>
