@@ -56,6 +56,12 @@ Yusuke Shinyama, Jan. 2023
 <li> <a href="#application">アプリケーション層</a>
 </ol>
 
+<h4>使用するツール</h4>
+<div class=formula>
+<a target="_blank" href="https://www.wireshark.org/">Wireshark</a> :
+パケットキャプチャ・解析ツール。
+</div>
+
 
 <h2 id="internet">1. インターネットの作り方・概要</h2>
 
@@ -417,6 +423,14 @@ Ethernet を使って別のノードにデータを送るときは、
   </ol>
 </div>
 
+<div class=exercise id="ex-eithernet-wireshark">
+<div class=header>演習. Wireshark を使って Ethernet フレームの詳細を確認する</div>
+<p>
+<a href="https://www.wireshark.org/">Wireshark</a> を起動後にパケットキャプチャーを開始し、
+各パケットの詳細パネルをクリックして Ethernet の送信元・送信先MACアドレスを確認せよ。
+</p>
+</div>
+
 <h2 id="ip">3. IP層 (ネットワーク層) のしくみ</h2>
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
@@ -576,6 +590,15 @@ IPパケットの実際のデータを表したものである (<span class=bgy>
 <li> 送信先の IPアドレス
 <li> IP パケットの大きさ (バイト数)
 </ol>
+</div>
+
+<div class=exercise id="ex-ip-wireshark">
+<div class=header>演習. Wireshark を使って IPパケットの中身を観察する</div>
+<p>
+Wireshark を起動後、パケットキャプチャーを開始し、
+フィルタバーに <code>ip</code> と入力せよ。
+各パケットをクリックして送信元・送信先のIPアドレスを確認せよ。
+</p>
 </div>
 
 <h3 id="ip-routing">3.3. ルーティング (Routing)</h3>
@@ -1247,16 +1270,14 @@ $ <strong>netstat -n -t</strong>
 現在通信中のポートが表示されていることを確認せよ。
 </div>
 
-<div class=exercise id="ex-wireshark">
-<div class=header>演習. Wireshark を使って TCP パケットの詳細を確認する</div>
-<ol>
-<li> まず <a href="https://www.wireshark.org/">Wireshark</a> をダウンロードし、
-インストールせよ。
-<li> <a href="#ex-tcp-connection">上の演習</a> を実行中に、
+<div class=exercise id="ex-tcp-wireshark">
+<div class=header>演習. Wireshark を使って TCPハンドシェイクを観察する</div>
+<p>
+<a href="#ex-tcp-connection">上の演習</a> を実行中に、
 Wireshark を起動後、パケットキャプチャーを開始し、
 フィルタバーに <code>ip.addr == <em>対象のIPアドレス</em></code> と入力せよ。
-<li> TCP の 3ウェイハンドシェイクが行われていることを確認せよ。
-</ol>
+TCP の 3ウェイハンドシェイクが行われていることを確認せよ。
+</p>
 </div>
 
 <h3 id="tcp-udp">4.2. UDP層</h3>
