@@ -110,6 +110,43 @@ Yusuke Shinyama, Jan. 2023
 <u>パケット通信</u>。
 インターネットを含む現在のコンピュータネットワークでは、
 パケット通信を使っている。
+ケーブルの中には、多様なデータのパケットが流れており、
+各パケットには、行き先をあらわす「<u>アドレス</u>」がついている。
+データの種類は、各パケットにつけられた「<u>ポート番号</u>」および
+「通信手順 (<u>プロトコル</u>)」で区別する。
+</p>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="600" height="200">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="3" fill="none">
+      <rect x="60" y="10" width="500" height="180" />
+      <ellipse cx="60" cy="100" rx="50" ry="90" fill="white" />
+      <rect x="180" y="25" width="80" height="40" />
+      <rect x="405" y="65" width="80" height="40" />
+      <rect x="330" y="130" width="100" height="40" />
+      <rect x="160" y="100" width="80" height="40" />
+      <line x1="180" y1="40" x2="140" y2="40" marker-end="url(#arrow)" />
+      <line x1="240" y1="120" x2="290" y2="120" marker-end="url(#arrow)" />
+      <line x1="485" y1="80" x2="510" y2="80" marker-end="url(#arrow)" />
+      <line x1="330" y1="150" x2="290" y2="150" marker-end="url(#arrow)" />
+    </g>
+    <g text-anchor="middle">
+      <text x="220" y="40" dy="0.5em">ウェブ</text>
+      <text x="445" y="80" dy="0.5em">LINE</text>
+      <text x="200" y="120" dy="0.5em">メール</text>
+      <text x="380" y="145" dy="0.5em">動画配信</text>
+    </g>
+    <g>
+      <text x="170" y="60" dy="0.5em" text-anchor="end">11.22.33.44</text>
+      <text x="490" y="100" dy="0.5em" text-anchor="begin">55.66.77.88</text>
+      <text x="245" y="130" dy="0.5em" text-anchor="begin">123.45.200.10</text>
+      <text x="320" y="165" dy="0.5em" text-anchor="end">20.10.8.5</text>
+    </g>
+  </svg>
+</div>
 
 <h4>インターネット以外に使われている (いた) ネットワーク規格</h4>
 <ul>
@@ -426,9 +463,12 @@ Ethernet を使って別のノードにデータを送るときは、
 <div class=exercise id="ex-eithernet-wireshark">
 <div class=header>演習. Wireshark を使って Ethernet フレームの詳細を確認する</div>
 <p>
-<a href="https://www.wireshark.org/">Wireshark</a> を起動後にパケットキャプチャーを開始し、
+<a target="_blank" href="https://www.wireshark.org/">Wireshark</a> を起動後にパケットキャプチャーを開始し、
 各パケットの詳細パネルをクリックして Ethernet の送信元・送信先MACアドレスを確認せよ。
 </p>
+<div class=figure>
+<img src="wireshark.png" width="700" height="464">
+</div>
 </div>
 
 <h2 id="ip">3. IP層 (ネットワーク層) のしくみ</h2>
@@ -1160,7 +1200,7 @@ TCP セグメントには、データの「始まり」を示す
 
 <p>
 実際のTCP通信は、以下のようにして開始する。
-この処理を <a href="https://ja.wikipedia.org/wiki/3%E3%82%A6%E3%82%A7%E3%82%A4%E3%83%BB%E3%83%8F%E3%83%B3%E3%83%89%E3%82%B7%E3%82%A7%E3%82%A4%E3%82%AF">3ウェイ・ハンドシェイク</a> という。
+この処理を <a target="_blank" href="https://ja.wikipedia.org/wiki/3%E3%82%A6%E3%82%A7%E3%82%A4%E3%83%BB%E3%83%8F%E3%83%B3%E3%83%89%E3%82%B7%E3%82%A7%E3%82%A4%E3%82%AF">3ウェイ・ハンドシェイク</a> という。
 
 <ol>
 <li> 送り側が TCP SYN パケットを送る。
@@ -1273,9 +1313,9 @@ $ <strong>netstat -n -t</strong>
 <div class=exercise id="ex-tcp-wireshark">
 <div class=header>演習. Wireshark を使って TCPハンドシェイクを観察する</div>
 <p>
-<a href="#ex-tcp-connection">上の演習</a> を実行中に、
 Wireshark を起動後、パケットキャプチャーを開始し、
-フィルタバーに <code>ip.addr == <em>対象のIPアドレス</em></code> と入力せよ。
+フィルタバーに <code>ip.addr == 93.184.216.34</code> と入力せよ。
+ブラウザで <a target="_blank" href="https://www.example.com/">https://www.example.com/</a> を開き、
 TCP の 3ウェイハンドシェイクが行われていることを確認せよ。
 </p>
 </div>
@@ -1437,7 +1477,7 @@ DNS は以下のような機構になっている:
   たとえば <code>.com</code> ドメインのネームサーバは
   <code>192.5.6.30</code>
   である。
-<li> 世界 13箇所に<a href="https://ja.wikipedia.org/wiki/%E3%83%AB%E3%83%BC%E3%83%88%E3%82%B5%E3%83%BC%E3%83%90">ルートネームサーバ</a> (root name server) をおく。
+<li> 世界 13箇所に<a target="_blank" href="https://ja.wikipedia.org/wiki/%E3%83%AB%E3%83%BC%E3%83%88%E3%82%B5%E3%83%BC%E3%83%90">ルートネームサーバ</a> (root name server) をおく。
   このサーバは各トップレベルドメイン (<code>.com</code>など) の
   ネームサーバのIPアドレスを記憶している。
 </ul>
@@ -1518,7 +1558,7 @@ TCP 層の機能を使って、特定のサーバの TCP 80番ポートに
 <div class=header>演習. 人間HTTPクライアント</div>
 <p>
 <code>nc</code> コマンドを使って、
-<a href="https://www.example.com/">www.example.com</a> サーバに
+<a target="_blank" href="https://www.example.com/">www.example.com</a> サーバに
 「人間HTTPクライアント」としてリクエストを送り、
 返答を確認せよ。
 <blockquote><pre>
