@@ -71,6 +71,7 @@ Yusuke Shinyama, Jan. 2023
 <u>ホスト</u> (host) と呼ぶ。
 インターネットでは、信号線は基本的に 1本しかなくても、
 複数のホストどうしが同時に双方向で通信できる。
+</p>
 
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
@@ -1066,6 +1067,7 @@ TCP 層では、<u>シーケンス番号</u>
 さらに各通信は <u>送り元ポート番号</u> と
 <u>送り先ポート番号</u> によって区別されており、
 これらが違うセグメントは別々の通信とみなされる。
+(ちなみに、IP層には「ポート番号」という概念はない。)
 
 <div class=exercise id="ex-tcp-segment">
 <div class=header>演習. TCP セグメントの中身</div>
@@ -1544,7 +1546,7 @@ C:\&gt; <strong>ping <em>ホスト名</em></strong>
 </pre></blockquote>
 </div>
 
-<h3 id="app-web">5.2. ウェブ (HTTP)</h3>
+<h3 id="app-web">5.2. Web (HTTP)</h3>
 <p>
 TCP 層の機能を使って、特定のサーバの TCP 80番ポートに
 特定の規約でデータを送ると、ウェブページを閲覧することができる。
@@ -1553,6 +1555,53 @@ TCP 層の機能を使って、特定のサーバの TCP 80番ポートに
 この「規約」は HTML データを転送するという意味で
 <u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol
 (<nobr><span class=bl>HTTP</span></nobr>) と呼ばれる。
+</p>
+
+<ol>
+<li> クライアント (Webブラウザ) がサーバの TCP 80番ポートに接続する。
+<li> クライアントが <u>HTTPリクエスト</u> を送る。
+これはテキスト形式で、以下のような構造になっている:
+<blockquote><pre>
+リクエストヘッダ
+メソッド パス名 HTTP/1.0
+フィールド: 値
+フィールド: 値
+...
+(1行あける)
+リクエストボディ
+データ
+</pre></blockquote>
+<p>
+例:
+<blockquote><pre>
+GET / HTTP/1.0
+Host: www.example.com
+</pre></blockquote>
+<li> サーバがこれに応じた <u>HTTPレスポンス</u> を返す。
+これも通常はテキスト形式で、以下のような構造になっている:
+<blockquote><pre>
+レスポンスヘッダ
+HTTP/1.0 ステータスコード メッセージ
+フィールド: 値
+フィールド: 値
+...
+(1行あける)
+レスポンスボディ
+データ
+</pre></blockquote>
+<p>
+例:
+<blockquote><pre>
+HTTP/1.0 200 OK
+Content-Type: text/html; charset=UTF-8
+Date: Mon, 23 Jan 2023 13:39:22 GMT
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+...
+</pre></blockquote>
+</ol>
 
 <div class=exercise id="ex-human-http-client">
 <div class=header>演習. 人間HTTPクライアント</div>
@@ -1599,7 +1648,6 @@ User-Agent: Mozilla/5.0
 </pre></blockquote>
 </div>
 
-
 <h3 id="app-email">5.3. 電子メール (SMTP)</h3>
 <p>
 TCP 層の機能を使って、特定のサーバの TCP 25番ポートに
@@ -1628,6 +1676,52 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 <strong>QUIT</strong>
 221 2.0.0 closing connection
 </pre></blockquote>
+
+
+<h2 id="encryption">6. さらに上の層</h2>
+<p>
+本来、TCP/IP の公式な範疇はTCP層まで、それより上は
+アプリケーションの責任となっている。しかし TCP 層だけでは
+真に安全な通信は実現できない。とくに、TCP 層には以下のような欠点がある:
+<ul>
+<li> 短所: 通信内容が中継ホストにまる見えであること。
+<li> 短所: 通信相手が本物かどうか確認できないこと。
+  (中継するホストが最終目的のIPアドレスのふりをすることが可能である)
+<li> 短所: 通信内容が途中で改竄される可能性があること。
+</ul>
+
+<p>
+そこで最近では、これらの欠点を補うために TCP層の上にさらにもう一段、
+暗号化をおこなう層を追加して使うことが多い。
+この層は end-to-end の安全な通信を提供する。
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="180" transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" />
+      <rect x="0" y="30" width="120" height="30" fill="#ff88ff" />
+      <rect x="0" y="60" width="120" height="30" />
+      <rect x="0" y="90" width="120" height="30" />
+      <rect x="0" y="120" width="120" height="30" />
+      <line x1="60" y1="150" x2="60" y2="170" />
+      <line x1="-50" y1="170" x2="170" y2="170" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">アプリケーション層</text>
+      <text x="60" y="45" dy="0.5em">暗号化層</text>
+      <text x="60" y="75" dy="0.5em">TCP層</text>
+      <text x="60" y="105" dy="0.5em">IP層</text>
+      <text x="60" y="135" dy="0.5em">データリンク層</text>
+      <text x="170" y="158" dy="0.5em">ケーブル</text>
+    </g>
+  </svg>
+</div>
+
+<h3 id="encryption-tls">6.1. TLS/SSL層</h2>
+
+<h3 id="encryption-ssh">6.2. SSH層</h2>
 
 
 <hr>
