@@ -12,7 +12,8 @@ h3 { border-bottom: solid 1px #000088; }
 table { border-collapse: collapse; margin-left: auto; margin-right: auto; }
 td { padding: 4px; }
 kbd { outline: 1px solid black; padding: 2px; }
-pre { outline: 1px solid black; padding: 4px; overflow: auto; }
+blockquote { outline: 1px solid black; padding: 4px; }
+pre { overflow: auto; margin: 0; }
 mark { font-weight: bold; }
 pre, code { background: #ddd; font-size: 150%; font-family: courier; }
 img { max-width: 80vw; height: auto; }
@@ -154,7 +155,7 @@ Yusuke Shinyama, Jan. 2023
 <li> ATM (国内のみ)
 <li> AppleTalk (LAN のみ)
 <li> <u>OSI</u> (Open Systems Interconnection)
-<li> ...
+<li> …
 </ul>
 
 <h3 id="internet-layers">1.2. ネットワークの「階層」</h3>
@@ -201,7 +202,8 @@ OSI はネットワーク規格としては普及しなかったが、
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="250" height="150" transform="translate(55,5)">
+       version="1.1" width="250" height="150">
+    <g transform="translate(55,5)">
     <g stroke="black" stroke-width="2" fill="none">
       <rect x="0" y="0" width="120" height="30" />
       <rect x="0" y="30" width="120" height="30" />
@@ -216,7 +218,7 @@ OSI はネットワーク規格としては普及しなかったが、
       <text x="60" y="75" dy="0.5em">IP層</text>
       <text x="60" y="105" dy="0.5em">データリンク層</text>
       <text x="170" y="128" dy="0.5em">ケーブル</text>
-    </g>
+    </g></g>
   </svg>
 </div>
 
@@ -338,7 +340,8 @@ TCP層の機能を使って、
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="250" height="150" transform="translate(55,5)">
+       version="1.1" width="250" height="150">
+    <g transform="translate(55,5)">
     <g stroke="black" stroke-width="2" fill="none">
       <rect x="0" y="0" width="120" height="30" />
       <rect x="0" y="30" width="120" height="30" />
@@ -353,7 +356,7 @@ TCP層の機能を使って、
       <text x="60" y="75" dy="0.5em">IP層</text>
       <text x="60" y="105" dy="0.5em">データリンク層</text>
       <text x="170" y="128" dy="0.5em">ケーブル</text>
-    </g>
+    </g></g>
   </svg>
 </div>
 <p>
@@ -421,7 +424,7 @@ Ethernet を使って別のノードにデータを送るときは、
 <table border>
 <tr>
 <td class=bits>10101010</td>
-<td>...</td>
+<td>…</td>
 <td class=bits>10101011</td>
 <td class=bgb>送信先アドレス<br>(6バイト)</td>
 <td class=bgy>送信元アドレス<br>(6バイト)</td>
@@ -476,7 +479,8 @@ Ethernet を使って別のノードにデータを送るときは、
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="250" height="150" transform="translate(55,5)">
+       version="1.1" width="250" height="150">
+    <g transform="translate(55,5)">
     <g stroke="black" stroke-width="2" fill="none">
       <rect x="0" y="0" width="120" height="30" />
       <rect x="0" y="30" width="120" height="30" />
@@ -491,7 +495,7 @@ Ethernet を使って別のノードにデータを送るときは、
       <text x="60" y="75" dy="0.5em">IP層</text>
       <text x="60" y="105" dy="0.5em">データリンク層</text>
       <text x="170" y="128" dy="0.5em">ケーブル</text>
-    </g>
+    </g></g>
   </svg>
 </div>
 <p>
@@ -505,7 +509,7 @@ Ethernet では基本的にどんなデータを送ってもよいが、
 <table border>
 <tr>
 <td class=bits>10101010</td>
-<td>...</td>
+<td>…</td>
 <td class=bits>10101011</td>
 <td>送信元アドレス</td>
 <td>送信先アドレス</td>
@@ -603,7 +607,7 @@ C:\&gt; <strong>ping 1.1.1.1</strong>
 </tr>
 <tr>
 <th>24</th>
-<td align=center colspan="4">実際のデータ<br>...</td>
+<td align=center colspan="4">実際のデータ<br>…</td>
 </tr>
 </table>
 </div>
@@ -689,7 +693,7 @@ IPアドレスはそのホストが「勝手に名乗っているだけ」であ
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="340" height="120">
+       version="1.1" width="350" height="120">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
       <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
     </marker>
@@ -742,7 +746,7 @@ IPアドレスはそのホストが「勝手に名乗っているだけ」であ
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="340" height="120">
+       version="1.1" width="350" height="120">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
       <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
     </marker>
@@ -993,7 +997,8 @@ C:\&gt; <strong>tracert 166.84.7.55</strong>
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="250" height="150" transform="translate(55,5)">
+       version="1.1" width="250" height="150">
+    <g transform="translate(55,5)">
     <g stroke="black" stroke-width="2" fill="none">
       <rect x="0" y="0" width="120" height="30" />
       <rect x="0" y="30" width="120" height="30" fill="#88ff88" />
@@ -1008,7 +1013,7 @@ C:\&gt; <strong>tracert 166.84.7.55</strong>
       <text x="60" y="75" dy="0.5em">IP層</text>
       <text x="60" y="105" dy="0.5em">データリンク層</text>
       <text x="170" y="128" dy="0.5em">ケーブル</text>
-    </g>
+    </g></g>
   </svg>
 </div>
 <p>
@@ -1056,7 +1061,7 @@ TCPパケット (<u>TCPセグメント</u>) がさらに入っている。
 </tr>
 <tr>
 <th>24</th>
-<td align=center colspan="4">実際のデータ<br>...</td>
+<td align=center colspan="4">実際のデータ<br>…</td>
 </tr>
 </table>
 </div>
@@ -1340,7 +1345,8 @@ TCPとは別の方法で通信をおこなう。
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="250" height="150" transform="translate(55,5)">
+       version="1.1" width="250" height="150">
+    <g transform="translate(55,5)">
     <g stroke="black" stroke-width="2" fill="none">
       <rect x="0" y="0" width="120" height="30" />
       <rect x="0" y="30" width="60" height="30" fill="#ffaaff" />
@@ -1357,7 +1363,7 @@ TCPとは別の方法で通信をおこなう。
       <text x="60" y="75" dy="0.5em">IP層</text>
       <text x="60" y="105" dy="0.5em">データリンク層</text>
       <text x="170" y="128" dy="0.5em">ケーブル</text>
-    </g>
+    </g></g>
   </svg>
 </div>
 
@@ -1420,7 +1426,8 @@ TCPとは別の方法で通信をおこなう。
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="250" height="150" transform="translate(55,5)">
+       version="1.1" width="250" height="150">
+    <g transform="translate(55,5)">
     <g stroke="black" stroke-width="2" fill="none">
       <rect x="0" y="0" width="120" height="30" fill="#88ff88" />
       <rect x="0" y="30" width="120" height="30" />
@@ -1435,7 +1442,7 @@ TCPとは別の方法で通信をおこなう。
       <text x="60" y="75" dy="0.5em">IP層</text>
       <text x="60" y="105" dy="0.5em">データリンク層</text>
       <text x="170" y="128" dy="0.5em">ケーブル</text>
-    </g>
+    </g></g>
   </svg>
 </div>
 
@@ -1560,46 +1567,51 @@ TCP 層の機能を使って、特定のサーバの TCP 80番ポートに
 <ol>
 <li> クライアント (Webブラウザ) がサーバの TCP 80番ポートに接続する。
 <li> クライアントが <u>HTTPリクエスト</u> を送る。
-これはテキスト形式で、以下のような構造になっている:
-<blockquote><pre>
-リクエストヘッダ
-メソッド パス名 HTTP/1.0
-フィールド: 値
-フィールド: 値
-...
-(1行あける)
-リクエストボディ
-データ
-</pre></blockquote>
+HTTPリクエストには GET, POST などいくつかの種類があるが、
+代表的な GETリクエストでは以下のようなテキスト形式のデータを送信する:
+<blockquote>
+リクエストヘッダ:<br>
+<pre>
+GET <span class=bgy>パス名</span> HTTP/1.0
+<span class=bgg>フィールド</span>: <span class=bgr>値</span>
+<span class=bgg>フィールド</span>: <span class=bgr>値</span>
+…
+<em>(空行)</em>
+</blockquote>
 <p>
 例:
 <blockquote><pre>
-GET / HTTP/1.0
-Host: www.example.com
+GET <span class=bgy>/</span> HTTP/1.0
+<span class=bgg>Host</span>: <span class=bgr>www.example.com</span>
+
 </pre></blockquote>
 <li> サーバがこれに応じた <u>HTTPレスポンス</u> を返す。
 これも通常はテキスト形式で、以下のような構造になっている:
-<blockquote><pre>
-レスポンスヘッダ
-HTTP/1.0 ステータスコード メッセージ
-フィールド: 値
-フィールド: 値
-...
-(1行あける)
-レスポンスボディ
-データ
+<blockquote>
+レスポンスヘッダ:<br>
+<pre>
+HTTP/1.0 <span class=bgy>ステータスコード</span>
+<span class=bgg>フィールド</span>: <span class=bgr>値</span>
+<span class=bgg>フィールド</span>: <span class=bgr>値</span>
+…
+<em>(空行)</em>
+</pre>
+レスポンスボディ:<Br>
+<pre>
+<span class=bgb>データ</span>
 </pre></blockquote>
 <p>
 例:
 <blockquote><pre>
-HTTP/1.0 200 OK
-Content-Type: text/html; charset=UTF-8
-Date: Mon, 23 Jan 2023 13:39:22 GMT
+HTTP/1.0 <span class=bgy>200</span> OK
+<span class=bgg>Content-Type</span>: <span class=bgr>text/html; charset=UTF-8</span>
+<span class=bgg>Date</span>: <span class=bgr>Mon, 23 Jan 2023 13:39:22 GMT</span>
+…
 
-&lt;!doctype html&gt;
+<span class=bgb>&lt;!doctype html&gt;
 &lt;html&gt;
-&lt;head&gt;
-...
+&lt;head&gt;</span>
+…
 </pre></blockquote>
 </ol>
 
@@ -1618,12 +1630,12 @@ $ <strong>nc www.example.com 80</strong>
 HTTP/1.0 200 OK
 Content-Type: text/html; charset=UTF-8
 Date: Mon, 23 Jan 2023 13:39:22 GMT
-...
+…
 
 &lt;!doctype html&gt;
 &lt;html&gt;
 &lt;head&gt;
-...
+…
 </pre></blockquote>
 </div>
 
@@ -1637,7 +1649,7 @@ Date: Mon, 23 Jan 2023 13:39:22 GMT
 $ <strong>nc -l -p 8080</strong>
 GET / HTTP/1.1
 User-Agent: Mozilla/5.0
-...
+…
 
 <strong>HTTP/1.0 200 OK</strong>
 <strong>Content-Type: text/plain</strong>
@@ -1698,7 +1710,8 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="250" height="180" transform="translate(55,5)">
+       version="1.1" width="250" height="180">
+    <g transform="translate(55,5)">
     <g stroke="black" stroke-width="2" fill="none">
       <rect x="0" y="0" width="120" height="30" />
       <rect x="0" y="30" width="120" height="30" fill="#ff88ff" />
@@ -1715,7 +1728,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
       <text x="60" y="105" dy="0.5em">IP層</text>
       <text x="60" y="135" dy="0.5em">データリンク層</text>
       <text x="170" y="158" dy="0.5em">ケーブル</text>
-    </g>
+    </g></g>
   </svg>
 </div>
 
