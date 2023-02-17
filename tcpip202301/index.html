@@ -362,7 +362,44 @@ TCP層の機能を使って、
 <p>
 過去には、FDDI や Token Ring など、いろいろな方式があった。
 現在ではおもに <u>イーサネット</u> (Ethernet) が使われている。
-これは "IEEE 802" という規格で定義されている。
+これは各機器を (概念的には) 単一の共通線でつなぎ、各機器が
+<u>ブロードキャスト</u>によって通信するものである。
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="400" height="80">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="10" y="10" />
+      <use xlink:href="#computer" x="100" y="10" />
+      <use xlink:href="#computer" x="190" y="10" />
+      <use xlink:href="#computer" x="280" y="10" />
+      <line x1="0" y1="5" x2="350" y2="5" />
+      <line x1="35" y1="5" x2="35" y2="15" />
+      <line x1="125" y1="5" x2="125" y2="15" />
+      <line x1="215" y1="5" x2="215" y2="15" />
+      <line x1="305" y1="5" x2="305" y2="15" />
+    </g>
+    <text x="350" y="40">ノード</text>
+    <g style="font-size: 50%;">
+      <g text-anchor="middle">
+	<text x="35" y="70">aa-bb-cc-dd-ee-ff</text>
+	<text x="125" y="70">11-22-33-44-55-66</text>
+	<text x="215" y="70">a1-b2-c3-d4-e5-f6</text>
+	<text x="305" y="70">6f-5e-4d-3c-b2-1a</text>
+      </g>
+    </g>
+  </svg>
+</div>
 
 <h3 id="datalink-mac">2.1. 物理アドレス (MACアドレス)</h3>
 <p>
@@ -389,7 +426,7 @@ Ethernet ではおもに 2つの通信方式がある:
 </ul>
 <p>
 1本のケーブルを複数のノードで共有している場合は、
-<u>ブロードキャスト</u>が基本である。
+ブロードキャストが基本である。
 
 <h4>Ethernetのルール (半二重)</h4>
 <ol>
