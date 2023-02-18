@@ -64,6 +64,8 @@ Yusuke Shinyama, Jan. 2023
 <li>保守しやすく、拡張性にも優れている</li>
 </ul>
 
+<p>
+つまり…
 <div style="display: flex; justify-content: center; align-items: flex-end;">
 <div class=figure>
     <img width="243" height="275" src="bad.svg">
@@ -76,7 +78,7 @@ Yusuke Shinyama, Jan. 2023
 </div>
 
 <p>
-しかしこれはとてつもなく難しい。
+しかし、これはとてつもなく難しい。
 なぜなら、ソフトウェアというものは非常に複雑だからである。
 この複雑さは、そもそもソフトウェアが扱っている問題（社会）の複雑さに起因する。
 過去数十年、ソフトウェアの先人達はこの複雑なシステムを分解
@@ -90,7 +92,7 @@ Yusuke Shinyama, Jan. 2023
 <li> 1980年代: OOP (カプセル化、データ抽象)</li>
 <li> 1990年代: AOP (複数箇所をまとめる)</li>
 <li> 1980年代: 関数型 (状態の除去)</li>
-<li> 2000年代: フレームワーク, TDD (IoC, DI, etc.)</li>
+<li> 2000年代: フレームワーク (IoC, DI, etc.)</li>
 <li> 2010年代: コンテナ関連技術</li>
 <li> ... </li>
 </ul>
@@ -133,14 +135,14 @@ class App {
 </pre></blockquote>
 
 <p>
-ここでの問題は、このようなデータの依存が
+問題は、このようなデータの依存は
 コード中に<strong>固定されている</strong>ということである。
 これにより以下のような弊害が生じる:
 </p>
 <ul>
-<li> 個々のクラスを個別にテストするのが難しい。
+<li> 個々のクラスを個別にテストできない。
 <li> <code>Client</code> や <code>Database</code>、<code>Connection</code> などのクラスを
-  別のものに置き換えたり、拡張したりするのが難しい。
+  別のものに置き換えたり、拡張したりできない。
 </ul>
 <p>
 Spring Framework を使うと、上のようなコードは以下のように書き直せる:

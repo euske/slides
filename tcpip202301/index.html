@@ -1364,7 +1364,52 @@ TCP の 3ウェイハンドシェイクが行われていることを確認せ�
 </p>
 </div>
 
-<h3 id="tcp-udp">4.2. UDP層</h3>
+<h4>TCP/IP プログラミング</h4>
+<p>
+一般的に、インターネットを使った通信をプログラムによって実装するとき、
+もっともよく使うのは TCP層の機能である。
+現在の UNIXでは「ソケット (socket)」という機構を使った API が整備されており、
+たとえば Python なら、以下の簡単なスクリプトを使って
+すぐにサーバ-クライアント間でバイト列が送受信できる:
+
+<div class=file>
+server.py (サーバ側):
+<pre>
+from socket import *
+<em># TCP用ソケットを準備。</em>
+sock = socket(AF_INET, SOCK_STREAM)
+<em># TCPポート 10000番で listen状態にする。</em>
+sock.bind(('0.0.0.0', 10000))
+sock.listen(1)
+<em># 接続してきたクライアント用のソケットを取得する。</em>
+(client, addr) = sock.accept()
+<em># データを受信する。</em>
+data = client.recv(10)
+print(data)
+</pre></div>
+
+<div class=file>
+client.py (クライアント側):
+<pre>
+from socket import *
+<em># TCP用ソケットを準備。</em>
+sock = socket(AF_INET, SOCK_STREAM)
+<em># ホスト 127.0.0.1 の TCPポート 10000番に接続する。</em>
+sock.connect(('127.0.0.1', 10000))
+<em># データを送信する。</em>
+sock.send(b'hello')
+</pre></div>
+
+<div class=exercise id="ex-tcp-pytho">
+<div class=header>演習. Python を使った TCPプログラミング</div>
+<p>
+上の 2つの Pythonスクリプト
+<code>server.py</code>、<code>client.py</code> を
+同一のホスト上で同時に動かし、通信ができていることを確認せよ。
+</p>
+</div>
+
+<h3 id="tcp-udp">4.4. UDP層</h3>
 <p>
 TCP層は便利だが、いくつか欠点がある:
 <ul>
