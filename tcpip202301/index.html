@@ -227,6 +227,13 @@ OSI はネットワーク規格としては普及しなかったが、
 また、アプリケーション層から上は「使う人が勝手に決める」。
 
 <p>
+注意: インターネットの階層でハードウェアが関連しているのは
+おもにデータリンク層だけである。それ以上の階層は、
+すべてソフトウェア的な「部品」であり、
+現在は OS の機能の一部として提供されている。
+
+
+<p>
 テレビなどと比較すると、インターネットでは上の要素はどれも可変である。
 唯一の規格は送受信の方式だけ。そのため、
 インターネットは「自由なネットワークだ」といわれる。
@@ -415,6 +422,7 @@ MACアドレスは 48ビット (8ビット×6) で、これは
 <div class=header>演習. MACアドレスを調べる</div>
 <p>
 自分のパソコンについている Ethernet の MAC アドレスを調べよ。
+(複数のインターフェイスが接続されている場合、MAC アドレスは複数存在することがある。)
 </div>
 
 <h3 id="datalink-duplex">2.2. 通信方式</h3>
@@ -584,6 +592,8 @@ IPアドレスは変化する。
 <div class=header>演習. 自分のIPアドレスを調べる</div>
 <p>
 自分のパソコンについている IP アドレスを調べよ。
+(複数のデータリンク層が存在する場合、
+ひとつのホストに複数の IP アドレスが存在することがある。)
 </div>
 
 <div class=exercise id="ex-ping">
@@ -1020,13 +1030,19 @@ AS 間での経路情報を交換する。世界には約5万のASがあり、�
 <div class=exercise id="ex-traceroute">
 <div class=header>演習. 広域ルーティングの実際</div>
 <p>
-ニューヨークのとあるサーバの IP アドレスは 166.84.7.55 である。
+ニューヨークに存在する、とあるサーバの IP アドレスは 166.84.7.55 である。
 <code>traceroute</code> コマンド (Windows の場合は、<code>tracert</code> コマンド) を使って、
 ここに行くまでの経路を調べよ。
-<blockquote><pre>
+<p>
+macOS/Linuxの場合:
+<pre>
 $ <strong>traceroute 166.84.7.55</strong>
+</pre>
+<p>
+Windowsの場合:
+<pre>
 C:\&gt; <strong>tracert 166.84.7.55</strong>
-</pre></blockquote>
+</pre>
 </div>
 
 
@@ -1621,9 +1637,14 @@ IPアドレスがわからないので、そもそも通信ができなくなる
 </ol>
 
 <p>
-TCP/IPに対応している多くのプログラム
+TCP/IPに対応している多くの API やプログラム
 (<code>ping</code>, <code>traceroute</code>, <code>nc</code> など) では、
-IPアドレスの代わりにホスト名を直接指定してもよい。
+DNS はデフォルトで対応しており、これらの IPアドレスの指定欄には
+代わりにホスト名を直接指定してもよい。
+実際、DNS はインターネットの基幹をなすサービスであり、
+ほとんどの API やアプリ、サービスなどが DNS に依存している。
+そのため <strong>DNS がうまく動かない場合、
+多くのサービスやサイトで大規模な障害が発生する</strong>。
 
 <div class=exercise id="ex-nslookup">
 <div class=header>演習. ホスト名から IP アドレスを求める</div>
@@ -1660,9 +1681,9 @@ GET <span class=bgy>パス名</span> HTTP/1.0
 …
 <em>(空行)</em>
 </blockquote>
-<p>
-例:
-<blockquote><pre>
+<blockquote>
+例:<br>
+<pre>
 GET <span class=bgy>/</span> HTTP/1.0
 <span class=bgg>Host</span>: <span class=bgr>www.example.com</span>
 
@@ -1681,10 +1702,11 @@ HTTP/1.0 <span class=bgy>ステータスコード</span>
 レスポンスボディ:<Br>
 <pre>
 <span class=bgb>データ</span>
+…
 </pre></blockquote>
-<p>
-例:
-<blockquote><pre>
+<blockquote>
+例:<br>
+<pre>
 HTTP/1.0 <span class=bgy>200</span> OK
 <span class=bgg>Content-Type</span>: <span class=bgr>text/html; charset=UTF-8</span>
 <span class=bgg>Date</span>: <span class=bgr>Mon, 23 Jan 2023 13:39:22 GMT</span>
@@ -1703,12 +1725,13 @@ HTTP/1.0 <span class=bgy>200</span> OK
 <code>nc</code> コマンドを使って、
 <a target="_blank" href="https://www.example.com/">www.example.com</a> サーバに
 「人間HTTPクライアント」としてリクエストを送り、
-返答を確認せよ。
+サーバ側のレスポンスを確認せよ。
 <blockquote><pre>
 $ <strong>nc www.example.com 80</strong>
 <strong>GET / HTTP/1.0</strong>
 <strong>Host: www.example.com</strong>
 
+<em>(サーバからのレスポンス)</em>
 HTTP/1.0 200 OK
 Content-Type: text/html; charset=UTF-8
 Date: Mon, 23 Jan 2023 13:39:22 GMT
@@ -1727,8 +1750,13 @@ Date: Mon, 23 Jan 2023 13:39:22 GMT
 <code>nc</code> コマンドを使って、
 「人間HTTPサーバ」としてブラウザからの
 リクエストに返答せよ。
+まず <code>nc</code> をサーバとして起動し、
+ブラウザから <a href="http://localhost:8080/"><code>http://localhost:8080/</code></a>
+という URLに接続してリクエストが送られるのを確認してから、
+応答を入力せよ。
 <blockquote><pre>
 $ <strong>nc -l -p 8080</strong>
+<em>(クライアントからのリクエスト)</em>
 GET / HTTP/1.1
 User-Agent: Mozilla/5.0
 …
@@ -1774,7 +1802,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 
 <h2 id="encryption">6. さらに上の層</h2>
 <p>
-本来、TCP/IP の公式な範疇はTCP層まで、それより上は
+本来、TCP/IP の公式な範疇はTCP層までで、それより上は
 アプリケーションの責任となっている。しかし TCP 層だけでは
 真に安全な通信は実現できない。とくに、TCP 層には以下のような欠点がある:
 <ul>
@@ -1787,7 +1815,6 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 <p>
 そこで最近では、これらの欠点を補うために TCP層の上にさらにもう一段、
 暗号化をおこなう層を追加して使うことが多い。
-この層は end-to-end の安全な通信を提供する。
 
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
@@ -1814,7 +1841,164 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
   </svg>
 </div>
 
+<p>
+暗号化通信において特に重要なのは、
+「<strong>暗号化は、必ず通信相手の確認とセットで使わなければ意味がない</strong>」
+ということである。
+悪者も暗号は使えるので、たとえば中継ホストが正当な相手のフリをして
+自分と暗号を使って通信すれば、結局のところ情報は悪者の手に渡ってしまう。
+(中間者攻撃)
+</p>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="500" height="120"
+       transform="scale(1,1)">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="user" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+    <g id="baddie" fill="black" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+    </defs>
+    <use xlink:href="#user" x="10" y="20" />
+    <use xlink:href="#baddie" x="260" y="20" />
+    <use xlink:href="#user" x="410" y="20" />
+    <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
+      <line x1="80" x2="240" y1="40" y2="40" />
+      <line x1="240" x2="80" y1="60" y2="60" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle">
+      <text x="160" y="30">暗号</text>
+      <text x="35" y="90">自分</text>
+      <text x="285" y="90">悪者</text>
+      <text x="285" y="90" dy="1.1em">(中間者)</text>
+      <text x="435" y="90">本当に通信したい相手</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+現在、普及している暗号化層は 2種類存在する。
+<u>TLS/SSL</u>層または<u>SSH</u>層である。
+TLS/SSL は <u>認証局 (CA)</u> という中央集権的な
+枠組みを導入することにより全世界のホストを識別する。
+いっぽう SSH は個人の信頼にもとづいたホスト間の
+簡単な認証システムを提供している。
+<p>
+TLS/SSL も SSH も (本来は TCP/IP 層の一部ではなくアプリケーション層なので)、
+アプリケーションまたはライブラリの形で提供されており、
+利用者に対して end-to-end の安全な通信を提供する。
+どちらもベースになっているのは<u>公開鍵暗号</u>技術である。
+
 <h3 id="encryption-tls">6.1. TLS/SSL層</h2>
+
+<p>
+TLS/SSL はもともと HTTP を暗号化するための方式 (HTTPS) として
+提案されたものである。これは、ブラウザ上にいわゆる
+「鍵マーク」を表示する仕組みで、<u>デジタル証明書</u> を使って
+接続先のサーバ名が正しいかどうかを
+<u>認証局 (CA)</u> と呼ばれる第三者機関に確認してもらい、
+「安全」というお墨付きを得ている。
+
+<p>
+デジタル証明書は認証局が発行し、
+ここで使われる公開鍵が本当にその個人・組織に
+所属するという証明として使われる。詳細は
+<a href="../certs202301/index.html">「デジタル証明書とは何か?」</a>を参照。
+</p>
+
+<div class=figure style="align-items: flex-end;">
+  <img src="key.png" width="389" height="131">
+
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="200"
+       transform="scale(1,1)">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="user" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+    <g id="ca" fill="none" stroke="black" stroke-width="2">
+      <rect x="5" y="0" width="40" height="50" />
+      <path d="M10,10 l0,40 M15,10 l0,40 M20,10 l0,40 M25,10 l0,40 M30,10 l0,40 M35,10 l0,40 M40,10 l0,40" />
+    </g>
+    <g id="site" fill="none" stroke="black" stroke-width="2">
+      <rect x="15" y="0" width="20" height="50" />
+      <rect x="0" y="20" width="50" height="30" />
+    </g>
+    <g id="keyg" fill="none" stroke="green" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    </defs>
+    <use xlink:href="#user" x="10" y="120" />
+    <use xlink:href="#ca" x="160" y="20" />
+    <use xlink:href="#site" x="310" y="120" />
+    <use xlink:href="#keyg" x="75" y="80" />
+    <use xlink:href="#keyg" x="370" y="150" />
+    <g stroke="black" fill="none" stroke-width="1">
+      <rect x="20" y="50" width="85" height="40" />
+      <rect x="18" y="48" width="89" height="44" />
+    </g>
+    <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
+      <line x1="280" x2="80" y1="150" y2="150" />
+      <line x1="150" y1="60" x2="80" y2="120" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle">
+      <text x="185" y="85">認証局 (CA)</text>
+      <text x="35" y="185">ブラウザ</text>
+      <text x="335" y="185" fill="green">www.google.com</text>
+    </g>
+    <g style="font-size: 75%;">
+      <text x="40" y="65">証明書</text>
+      <text x="25" y="85">Google:</text>
+      <text x="140" y="170">署名:</text>
+      <text x="170" y="170" fill="green" style="font-size: 125%; font-weight: bold; font-style: italic;">Google</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+TLS/SSL層を使った通信では、
+まず相手のサーバに TCP接続した後、
+デジタル証明書を送る処理 (TLS/SSLハンドシェイク) が追加されている。
+この処理が完了すると、TLS/SSL層はその上のアプリケーション層に対して
+通常の TCP層と同じようにふるまうため、アプリ側は何も考えずに普通の
+JHTTP を行えばよい。
+
+<p>
+実際にWebサーバが証明書を送っているところは、<code>openssl</code> コマンドを使うと見ることができる。
+</p>
+<blockquote><pre>
+$ <strong>openssl s_client -showcerts -servername www.google.com -connect www.google.com:443</strong>
+CONNECTED(00000005)
+...
+---
+Certificate chain
+<div class="cert0"> 0 s:/CN=www.google.com
+   i:/C=US/O=Google Trust Services LLC/CN=GTS CA 1C3
+-----BEGIN CERTIFICATE-----
+MIIEiDCCA3CgAwIBAgIRAI/Wbxh84E0gEre31m3+iM0wDQYJKoZIhvcNAQELBQAw
+...
+-----END CERTIFICATE-----</div>
+<div class="cert1"> 1 s:/C=US/O=Google Trust Services LLC/CN=GTS CA 1C3
+   i:/C=US/O=Google Trust Services LLC/CN=GTS Root R1
+-----BEGIN CERTIFICATE-----
+MIIFljCCA36gAwIBAgINAgO8U1lrNMcY9QFQZjANBgkqhkiG9w0BAQsFADBHMQsw
+...
+-----END CERTIFICATE-----</div>
+<div class="cert2"> 2 s:/C=US/O=Google Trust Services LLC/CN=GTS Root R1
+   i:/C=BE/O=GlobalSign nv-sa/OU=Root CA/CN=GlobalSign Root CA
+-----BEGIN CERTIFICATE-----
+MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
+...
+-----END CERTIFICATE-----</div>
+...
+</pre></blockquote>
 
 <h3 id="encryption-ssh">6.2. SSH層</h2>
 
