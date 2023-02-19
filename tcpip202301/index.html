@@ -55,6 +55,7 @@ Yusuke Shinyama, Jan. 2023
 <li> <a href="#ip">IP層 (ネットワーク層) のしくみ</a>
 <li> <a href="#tcp">TCP層 (トランスポート層) のしくみ</a>
 <li> <a href="#application">アプリケーション層</a>
+<li> <a href="#encryption">さらに上の層</a>
 </ol>
 
 <h4>使用するツール</h4>
@@ -1884,7 +1885,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 現在、普及している暗号化層は 2種類存在する。
 <u>TLS/SSL</u>層または<u>SSH</u>層である。
 TLS/SSL は <u>認証局 (CA)</u> という中央集権的な
-枠組みを導入することにより全世界のホストを識別する。
+枠組みを導入することにより、相手のホストを識別する枠組みである。
 いっぽう SSH は個人の信頼にもとづいたホスト間の
 簡単な認証システムを提供している。
 <p>
@@ -1963,44 +1964,90 @@ TLS/SSL はもともと HTTP を暗号化するための方式 (HTTPS) として
 </div>
 
 <p>
-TLS/SSL層を使った通信では、
-まず相手のサーバに TCP接続した後、
-デジタル証明書を送る処理 (TLS/SSLハンドシェイク) が追加されている。
-この処理が完了すると、TLS/SSL層はその上のアプリケーション層に対して
-通常の TCP層と同じようにふるまうため、アプリ側は何も考えずに普通の
-JHTTP を行えばよい。
-
-<p>
-実際にWebサーバが証明書を送っているところは、<code>openssl</code> コマンドを使うと見ることができる。
+実際の TLS/SSL による通信は <code>openssl</code> コマンドを使って
+おこなうことができる:
 </p>
 <blockquote><pre>
-$ <strong>openssl s_client -showcerts -servername www.google.com -connect www.google.com:443</strong>
-CONNECTED(00000005)
-...
----
-Certificate chain
-<div class="cert0"> 0 s:/CN=www.google.com
-   i:/C=US/O=Google Trust Services LLC/CN=GTS CA 1C3
------BEGIN CERTIFICATE-----
-MIIEiDCCA3CgAwIBAgIRAI/Wbxh84E0gEre31m3+iM0wDQYJKoZIhvcNAQELBQAw
-...
------END CERTIFICATE-----</div>
-<div class="cert1"> 1 s:/C=US/O=Google Trust Services LLC/CN=GTS CA 1C3
-   i:/C=US/O=Google Trust Services LLC/CN=GTS Root R1
------BEGIN CERTIFICATE-----
-MIIFljCCA36gAwIBAgINAgO8U1lrNMcY9QFQZjANBgkqhkiG9w0BAQsFADBHMQsw
-...
------END CERTIFICATE-----</div>
-<div class="cert2"> 2 s:/C=US/O=Google Trust Services LLC/CN=GTS Root R1
-   i:/C=BE/O=GlobalSign nv-sa/OU=Root CA/CN=GlobalSign Root CA
------BEGIN CERTIFICATE-----
-MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
-...
------END CERTIFICATE-----</div>
+$ <strong>openssl s_client -connect www.example.com:443</strong>
+CONNECTED(00000003)
+depth=2 C = US, O = DigiCert Inc, OU = www.digicert.com, CN = DigiCert Global Root CA
+verify return:1
+depth=1 C = US, O = DigiCert Inc, CN = DigiCert TLS RSA SHA256 2020 CA1
+verify return:1
+depth=0 C = US, ST = California, L = Los Angeles, O = Internet\C2\A0Corporation\C2\A0for\C2\A0Assigned\C2\A0Names\C2\A0and\C2\A0Numbers, CN = www.example.org
+verify return:1
 ...
 </pre></blockquote>
 
+<p>
+TLS/SSL層を使った通信では、
+まず相手のサーバに TCP接続した後、
+デジタル証明書を送る処理 (TLS/SSLハンドシェイク) が追加されている。
+上の例では <code>www.example.com</code> サーバが証明書を送っているところが見える。
+この処理が完了すると、TLS/SSL層はその上のアプリケーション層に対して
+通常の TCP層と同じようにふるまうため、
+アプリ側は何も考えずに普通の HTTP の処理を行えばよい。
+つまり、<code>https://…</code> という URL に対する処理は、
+TLS/SSL層を使った部分以外は通常の <code>http://…</code> と同じである。
+なお、HTTPS には通常 TCP 443番ポートが使われる。
+
+<div class=exercise id="ex-openssl-http-client">
+<div class=header>演習. openssl コマンドを使って HTTPリクエストを送る</div>
+<p>
+上で示した openssl コマンドを使って、
+<a href="#">先の演習</a>にならい
+サーバに HTTPリクエストを送り、応答を確認せよ。
+<blockquote><pre>
+$ <strong>openssl s_client -connect www.example.com:443</strong>
+<em>(サーバ証明書の表示)</em>
+...
+<strong>GET / HTTP/1.0</strong>
+<strong>Host: www.example.com</strong>
+
+<em>(サーバからのレスポンス)</em>
+HTTP/1.0 200 OK
+Content-Type: text/html; charset=UTF-8
+…
+</pre></blockquote>
+</div>
+
 <h3 id="encryption-ssh">6.2. SSH層</h2>
+<p>
+TLS/SSL 層の大きな欠点は、認証局を頂点とする、中央集権化された
+全世界規模の <u>公開鍵基盤</u> (PKI) を構築する必要があることである。
+これには大きなコストがかかるうえに、認証局が信頼できない場合がある
+というリスクも抱えている (参考:
+<a href="https://ja.wikipedia.org/wiki/2011%E5%B9%B4%E3%83%87%E3%82%B8%E3%83%8E%E3%82%BF%E3%83%BC%E4%BA%8B%E4%BB%B6">2011年デジノター事件</a>)。
+
+<p>
+SSH はこれに対して「サーバが公開鍵を提示し、ユーザにそれを信頼するか否かを
+判断させる」という簡単な仕組みで暗号化された通信を実現している。
+
+<ol>
+<li> ユーザは、まず接続しようとするサーバの公開鍵の
+<u>指紋</u> (fingerprint) を、なんらかの方法によってあらかじめ知っておく。
+<li> サーバの初回接続時に、サーバがその公開鍵の指紋を提示する。
+これは以下のように表示される:
+<blockquote><pre>
+$ <strong>ssh server.example.com</strong>
+The authenticity of host '[server.example.com]:22 ([192.168.1.10]:22)' can't be established.
+ED25519 key fingerprint is SHA256:HLfnjG5dDqVPIfWtG6sNGG5JyY5AYtkxaupGsJffyYs.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])?
+</pre></blockquote>
+<li> ユーザがこれを信頼すれば (<code>yes</code>)、暗号化された通信が確立する。
+</ol>
+
+<p>
+SSH では、通常 TCP 22番ポートが使われる。
+SSH のよくある使い方はサーバ上のシェルをリモートから実行するためのものだが
+(ログイン)、SSH 層自体がいくつかのレイヤーから構成されており、
+シェル以外の用途にも利用可能である:
+
+<ul>
+<li> ファイル転送機能 (SFTP)
+<li> ポート転送機能
+</ul>
 
 
 <hr>
