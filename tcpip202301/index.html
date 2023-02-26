@@ -51,11 +51,46 @@ Yusuke Shinyama, Jan. 2023
 
 <ol>
 <li> <a href="#internet">インターネットの作り方・概要</a>
+<ul>
+  <li> <a href="#internet-basic">ネットワーク通信の原理</a>
+  <li> <a href="#internet-layers">ネットワークの「階層」</a>
+  <li> <a href="#internet-datalink">データリンク層</a>
+  <li> <a href="#internet-ip">IP層 (ネットワーク層)</a>
+  <li> <a href="#internet-tcp">TCP層 (トランスポート層)</a>
+  <li> <a href="#internet-application">アプリケーション層</a>
+</ul>
 <li> <a href="#datalink">データリンク層のしくみ</a>
+<ul>
+  <li> <a href="#datalink-macaddr">物理アドレス (MACアドレス)</a>
+  <li> <a href="#datalink-duplex">通信方式</a>
+  <li> <a href="#datalink-frame">Ethernetフレーム</a>
+</ul>
 <li> <a href="#ip">IP層 (ネットワーク層) のしくみ</a>
+<ul>
+  <li> <a href="#ip-addr">IPアドレス</a>
+  <li> <a href="#ip-packet">IPパケット</a>
+  <li> <a href="#ip-routing">ルーティング (Routing)</a>
+  <li> <a href="#ip-cidr">CIDR 方式</a>
+  <li> <a href="#ip-wan">広域レベルでのルーティング</a>
+</ul>
 <li> <a href="#tcp">TCP層 (トランスポート層) のしくみ</a>
+<ul>
+  <li> <a href="#tcp-details">TCPの詳細</a>
+  <li> <a href="#tcp-client-server">TCPにおける「クライアント」と「サーバ」</a>
+  <li> <a href="#tcp-udp">UDP層</a>
+</ul>
 <li> <a href="#application">アプリケーション層</a>
+<ul>
+  <li> <a href="#app-dns">ドメイン名検索 (DNS)</a>
+  <li> <a href="#app-web">ウェブ (HTTP)</a>
+  <li> <a href="#app-email">電子メール (SMTP)</a>
+</ul>
 <li> <a href="#encryption">さらに上の層</a>
+<ul>
+  <li> <a href="#encryption-tls">TLS/SSL層</a>
+  <li> <a href="#encryption-ssh">SSH層</a>
+</ul>
+<li> <a href="#firewall">ファイアウォール・VPN</a>
 </ol>
 
 <h4>使用するツール</h4>
@@ -424,7 +459,7 @@ TCP層の機能を使って、
   </svg>
 </div>
 
-<h3 id="datalink-mac">2.1. 物理アドレス (MACアドレス)</h3>
+<h3 id="datalink-macaddr">2.1. 物理アドレス (MACアドレス)</h3>
 <p>
 Ethernet では、接続されている各機器はホストではなく
 「<u>ノード</u>」
@@ -724,6 +759,9 @@ Wireshark を起動後、パケットキャプチャーを開始し、
 <p>
 IPパケットは、複数台のコンピュータを経由して転送される。
 このようなIPパケットを転送するコンピュータを「ルータ (router)」とよぶ。
+(注意: 米国英語では "route" / "router" はどちらかというと
+「ラウト」「ラウター」に近い発音だが、ここでは日本語の慣例にならって
+「ルート」「ルーティング」と表記する。)
 </p>
 <p>
 ルータは受けとったパケットをいったんメモリに保管し、
@@ -1195,7 +1233,7 @@ TCP 層では、<u>シーケンス番号</u>
 </ol>
 </div>
 
-<h3 id="tcp-details">4.1 TCPの詳細</h3>
+<h3 id="tcp-details">4.1. TCPの詳細</h3>
 
 <h4>TCP ACKパケット</h4>
 <p>
@@ -1325,7 +1363,7 @@ TCP セグメントには、データの「始まり」を示す
 各セグメントに含まれる確認応答(ACK)番号とは別である。
 </div>
 
-<h3>4.3. TCPの「クライアント」と「サーバ」</h3>
+<h3 id="tcp-client-server">4.2. TCPにおける「クライアント」と「サーバ」</h3>
 <p>
 IP層においては、すべてのホストはパケットを送受信するという役割は同じであった。
 しかし TCP層の通信では、2種類の役割が必ず存在する。
@@ -1482,7 +1520,7 @@ sock.send(b'hello')
 </p>
 </div>
 
-<h3 id="tcp-udp">4.4. UDP層</h3>
+<h3 id="tcp-udp">4.3. UDP層</h3>
 <p>
 TCP層は便利だが、いくつか欠点がある:
 </p>
@@ -1726,7 +1764,7 @@ C:\&gt; <strong>ping <em>ホスト名</em></strong>
 </pre></blockquote>
 </div>
 
-<h3 id="app-web">5.2. Web (HTTP)</h3>
+<h3 id="app-web">5.2. ウェブ (HTTP)</h3>
 <p>
 TCP 層の機能を使って、特定のサーバの TCP 80番ポートに
 特定の規約でデータを送ると、ウェブページを閲覧することができる。
@@ -2091,7 +2129,7 @@ Content-Type: text/html; charset=UTF-8
 
 <h3 id="encryption-ssh">6.2. SSH層</h3>
 <p>
-TLS/SSL 層の大きな欠点は、認証局を頂点とする、中央集権化された
+TLS/SSL 層の大きな欠点は、認証局を頂点とする、中央集権化された、
 全世界規模の <u>公開鍵基盤</u> (PKI) を構築する必要があることである。
 これには大きなコストがかかるうえに、認証局が信頼できない場合がある
 というリスクも抱えている (参考:
@@ -2128,6 +2166,10 @@ SSH のよくある使い方はサーバ上のシェルをリモートから実�
 <li> ファイル転送機能 (SFTP)
 <li> ポート転送機能
 </ul>
+
+
+<h2 id="firewall">7. ファイアウォール・VPN</h2>
+<p>
 
 
 <hr>
