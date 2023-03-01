@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TCP/IP ネットワーク入門</title>
+<title>(アプリ開発者のための) TCP/IP ネットワーク入門</title>
 <style><!--
 body { line-height: 1.5; }
 h1 { border-bottom: solid 4px #000088; }
@@ -44,11 +44,22 @@ code em { color: #000088; }
 <div class=nav>
 <a href="../index.html">&lt; もどる</a>
 </div>
-<h1>TCP/IP ネットワーク入門</h1>
+<h1>(アプリ開発者のための)<br>
+TCP/IP ネットワーク入門</h1>
 
 <div class=author>
 Yusuke Shinyama, Jan. 2023
 </div>
+
+<p>
+<strong>概要:</strong>
+この記事では、アプリ開発者の役に立ちそうな
+TCP/IPネットワークに関する最低限の知識をまとめた。
+あくまで視点は「アプリ開発者」なので、
+現在の家庭・企業における一般的なネットワーク環境しか想定していないし、
+セキュリティに関しても基本的なことしかカバーしていない。
+ネットワーク機器の具体的な設定方法や診断については、より専門的な資料を参照のこと。
+</p>
 
 <ol>
 <li> <a href="#internet">インターネットの作り方・概要</a>
@@ -70,14 +81,14 @@ Yusuke Shinyama, Jan. 2023
 <ul>
   <li> <a href="#ip-addr">IPアドレス</a>
   <li> <a href="#ip-packet">IPパケット</a>
-  <li> <a href="#ip-routing">ルーティング (Routing)</a>
+  <li> <a href="#ip-routing">ルーティング</a>
   <li> <a href="#ip-cidr">CIDR 方式</a>
   <li> <a href="#ip-wan">広域レベルでのルーティング</a>
 </ul>
 <li> <a href="#tcp">TCP層 (トランスポート層) のしくみ</a>
 <ul>
   <li> <a href="#tcp-details">TCPの詳細</a>
-  <li> <a href="#tcp-client-server">TCPにおける「クライアント」と「サーバ」</a>
+  <li> <a href="#tcp-client-server">「クライアント」と「サーバ」</a>
   <li> <a href="#tcp-udp">UDP層</a>
 </ul>
 <li> <a href="#application">アプリケーション層</a>
@@ -95,9 +106,9 @@ Yusuke Shinyama, Jan. 2023
 <ul>
   <li> <a href="#security-privateip">プライベートIPアドレス</a>
   <li> <a href="#security-nat">NAT</a>
-  <li> <a href="#security-firewall">ファイヤーウォール (Firewall)</a>
-  <li> <a href="#security-proxy">プロキシーサーバ (Proxy Server)</a>
-  <li> <a href="#security-vpn">VPN (Virtual Private Network)</a>
+  <li> <a href="#security-firewall">ファイヤウォール</a>
+  <li> <a href="#security-proxy">プロキシサーバ</a>
+  <li> <a href="#security-vpn">VPN</a>
 </ul>
 </ol>
 
@@ -763,7 +774,7 @@ Wireshark を起動後、パケットキャプチャーを開始し、
 </p>
 </div>
 
-<h3 id="ip-routing">3.3. ルーティング (Routing)</h3>
+<h3 id="ip-routing">3.3. ルーティング</h3>
 <p>
 IPパケットは、複数台のコンピュータを経由して転送される。
 このようなIPパケットを転送するコンピュータを「ルータ (router)」とよぶ。
@@ -841,8 +852,8 @@ IPアドレスはそのホストが「勝手に名乗っているだけ」であ
       <line x1="85" y1="45" x2="85" y2="55" />
     </g>
     <g style="font-size: 80%;">
-      <text x="110" y="30">ルータ</text>
-      <text x="110" y="10">192.168.1.1</text>
+      <text x="110" y="20">ルータ</text>
+      <text x="110" y="40">192.168.1.1</text>
       <text x="270" y="60">192.168.1.0</text>
       <text x="250" y="90">ホスト</text>
       <g text-anchor="middle">
@@ -893,18 +904,21 @@ IPアドレスはそのホストが「勝手に名乗っているだけ」であ
       <line x1="65" y1="40" x2="65" y2="50" />
     </g>
     <g style="font-size: 80%;">
-      <text x="180" y="95">ルータ</text>
-      <text x="180" y="75">192.168.1.1</text>
+      <text x="125" y="90" text-anchor="end">ルータ</text>
+      <text x="170" y="100">192.168.1.1</text>
+      <text x="170" y="80">192.168.2.2</text>
       <text x="270" y="120">192.168.1.0</text>
       <text x="270" y="50">192.168.2.0</text>
-      <text x="100" y="10">192.168.2.1</text>
-      <text x="100" y="30">ルータ</text>
+      <text x="45" y="20" text-anchor="end">ルータ</text>
+      <text x="90" y="15">10.0.1.2</text>
+      <text x="90" y="35">192.168.2.1</text>
     </g>
   </svg>
 </div>
 
 <p>
-ルータは、少なくとも 2つのサブネットに接続している。
+ルータは、少なくとも<strong>2つのIPアドレス</strong>を持っており、
+2つ以上のサブネットに接続している。
 これは次のような方法でIPパケットを転送する:
 </p>
 <ul>
@@ -981,7 +995,7 @@ Ethernet の全ノード対して送る。ここには、そのノードの MAC 
 <li> <code>10.0.1.3/8</code>
 <li> <code>128.122.100.181/16 (255.255.0.0)</code>
 <li> <code>192.168.1.9/24 (255.255.255.0)</code>
-<li> <code>166.84.7.52/30 (255.255.255.252)</code>
+<li> <code>166.84.7.55/30 (255.255.255.252)</code>
 </ol>
 </div>
 
@@ -1371,7 +1385,7 @@ TCP セグメントには、データの「始まり」を示す
 各セグメントに含まれる確認応答(ACK)番号とは別である。
 </div>
 
-<h3 id="tcp-client-server">4.2. TCPにおける「クライアント」と「サーバ」</h3>
+<h3 id="tcp-client-server">4.2. 「クライアント」と「サーバ」</h3>
 <p>
 IP層においては、すべてのホストはパケットを送受信するという役割は同じであった。
 しかし TCP層の通信では、2種類の役割が必ず存在する。
@@ -2304,6 +2318,20 @@ SSH のよくある使い方はサーバ上のシェルをリモートから実�
 
 
 <h2 id="security">7. セキュリティ</h2>
+<p>
+一般的に、ネットワークにおける「セキュリティ」とは、以下の性質をさす:
+</p>
+<ol type=a>
+  <li> 機密性 (情報が不正に閲覧されない)
+  <li> 完全性 (情報が不正に改竄されない)
+  <li> 可用性 (情報へのアクセスが妨害されない)
+</ol>
+<p>
+先に述べた暗号化は上の性質 a., b. に対してある程度は有効だが、
+完全ではない (そもそも「完全な」セキュリティなど現実にありえない)。
+インターネットは本質的に信頼できないネットワークであり、
+暗号化以外にもネットワークからの攻撃を防ぐ仕組みがいくつも存在する。
+</p>
 
 <h3 id="security-privateip">7.1. プライベートIPアドレス</h3>
 <p>
@@ -2357,7 +2385,7 @@ IPアドレスが必要であり、しかも同じアドレスを 2つの場所�
       <use xlink:href="#computer" x="300" y="80" />
     </g>
     <g text-anchor="middle" style="font-size: 80%;">
-      <text x="175" y="50" dy="0.5em">166.84.7.52</text>
+      <text x="175" y="50" dy="0.5em">166.84.7.55</text>
       <text x="125" y="170" dy="0.5em">192.168.1.1</text>
       <text x="55" y="220" dy="0.5em">192.168.1.2</text>
       <text x="35" y="150" dy="0.5em">192.168.1.3</text>
@@ -2434,14 +2462,14 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
       <text x="25" y="70" dy="0.5em">192.168.1.2</text>
       <text x="225" y="70" dy="0.5em">192.168.1.1</text>
       <text x="225" y="85" dy="0.5em">11.22.33.44</text>
-      <text x="425" y="70" dy="0.5em">166.84.7.52</text>
+      <text x="425" y="70" dy="0.5em">166.84.7.55</text>
       <text x="120" y="12" dy="0.5em">Src: 192.168.1.2</text>
-      <text x="120" y="27" dy="0.5em">Dst: 166.84.7.52</text>
+      <text x="120" y="27" dy="0.5em">Dst: 166.84.7.55</text>
       <text x="320" y="12" dy="0.5em">Src: 11.22.33.44</text>
-      <text x="320" y="27" dy="0.5em">Dst: 166.84.7.52</text>
-      <text x="340" y="92" dy="0.5em">Src: 166.84.7.52</text>
+      <text x="320" y="27" dy="0.5em">Dst: 166.84.7.55</text>
+      <text x="340" y="92" dy="0.5em">Src: 166.84.7.55</text>
       <text x="340" y="107" dy="0.5em">Dst: 11.22.33.44</text>
-      <text x="120" y="92" dy="0.5em">Src: 166.84.7.52</text>
+      <text x="120" y="92" dy="0.5em">Src: 166.84.7.55</text>
       <text x="120" y="107" dy="0.5em">Dst: 192.168.1.2</text>
     </g>
   </svg>
@@ -2505,11 +2533,20 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
 </div>
 </div>
 
-<h3 id="security-firewall">7.3. ファイヤーウォール (Firewall)</h3>
+<h3 id="security-firewall">7.3. ファイヤウォール</h3>
 <p>
-ルータが害のありそうなパケットを無視する (フィルタする) こと。
-通常は外→内をフィルタするが、
-内→外をフィルタしていることもある。
+<u>ファイヤウォール</u> (Firewall) とは、ホストにとって
+害のありそうなパケットを無視する (フィルタする) 機器またはソフトウェアのことである。
+現在の一般的な環境では:
+<ol>
+<li> ルータの機能の一部として
+<li> OSの機能の一部として (Windows ファイヤウォール)
+</ol>
+提供されている。
+
+<p>
+通常はファイヤウォールは 外 → 内 のパケットをフィルタするが、
+たまに 内 → 外 のパケットをフィルタすることもある。
 </p>
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg" 
@@ -2547,7 +2584,7 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
 </div>
 
 <p>
-一般的には、以下のようなルールが設定できる:
+ファイヤウォールには、一般的に以下のようなルールが設定できる:
 </p>
 <ul>
 <li> 特定の宛先IPアドレスはダメ
@@ -2555,16 +2592,11 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
 <li> ...
 </ul>
 
-<ol>
-<li> ルータの機能の一部として
-<li> OSの機能の一部として (Windows ファイヤーウォール)
-</ol>
-
 <h4>WAF (Web Application Firewall)</h4>
 
 <h4>IDS/IPS</h4>
 
-<h3 id="security-proxy">7.4. プロキシーサーバ (Proxy Server)</h3>
+<h3 id="security-proxy">7.4. プロキシサーバ (Proxy Server)</h3>
 <p>
 プライベートネットワーク内にある PC が外部と通信するための方法のひとつ。
 NAT が IP層 (レイヤー3) で動作するのとは異なり、TCP層 (レイヤー4) の
@@ -2594,22 +2626,22 @@ NAT が IP層 (レイヤー3) で動作するのとは異なり、TCP層 (レイ
     </g>
     <g text-anchor="middle" style="font-size: 80%;">
       <text x="125" y="20" dy="0.5em">192.168.1.1:8080</text>
-      <text x="325" y="20" dy="0.5em">166.84.7.52:80</text>
+      <text x="325" y="20" dy="0.5em">166.84.7.55:80</text>
 
       <text x="25" y="70" dy="0.5em">192.168.1.2</text>
       <text x="225" y="70" dy="0.5em">192.168.1.1</text>
-      <text x="425" y="70" dy="0.5em">166.84.7.52</text>
+      <text x="425" y="70" dy="0.5em">166.84.7.55</text>
     </g>
   </svg>
 </div>
 
 <ol>
 <li> あらかじめ、ブラウザがプライベートネットワーク内の
-特定の<u>プロキシーサーバ</u> (Proxy Server) に
+特定の<u>プロキシサーバ</u> (Proxy Server) に
 接続するよう設定しておく。
 <li> ブラウザがインターネット上のホストにじかに接続するかわりに、
-プロキシーサーバの指定されたTCPポートに接続する。
-<li> プロキシーサーバは、あらためて宛先のWebサーバに向けてTCP接続し、
+プロキシサーバの指定されたTCPポートに接続する。
+<li> プロキシサーバは、あらためて宛先のWebサーバに向けてTCP接続し、
 その内容を転送する。
 </ol>
 
@@ -2619,7 +2651,7 @@ NAT が IP層 (レイヤー3) で動作するのとは異なり、TCP層 (レイ
 <li> より細かい通信制御ができる (例. 特定サイトの閲覧を禁止する)
 </ul>
 
-<h3 id="security-vpn">7.4. VPN (Virtual Private Network)</h3>
+<h3 id="security-vpn">7.5. VPN (Virtual Private Network)</h3>
 
 
 <hr>
