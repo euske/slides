@@ -9,7 +9,7 @@ body { line-height: 1.5; }
 h1 { border-bottom: solid 4px #000088; }
 h2 { border-bottom: solid 2px #000088; }
 h3 { border-bottom: solid 1px #000088; }
-table { border-collapse: collapse; margin-left: auto; margin-right: auto; }
+table { border-collapse: collapse; margin: 1em; }
 td { padding: 4px; }
 kbd { outline: 1px solid black; padding: 2px; }
 blockquote { outline: 1px solid black; padding: 4px; }
@@ -28,6 +28,7 @@ pre em { color: #008800; }
 code em { color: #000088; }
 .exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
 .exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.bl { outline: 1px solid black; padding: 2px; font-size: 120%; color: transparent; }
 .file { outline: 2px solid black; padding: 1em; margin: 1em; }
 .file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
 .file pre { margin: 0; }
@@ -85,12 +86,19 @@ Yusuke Shinyama, Jan. 2023
   <li> <a href="#app-web">ウェブ (HTTP)</a>
   <li> <a href="#app-email">電子メール (SMTP)</a>
 </ul>
-<li> <a href="#encryption">さらに上の層</a>
+<li> <a href="#encryption">暗号化</a>
 <ul>
   <li> <a href="#encryption-tls">TLS/SSL層</a>
   <li> <a href="#encryption-ssh">SSH層</a>
 </ul>
-<li> <a href="#firewall">ファイアウォール・VPN</a>
+<li> <a href="#security">セキュリティ</a>
+<ul>
+  <li> <a href="#security-privateip">プライベートIPアドレス</a>
+  <li> <a href="#security-nat">NAT</a>
+  <li> <a href="#security-firewall">ファイヤーウォール (Firewall)</a>
+  <li> <a href="#security-proxy">プロキシーサーバ (Proxy Server)</a>
+  <li> <a href="#security-vpn">VPN (Virtual Private Network)</a>
+</ul>
 </ol>
 
 <h4>使用するツール</h4>
@@ -1765,67 +1773,174 @@ C:\&gt; <strong>ping <em>ホスト名</em></strong>
 </div>
 
 <h3 id="app-web">5.2. ウェブ (HTTP)</h3>
+
+<h4>HTTP のしくみ</h4>
 <p>
-TCP 層の機能を使って、特定のサーバの TCP 80番ポートに
-特定の規約でデータを送ると、ウェブページを閲覧することができる。
-サーバから送られてくるデータはテキスト型式で、
-<nobr><span class=bl>HTML</span></nobr> と呼ばれる型式で書かれている。
-この「規約」は HTML データを転送するという意味で
-<u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol
-(<nobr><span class=bl>HTTP</span></nobr>) と呼ばれる。
+HTTP は、TCP 80番ポート (HTTPS の場合は TCP 443番ポート) を使った
+もっとも有名なアプリケーション層である。
+これは HTML (<u>H</u>yper <u>T</u>ext <u>M</u>arkup <u>L</u>anguage) 型式で
+書かれたデータ (ようするに、Webページ) をブラウザに転送するという意味で
+HTTP (<u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol)
+と呼ばれる。
 </p>
 
 <ol>
-<li> クライアント (Webブラウザ) がサーバの TCP 80番ポートに接続する。
-<li> クライアントが <u>HTTPリクエスト</u> を送る。
-HTTPリクエストには GET, POST などいくつかの種類があるが、
-代表的な GETリクエストでは以下のようなテキスト形式のデータを送信する:
+<li> クライアントがコンテンツを要求する。(要求、<u>リクエスト</u>)
+<li> サーバがコンテンツを提供する。(応答、<u>レスポンス</u>)
+<li> 読み込むページ・画像ファイルの数だけ 1., 2. を繰り返す。
+</ol>
+<p>
+通常、HTTP を使うクライアントを
+<u>ウェブブラウザ</u> (HTTPクライアント) と呼び、
+それに答えるサーバを
+<u>ウェブサーバ</u> (HTTPサーバ) という。
+</p>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" 
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="400" height="70">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="white" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use x="20" y="0" xlink:href="#computer" />
+      <use x="320" y="0" xlink:href="#computer" />
+      <path d="M70,20 l240,0" marker-end="url(#arrow)" />
+      <path d="M310,30 l-240,0" marker-end="url(#arrow)" />
+    </g>
+    <g text-anchor="middle" style="font-size:80%;">
+      <text x="45" y="60">クライアント</text>
+      <text x="345" y="60">サーバ</text>
+      <text x="110" y="12">リクエスト</text>
+      <text x="270" y="48">レスポンス</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+たとえばブラウザで
+<div class=figure>
+<code>http://<span class=bgy>www.example.com</span>:<span class=bgr>80</span><span class=bgg>/news/</span></code> 
+</div>
+というURL を開くと、
+TCPポート <span class=bgr>80</span>番に対して接続がおこなわれ、
+以下のような<u>リクエスト</u>文字列が送信される:
+<blockquote><pre>
+GET <span class=bgg>/news/</span> HTTP/1.1
+Host: <span class=bgy>www.example.com</span>
+User-Agent: Mozilla/5.0 (Windows NT 6.1;) Gecko/20100101
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,&#48;/&#48;;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+<em>(空行)</em>
+</pre></blockquote>
+<p>
+これに対してサーバは以下のような<u>レスポンス</u>文字列を返す:
+<blockquote><pre>
+HTTP/1.1 200 OK
+Connection: close
+Date: Fri, 20 Feb 2023 08:27:28 GMT
+Content-Type: text/html
+Content-Length: 9022
+<em>(空行)</em>
+&lt;html&gt;
+...
+</pre></blockquote>
+
+<h4>HTTPリクエスト</h4>
+<p>
+HTTP リクエストには GET, POST などいくつかの種類があり、
+リクエストはさらに <u>ヘッダ</u> (header) と
+<u>ボディ (ペイロード)</u> (body, payload) に分かれている。
+これらは<em>空行</em>で分けられている。
+
 <blockquote>
 リクエストヘッダ:<br>
 <pre>
-GET <span class=bgy>パス名</span> HTTP/1.0
-<span class=bgg>フィールド</span>: <span class=bgr>値</span>
-<span class=bgg>フィールド</span>: <span class=bgr>値</span>
-…
-<em>(空行)</em>
-</blockquote>
-<blockquote>
-例:<br>
-<pre>
-GET <span class=bgy>/</span> HTTP/1.0
-<span class=bgg>Host</span>: <span class=bgr>www.example.com</span>
-
-</pre></blockquote>
-<li> サーバがこれに応じた <u>HTTPレスポンス</u> を返す。
-これも通常はテキスト形式で、以下のような構造になっている:
-<blockquote>
-レスポンスヘッダ:<br>
-<pre>
-HTTP/1.0 <span class=bgy>ステータスコード</span>
-<span class=bgg>フィールド</span>: <span class=bgr>値</span>
-<span class=bgg>フィールド</span>: <span class=bgr>値</span>
+GET /news/ HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:35.0) Gecko/20100101 Firefox/35.0
 …
 <em>(空行)</em>
 </pre>
-レスポンスボディ:<Br>
-<pre>
-<span class=bgb>データ</span>
-…
-</pre></blockquote>
-<blockquote>
-例:<br>
-<pre>
-HTTP/1.0 <span class=bgy>200</span> OK
-<span class=bgg>Content-Type</span>: <span class=bgr>text/html; charset=UTF-8</span>
-<span class=bgg>Date</span>: <span class=bgr>Mon, 23 Jan 2023 13:39:22 GMT</span>
-…
+リクエストボディ (ペイロード):<br>
+</blockquote>
 
-<span class=bgb>&lt;!doctype html&gt;
-&lt;html&gt;
-&lt;head&gt;</span>
+<p> 
+ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
+</p>
+<ul>
+<li> <code><u>Host:</u></code> 相手のサーバの名前
+<li> <code><u>User-Agent:</u></code> ブラウザの種類
+<li> その他 (<A target="_blank" href="https://tools.ietf.org/html/rfc2616">RFC 2616</a> 参照)
+</ul>
+<p>
+通常、GETリクエストはヘッダのみで構成され、ボディは空である。
+つまり何も含まれていない。
+</p>
+
+<h4>HTTPレスポンス</h4>
+<p>
+HTTP レスポンスもまた、
+<u>ヘッダ</u> (header) と
+<u>ボディ (ペイロード)</u> (body, payload) に分かれている。
+これらは<em>空行</em>で分けられている。
+
+<blockquote>
+レスポンスヘッダ:<br>
+<pre>
+HTTP/1.1 200 OK
+Connection: close
+Date: Fri, 20 Feb 2015 08:27:28 GMT
+Content-Type: text/html
+Content-Length: 9022
+…
+<em>(空行)</em>
+</pre>
+レスポンスボディ (ペイロード):<Br>
+<pre>
+&lt;html&gt;&lt;body&gt;
 …
 </pre></blockquote>
-</ol>
+
+<p> 
+ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
+</p>
+<ul>
+<li> <code><u>Date:</u></code> サーバの応答時刻。
+<li> <code><u>Content-Type:</u></code> そのコンテンツの種類 (HTMLファイルか画像か)。
+<li> <code><u>Content-Length:</u></code> そのコンテンツの大きさ (バイト数)。
+</ul>
+<p>
+レスポンス内のペイロードには、通常 HTML ファイル
+(または画像ファイルなど) の内容がそのまま含まれている。
+ブラウザはこの内容を解析して表示すると、ページが表示されたことになる。
+</p>
+
+<h4>いろいろな HTTP レスポンス</h4>
+<p>
+正常なレスポンスの場合、最初の一行は必ず 
+<blockquote><pre>
+HTTP/1.1 <u>200</u> OK
+</pre></blockquote>
+となっているが、これ以外のレスポンスが返ってくる場合もある。
+<ul>
+<li> 指定されたファイルが存在しない。いわゆる「ページが見つかりません」エラー。
+    この場合、サーバはペイロードとして HTML を返すこともある。
+  <blockquote><pre>HTTP/1.1 <u>404</u> Not Found</pre></blockquote>
+  <p> 例: <a target="_blank" href="https://www.yahoo.co.jp/nonexistent">https://www.yahoo.co.jp/nonexistent</a>
+<li> 別の場所を参照せよ。これが返されると、ブラウザのアドレスバーが変化する。
+  <blockquote><pre>HTTP/1.1 <u>302</u> Moved</pre></blockquote>
+  <p> 例: <a target="_blank" href="https://ja.wikipedia.org/">https://ja.wikipedia.org/</a>
+</ul>
 
 <div class=exercise id="ex-human-http-client">
 <div class=header>演習. 人間HTTPクライアント</div>
@@ -1880,6 +1995,26 @@ User-Agent: Mozilla/5.0
 </pre></blockquote>
 </div>
 
+<div class=exercise id="ex-http-troubleshooting">
+<div class=header>演習. トラブルシューティング</div>
+<p>
+あるユーザが「インターネットが動かない」といっている。
+聞けばブラウザに <code>http://www.example.com/</code> というアドレスを入力したが、
+ページが表示されないのだという。この場合、考えられる原因をすべてあげよ。
+<ol type=a>
+<li> <nobr><span class=bl>どこかのケーブルが断線している</span></nobr>
+<li> <nobr><span class=bl>DNS から IPアドレスが解決できていない</span></nobr>
+<li> <nobr><span class=bl>ルータが正しく動いていない</span></nobr>
+<li> <nobr><span class=bl>パケットが捨てられている</span></nobr>
+<li> <nobr><span class=bl>ブラウザにバグがある</span></nobr>
+<li> <nobr><span class=bl>相手のサーバの電源が入っていない</span></nobr>
+<li> <nobr><span class=bl>相手のサーバがListen状態になっていない</span></nobr>
+<li> <nobr><span class=bl>相手のサーバプログラムにバグがある</span></nobr>
+<li> ...
+</ol>
+</p>
+</div>
+
 <h3 id="app-email">5.3. 電子メール (SMTP)</h3>
 <p>
 TCP 層の機能を使って、特定のサーバの TCP 25番ポートに
@@ -1911,10 +2046,10 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 </pre></blockquote>
 
 
-<h2 id="encryption">6. さらに上の層</h2>
+<h2 id="encryption">6. 暗号化</h2>
 <p>
 本来、TCP/IP の公式な範疇はTCP層までで、それより上は
-アプリケーションの責任となっている。しかし TCP 層だけでは
+アプリケーションの責任となっている。しかし TCP 層まででは
 真に安全な通信は実現できない。とくに、TCP 層には以下のような欠点がある:
 </p>
 <ul>
@@ -1925,7 +2060,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 </ul>
 
 <p>
-そこで最近では、これらの欠点を補うために TCP層の上にさらにもう一段、
+そこで最近では、これらの欠点を補うため TCP層の上にさらにもう一段、
 暗号化をおこなう層を追加して使うことが多い。
 </p>
 
@@ -2148,7 +2283,7 @@ SSH はこれに対して「サーバが公開鍵を提示し、ユーザにそ�
 <blockquote><pre>
 $ <strong>ssh server.example.com</strong>
 The authenticity of host '[server.example.com]:22 ([192.168.1.10]:22)' can't be established.
-ED25519 key fingerprint is SHA256:HLfnjG5dDqVPIfWtG6sNGG5JyY5AYtkxaupGsJffyYs.
+ED25519 key fingerprint is <mark>SHA256:HLfnjG5dDqVPIfWtG6sNGG5JyY5AYtkxaupGsJffyYs</mark>.
 This key is not known by any other names.
 Are you sure you want to continue connecting (yes/no/[fingerprint])?
 </pre></blockquote>
@@ -2168,8 +2303,323 @@ SSH のよくある使い方はサーバ上のシェルをリモートから実�
 </ul>
 
 
-<h2 id="firewall">7. ファイアウォール・VPN</h2>
+<h2 id="security">7. セキュリティ</h2>
+
+<h3 id="security-privateip">7.1. プライベートIPアドレス</h3>
 <p>
+インターネットを使う<strong>すべての</strong>機器には
+IPアドレスが必要であり、しかも同じアドレスを 2つの場所で使ってはならない。
+しかし、IP アドレスは 32ビットで表現されているため、
+たかだか 2<sup>32</sup> ≒ 42億個しか表現できない。
+→ IPアドレスが足りない。
+</p>
+<p>
+そこで、以下のアドレスは組織内で勝手に使ってよいという
+決まりになっている。これを <u>プライベート IPアドレス</u> といい、
+このような IPアドレスで構成したネットワークを
+<u>プライベート ネットワーク</u> (private network) という。
+</p>
+<ul>
+<li> <code>10.0.0.0/8</code>
+<li> <code>172.16.0.0/12</code>
+<li> <code>192.168.0.0/16</code>
+<li> ...
+</ul>
+
+<div class=notice>
+注意:
+プライベートIPアドレスのホストは、
+インターネット (その組織の外) からは到達できない。
+</div>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" 
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="410" height="230">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="white" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <ellipse cx="75" cy="160" rx="70" ry="40" />
+      <ellipse cx="340" cy="70" rx="58" ry="65" />
+      <use xlink:href="#computer" x="0" y="100" />
+      <use xlink:href="#computer" x="100" y="120" />
+      <use xlink:href="#computer" x="30" y="170" />
+      <use xlink:href="#computer" x="150" y="0" />
+      <use xlink:href="#computer" x="280" y="30" />
+      <use xlink:href="#computer" x="350" y="0" />
+      <use xlink:href="#computer" x="300" y="80" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="175" y="50" dy="0.5em">166.84.7.52</text>
+      <text x="125" y="170" dy="0.5em">192.168.1.1</text>
+      <text x="55" y="220" dy="0.5em">192.168.1.2</text>
+      <text x="35" y="150" dy="0.5em">192.168.1.3</text>
+      <text x="305" y="80" dy="0.5em">192.168.1.1</text>
+      <text x="375" y="50" dy="0.5em">192.168.1.2</text>
+      <text x="325" y="130" dy="0.5em">192.168.1.4</text>
+      <text x="175" y="70" dy="0.5em">グローバルIP</text>
+      <text x="75" y="85" dy="0.5em">プライベート</text>
+      <text x="75" y="100" dy="0.5em">ネットワーク</text>
+      <text x="340" y="155" dy="0.5em">プライベート</text>
+      <text x="340" y="170" dy="0.5em">ネットワーク</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+これに対して、世界中から実際に到達可能な「普通の」IPアドレスのことを
+<u>グローバル IPアドレス</u>という。
+現在の日本のオフィス・家庭では、ルータ以外の
+機器はほとんどプライベート IP アドレスを使っている。
+</p>
+
+<h4>IPv6</h4>
+<p>
+アドレスの不足を解決するため、現在の IP 層を変更して
+128ビットのアドレスを使えるようにしたものが <u>IPv6</u> である。
+これに対して、従来の IP層は <u>IPv4</u> という。
+IPv6 を使えばすべての機器がグローバル IP アドレスを持つことができる。
+しかし IPv6 は従来の IPv4 とは互換性がないため、
+世界じゅうのルータを入れ換えなければならない。
+このため、まだたいして普及していない。
+</p>
+
+<h3 id="security-nat">7.2. NAT</h3>
+<p>
+<u>NAT</u> (Network Address Translation) とは、
+プライベートネットワーク内のホストがインターネットに
+アクセスするための仕組みである。
+具体的には、ルータが「どのプライベートIPアドレスがどのグローバルIPアドレスと
+通信しているか」をすべて覚えておき、それに該当する (双方向の)
+IPパケットが来るたびにそのアドレスを書き換えることによって実現する:
+</p>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" 
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="550" height="122" transform="translate(10,0)">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="0" y="20" />
+      <use xlink:href="#computer" x="200" y="20" />
+      <use xlink:href="#computer" x="400" y="20" />
+      <line x1="60" y1="52" x2="190" y2="52" />
+      <line x1="260" y1="52" x2="390" y2="52" />
+      <rect x="60" y="2" width="120" height="40" />
+      <rect x="260" y="2" width="120" height="40" />
+      <rect x="280" y="80" width="120" height="40" />
+      <rect x="60" y="80" width="120" height="40" />
+      <g marker-end="url(#arrow)" stroke-width="4">
+        <line x1="184" y1="22" x2="200" y2="22" />
+        <line x1="384" y1="22" x2="400" y2="22" />
+        <line x1="276" y1="105" x2="260" y2="105" />
+        <line x1="56" y1="105" x2="40" y2="105" />
+      </g>
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="25" y="70" dy="0.5em">192.168.1.2</text>
+      <text x="225" y="70" dy="0.5em">192.168.1.1</text>
+      <text x="225" y="85" dy="0.5em">11.22.33.44</text>
+      <text x="425" y="70" dy="0.5em">166.84.7.52</text>
+      <text x="120" y="12" dy="0.5em">Src: 192.168.1.2</text>
+      <text x="120" y="27" dy="0.5em">Dst: 166.84.7.52</text>
+      <text x="320" y="12" dy="0.5em">Src: 11.22.33.44</text>
+      <text x="320" y="27" dy="0.5em">Dst: 166.84.7.52</text>
+      <text x="340" y="92" dy="0.5em">Src: 166.84.7.52</text>
+      <text x="340" y="107" dy="0.5em">Dst: 11.22.33.44</text>
+      <text x="120" y="92" dy="0.5em">Src: 166.84.7.52</text>
+      <text x="120" y="107" dy="0.5em">Dst: 192.168.1.2</text>
+    </g>
+  </svg>
+</div>
+
+<div class=exercise id="ex-nat">
+<div class=header>演習. NATの動きを理解する</div>
+<p>
+プライベートネットワーク内のホスト <code>10.10.1.2</code> が
+ゲートウェイ <code>10.10.1.1</code> を経由して、
+インターネット上のホスト <code>55.66.77.88</code> と通信するとする。
+このとき送信されるIPパケットの送信元・送信先アドレスを書け。
+</p>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" 
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="550" height="122" transform="translate(10,0)">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="0" y="20" />
+      <use xlink:href="#computer" x="200" y="20" />
+      <use xlink:href="#computer" x="400" y="20" />
+      <line x1="60" y1="52" x2="190" y2="52" />
+      <line x1="260" y1="52" x2="390" y2="52" />
+      <rect x="60" y="2" width="120" height="40" />
+      <rect x="260" y="2" width="120" height="40" />
+      <rect x="280" y="80" width="120" height="40" />
+      <rect x="60" y="80" width="120" height="40" />
+      <g marker-end="url(#arrow)" stroke-width="4">
+        <line x1="184" y1="22" x2="200" y2="22" />
+        <line x1="384" y1="22" x2="400" y2="22" />
+        <line x1="276" y1="105" x2="260" y2="105" />
+        <line x1="56" y1="105" x2="40" y2="105" />
+      </g>
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="25" y="70" dy="0.5em">10.10.1.2</text>
+      <text x="225" y="70" dy="0.5em">10.10.1.1</text>
+      <text x="225" y="85" dy="0.5em">11.22.33.44</text>
+      <text x="425" y="70" dy="0.5em">55.66.77.88</text>
+    </g>
+    <g style="font-size: 80%;">
+      <text x="70" y="12" dy="0.5em">Src: </text>
+      <text x="70" y="27" dy="0.5em">Dst: </text>
+      <text x="270" y="12" dy="0.5em">Src: </text>
+      <text x="270" y="27" dy="0.5em">Dst: </text>
+      <text x="290" y="92" dy="0.5em">Src: </text>
+      <text x="290" y="107" dy="0.5em">Dst: </text>
+      <text x="70" y="92" dy="0.5em">Src: </text>
+      <text x="70" y="107" dy="0.5em">Dst: </text>
+    </g>
+  </svg>
+</div>
+</div>
+
+<h3 id="security-firewall">7.3. ファイヤーウォール (Firewall)</h3>
+<p>
+ルータが害のありそうなパケットを無視する (フィルタする) こと。
+通常は外→内をフィルタするが、
+内→外をフィルタしていることもある。
+</p>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" 
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="550" height="122" transform="translate(10,0)">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    <g id="cross" fill="none" stroke="black" stroke-width="2">
+      <line x1="0" y1="0" x2="20" y2="20" />
+      <line x1="20" y1="0" x2="0" y2="20" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="0" y="40" />
+      <use xlink:href="#computer" x="200" y="40" />
+      <use xlink:href="#computer" x="400" y="40" />
+      <line x1="60" y1="72" x2="190" y2="72" />
+      <line x1="260" y1="72" x2="390" y2="72" />
+      <rect x="270" y="10" width="50" height="30" />
+      <rect x="130" y="90" width="50" height="30" />
+      <use xlink:href="#cross" x="215" y="15" />
+      <use xlink:href="#cross" x="215" y="95" />
+      <g marker-end="url(#arrow)" stroke-width="4">
+        <line x1="266" y1="25" x2="250" y2="25" />
+        <line x1="184" y1="105" x2="200" y2="105" />
+      </g>
+    </g>
+  </svg>
+</div>
+
+<p>
+一般的には、以下のようなルールが設定できる:
+</p>
+<ul>
+<li> 特定の宛先IPアドレスはダメ
+<li> 特定の宛先IPポートはダメ
+<li> ...
+</ul>
+
+<ol>
+<li> ルータの機能の一部として
+<li> OSの機能の一部として (Windows ファイヤーウォール)
+</ol>
+
+<h4>WAF (Web Application Firewall)</h4>
+
+<h4>IDS/IPS</h4>
+
+<h3 id="security-proxy">7.4. プロキシーサーバ (Proxy Server)</h3>
+<p>
+プライベートネットワーク内にある PC が外部と通信するための方法のひとつ。
+NAT が IP層 (レイヤー3) で動作するのとは異なり、TCP層 (レイヤー4) の
+接続を制御する。
+</p>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" 
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="550" height="80" transform="translate(10,0)">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="0" y="20" />
+      <use xlink:href="#computer" x="200" y="20" />
+      <use xlink:href="#computer" x="400" y="20" />
+      <g marker-end="url(#arrow)" stroke-width="4">
+        <line x1="60" y1="52" x2="190" y2="52" />
+        <line x1="260" y1="52" x2="390" y2="52" />
+      </g>
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="125" y="20" dy="0.5em">192.168.1.1:8080</text>
+      <text x="325" y="20" dy="0.5em">166.84.7.52:80</text>
+
+      <text x="25" y="70" dy="0.5em">192.168.1.2</text>
+      <text x="225" y="70" dy="0.5em">192.168.1.1</text>
+      <text x="425" y="70" dy="0.5em">166.84.7.52</text>
+    </g>
+  </svg>
+</div>
+
+<ol>
+<li> あらかじめ、ブラウザがプライベートネットワーク内の
+特定の<u>プロキシーサーバ</u> (Proxy Server) に
+接続するよう設定しておく。
+<li> ブラウザがインターネット上のホストにじかに接続するかわりに、
+プロキシーサーバの指定されたTCPポートに接続する。
+<li> プロキシーサーバは、あらためて宛先のWebサーバに向けてTCP接続し、
+その内容を転送する。
+</ol>
+
+<h4>利点</h4>
+<ul>
+<li> NAT が必要ない。
+<li> より細かい通信制御ができる (例. 特定サイトの閲覧を禁止する)
+</ul>
+
+<h3 id="security-vpn">7.4. VPN (Virtual Private Network)</h3>
 
 
 <hr>
