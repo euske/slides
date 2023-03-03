@@ -1811,7 +1811,7 @@ HTTP (<u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol)
 </p>
 
 <div class=figure>
-  <svg xmlns="http://www.w3.org/2000/svg" 
+  <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="400" height="70">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
@@ -1841,7 +1841,7 @@ HTTP (<u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol)
 <p>
 たとえばブラウザで
 <div class=figure>
-<code>http://<span class=bgy>www.example.com</span>:<span class=bgr>80</span><span class=bgg>/news/</span></code> 
+<code>http://<span class=bgy>www.example.com</span>:<span class=bgr>80</span><span class=bgg>/news/</span></code>
 </div>
 というURL を開くと、
 TCPポート <span class=bgr>80</span>番に対して接続がおこなわれ、
@@ -1888,7 +1888,7 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:35.0) Gecko/20100101 Firefox/35.0
 リクエストボディ (ペイロード):<br>
 </blockquote>
 
-<p> 
+<p>
 ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
 </p>
 <ul>
@@ -1925,7 +1925,7 @@ Content-Length: 9022
 …
 </pre></blockquote>
 
-<p> 
+<p>
 ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
 </p>
 <ul>
@@ -1941,7 +1941,7 @@ Content-Length: 9022
 
 <h4>いろいろな HTTP レスポンス</h4>
 <p>
-正常なレスポンスの場合、最初の一行は必ず 
+正常なレスポンスの場合、最初の一行は必ず
 <blockquote><pre>
 HTTP/1.1 <u>200</u> OK
 </pre></blockquote>
@@ -2361,7 +2361,7 @@ IPアドレスが必要であり、しかも同じアドレスを 2つの場所�
 </div>
 
 <div class=figure>
-  <svg xmlns="http://www.w3.org/2000/svg" 
+  <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="410" height="230">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
@@ -2406,6 +2406,11 @@ IPアドレスが必要であり、しかも同じアドレスを 2つの場所�
 <u>グローバル IPアドレス</u>という。
 現在の日本のオフィス・家庭では、ルータ以外の
 機器はほとんどプライベート IP アドレスを使っている。
+プライベートネットワークに接続された機器は外部のインターネットから
+アクセスできないため、そのネットワーク内で「信頼された」機器として
+扱われ、パスワード等による認証も省略されることが多い。
+そのため、多くの組織でプライベートネットワークは
+「安全なネットワーク (イントラネット)」として使われる。
 </p>
 
 <h4>IPv6</h4>
@@ -2416,7 +2421,7 @@ IPアドレスが必要であり、しかも同じアドレスを 2つの場所�
 IPv6 を使えばすべての機器がグローバル IP アドレスを持つことができる。
 しかし IPv6 は従来の IPv4 とは互換性がないため、
 世界じゅうのルータを入れ換えなければならない。
-このため、まだたいして普及していない。
+このため、まだあまり普及していない。
 </p>
 
 <h3 id="security-nat">7.2. NAT</h3>
@@ -2429,7 +2434,7 @@ IPv6 を使えばすべての機器がグローバル IP アドレスを持つ�
 IPパケットが来るたびにそのアドレスを書き換えることによって実現する:
 </p>
 <div class=figure>
-  <svg xmlns="http://www.w3.org/2000/svg" 
+  <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="550" height="122" transform="translate(10,0)">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
@@ -2484,7 +2489,7 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
 このとき送信されるIPパケットの送信元・送信先アドレスを書け。
 </p>
 <div class=figure>
-  <svg xmlns="http://www.w3.org/2000/svg" 
+  <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="550" height="122" transform="translate(10,0)">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
@@ -2549,7 +2554,7 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
 たまに 内 → 外 のパケットをフィルタすることもある。
 </p>
 <div class=figure>
-  <svg xmlns="http://www.w3.org/2000/svg" 
+  <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="550" height="122" transform="translate(10,0)">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
@@ -2592,18 +2597,59 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
 <li> ...
 </ul>
 
-<h4>WAF (Web Application Firewall)</h4>
-
-<h4>IDS/IPS</h4>
-
-<h3 id="security-proxy">7.4. プロキシサーバ (Proxy Server)</h3>
+<h4>WAF と IDS/IPS</h4>
 <p>
-プライベートネットワーク内にある PC が外部と通信するための方法のひとつ。
-NAT が IP層 (レイヤー3) で動作するのとは異なり、TCP層 (レイヤー4) の
-接続を制御する。
+最近のネットワークでは、ファイヤウォールに加えて
+以下のような機器も使われることが多い:
+</p>
+
+<ul>
+<li> <u>WAF</u> (Web Application Firewall、Webアプリケーションファイヤウォール)
+<li> <u>IDS</u> (Intrusion Detection System、侵入検知システム)
+<li> <u>IPS</u> (Intrusion Protection System、侵入防御システム)
+</ul>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="560" height="220" transform="translate(10,0)">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="0" y="150" />
+      <use xlink:href="#computer" x="150" y="150" />
+      <use xlink:href="#computer" x="300" y="150" />
+      <use xlink:href="#computer" x="350" y="80" />
+      <use xlink:href="#computer" x="350" y="10" />
+      <path d="M60,180 l80,0 M210,180 l80,0 M360,180 l80,0" />
+      <path d="M375,180 l0,-50 M375,80 l0,-20" />
+      <ellipse cx="500" cy="180" rx="50" ry="25" />
+    </g>
+    <g text-anchor="middle" style="font-size:75%;">
+      <text x="400" y="30" dy="0.5em" text-anchor="start">ウェブサーバ</text>
+      <text x="400" y="100" dy="0.5em" text-anchor="start">WAF</text>
+      <text x="175" y="200" dy="0.5em">IDS/IPS</text>
+      <text x="325" y="200" dy="0.5em">ファイヤウォール</text>
+      <text x="500" y="180" dy="0.5em">インターネット</text>
+    </g>
+  </svg>
+</div>
+
+<h3 id="security-proxy">7.4. プロキシサーバ</h3>
+<p>
+<u>プロキシサーバ</u> (proxy server) は、
+プライベートネットワーク内にある PC が外部と通信するための方法のひとつである。
+NAT とは異なり、IP層 (レイヤー3) ではなく TCP層 (レイヤー4) の接続を制御する。
 </p>
 <div class=figure>
-  <svg xmlns="http://www.w3.org/2000/svg" 
+  <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="550" height="80" transform="translate(10,0)">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
@@ -2636,9 +2682,8 @@ NAT が IP層 (レイヤー3) で動作するのとは異なり、TCP層 (レイ
 </div>
 
 <ol>
-<li> あらかじめ、ブラウザがプライベートネットワーク内の
-特定の<u>プロキシサーバ</u> (Proxy Server) に
-接続するよう設定しておく。
+<li> あらかじめ、プライベートネットワーク内のブラウザが
+特定のプロキシサーバに接続するよう設定しておく。
 <li> ブラウザがインターネット上のホストにじかに接続するかわりに、
 プロキシサーバの指定されたTCPポートに接続する。
 <li> プロキシサーバは、あらためて宛先のWebサーバに向けてTCP接続し、
@@ -2651,8 +2696,14 @@ NAT が IP層 (レイヤー3) で動作するのとは異なり、TCP層 (レイ
 <li> より細かい通信制御ができる (例. 特定サイトの閲覧を禁止する)
 </ul>
 
-<h3 id="security-vpn">7.5. VPN (Virtual Private Network)</h3>
-
+<h3 id="security-vpn">7.5. VPN</h3>
+<p>
+プライベートネットワークは、本来は外部からアクセスできない
+(ファイヤウォールで守られた) 安全な環境に有線で構築するのが普通である。
+しかし暗号化を使うことにより、安全でない環境を通って
+プライベートネットワークを構築することが可能になった。
+これを <u>VPN</u> (Virtual Private Network、仮想プライベートネットワーク) という。
+</p>
 
 <hr>
 <address>Yusuke Shinyama</address>
