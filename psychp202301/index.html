@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>「プログラミングの心理学」を読む</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000088; }
+h2 { border-bottom: solid 2px #000088; }
+h3 { border-bottom: solid 1px #000088; }
+table { border-collapse: collapse; margin: 1em; }
+td { padding: 4px; }
+kbd { outline: 1px solid black; padding: 2px; }
+blockquote { outline: 1px solid black; padding: 4px; }
+pre { overflow: auto; margin: 0; }
+mark { font-weight: bold; }
+pre, code { background: #ddd; font-size: 150%; font-family: courier; }
+img { max-width: 80vw; height: auto; }
+dt { text-decoration: underline; font-weight: bold; }
+u { color: #880000; font-weight: bold; }
+.author { text-align: right; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
+.notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
+.formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+.note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+pre em { color: #008800; }
+code em { color: #000088; }
+.exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
+.exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.bl { outline: 1px solid black; padding: 2px; font-size: 120%; color: transparent; }
+.file { outline: 2px solid black; padding: 1em; margin: 1em; }
+.file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
+.file pre { margin: 0; }
+
+.g { background: #eeeeee; }
+.bgr { background: #ffbbff; }
+.bgg { background: #88ff88; }
+.bgb { background: #88ffff; }
+.bgy { background: #ffff88; }
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>「プログラミングの心理学」を読む</h1>
+
+<div class=author>
+Yusuke Shinyama, Mar. 2023
+</div>
+
+<p>
+<strong>概要:</strong>
+「プログラミングの心理学」は、
+<a href="https://en.wikipedia.org/wiki/Gerald_Weinberg">ジェラルド M. ワインバーグ (Gerald M. Weinberg)</a> による本である。
+オリジナルは 1971年に刊行され、25周年記念版が 1998年に発行された
+(<a href="https://www.amazon.co.jp/dp/4839915946">日本語訳</a>もある)。
+著者のワインバーグは著名なコンサルタント・教師であり、
+ソフトウェア工学の学術的な研究でも業績をあげている。
+1971年当時のプログラマはメインフレームのソフトウェア開発が主な業務で
+(PC はまだ存在しなかった)、おもな使用言語は FORTRAN や
+COBOL、PL/I などであった。そのような時代に書かれたにもかかわらず、
+この本が推奨するのは XP 的な手法であり、こんにち
+「心理的安全性」と呼ばれているものがなぜ重要かが解説されている。
+この本は XP がなぜ有効かを表す実例集として参考になる。
+</p>
+
+
+<h2 id="preface">前書き</h2>
+<p>
+「この本の目的はただひとつ、それはプログラミングを
+人間的な活動として研究する試みを始めることである」
+
+<h2 id="programming-as-human-performance">第1部. プログラミングと才能</h2>
+<ol start="1">
+<li> プログラムを読むという行為
+<li> よいプログラムとは何か?
+<li> プログラミングをどのように研究するのか?
+</ol>
+
+<h2 id="programming-as-social-activity">第2部. 社会的活動としてのプログラミング</h2>
+
+<h3 id="programming-group">4章. プログラミングをする集団</h3>
+
+<h4>公式な組織・非公式な組織</h4>
+<p>
+人が集まるところでは、必然的になんらかの組織が発生する。<br>
+会社などで定義された「公式な」組織だけではなく、
+自然発生的に生まれた「非公式な」組織の場合もある。<br>
+非公式な組織の存在を無視したり、それを強制的に解散させようとすると
+何らかのツケが回ってくることが多い。<br>
+</p>
+<ul>
+<li> 井戸端会議による情報共有
+<li> たまたま掲示板が見える席にいた秘書
+<li> 自販機の回りにたむろす学生の集団
+</ul>
+
+<h4>間違いとエゴ</h4>
+<p>
+多くのプログラマは他人から離れて作業することを好むが、
+一方で彼らは自分の成果物に執着しがちである。<br>
+コードを「所有する」ことの害悪は、それが自分自身 (エゴ) の
+延長であると考えがちなことである。<br>
+こうなると、自分のコードの間違いは自分自身の欠陥ととらえることになり、
+間違いが見つけにくい (あるいは、間違いを間違いと認めにくい)。
+</p>
+
+<h4>「エゴレスプログラミング」</h4>
+<p>
+プログラマのエゴの問題を直接是正しようとしても難しい。
+むしろ有効なのは、プログラマのいる文化および価値観を変えることである。<br>
+プログラマの成果が集団に帰属し、個人には帰属しない
+というチームでは、コードはつねに全員で改良すべき共有物という
+考え方が生まれ、バグの発見が促進される。<br>
+このようなチームは仕事に対するメンバーの満足度が高く、
+あまり人が離れない。<br>
+また、たとえ誰かがいなくなったとしても、
+チーム全員が同じ知識を共有しているので、あまり深刻な問題にならない。<br>
+</p>
+
+<h4>エゴレス環境を作る・保持するには</h4>
+<p>
+上のようなチームは存在するが、
+残念ならがまだあまり一般的ではない。<br>
+伝統的な考え方をもつ組織をこのようなチームにつくり変えることは難しく、
+このようなチームをゼロから構築するほうが簡単である。<br>
+いったんこのようにしてできあがったチームは、
+全体で環境を移動することもありうる。
+</p>
+
+<div class=exercise>
+<div class=header>章末問題 (プログラマ向け)</div>
+<ol>
+<li> Zoom やチャットによるコミュニケーションは、
+対面によるコミュニケーションと比べてどう変わったか?
+良くなった点、悪くなった点をあげよ。
+<li> あなたは「自分のコード」「誰かのコード」という言い方をしたことがあるか?<br>
+  一週間この表現を使わないように心がけたら、どんな変化が生じるだろうか。
+<li> 「自分のコード」の間違いを、他人のせい、あるいは
+モノのせいにしたことはあるか?
+<li> 「自分のコード」の間違いを、運が悪かっただけ、
+と思ったことはあるか?<br>
+だとしたら、自分の「運の良さ」は他人と違うと思うか?<br>
+幸運をもたらすための「儀式」をやったことはあるか?
+</ol>
+</div>
+
+<h3 id="programming-team">5章. 開発チーム</h3>
+
+<h3 id="programming-project">6章. ソフトウェアプロジェクト</h3>
+
+
+<h2 id="programming-as-individual-activity">第3部. 個人的活動としてのプログラミング</h2>
+<ol start="7">
+<li> プログラミングという作業の多様性
+<li> 性格による要因
+<li> 知能および問題解決能力
+<li> 動機、訓練および経験
+</ol>
+
+<h2 id="programming-tools">第4部. プログラミングにおける道具</h2>
+<ol start="11">
+<li> プログラミング言語
+<li> 言語設計における原則
+<li> その他のツール
+</ol>
+
+<h2 id="epilogue">第5部. エピローグ</h2>
+
+
+
+
+
+<hr>
+<address>Yusuke Shinyama</address>
