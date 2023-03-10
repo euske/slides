@@ -21,6 +21,7 @@ dt { text-decoration: underline; font-weight: bold; }
 u { color: #880000; font-weight: bold; }
 .author { text-align: right; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
+.figure .caption { margin-top: 1em; font-size: 80%; font-weight: bold; }
 .notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
@@ -162,6 +163,8 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
     </g>
   </svg>
 </div>
+  <div class="caption">コンピュータのネットワーク</div>
+</div>
 
 <p>
 これを実現するには、2通りの方法がある:
@@ -176,6 +179,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 </p>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="600" height="200">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
       <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
@@ -205,6 +209,8 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
       <text x="320" y="165" dy="0.5em" text-anchor="end">20.10.8.5</text>
     </g>
   </svg>
+</div>
+<div class="caption">双方向に流れるパケット</div>
 </div>
 
 <h4>インターネット以外に使われている (いた) ネットワーク規格</h4>
@@ -449,6 +455,7 @@ TCP層の機能を使って、
 </p>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="400" height="80">
@@ -482,6 +489,8 @@ TCP層の機能を使って、
       </g>
     </g>
   </svg>
+</div>
+<div class="caption">Ethernet</div>
 </div>
 
 <h3 id="datalink-macaddr">2.1. 物理アドレス (MACアドレス)</h3>
@@ -598,7 +607,10 @@ Ethernet を使って別のノードにデータを送るときは、
 各パケットの詳細パネルをクリックして Ethernet の送信元・送信先MACアドレスを確認せよ。
 </p>
 <div class=figure>
+  <div>
 <img src="wireshark.png" width="700" height="464">
+</div>
+<div class="caption">Wireshark</div>
 </div>
 </div>
 
@@ -614,6 +626,7 @@ Ethernet を使って別のノードにデータを送るときは、
 </p>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="310" height="95">
@@ -631,15 +644,18 @@ Ethernet を使って別のノードにデータを送るときは、
       <rect x="15" y="5" width="90" height="60" />
       <polygon points="20,70 0,90 120,90 100,70" />
       <path d="M90,45 l-20,0" />
-      <path d="M90,25 l+70,0" />
+      <path d="M90,25 l+100,0" />
+      <path d="M190,25 l50,0" stroke-dasharray="2,2" />
       <circle r="5" cx="90" cy="45" fill="white" />
       <circle r="5" cx="90" cy="25" fill="white" />
     </g>
     <g style="font-size: 75%;">
-      <text x="165" y="30">(本物の)インターフェイス</text>
-      <text x="120" y="50">仮想インターフェイス</text>
+      <text x="110" y="15">(本物の)インターフェイス</text>
+      <text x="110" y="50">仮想インターフェイス</text>
     </g>
   </svg>
+</div>
+<div class="caption">本物のインターフェイスと仮想インターフェイス</div>
 </div>
 
 <div class=exercise id="ex-virtual-interface">
@@ -754,7 +770,8 @@ IPアドレスはソフトウェアによって決定されている。
 IPアドレスがなければ、そもそも IP層を使って通信できないため、
 すべての PC は起動時に IPアドレスを決定する必要がある。
 現在、IPアドレスを決める方法はおもに 3通り存在する:
-<p>
+</p>
+
 <ul>
 <li> 手動で設定する … OSの設定画面等から。
 <li> <u>PPPoE</u> を使ってサーバから取得する …
@@ -922,6 +939,7 @@ IPアドレスはそのホストが「勝手に名乗っているだけ」であ
 
 <h4>末端の (ルータでない) ホストの場合:</h4>
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="350" height="120">
@@ -958,6 +976,8 @@ IPアドレスはそのホストが「勝手に名乗っているだけ」であ
     </g>
   </svg>
 </div>
+<div class="caption">サブネット 192.168.1.0 に接続されているホスト</div>
+</div>
 
 <p>
 末端のホストは、ひとつのサブネットに接続している。
@@ -971,11 +991,15 @@ IPアドレスはそのホストが「勝手に名乗っているだけ」であ
 </ul>
 
 <div class=figure>
+<div>
 <img src="netcpl.png" width="482" height="279">
+</div>
+<div class="caption">macOSにおけるTCP/IPの設定</div>
 </div>
 
 <h4>ルータの場合:</h4>
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="350" height="120">
@@ -1008,6 +1032,8 @@ IPアドレスはそのホストが「勝手に名乗っているだけ」であ
       <text x="90" y="35">192.168.2.1</text>
     </g>
   </svg>
+  </div>
+  <div class="caption">ルータが2つのサブネットを中継する</div>
 </div>
 
 <p>
@@ -1137,6 +1163,7 @@ Ethernet の全ノード対して送る。ここには、そのノードの MAC 
 </p>
 
 <div class=figure>
+<div>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="220" height="220">
 <g transform="translate(10,10)">
 <g fill="none" stroke="black" stroke-width="2">
@@ -1191,6 +1218,8 @@ Ethernet の全ノード対して送る。ここには、そのノードの MAC 
 </g>
 </g>
 </svg>
+</div>
+<div class="caption">リンク・ステート方式で作成される地図の一例</div>
 </div>
 
 <h4>経路ベクトル方式</h4>
@@ -1389,6 +1418,7 @@ TCP <u>ACK</u> パケット
 </ul>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="350" height="88">
@@ -1426,6 +1456,8 @@ TCP <u>ACK</u> パケット
       <text x="145" y="72" dy="0.5em">8</text>
     </g>
   </svg>
+  </div>
+  <div class="caption">失われたパケット (13)</div>
 </div>
 
 <p>
@@ -1506,6 +1538,7 @@ TCPサーバとは特定のTCPポートを
 </p>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="400" height="70">
@@ -1530,7 +1563,8 @@ TCPサーバとは特定のTCPポートを
       <text x="190" y="40">接続する</text>
       <text x="310" y="10">Listen</text>
     </g>
-  </svg>
+  </svg></div>
+  <div class="caption">TCPにおける、クライアントからサーバへの「接続」</div>
 </div>
 
 <h4>TCPサーバ側の手順:</h4>
@@ -1792,16 +1826,16 @@ TCPとは別の方法で通信をおこなう。
 <p>
 IP アドレスはそのままでは人間にとって覚えにくいので、
 実際には各ホストに名前 (文字列) をつけて、IPアドレスの代わりに
-その文字列を使うことができる。この仕組みを
-<nobr><span class=bl>ドメイン・ネーム・システム</span></nobr> (あるいは
-<nobr><span class=bl>DNS</span></nobr>) といい、
-各ホストにつけられた名前を<nobr><span class=bl>ホスト名</span></nobr> という。
+その文字列を使うことができる。この仕組みを DNS
+(<u>D</u>omain <u>N</u>ame <u>S</u>ystem) といい、
+各ホストにつけられた名前を<u>ホスト名</u> という。
 たとえば、以下の2つは同じ意味である:
+</p>
 <blockquote><pre>
 C:\&gt; <strong>ping 93.184.216.34</strong>
 C:\&gt; <strong>ping www.example.com</strong>
 </pre></blockquote>
-</p>
+
 <p>
 DNS は TCP/IP の機能を使って、<code>www.example.com</code> などの
 文字列から <code>93.184.216.34</code> などの IPアドレスを検索する
@@ -1864,10 +1898,10 @@ IPアドレスがわからないので、そもそも通信ができなくなる
 
 <h4>localhost</h4>
 <p>
-<nobr><span class=bl><code>127.0.0.1</code></span></nobr> は
+<code>127.0.0.1</code> は
 特別な IPアドレスであり、これはつねに「自分自身のホスト」をあらわす。
 これをループバックアドレスという。
-なお、ホスト名 <nobr><span class=bl><code>localhost</code></span></nobr> は
+なお、ホスト名 <code>localhost</code> は
 つねにループバックアドレスに解決される。
 </p>
 
@@ -1935,6 +1969,7 @@ HTTP (<u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol)
 </p>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="400" height="70">
@@ -1959,7 +1994,8 @@ HTTP (<u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol)
       <text x="110" y="12">リクエスト</text>
       <text x="270" y="48">レスポンス</text>
     </g>
-  </svg>
+  </svg></div>
+  <div class="caption">HTTPにおけるリクエストとレスポンス</div>
 </div>
 
 <p>
@@ -1970,6 +2006,7 @@ HTTP (<u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol)
 というURL を開くと、
 TCPポート <span class=bgr>80</span>番に対して接続がおこなわれ、
 以下のような<u>リクエスト</u>文字列が送信される:
+</p>
 <blockquote><pre>
 GET <span class=bgg>/news/</span> HTTP/1.1
 Host: <span class=bgy>www.example.com</span>
@@ -1982,6 +2019,7 @@ Connection: keep-alive
 </pre></blockquote>
 <p>
 これに対してサーバは以下のような<u>レスポンス</u>文字列を返す:
+</p>
 <blockquote><pre>
 HTTP/1.1 200 OK
 Connection: close
@@ -1999,6 +2037,7 @@ HTTP リクエストには GET, POST などいくつかの種類があり、
 リクエストはさらに <u>ヘッダ</u> (header) と
 <u>ボディ (ペイロード)</u> (body, payload) に分かれている。
 これらは<em>空行</em>で分けられている。
+</p>
 
 <blockquote>
 リクエストヘッダ:<br>
@@ -2031,6 +2070,7 @@ HTTP レスポンスもまた、
 <u>ヘッダ</u> (header) と
 <u>ボディ (ペイロード)</u> (body, payload) に分かれている。
 これらは<em>空行</em>で分けられている。
+</p>
 
 <blockquote>
 レスポンスヘッダ:<br>
@@ -2070,6 +2110,7 @@ Content-Length: 9022
 HTTP/1.1 <u>200</u> OK
 </pre></blockquote>
 となっているが、これ以外のレスポンスが返ってくる場合もある。
+</p>
 <ul>
 <li> 指定されたファイルが存在しない。いわゆる「ページが見つかりません」エラー。
     この場合、サーバはペイロードとして HTML を返すこともある。
@@ -2203,6 +2244,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 </p>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="250" height="180">
@@ -2225,6 +2267,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
       <text x="170" y="158" dy="0.5em">ケーブル</text>
     </g></g>
   </svg>
+  </div>
 </div>
 
 <p>
@@ -2236,6 +2279,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 (中間者攻撃)
 </p>
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="500" height="120"
        transform="scale(1,1)">
     <defs>
@@ -2264,6 +2308,8 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
       <text x="435" y="90">本当に通信したい相手</text>
     </g>
   </svg>
+  </div>
+    <div class="caption">悪者が暗号を使ったら…?</div>
 </div>
 
 <p>
@@ -2298,7 +2344,8 @@ TLS/SSL はもともと HTTP を暗号化するための方式 (HTTPS) として
 <a href="../certs202301/index.html">「デジタル証明書とは何か?」</a>を参照。
 </p>
 
-<div class=figure style="align-items: flex-end;">
+<div class=figure>
+  <div style="align-items: flex-end;">
   <img src="key.png" width="389" height="131">
 
   <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="200"
@@ -2348,6 +2395,8 @@ TLS/SSL はもともと HTTP を暗号化するための方式 (HTTPS) として
       <text x="170" y="170" fill="green" style="font-size: 125%; font-weight: bold; font-style: italic;">Google</text>
     </g>
   </svg>
+    </div>
+  <div class="caption">鍵マークが表示されるしくみ</div>
 </div>
 
 <p>
@@ -2485,6 +2534,7 @@ IPアドレスが必要であり、しかも同じアドレスを 2つの場所�
 </div>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="410" height="230">
@@ -2522,7 +2572,8 @@ IPアドレスが必要であり、しかも同じアドレスを 2つの場所�
       <text x="340" y="155" dy="0.5em">プライベート</text>
       <text x="340" y="170" dy="0.5em">ネットワーク</text>
     </g>
-  </svg>
+  </svg></div>
+  <div class="caption">プライベートIPアドレス と プライベートネットワーク</div>
 </div>
 
 <p>
@@ -2558,6 +2609,7 @@ IPv6 を使えばすべての機器がグローバル IP アドレスを持つ�
 IPパケットが来るたびにそのアドレスを書き換えることによって実現する:
 </p>
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="550" height="122" transform="translate(10,0)">
@@ -2601,7 +2653,8 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
       <text x="120" y="92" dy="0.5em">Src: 166.84.7.55</text>
       <text x="120" y="107" dy="0.5em">Dst: 192.168.1.2</text>
     </g>
-  </svg>
+  </svg></div>
+  <div class="caption">NATによるIPアドレスの書き換え</div>
 </div>
 
 <div class=exercise id="ex-nat">
@@ -2672,12 +2725,14 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
 <li> OSの機能の一部として (Windows ファイヤウォール)
 </ol>
 提供されている。
+</p>
 
 <p>
 通常はファイヤウォールは 外 → 内 のパケットをフィルタするが、
 たまに 内 → 外 のパケットをフィルタすることもある。
 </p>
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="550" height="122" transform="translate(10,0)">
@@ -2710,6 +2765,8 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
       </g>
     </g>
   </svg>
+  </div>
+  <div class="caption">パケットをフィルタする</div>
 </div>
 
 <p>
@@ -2740,6 +2797,7 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
 </ul>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="560" height="220" transform="translate(10,0)">
@@ -2769,7 +2827,8 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
       <text x="325" y="200" dy="0.5em">ファイヤウォール</text>
       <text x="500" y="180" dy="0.5em">インターネット</text>
     </g>
-  </svg>
+  </svg></div>
+  <div class="caption">WAF・IDS・IPS</div>
 </div>
 
 <h3 id="security-proxy">7.4. プロキシサーバ</h3>
@@ -2779,6 +2838,7 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
 NAT とは異なり、IP層 (レイヤー3) ではなく TCP層 (レイヤー4) の接続を制御する。
 </p>
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="550" height="80" transform="translate(10,0)">
@@ -2808,7 +2868,8 @@ NAT とは異なり、IP層 (レイヤー3) ではなく TCP層 (レイヤー4) 
       <text x="225" y="70" dy="0.5em">192.168.1.1</text>
       <text x="425" y="70" dy="0.5em">166.84.7.55</text>
     </g>
-  </svg>
+  </svg></div>
+  <div class="caption">プロキシサーバ</div>
 </div>
 
 <ol>
@@ -2849,6 +2910,7 @@ VPN では、別々の場所にある2つのサーバ間を暗号化通信でつ
 </p>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="600" height="150">
@@ -2905,12 +2967,14 @@ VPN では、別々の場所にある2つのサーバ間を暗号化通信でつ
       </g>
     </g>
   </g>
-  </svg>
+  </svg></div>
+  <div class="caption">VPNにより2つのネットワークを接続した図</div>
 </div>
 
 <h3 id="security-ssh-tunnel">7.6. SSHによるトンネリング</h3>
 
 <div class=figure>
+  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="430" height="130">
@@ -2955,6 +3019,8 @@ VPN では、別々の場所にある2つのサーバ間を暗号化通信でつ
     </g>
   </g>
   </svg>
+  </div>
+  <div class="caption">ローカル→リモート転送 (L)</div>
 </div>
 
 
