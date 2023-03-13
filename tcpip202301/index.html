@@ -2901,7 +2901,7 @@ VPN では、別々の場所にある2つのサーバ間を暗号化通信でつ
 仮想インターフェイスを使って
 見かけ上2つのホストがあたかも同一ネットワーク上に配線されているかのように
 通信する。以下の図は、2つのサブネットを VPN 接続した例を表したものである。
-(実際のパケットの通信は赤線で表示している。)
+赤線は、VPN による (見かけ上の) パケット通信を示している。
 各ホストのルーティング規則は変更されており、
 左側のホスト (<code>192.168.1.0/24</code>) と
 右側のホスト (<code>192.168.2.0/24</code>) は
@@ -2944,12 +2944,12 @@ VPN では、別々の場所にある2つのサーバ間を暗号化通信でつ
       <line x1="450" y1="55" x2="550" y2="55" />
       <line x1="525" y1="65" x2="525" y2="55" />
       <line x1="485" y1="45" x2="485" y2="55" />
-      <rect x="310" y="50" width="90" height="8" fill="url(#diagonalHatch)" />
+      <rect x="310" y="46" width="90" height="8" fill="url(#diagonalHatch)" />
       <ellipse cx="125" cy="95" rx="140" ry="50" stroke-dasharray="4,4" />
       <ellipse cx="525" cy="95" rx="50" ry="50" stroke-dasharray="4,4" />
     </g>
-    <g stroke="red" stroke-width="2" fill="none">
-      <path d="M130,65 l0,-5 l135,0 l0,-10 l-170,0 l0,-50 l380,0 l0,50 l-30,0 l0,10 l75,0 l0,5" />
+    <g stroke="red" stroke-width="2" fill="none" stroke-dasharray="2,2">
+      <path d="M130,65 l0,-15 l390,0 l0,15" />
     </g>
     <g style="font-size: 80%;">
       <text x="110" y="30">ルータ</text>
@@ -2972,12 +2972,93 @@ VPN では、別々の場所にある2つのサーバ間を暗号化通信でつ
 </div>
 
 <h3 id="security-ssh-tunnel">7.6. SSHによるトンネリング</h3>
+<p>
+一般に VPN を自分で構築・設定するのはかなり手間がかかる。
+いっぽう SSH の<u>ポート転送機能</u>を使うと、異なるネットワーク間における
+サーバ共有が簡単にできる。これは (IPパケットをすべて転送できる VPN とは違って)
+TCP層でしか動作しないが、相手ネットワーク内にあるサーバにこちらから
+安全にアクセスしたり、自ネットワークのサーバを相手から安全にアクセスさせるときに
+有用である。
+</p>
+
+<p>
+以下の構成は、ポート転送機能を使って相手ネットワーク内
+(リモート) にあるサーバの TCP 80番にアクセスする設定である。
+この場合、ローカルの SSHクライアント自身がサーバとして動作し、
+この 8080番ポートに接続された TCP の通信はすべて相手サーバの
+80番に転送される。
+</p>
 
 <div class=figure>
   <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="430" height="130">
+       version="1.1" width="450" height="130">
+    <defs>
+      <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+        <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+      </marker>
+      <pattern id="diagonalHatch" width="4" height="4" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="0" x2="0" y2="4" style="stroke:black; stroke-width:2" />
+      </pattern>
+      <g id="computer" fill="none" stroke="black" stroke-width="2">
+        <rect x="10" y="10" width="30" height="20" />
+        <polygon points="10,32 0,40 50,40 40,32" />
+      </g>
+    </defs>
+    <g transform="translate(20,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="50" y="0" />
+      <use xlink:href="#computer" x="10" y="60" />
+      <use xlink:href="#computer" x="130" y="30" />
+      <use xlink:href="#computer" x="270" y="30" />
+      <use xlink:href="#computer" x="330" y="0" />
+      <use xlink:href="#computer" x="370" y="60" />
+      <path d="M10,55 l100,0" />
+      <path d="M35,55 l0,10 M75,55 l0,-10" />
+      <path d="M320,55 l100,0" />
+      <path d="M355,55 l0,-10 M395,55 l0,10" />
+      <rect x="180" y="46" width="90" height="8" fill="url(#diagonalHatch)" />
+      <path d="M370,80 l-10,10 l0,-20 l10,10 l10,0" />
+      <path d="M130,50 l-10,10 l0,-20 l10,10 l10,0" />
+    </g>
+    <g stroke="red" stroke-width="2" fill="none" stroke-dasharray="2,2" >
+      <path d="M40,65 l0,-15 l310,0 l0,30 l10,0" />
+    </g>
+    <g style="font-size: 80%;">
+      <text x="100" y="30">ルータ</text>
+      <text x="380" y="30">ルータ</text>
+      <g text-anchor="middle">
+	<text x="35" y="120">192.168.1.2</text>
+	<text x="395" y="120">10.0.1.2</text>
+	<text x="225" y="70" dy="0.5em">暗号化</text>
+	<text x="155" y="80" dy="0.5em">SSH</text>
+	<text x="155" y="80" dy="1.5em">クライアント</text>
+	<text x="295" y="80" dy="0.5em">SSH</text>
+	<text x="295" y="80" dy="1.5em">サーバ</text>
+	<text x="110" y="70">8080</text>
+	<text x="360" y="100">80</text>
+      </g>
+    </g>
+  </g>
+  </svg>
+  </div>
+  <div class="caption">ローカル→リモート転送 (<code>-L 8080:10.0.1.2:80</code>)</div>
+</div>
+
+<p>
+いっぽう以下の構成は、自ネットワーク (ローカル) 内のサーバの
+TCP 80番にリモートからアクセスさせる設定である。
+この場合はリモートの SSHサーバが別のサーバとしても動作し、
+この 8080番ポートに接続された TCP の通信はすべてローカルの
+特定ホストの 80番に転送される。
+</p>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="450" height="130">
     <defs>
       <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
         <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
@@ -2996,31 +3077,38 @@ VPN では、別々の場所にある2つのサーバ間を暗号化通信でつ
       <use xlink:href="#computer" x="10" y="60" />
       <use xlink:href="#computer" x="110" y="30" />
       <use xlink:href="#computer" x="250" y="30" />
-      <use xlink:href="#computer" x="310" y="0" />
-      <use xlink:href="#computer" x="350" y="60" />
+      <use xlink:href="#computer" x="330" y="0" />
+      <use xlink:href="#computer" x="370" y="60" />
       <path d="M10,55 l100,0" />
       <path d="M35,55 l0,10 M75,55 l0,-10" />
-      <path d="M300,55 l100,0" />
-      <path d="M335,55 l0,-10 M375,55 l0,10" />
-      <rect x="160" y="50" width="90" height="8" fill="url(#diagonalHatch)" />
+      <path d="M320,55 l100,0" />
+      <path d="M355,55 l0,-10 M395,55 l0,10" />
+      <rect x="160" y="46" width="90" height="8" fill="url(#diagonalHatch)" />
+      <path d="M290,50 l10,0 l10,-10 l0,20 l-10,-10" />
+      <path d="M50,80 l10,0 l10,-10 l0,20 l-10,-10" />
+    </g>
+    <g stroke="red" stroke-width="2" fill="none" stroke-dasharray="2,2" >
+      <path d="M40,65 l0,-15 l310,0 l0,30 l10,0" />
     </g>
     <g style="font-size: 80%;">
       <text x="100" y="30">ルータ</text>
-      <text x="360" y="30">ルータ</text>
+      <text x="380" y="30">ルータ</text>
       <g text-anchor="middle">
 	<text x="35" y="120">192.168.1.2</text>
-	<text x="375" y="120">10.0.1.2</text>
+	<text x="395" y="120">10.0.1.2</text>
 	<text x="205" y="70" dy="0.5em">暗号化</text>
 	<text x="135" y="80" dy="0.5em">SSH</text>
 	<text x="135" y="80" dy="1.5em">クライアント</text>
 	<text x="275" y="80" dy="0.5em">SSH</text>
 	<text x="275" y="80" dy="1.5em">サーバ</text>
+	<text x="70" y="100">80</text>
+	<text x="320" y="70">8080</text>
       </g>
     </g>
   </g>
   </svg>
   </div>
-  <div class="caption">ローカル→リモート転送 (L)</div>
+  <div class="caption">リモート→ローカル転送 (<code>-R 8080:192.168.1.2:80</code>)</div>
 </div>
 
 
