@@ -29,15 +29,7 @@ code em { color: #000088; }
 .exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
 .exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
 .bl { outline: 1px solid black; padding: 2px; font-size: 120%; color: transparent; }
-.file { outline: 2px solid black; padding: 1em; margin: 1em; }
-.file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
-.file pre { margin: 0; }
-
-.g { background: #eeeeee; }
-.bgr { background: #ffbbff; }
-.bgg { background: #88ff88; }
-.bgb { background: #88ffff; }
-.bgy { background: #ffff88; }
+.uncovered { color: gray; }
 --></style>
 </head>
 <body>
@@ -54,20 +46,21 @@ Yusuke Shinyama, Mar. 2023
 <strong>概要:</strong>
 「プログラミングの心理学」は、
 <a href="https://en.wikipedia.org/wiki/Gerald_Weinberg">ジェラルド M. ワインバーグ (Gerald M. Weinberg)</a> による本である。
-オリジナルは 1971年に刊行され、25周年記念版が 1998年に発行された
-(<a href="https://www.amazon.co.jp/dp/4839915946">日本語訳</a>もある)。
+オリジナルは 1971年に刊行され、25周年記念版が 1998年に発行された。
+<a href="https://www.amazon.co.jp/dp/4839915946">日本語訳</a>もある。
 著者のワインバーグは著名なコンサルタント・教師であり、
-ソフトウェア工学の学術的な研究でも業績をあげている。
-1971年当時のプログラマはメインフレームのソフトウェア開発が主な業務で
-(PC はまだ存在しなかった)、おもな使用言語は FORTRAN や
-COBOL、PL/I などであった。そのような時代に書かれたにもかかわらず、
+学術的な研究でも業績をあげている。
+1971年当時のプログラマはメインフレームのソフトウェア開発が主な業務で、
+おもな使用言語は FORTRAN や COBOL、PL/I などであった。
+ちなみに、PC はまだ存在しなかった。
+このような時代に書かれたにもかかわらず、
 この本が推奨するのは XP 的な手法であり、こんにち
 「バランスドチーム」「心理的安全性」と呼ばれているものが
-なぜ重要かが示されている。
-この本は XP がなぜ有効かを表す実例集として参考になる。
+なぜ重要かが実例とともに説明されている。
 </p>
 
 
+<div class=uncovered>
 <h2 id="preface">前書き</h2>
 <p>
 「この本の目的はただひとつ、それはプログラミングを
@@ -79,6 +72,7 @@ COBOL、PL/I などであった。そのような時代に書かれたにもか�
 <li> よいプログラムとは何か?
 <li> プログラミングをどのように研究するのか?
 </ol>
+</div>
 
 <h2 id="programming-as-social-activity">第2部. 社会的活動としてのプログラミング</h2>
 
@@ -235,6 +229,7 @@ def main():
 <h3 id="programming-project">6章. ソフトウェアプロジェクト</h3>
 
 
+<div class=uncovered>
 <h2 id="programming-as-individual-activity">第3部. 個人的活動としてのプログラミング</h2>
 <ol start="7">
 <li> プログラミングという作業の多様性
@@ -251,9 +246,7 @@ def main():
 </ol>
 
 <h2 id="epilogue">第5部. エピローグ</h2>
-
-
-
+</div>
 
 
 <hr>
