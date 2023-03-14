@@ -39,6 +39,8 @@ code em { color: #000088; }
 .bgg { background: #88ff88; }
 .bgb { background: #88ffff; }
 .bgy { background: #ffff88; }
+
+.wip { color: gray; }
 --></style>
 </head>
 <body>
@@ -49,7 +51,7 @@ code em { color: #000088; }
 TCP/IP ネットワーク入門</h1>
 
 <div class=author>
-Yusuke Shinyama, Jan. 2023
+Yusuke Shinyama, Mar. 2023
 </div>
 
 <p>
@@ -62,6 +64,19 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 ネットワーク機器の具体的な設定方法や診断については、より専門的な資料を参照のこと。
 </p>
 
+<ul>
+<li> 第1回 (3/15): インターネットの概要、データリンク層、IP層
+<li class=wip> 第2回 (?): TCP層、DNS、HTTP
+<li class=wip> 第3回 (?): 暗号化、NAT、ファイヤーウォール、VPN、SSH
+</ul>
+
+<h4>使用するツール</h4>
+<div class=formula>
+<a target="_blank" href="https://www.wireshark.org/">Wireshark</a> :
+パケットキャプチャ・解析ツール。
+</div>
+
+<h4>目次</h4>
 <ol>
 <li> <a href="#internet">インターネットの作り方・概要</a>
 <ul>
@@ -87,6 +102,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <li> <a href="#ip-cidr">CIDR 方式</a>
   <li> <a href="#ip-wan">広域レベルでのルーティング</a>
 </ul>
+<!--
 <li> <a href="#tcp">TCP層 (トランスポート層) のしくみ</a>
 <ul>
   <li> <a href="#tcp-details">TCPの詳細</a>
@@ -113,12 +129,8 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <li> <a href="#security-vpn">VPN</a>
   <li> <a href="#security-ssh-tunnel">SSHによるトンネリング</a>
 </ul>
+-->
 </ol>
-
-<h4>使用するツール</h4>
-<div class=formula>
-<a target="_blank" href="https://www.wireshark.org/">Wireshark</a> :
-パケットキャプチャ・解析ツール。
 </div>
 
 
@@ -338,7 +350,7 @@ OSI はネットワーク規格としては普及しなかったが、
 ひとつ隣のホストは別の国である。
 </p>
 <ul>
-<li> <a target="_blank" href="https://www.telegeography.com/telecom-resources/map-gallery/index.html">海底ケーブル地図</a>
+<li> <a target="_blank" href="https://www.submarinecablemap.com/">海底ケーブル地図</a>
 <li> <a target="_blank" href="https://en.wikipedia.org/wiki/SEA-ME-WE_3_%28cable_system%29">SEA-ME-WE</a>
 (全長39,000キロ、世界最長, 960Gbps)
 <li> <a target="_blank" href="https://web.archive.org/web/20210307133640/https://jpn.nec.com/info-square/mitatv/discover/01_sequel/index.html">海底ケーブルの秘密に迫る</a> (NEC)
@@ -418,6 +430,10 @@ TCP層の機能を使って、
 <li> 長所: 最終的にユーザにとって意味のある「インターネット」になる。
 <li> 短所: 悪意あるルータがパケットを盗聴・なりすましをしてもわからない。
 </ul>
+
+<p>
+最近では、この短所を解決するため、さらに TLS/SSL層などを導入して
+その上にアプリケーションを構築することもある (HTTPSなど)。
 
 
 <h2 id="datalink">2. データリンク層のしくみ</h2>
@@ -883,7 +899,7 @@ Wireshark を起動後、パケットキャプチャーを開始し、
 <h3 id="ip-routing">3.3. ルーティング</h3>
 <p>
 IPパケットは、複数台のコンピュータを経由して転送される。
-このようなIPパケットを転送するコンピュータを「ルータ (router)」とよぶ。
+このようなIPパケットを転送するコンピュータを「<u>ルータ</u> (router)」とよぶ。
 (注意: 米国英語では "route" / "router" はどちらかというと
 「ラウト」「ラウター」に近い発音だが、ここでは日本語の慣例にならって
 「ルート」「ルーティング」と表記する。)
@@ -1047,7 +1063,6 @@ IPアドレスはそのホストが「勝手に名乗っているだけ」であ
 <li> それ以外の場合は、<u>デフォルト ゲートウェイ</u> に送る。
 </ul>
 
-<!--
 <h4>Ethernet のブロードキャストと ARP</h4>
 <p>
 Ethernet の送信先アドレスとして、
@@ -1060,7 +1075,6 @@ Ethernet の全ノード対して送る。ここには、そのノードの MAC 
 そのコンピュータの IP アドレスが含まれており、各ホストは
 その情報を覚えておいて IP パケット送信時に使う。
 </p>
--->
 
 <h4>サブネット・マスクとネットワーク・アドレス</h4>
 <p>
@@ -1274,6 +1288,7 @@ C:\&gt; <strong>tracert 166.84.7.55</strong>
 </div>
 
 
+<!--
 <h2 id="tcp">4. TCP層 (トランポート層) のしくみ</h2>
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
@@ -3110,6 +3125,7 @@ TCP 80番にリモートからアクセスさせる設定である。
   </div>
   <div class="caption">リモート→ローカル転送 (<code>-R 8080:192.168.1.2:80</code>)</div>
 </div>
+-->
 
 
 <hr>
