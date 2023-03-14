@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="./common.css">
+<title>6502アセンブラプログラミング入門
+/ 新山 祐介</title>
+<style><!--
+.author { text-align: right; }
+.bin { font-family: Courier New, Courier, monospace; font-style: italic; font-weight: 900; color: blue; }
+.hex { font-family: Courier New, Courier, monospace; font-style: italic; font-weight: 900; color: darkgreen; }
+.dec { font-family: serif; font-style: italic; font-weight: 900; color: red; }
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+
+<h1>6502アセンブラプログラミング入門</h1>
+<div class=author>
+Yusuke Shinyama, Mar. 2023
+</div>
+
+<p>
+<strong>概要:</strong>
+この記事では 6502 を使ったアセンブラプログラミングを紹介する。
+「アセンブラプログラミング」とは、プログラミング言語を使わずに
+CPU を直接制御する方法である。6502 はいまから約50年前に開発された
+原始的な CPU だが、その原理は今日のコンピュータとほとんど変わっていない。
+ここでは 6502 のプログラミングを通して、コンピュータの本質を学習する。
+</p>
+
+<ol>
+<li> <a href="#computer">コンピュータを原始的に使う</a>
+<ul>
+  <li> <a href="#6502intro">6502 プログラミング入門</a>
+  <li> <a href="#6502register">レジスタとは</a>
+</ul>
+<li> <a href="#6502emu">6502エミュレータを使った演習</a>
+<ul>
+  <li> <a href="#6502mem">メモリに値を格納する</a>
+  <li> <a href="#6502loop">メモリの値を増加させながらループする</a>
+</ul>
+<li> <a href="#assembly">アセンブリ言語を使ったプログラム</a>
+<ul>
+  <li> <a href="#firstasm">最初のプログラム (改良版)</a>
+  <li> <a href="#jumpinst">アセンブラを使ったジャンプ命令</a>
+  <li> <a href="#dispaddr">差分アドレッシング</a>
+  <li> <a href="#branch">条件分岐</a>
+  <li> <a href="#branch2">条件分岐 その2</a>
+</ul>
+<li> <a href="#16bits">16ビットの値を計算する</a>
+<ul>
+  <li> <a href="#fillscreen">16ビット値を使った画面書き換え</a>
+</ul>
+<li> <a href="#os">オペレーティングシステム (OS) とは何か?</a>
+<li> <a href="#modern">現代のコンピュータとの違い</a>
+</ol>
+
+
+<h2 id="computer">1. コンピュータを原始的に使う</h2>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="130">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="10" y="10" width="80" height="40" />
+      <rect x="120" y="10" width="80" height="40" />
+      <rect x="230" y="10" width="80" height="40" />
+      <rect x="120" y="80" width="80" height="40" />
+      <line x1="90" y1="30" x2="120" y2="30" />
+      <line x1="200" y1="30" x2="230" y2="30" />
+      <line x1="160" y1="50" x2="160" y2="80" />
+    </g>
+    <g text-anchor="middle">
+      <text x="50" y="30">入力装置</text>
+      <text x="160" y="30">演算装置</text>
+      <text x="270" y="30">出力装置</text>
+      <text x="160" y="100">記憶装置</text>
+    </g>
+  </svg>
+</div>
+<ol>
+<li> 入力装置 … マウス、キーボードなど。
+<li> 出力装置 … 画面、スピーカなど。
+<li> 記憶装置 … メモリ、ハードディスクなど。
+<li> 演算装置 … プログラムの実行をおこなう中心部分。
+</ol>
+<p>
+本日は、コンピュータのもっとも原始的なプログラミング言語である
+「機械語 (machine language)」でのプログラムを体験する。
+機械語は Python や JavaScript のような現代的なプログラミング言語とは違い、
+文字列で書かれていない。機械語プログラムは、基本的には記憶装置上の
+数値 (命令語) の列によって表現される。これを演算装置が 1つずつ読み込んで動作する。
+
+<h3 id="6502intro">1.1. 6502 プログラミング入門</h3>
+<p>
+ここでは「<a target="_blank" href="https://ja.wikipedia.org/wiki/MOS_6502">MOS 6502</a>」という、
+1975年に開発された原始的な演算装置 (のエミュレータ) を使ってみる。
+これはファミコンや Apple II などの初期のパソコンに使われていた。
+価格は $100 程度で、当時としては破格に安かった。
+<p>
+MOS 6502 は、以下のような機能をもっている:
+<ul>
+  <li> 使える変数は 3つ (A, X, Y) だけ。
+    変数に入れられるのは 8ビットの値 (0〜255) まで。
+  <li> 使えるメモリは最大 65536バイトである。
+    各要素には 8ビットの値を入れることができる。
+  <li> 足し算、引き算、メモリ上の値のコピー、条件分岐、繰り返し処理が可能。
+</ul>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="180">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="10" y="10" width="100" height="160" />
+      <rect x="20" y="70" width="80" height="40" />
+      <rect x="150" y="20" width="60" height="30" />
+      <rect x="250" y="10" width="100" height="160" />
+      <rect x="270" y="75" width="60" height="20" />
+      <rect x="270" y="105" width="60" height="20" />
+      <rect x="270" y="135" width="60" height="20" />
+    </g>
+    <g stroke="black" stroke-width="8" fill="none" marker-end="url(#arrow)">
+      <line x1="100" y1="90" x2="240" y2="90" />
+      <line x1="250" y1="35" x2="220" y2="35" />
+      <line x1="150" y1="35" x2="120" y2="35" />
+    </g>
+    <g text-anchor="middle">
+      <text x="60" y="40">記憶装置</text>
+      <text x="60" y="90" style="font-size:80%;">プログラム</text>
+      <text x="180" y="110">命令語</text>
+      <text x="180" y="40">PC</text>
+      <text x="230" y="20">+1</text>
+      <text x="300" y="40">演算装置</text>
+      <text x="300" y="90">A</text>
+      <text x="300" y="120">X</text>
+      <text x="300" y="150">Y</text>
+    </g>
+  </svg>
+</div>
+
+<p>
+CPU には、もうひとつ特別な変数 <u>PC</u> (プログラム・カウンタ) がある。
+これは、次に記憶装置上のどの命令語を読むかの位置を示しており、
+演算装置は命令を読んでは実行を永久にくりかえす。
+演算装置の動作を Python 風に書くと、次のようになる:
+(実際にはこれはプログラムではなく電子回路そのものによって実現されている)
+
+<blockquote><pre>
+<span class=comment># メモリの内容 (65536要素の配列)</span>
+M = [0, 0, 0, 0, 0, ... ]
+<span class=comment># PCは現在実行する命令の位置。</span>
+PC = 0
+
+<span class=comment># 以下を永久にくり返す。</span>
+while True:
+    <span class=comment># 現在の命令を調べる。</span>
+    c = M[PC]
+    if c == 1:
+        A = A + 1  <span class=comment># 変数 A に1を足す。</span>
+    elif c == 2:
+        A = A - 1  <span class=comment># 変数 A から1を引く。</span>
+    elif
+        ...
+    <span class=comment># 次の命令を実行。</span>
+    PC = PC + 1
+</pre></blockquote>
+
+<h3 id="6502register">1.2. レジスタとは</h3>
+<p>
+演算装置の中では、変数のことを<u>レジスタ</u> (register) とよぶ。
+MOS 6502 には以下のようなレジスタが装備されている。
+
+<div class=figure>
+<table border>
+<tr><th>名前</th><th>大きさ</th><th>機能</th></tr>
+<tr><td>PC</td><td>16ビット</td><td>これから実行する命令のメモリ上の位置。</td></tr>
+<tr><td>Aレジスタ</td><td>8ビット</td><td>計算のために使う。</td></tr>
+<tr><td>Xレジスタ</td><td>8ビット</td><td>メモリ上の位置を指すために使う。(後述)</td></tr>
+<tr><td>Yレジスタ</td><td>8ビット</td><td>(今回は使わない)</td></tr>
+<tr><td>Zフラグ</td><td>1ビット</td><td>計算結果がゼロになったときに 1 になる。(後述)</td></tr>
+<tr><td>Cフラグ</td><td>1ビット</td><td>計算結果が桁あふれしたときに 1 になる。(後述)</td></tr>
+</table>
+</div>
+
+
+<h2 id="6502emu">2. 6502エミュレータを使った演習</h2>
+<p>
+ブラウザで <a target="_blank" href="http://visual6502.org/JSSim/expert.html">http://visual6502.org/</a>
+を開き、"Visual Sim / 6502" の "Advanced" リンクをクリックする。
+これは本物の 6502 の電子回路の動きをブラウザ上で仮想的に再現するエミュレータである。
+
+<ul>
+<li> 赤色の部分 (<span style="background:#ff4d4d; padding-left:2em;">&nbsp;</span>) は、
+  +5V の電圧がかかっていることを示す。
+<li> 緑色の部分 (<span style="background:#4dff4d; padding-left:2em;">&nbsp;</span>) は、
+  0V の電圧がかかっている (接地) ことを示す。
+<li> 黄色の部分 (<span style="background:#ffff00; padding-left:2em;">&nbsp;</span>) は、
+  中間的な電圧がかかっていることを示す。
+</ul>
+
+<p>
+演算装置の世界では、なぜか数値は16進数で表されることが多い。
+<u>16進数</u> (Hexadecimal, 通称Hex) とは、
+1ケタの文字で 16種類の数を表わせるようにしたものである。
+通常の10進数の <span class=hex>0</span>〜<span class=hex>9</span> までの数字に加え、
+アルファベットの <span class=hex>a</span>〜<span class=hex>f</span> の文字
+(大文字・小文字はどちらでもよい) を「数字」として利用している。
+16進数を使うと、2進数の4ケタの数値を1文字で表すことができるため、
+0 と 1 の羅列を表す短縮記法としてよく使われている。
+
+<div class=figure>
+<table border>
+<tr><th>10進数</th><th>2進数</th><th>16進数</th></tr>
+<tr><td><span class=dec>0</span></td><td><span class=bin>0000</span></td><td><span class=hex>0</span></td></tr>
+<tr><td><span class=dec>1</span></td><td><span class=bin>0001</span></td><td><span class=hex>1</span></td></tr>
+<tr><td><span class=dec>2</span></td><td><span class=bin>0010</span></td><td><span class=hex>2</span></td></tr>
+<tr><td><span class=dec>3</span></td><td><span class=bin>0011</span></td><td><span class=hex>3</span></td></tr>
+<tr><td><span class=dec>4</span></td><td><span class=bin>0100</span></td><td><span class=hex>4</span></td></tr>
+<tr><td><span class=dec>5</span></td><td><span class=bin>0101</span></td><td><span class=hex>5</span></td></tr>
+<tr><td><span class=dec>6</span></td><td><span class=bin>0110</span></td><td><span class=hex>6</span></td></tr>
+<tr><td><span class=dec>7</span></td><td><span class=bin>0111</span></td><td><span class=hex>7</span></td></tr>
+<tr><td><span class=dec>8</span></td><td><span class=bin>1000</span></td><td><span class=hex>8</span></td></tr>
+<tr><td><span class=dec>9</span></td><td><span class=bin>1001</span></td><td><span class=hex>9</span></td></tr>
+<tr><td><span class=dec>10</span></td><td><span class=bin>1010</span></td><td><span class=hex>a / A</span></td></tr>
+<tr><td><span class=dec>11</span></td><td><span class=bin>1011</span></td><td><span class=hex>b / B</span></td></tr>
+<tr><td><span class=dec>12</span></td><td><span class=bin>1100</span></td><td><span class=hex>c / C</span></td></tr>
+<tr><td><span class=dec>13</span></td><td><span class=bin>1101</span></td><td><span class=hex>d / D</span></td></tr>
+<tr><td><span class=dec>14</span></td><td><span class=bin>1110</span></td><td><span class=hex>e / E</span></td></tr>
+<tr><td><span class=dec>15</span></td><td><span class=bin>1111</span></td><td><span class=hex>f / F</span></td></tr>
+</table>
+</div>
+
+<h3 id="6502mem">2.1. メモリに値を格納する</h3>
+<p>
+では最初のプログラムとして、メモリ上のある位置
+(演算装置の世界では、<u>番地</u> (address) と呼ばれる) に
+ある8ビットの数値を格納する処理をやってみる。
+これは、以下のような数値の羅列で表現される。
+
+<blockquote><pre>
+0000: A9 01     <span class=comment>; LDA #$01 - Aレジスタに $01 を格納。</span>
+0002: 95 10     <span class=comment>; STA $10  - Aレジスタの値をメモリの 16 番地に格納。</span>
+0004: 00        <span class=comment>; BRK      - CPUの停止。</span>
+</pre></blockquote>
+
+<p>
+これは Python でいえば、以下のような処理に等しい:
+<blockquote><pre>
+A = 1      <span class=comment># LDA #$01</span>
+M[16] = A  <span class=comment># STA $10</span>
+</pre></blockquote>
+
+<p>
+プログラムは、メモリ上の 16進数が書かれている部分を
+ダブルクリックして直接入力する。
+ここでは <code>LDA</code>命令、<code>STA</code>命令、<code>BRK</code>命令を使っている。
+<div class=figure>
+<table border>
+<tr><th>命令語 (16進)</th><th>バイト数</th><th>表記</th><th>機能</th></tr>
+<tr><td><code><span class=hex>A9</span> <u><span class=hex>XX</span></u></code></td>
+  <td>2 (命令 1 + 値 1)</td>
+  <td><code>LDA #$<u><span class=hex>XX</span></u></code></td>
+  <td>Aレジスタに値 16進数 <u><span class=hex>XX</span></u> を記録する。</td>
+</tr>
+<tr><td><code><span class=hex>95</span> <u><span class=hex>XX</span></u></code></td>
+  <td>2 (命令 1 + アドレス 1)</td>
+  <td><code>STA $<u><span class=hex>XX</span></u></code></td>
+  <td>Aレジスタの値をメモリの <u><span class=hex>XX</span></u> 番地に記録する。</td>
+</tr>
+<tr><td><code><span class=hex>00</span></code></td>
+  <td>1</td>
+  <td><code>BRK</code></td>
+  <td>制御装置を停止する。</td>
+</tr>
+</table>
+</div>
+
+<p>
+(もっと詳しい命令語と数値の対応表は以下を参照のこと)
+<ul>
+<li> <a target="_blank" href="http://www.6502.org/tutorials/6502opcodes.html">6502 命令表</a>
+<li> <a target="_blank" href="https://wiki.nesdev.com/w/index.php/CPU_unofficial_opcodes">命令表 その2</a>
+</ul>
+
+<h3 id="6502loop">2.2. メモリの値を増加させながらループする</h3>
+<p>
+次に足し算とおこなう <code>ADC</code>命令 とジャンプ命令 <code>JMP</code> を使ってみる。
+「ジャンプ命令」とは繰り返し処理をおこなうための命令で、
+これがくると CPU は指定された番地から実行をおこなう。
+つまり、以前実行した命令にまた戻ることができる。
+なお、ジャンプ命令がやっていることは、
+実際には PC レジスタの値を書き換えることだけである。
+
+<blockquote><pre>
+0000: A9 01
+0002: 95 10
+0004: 69 02     <span class=comment>; ADC #$02 - Aレジスタに $02 を足す。</span>
+0006: 4C 02 00  <span class=comment>; JMP $0002 - $0002番地の命令にジャンプする。</span>
+</pre></blockquote>
+
+<p>
+これは、Python でいえば、以下のような処理に(ほぼ)等しい:
+<blockquote><pre>
+A = 1          <span class=comment># LDA #$01</span>
+while True:
+    M[16] = A  <span class=comment># STA $10</span>
+    A = A + 2  <span class=comment># ADC #$02</span>
+</pre></blockquote>
+
+<div class=figure>
+<table border>
+<tr><th>命令語 (16進)</th><th>バイト数</th><th>表記</th><th>機能</th></tr>
+<tr><td><code><span class=hex>69</span> <u><span class=hex>XX</span></u></code></td>
+  <td>2 (命令 1 + 値 1)</td>
+  <td><code>ADC #$<u><span class=hex>XX</span></u></td>
+  <td>Aレジスタの値に 16進数で <u><span class=hex>XX</span></u> を加える。</td>
+</tr>
+<tr><td><code>4C <u>PP QQ</u></code></td>
+  <td>3 (命令 1 + アドレス 2)</td>
+  <td><code>JMP $<u><span class=hex>QQPP</span></u></code></td>
+  <td>16進数で <u><span class=hex>QQPP</span></u> 番地から実行を開始する。
+    <p>番地の上2桁、下2桁が<u>逆になっている</u>ことに注意。
+      (リトルエンディアン)
+  </td>
+</tr>
+</table>
+</div>
+
+<div class=exercise id="ex7-1">
+<div class=header>演習 7-1. Aレジスタに値を加える</div>
+<p>
+上のプログラム2種類をエミュレータ上で実際に実行せよ。
+Aレジスタの値が <span class=hex>FF</span> を超えると何が起こるか?
+</div>
+
+
+<h2 id="assembly">3. アセンブリ言語を使ったプログラム</h2>
+
+<p>
+いちいち命令語の数値を調べるのは面倒くさいので、
+これからはアセンブリ言語 (assembly language) というプログラムを使う。
+これは、文字で命令語を入力すると自動的に数値に変換するものである。
+ここでは別のサイト <a target="_blank" href="http://6502asm.com/">http://6502asm.com</a> を使う。
+
+<h3 id="firstasm">3.1. 最初のプログラム (改良版)</h3>
+<blockquote><pre>
+LDA #$01
+STA <u>$0200</u>
+</pre></blockquote>
+
+<p>
+ここでは、<code><u>$</u><span class=hex>XXXX</span></code> というのは 16進数の数値であることを表す。
+さらに、以下のような表記の決まりがある:
+<ul>
+<li> <code>#$01</code> … <code>$01</code> という値そのもの。
+<li> <code>$0200</code> … <code>$0200</code> という「メモリ上の番地に入っている」値。
+</ul>
+
+<p>
+6502asm.com のエミュレータでは、
+メモリ上の番地 <code>$0200</code> 〜 <code>$05ff</code> の範囲が
+画面の各ピクセルに対応している。
+ここに値を格納すると、それが実際に画面に表示される。
+つまり、ここではメモリへの書き込みが出力装置も兼ねているのである。
+
+<h3 id="jumpinst">3.2. アセンブラを使ったジャンプ命令</h3>
+<p>
+アセンブラを使うと、プログラム中の場所にラベルをつけることができ、
+実際の番地を書くかわりに使うことができる。
+<blockquote><pre>
+    LDA #$01
+<u>loop:</u>           <span class=comment>; ラベル "loop" をここに設定。</span>
+    STA $0200
+    ADC #$02
+    JMP <u>loop</u>    <span class=comment>; "loop" の番地にジャンプする。</span>
+</pre></blockquote>
+
+<p>
+<strong>注意:</strong>
+ラベル自体はただプログラム中の位置を表すもので、実際の命令ではない。
+
+<h3 id="dispaddr">3.3. 差分アドレッシング</h3>
+<p>
+差分アドレッシングという機能を使うと、
+メモリ上の可変の位置のデータを読み書きできる。
+これは、画面上のある連続した領域を埋めるのに使える。
+<blockquote><pre>
+    LDA #$01
+    LDX #$00     <span class=comment>; Xレジスタに $00 を格納。</span>
+loop:
+    STA $0200,X  <span class=comment>; Aレジスタの値を ($0200+X) の位置に格納。</span>
+    ADC #$02
+    INX          <span class=comment>; Xレジスタの値を 1だけ増やす。</span>
+    JMP loop
+</pre></blockquote>
+<p>
+以下、Python 相当の処理:
+<blockquote><pre>
+A = 1             <span class=comment># LDA #$01</span>
+X = 0             <span class=comment># LDX #$00</span>
+while True:
+    M[512+X] = A  <span class=comment># STA $0200,X</span>
+    A = A + 2     <span class=comment># ADC #$02</span>
+    X = X + 1     <span class=comment># INX</span>
+</pre></blockquote>
+
+<div class=figure>
+<table border>
+<tr><th>命令語</th><th>バイト数</th><th>機能</th></tr>
+<tr><td><code>LDX #$<u><span class=hex>XX</span></u></code></td>
+  <td>2 (命令 1 + 値 1)</td>
+  <td>Xレジスタに値 $<u><span class=hex>XX</span></u> を記録する。</td>
+</tr>
+<tr><td><code>STA $<u><span class=hex>ZZZZ</span></u>,X</code></td>
+  <td>3 (命令 1 + アドレス 2)</td>
+  <td>Aレジスタの値を ($<u><span class=hex>ZZZZ</span></u>+X) の位置に格納する。
+    (差分アドレッシング)</td>
+</tr>
+<tr><td><code>INX</code></td>
+  <td>1</td>
+  <td>Xレジスタの値を 1だけ増やす。</td>
+  </tr>
+</table>
+</div>
+
+<div class=exercise id="ex7-2">
+<div class=header>演習 7-2. 画面に描画する</div>
+<p>
+上のプログラムをエミュレータ上で実際に実行せよ。
+なぜ画面の一部しか更新されないのか?
+</div>
+
+<h3 id="#branch">3.4. 条件分岐</h3>
+<p>
+条件分岐とは、「場合によって、違ったことをする」
+処理のことである。画面をつねに同じ色で塗るのではなくて、
+「特定の場所に到達したときのみ、色を変える」にはどうするか?
+
+<blockquote><pre>
+    LDX #$00
+loop:
+    CPX #$10     <span class=comment>; Xレジスタの値を $10 と比較。</span>
+    BEQ on       <span class=comment>; 等しければ、on に分岐する。</span>
+    JMP off      <span class=comment>; 等しくなければ、off に分岐する。</span>
+on:
+    LDA #$01
+    JMP put
+off:
+    LDA #$02
+put:
+    STA $0200,X
+    INX
+    JMP loop
+</pre></blockquote>
+<p>
+Python 相当の処理:
+<blockquote><pre>
+X = 0             <span class=comment># LDX #$00</span>
+while True:
+    if X == 16:   <span class=comment># CPX #$10, BEQ on</span>
+        A = 1     <span class=comment># LDA #$01</span>
+    else:
+        A = 2     <span class=comment># LDA #$01</span>
+    M[512+X] = A  <span class=comment># STA $0200,X</span>
+    X = X + 1     <span class=comment># INX</span>
+</pre></blockquote>
+
+<div class=figure>
+<table border>
+<tr><th>命令語</th><th>バイト数</th><th>機能</th></tr>
+<tr><td><code>CPX #$<u><span class=hex>XX</span></u></code></td>
+  <td>2 (命令 1 + 値 1)</td>
+  <td>Xレジスタの値を $<u><span class=hex>XX</span></u> と比較する。
+    <p>等しければ Zフラグを 1 にする。</td>
+</tr>
+<tr><td><code>BEQ <u>ラベル</u></code></td>
+  <td>2 (命令 1 + アドレス 1)</td>
+  <td>Zフラグが 1 ならば (直前の値が等しければ)、
+  指定されたラベルに分岐する。</td>
+</tr>
+</table>
+</div>
+
+<P>
+6502 では、比較・演算命令
+(<code>ADC</code>, <code>CPX</code>, <code>INX</code> など) の結果によって
+内部の<u>フラグ</u> (flag) が変化する。フラグとは 1ビットの特殊な変数で、
+ふつう直前の計算によって生じた変化を記憶している。
+<ul>
+<li> Z (ゼロ) フラグ …
+  計算結果がゼロになった場合に 1 になる。
+  そうでない場合は 0 になる。
+<li> C (キャリー) フラグ …
+  計算結果、桁あふれまたは借り入れが発生した場合に 1 になる
+  (たとえば 255 + 1、 0 - 2 など)。そうでない場合は 0 になる。
+</ul>
+<p>
+上の<code>BEQ</code>命令は実際には何も計算してないように見えるが、
+内部的には 2つの数の引き算をおこなっている。これによって、
+2つの数が等しいときに結果が 0 になり、結果として Zフラグが 1 になる。
+
+<h3 id="branch2">3.5. 条件分岐 その2</h3>
+<p>
+上の条件分岐は、以下のようにも書ける:
+<blockquote><pre>
+    LDX #$00
+loop:
+    LDA #$02
+    CPX #$10
+    BNE put      <span class=comment>; 等しくなければ、put に分岐する。</span>
+    LDA #$01
+put:
+    STA $0200,X
+    INX
+    JMP loop
+</pre></blockquote>
+
+<div class=figure>
+<table border>
+<tr><th>命令語</th><th>バイト数</th><th>機能</th></tr>
+<tr><td><code>BNE <u>ラベル</u></code></td>
+  <td>2 (命令 1 + アドレス 1)</td>
+  <td>Zフラグが 0 ならば (直前の値が等しく<u>なければ</u>)、
+  指定されたラベルに分岐する。</td>
+</tr>
+</table>
+</div>
+
+
+<h2 id="16bits">4. 16ビットの値を計算する</h2>
+<p>
+MOS 6502 ではほとんどの計算は 8ビットでしかできないが、
+工夫することで 16ビットの計算が可能である。じつは "<code>ADC</code>" 命令は
+与えられた数に加えて <u>C フラグの値も加える</u> ようにできており、
+これを使って 8ビットの数を 2回に分けて計算する。
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="400" height="192">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g transform="translate(0.5,0.5)">
+    <g fill="none" stroke="black" stroke-width="1">
+      <line x1="0" y1="0" x2="280" y2="0" />
+      <line x1="0" y1="20" x2="280" y2="20" />
+      <line x1="40" y1="0" x2="40" y2="20" />
+      <line x1="125" y1="0" x2="125" y2="20" />
+      <line x1="210" y1="0" x2="210" y2="20" />
+      <rect x="40" y="40" width="80" height="30" />
+      <rect x="130" y="40" width="80" height="30" />
+      <rect x="40" y="80" width="80" height="30" />
+      <rect x="130" y="80" width="80" height="30" />
+      <rect x="80" y="120" width="40" height="20" />
+      <line x1="20" y1="115" x2="220" y2="115" />
+      <line x1="0" y1="170" x2="280" y2="170" />
+      <line x1="0" y1="190" x2="280" y2="190" />
+      <line x1="40" y1="170" x2="40" y2="190" />
+      <line x1="125" y1="170" x2="125" y2="190" />
+      <line x1="210" y1="170" x2="210" y2="190" />
+      <g marker-end="url(#arrow)" stroke-width="2">
+	<line x1="100" y1="20" x2="100" y2="38" />
+	<line x1="185" y1="20" x2="185" y2="38" />
+	<line x1="100" y1="150" x2="100" y2="168" />
+	<line x1="185" y1="150" x2="185" y2="168" />
+      </g>
+    </g>
+    <g text-anchor="middle" style="font-family: monospace;">
+      <text x="100" y="18">$30</text>
+      <text x="185" y="18">$31</text>
+      <text x="80" y="60">01</text>
+      <text x="170" y="60">FF</text>
+      <text x="80" y="100">00</text>
+      <text x="170" y="100">01</text>
+      <text x="30" y="110">+</text>
+      <text x="100" y="135">C</text>
+      <text x="100" y="188">$30</text>
+      <text x="185" y="188">$31</text>
+    </g>
+  </g>
+</svg>
+</div>
+
+<blockquote><pre>
+CLC        <span class=comment>; Cフラグをクリアする。</span>
+LDA $30    <span class=comment>; メモリ$30番地の値を Aレジスタに読み込む。</span>
+ADC #$01   <span class=comment>; A = A + 1 <u>+ 0</u></span>
+STA $30    <span class=comment>; Aレジスタの値をメモリ $30番地に書き込む。</span>
+LDA $31    <span class=comment>; メモリ$31番地の値を Aレジスタに読み込む。</span>
+ADC #$00   <span class=comment>; A = A + 0 <u>+ C</u></span>
+STA $31    <span class=comment>; Aレジスタの値をメモリ $31番地に書き込む。</span>
+</pre></blockquote>
+
+<div class=figure>
+<table border>
+<tr><th>命令語</th><th>バイト数</th><th>機能</th></tr>
+<td><code>CLC</code></td>
+<td>1</td>
+<td>Cフラグの値を 0 にする。</td>
+</tr>
+</table>
+</div>
+
+<h3>4.1. 16ビット値を使った画面書き換え</h3>
+<p>
+以上のテクニックと以下の「間接差分アドレッシング」を組み合わせると、
+256バイト (=8ビット) 以上のメモリ領域にアクセスできる。
+つまり、画面のより広い領域に描画できるようになる。
+
+<div class=figure>
+<table border>
+<tr><th>命令語</th><th>バイト数</th><th>機能</th></tr>
+<tr>
+  <td><code>STA ($<u><span class=hex>ZZ</span></u>,X)</code></td>
+  <td>2 (命令 1 + アドレス 1)</td>
+  <td>間接差分アドレッシング。
+  <ol>
+    <li> メモリ上の ($<u><span class=hex>ZZ</span></u>+X)
+      番地に書かれている値を2バイト分 (16ビット分) 読み込む。<br>
+      ($<u><span class=hex>ZZ</span></u>+X) 番地の内容 … PP<br>
+      ($<u><span class=hex>ZZ</span></u>+X+1) 番地の内容 … QQ<br>
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="400" height="80">
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  <g transform="translate(0.5,0.5)">
+    <g fill="none" stroke="black" stroke-width="1">
+      <line x1="0" y1="50" x2="340" y2="50" />
+      <line x1="0" y1="70" x2="340" y2="70" />
+      <line x1="20" y1="50" x2="20" y2="70" />
+      <line x1="60" y1="50" x2="60" y2="70" />
+      <line x1="100" y1="50" x2="100" y2="70" />
+      <rect x="240" y="50" width="40" height="20" fill="gray" />
+      <g stroke-width="2">
+	<polyline points="60,40 60,20 260,20 260,48" marker-end="url(#arrow)" />
+	<polyline points="20,48 20,40 100,40 100,48" />
+      </g>
+    </g>
+    <g text-anchor="middle" style="font-family: monospace;">
+      <text x="40" y="65">$ZZ</text>
+      <text x="80" y="65">$ZZ+1</text>
+    </g>
+    <g text-anchor="middle">
+      <text x="160" y="14">この2バイトで表されるアドレス</text>
+    </g>
+  </g>
+</svg>
+</div>
+    <li> その値がさす番地 ($<u><span class=hex>QQPP</span></u>) に A レジスタの値を書き込む。<br>
+      番地の上2桁、下2桁が<u>逆になっている</u>ことに注意。
+      (リトルエンディアン)
+  </ol>
+</td></tr>
+</table>
+</div>
+
+<blockquote><pre>
+    LDA #$00
+    STA $30
+    LDA #$02
+    STA $31
+loop:
+    LDX #$00
+    LDA #$01
+    STA ($30,X)  <span class=comment>; A をメモリ ($30+X) 番地に書かれている番地に書き込む。</span>
+<div class=qqq>    ???          ; 16ビットの加算をおこなう
+    ...
+</div>    JMP loop
+</pre></blockquote>
+
+<div class=exercise id="ex7-3">
+<div class=header>演習 7-3. 16ビットの演算</div>
+<p>
+上のプログラムを完成させ、
+画面全体を塗りつぶすようにせよ。
+</div>
+
+<p>
+実際には、画面やメモリやハードディスク (記憶装置) は、
+コンピュータにとってはどれもただの巨大な配列でしかない。
+コンピュータにとっての「入力」とか「表示」とかいった処理は、
+実際には、記憶装置のある場所から別の場所へプログラムが
+データ (0 と 1) をコピーしているだけである。
+</p>
+
+
+<h2 id="os">5. オペレーティングシステム (OS) とは何か?</h2>
+<p>
+現在のコンピュータでは、一般人が上で示したような
+プログラムを書く必要はない。文字表示やファイル処理など非常に基本的な部分は、
+「<u>オペレーティングシステム</u> (OS, 基本ソフトウェア)」として
+最初からPCと一緒に提供されているためである。
+ほとんどの人は、このオペレーティングシステムを使った
+アプリケーション (応用ソフトウェア) を書く。
+しかし実際にはこれはコンピュータで動いているソフトウェア全体の
+ごく一部にすぎない。
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="300" height="200">
+  <g fill="white" stroke="black" stroke-width="2">
+    <rect x="2" y="2" width="296" height="196" fill="#ddd" />
+    <rect x="150" y="50" width="60" height="40"/>
+    <rect x="50" y="110" width="60" height="40"/>
+    <rect x="190" y="140" width="60" height="40"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="150" y="20" dy="0.5em">オペレーティングシステム (OS)</text>
+    <text x="180" y="70" dy="-0.3em">Python</text>
+    <text x="180" y="70" dy="+0.8em">(アプリ)</text>
+    <text x="80" y="130" dy="0.5em">アプリ</text>
+    <text x="220" y="160" dy="0.5em">アプリ</text>
+  </g>
+</svg>
+</div>
+
+<p>
+また、OS は多くの仮想化処理を実現している。
+画面や記憶装置は、コンピュータにとっては (長さの決まった)
+0 と 1 のリストであるので、実際には以下のものは OS が
+あるかのように見せかけている「幻影」である。
+このような OS の仮想化機能により、
+現在のパソコンは実際の仕組みを知らなくても
+「なんとなく」使えるものになっている。
+しかし実際の中身は非常に複雑なのである。
+
+<h4>OS によって作り出されている見せかけの例</h4>
+<ul>
+<li> アニメーション …
+  一定時間おきに画像を何度も書き直す (コピーしなおす) 処理。
+
+<li> ファイルとフォルダ …
+  ディスクは実際にはでっかいリストなので、
+  「ファイル」「フォルダ」などというものは本来存在しない。
+  ここでは、ディスク上のどの要素からどの要素までが
+  どのファイルを表すのかを示す印をどこかに書いておくだけである。
+
+<li> ディスクの「空き容量」 …
+  ディスクは実際には物理的な媒体であり、その容量は増えも減りもしない。
+  一般にディスクの「空き容量」といっているのは、
+  単にディスク上の「ファイルがあるとされている範囲」を
+  除いた残りの部分の大きさを示しているだけである。
+
+<li> メールを「送る」 …
+  物理的に送ったものはなくなるが、メールは送っても自分の手元に残っている。
+  実際には、メールや画像を「送る」というのは、相手のコンピュータに
+  同じデータをコピーしているだけである。
+
+<li> 複数アプリの同時並列処理 …
+  実際には、コンピュータが実行できるのは一度にひとつのプログラムだけである
+  (注: 最近のマルチコアのCPUを除く)。複数のアプリが同時に動いているように
+  見えるのは、OS が各アプリをちょっとずつ (1/100秒程度) 動かしては
+  高速で切り替えているだけである。ようするに「見せかけ」なのだ。
+
+</ul>
+
+
+<h2 id="modern">6. 現代のコンピュータとの違い</h2>
+<p>
+現代の <a target="_blank" href="https://en.wikipedia.org/wiki/X86">最新鋭の演算装置</a>でも、
+基本的にやっていることは変わらない。ただ量が増えているだけである。
+<div class=figure>
+<table border>
+<tr><th></th><th>1975年</th><th>2021年</th></tr>
+<tr><td>レジスタの数</td><td align=right>4</td><td align=right>40</td></tr>
+<tr><td>計算できるビット数</td><td align=right>8</td><td align=right>64</td></tr>
+<tr><td>メモリの容量</td><td align=right>65,536</td><td align=right>34,359,738,368</td></tr>
+<tr><td>1秒間の命令実行数</td><td align=right>1,000,000</td><td align=right>1,000,000,000</td></tr>
+<tr><td>プログラムの大きさ</td><td align=right>10,000</td><td align=right>10,000,000,000</td></tr>
+</table>
+</div>
+<P>
+結局のところ、コンピュータはみな非常に単純な原理で動いている。
+これを組み合わせて複雑な処理をしているように見せかけているのが、
+現代のコンピュータシステムなのである。
+
+
+<hr>
+<address>
+Yusuke Shinyama
+</address>
