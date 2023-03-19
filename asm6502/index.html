@@ -252,15 +252,23 @@ MOS 6502 には以下のようなレジスタが装備されている。
 では最初のプログラムとして、メモリ上のある位置
 (演算装置の世界では、番地または <u>アドレス</u> (address) と呼ばれる) に
 ある8ビットの数値を格納する処理をやってみる。
-これは、以下のような数値の羅列で表現される。
+これは、以下のような16進数の数値の羅列で表現される。
 
-<blockquote><pre>
+<div class=file>
+プログラム1
+<pre>
 0000: A9 01     <span class=comment>; LDA #$01 - Aレジスタに $01 を格納。</span>
-0002: 95 10     <span class=comment>; STA $10  - Aレジスタの値をメモリの 16 番地に格納。</span>
+0002: 95 10     <span class=comment>; STA $10  - Aレジスタの値をメモリの $10 番地に格納。</span>
 0004: 00        <span class=comment>; BRK      - CPUの停止。</span>
-</pre></blockquote>
+</pre></div>
 
 <p>
+右側の「<code>LDA #$01</code>」などは<u>アセンブリ表記</u>と呼ばれ、
+命令語を人間がわかりやすいように書いたものである
+(アセンブリ「言語」という呼び方もあるが、通常のプログラミング言語よりも
+ずっと原始的である)。
+<code>$<span class=hex>XX</span></code> というのは
+16進数の数値であることを表す。
 これは JavaScript でいえば、以下のような処理に等しい:
 <blockquote><pre>
 A = 1      <span class=comment>// LDA #$01</span>
@@ -292,6 +300,15 @@ M[16] = A  <span class=comment>// STA $10</span>
 </table>
 </div>
 
+<div class=exercise id="ex-hex">
+<div class=header>演習. 命令語の解釈</div>
+<p>
+次の命令語は何を意味するか?
+<blockquote><pre>
+A5 03
+</pre></blockquote>
+</div>
+
 <p>
 (もっと詳しい命令語と数値の対応表は以下を参照のこと)
 <ul>
@@ -308,12 +325,14 @@ M[16] = A  <span class=comment>// STA $10</span>
 なお、ジャンプ命令がやっていることは、
 実際には PC レジスタの値を書き換えることだけである。
 
-<blockquote><pre>
+<div class=file>
+プログラム2
+<pre>
 0000: A9 01
 0002: 95 10
 0004: 69 02     <span class=comment>; ADC #$02 - Aレジスタに $02 を足す。</span>
 0006: 4C 02 00  <span class=comment>; JMP $0002 - $0002番地の命令にジャンプする。</span>
-</pre></blockquote>
+</pre></div>
 
 <p>
 これは、JavaScript でいえば、以下のような処理に(ほぼ)等しい:
@@ -344,11 +363,11 @@ while (true) {
 </table>
 </div>
 
-<div class=exercise id="ex7-1">
-<div class=header>演習 7-1. Aレジスタに値を加える</div>
+<div class=exercise id="ex-use-emulator">
+<div class=header>演習. エミュレータを使った実行</div>
 <p>
-上のプログラム2種類をエミュレータ上で実際に実行せよ。
-Aレジスタの値が <span class=hex>FF</span> を超えると何が起こるか?
+上のプログラム1 および 2をエミュレータ上で実際に実行せよ。
+プログラム2で Aレジスタの値が <span class=hex>FF</span> を超えると何が起こるか?
 </div>
 
 
@@ -357,20 +376,20 @@ Aレジスタの値が <span class=hex>FF</span> を超えると何が起こる�
 <p>
 いちいち命令語を数値で表すのは面倒くさいので、
 これからは <u>アセンブラ</u> (assembler) というものを使う。
-これは、CPU の各命令語を文字で入力すると、自動的に機械語に変換するものである。
-(アセンブリ「言語」という呼び方もあるが、通常のプログラミング言語よりも
-ずっと原始的である。)
+これは、CPU の各命令語をアセンブリ表記で入力すると、
+自動的に機械語の数値列に変換するものである。
 ここでは別のサイト <a target="_blank" href="http://6502asm.com/">http://6502asm.com</a> を使う。
 
 <h3 id="firstasm">3.1. 最初のプログラム (改良版)</h3>
-<blockquote><pre>
+<div class=file>
+プログラム1
+<pre>
 LDA #$01
-STA <u>$0200</u>
-</pre></blockquote>
+STA $0200
+</pre></div>
 
 <p>
-ここでは、<code><u>$</u><span class=hex>XXXX</span></code> というのは 16進数の数値であることを表す。
-さらに、以下のような表記の決まりがある:
+アセンブラではさらに、以下のような表記の決まりがある:
 <ul>
 <li> <code>#$01</code> … <code>$01</code> という値そのもの。
 <li> <code>$0200</code> … <code>$0200</code> という「メモリ上のアドレスに入っている」値。
