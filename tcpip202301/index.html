@@ -102,9 +102,9 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <li> <a href="#ip-cidr">CIDR 方式</a>
   <li> <a href="#ip-wan">広域レベルでのルーティング</a>
 </ul>
-<!--
 <li> <a href="#tcp">TCP層 (トランスポート層) のしくみ</a>
 <ul>
+  <li> <a href="#ex-1">前回までおさらい</a>
   <li> <a href="#tcp-details">TCPの詳細</a>
   <li> <a href="#tcp-client-server">「クライアント」と「サーバ」</a>
   <li> <a href="#tcp-udp">UDP層</a>
@@ -115,6 +115,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <li> <a href="#app-web">ウェブ (HTTP)</a>
   <li> <a href="#app-email">電子メール (SMTP)</a>
 </ul>
+<!--
 <li> <a href="#encryption">暗号化</a>
 <ul>
   <li> <a href="#encryption-tls">TLS/SSL層</a>
@@ -1289,8 +1290,31 @@ C:\&gt; <strong>tracert 166.84.7.55</strong>
 </div>
 
 
-<!--
 <h2 id="tcp">4. TCP層 (トランポート層) のしくみ</h2>
+
+<div class=exercise id="ex-1">
+<div class=header>演習. 前回までのおさらい</div>
+<ul>
+<li> インターネットでは、情報は小さな
+  <nobr><span class=bl>パケット</span></nobr>に分けて送信される。
+<li> インターネットに接続されているコンピュータはすべて
+  <nobr><span class=bl>IPアドレス</span></nobr>という固有の識別符号がついている。
+<li> パケットは、<nobr><span class=bl>ルータ</span></nobr>と呼ばれる機器によって中継され、
+  目的のホストに到達する。
+<li> Ethernet や WiFi は <nobr><span class=bl>データリンク</span></nobr>層の一種で、
+  近距離 (オフィス内など) の通信に使われる規格である。
+</ul>
+</div>
+
+<p>
+さて、ここで IP層における「衝撃の事実」がある:
+</p>
+<div class=notice>
+衝撃の事実:
+ルータは、パケットを正しく送るよう精一杯努力するが、たとえダメでも許してもらえる
+(がんばったらダメでもOK = ベストエフォート方式)。
+</div>
+
 <div class=figure>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -1313,6 +1337,7 @@ C:\&gt; <strong>tracert 166.84.7.55</strong>
     </g></g>
   </svg>
 </div>
+
 <p>
 IP層の機能を使うと、世界の離れた場所にパケットを送ることができる。
 しかしこれはまだ信頼性がなく、長いデータも送れない。
@@ -2240,6 +2265,8 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 221 2.0.0 closing connection
 </pre></blockquote>
 
+
+<!--
 
 <h2 id="encryption">6. 暗号化</h2>
 <p>
