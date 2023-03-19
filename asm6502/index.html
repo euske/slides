@@ -271,8 +271,8 @@ MOS 6502 には以下のようなレジスタが装備されている。
 16進数の数値であることを表す。
 これは JavaScript でいえば、以下のような処理に等しい:
 <blockquote><pre>
-A = 1      <span class=comment>// LDA #$01</span>
-M[16] = A  <span class=comment>// STA $10</span>
+A = 1        <span class=comment>// LDA #$01</span>
+M[0x10] = A  <span class=comment>// STA $10</span>
 </pre></blockquote>
 
 <p>
@@ -300,7 +300,7 @@ M[16] = A  <span class=comment>// STA $10</span>
 </table>
 </div>
 
-<div class=exercise id="ex-hex">
+<div class=exercise id="ex-mnemonic">
 <div class=header>演習. 命令語の解釈</div>
 <p>
 次の命令語は何を意味するか?
@@ -337,10 +337,10 @@ A5 03
 <p>
 これは、JavaScript でいえば、以下のような処理に(ほぼ)等しい:
 <blockquote><pre>
-A = 1          <span class=comment>// LDA #$01</span>
+A = 1            <span class=comment>// LDA #$01</span>
 while (true) {
-    M[16] = A  <span class=comment>// STA $10</span>
-    A = A + 2  <span class=comment>// ADC #$02</span>
+    M[0x10] = A  <span class=comment>// STA $10</span>
+    A = A + 2    <span class=comment>// ADC #$02</span>
 }
 </pre></blockquote>
 
@@ -382,16 +382,16 @@ while (true) {
 
 <h3 id="firstasm">3.1. 最初のプログラム (改良版)</h3>
 <div class=file>
-プログラム1
+プログラム3
 <pre>
-LDA #$01
+LDA <mark>#</mark>$01
 STA $0200
 </pre></div>
 
 <p>
 アセンブラではさらに、以下のような表記の決まりがある:
 <ul>
-<li> <code>#$01</code> … <code>$01</code> という値そのもの。
+<li> <code><mark>#</mark>$01</code> … <code>$01</code> という値そのもの。
 <li> <code>$0200</code> … <code>$0200</code> という「メモリ上のアドレスに入っている」値。
 </ul>
 
@@ -414,13 +414,15 @@ STA $0200
 <p>
 アセンブラを使うと、プログラム中の場所にラベルをつけることができ、
 実際のアドレスを書くかわりに使うことができる。
-<blockquote><pre>
+<div class=file>
+プログラム4
+<pre>
     LDA #$01
 <mark>loop:</mark>           <span class=comment>; ラベル "loop" をここに設定。</span>
     STA $0200
     ADC #$02
     JMP <mark>loop</mark>    <span class=comment>; "loop" のアドレスにジャンプする。</span>
-</pre></blockquote>
+</pre></div>
 
 <p>
 <strong>注意:</strong>
@@ -431,7 +433,9 @@ STA $0200
 差分アドレッシングという機能を使うと、
 メモリ上の可変の位置のデータを読み書きできる。
 これは、画面上のある連続した領域を埋めるのに使える。
-<blockquote><pre>
+<div class=file>
+プログラム5
+<pre>
     LDA #$01
     LDX #$00     <span class=comment>; Xレジスタに $00 を格納。</span>
 loop:
@@ -439,14 +443,14 @@ loop:
     ADC #$02
     INX          <span class=comment>; Xレジスタの値を 1だけ増やす。</span>
     JMP loop
-</pre></blockquote>
+</pre></div>
 <p>
 以下、JavaScript 相当の処理:
 <blockquote><pre>
 A = 1             <span class=comment>// LDA #$01</span>
 X = 0             <span class=comment>// LDX #$00</span>
 while (true) {
-    M[512+X] = A  <span class=comment>// STA $0200,X</span>
+    M[0x0200+X] = A  <span class=comment>// STA $0200,X</span>
     A = A + 2     <span class=comment>// ADC #$02</span>
     X = X + 1     <span class=comment>// INX</span>
 }
@@ -471,8 +475,8 @@ while (true) {
 </table>
 </div>
 
-<div class=exercise id="ex7-2">
-<div class=header>演習 7-2. 画面に描画する</div>
+<div class=exercise id="ex-draw-pixel">
+<div class=header>演習. 画面にピクセルを描画する</div>
 <p>
 上のプログラムをエミュレータ上で実際に実行せよ。
 なぜ画面の一部しか更新されないのか?
@@ -484,7 +488,9 @@ while (true) {
 処理のことである。画面をつねに同じ色で塗るのではなくて、
 「特定の場所に到達したときのみ、色を変える」にはどうするか?
 
-<blockquote><pre>
+<div class=file>
+プログラム5
+<pre>
     LDX #$00
 loop:
     CPX #$10     <span class=comment>; Xレジスタの値を $10 と比較。</span>
@@ -499,18 +505,18 @@ put:
     STA $0200,X
     INX
     JMP loop
-</pre></blockquote>
+</pre></div>
 <p>
 JavaScript 相当の処理:
 <blockquote><pre>
 X = 0              <span class=comment>// LDX #$00</span>
 while (true) {
-    if (X == 16) { <span class=comment>// CPX #$10, BEQ on</span>
+    if (X == 0x10) { <span class=comment>// CPX #$10, BEQ on</span>
         A = 1      <span class=comment>// LDA #$01</span>
     } else {
         A = 2      <span class=comment>// LDA #$01</span>
     }
-    M[512+X] = A   <span class=comment>// STA $0200,X</span>
+    M[0x0200+X] = A   <span class=comment>// STA $0200,X</span>
     X = X + 1      <span class=comment>// INX</span>
 }
 </pre></blockquote>
@@ -552,7 +558,9 @@ while (true) {
 <h3 id="branch2">3.5. 条件分岐 その2</h3>
 <p>
 上の条件分岐は、以下のようにも書ける:
-<blockquote><pre>
+<div class=file>
+プログラム5 (改良版)
+<pre>
     LDX #$00
 loop:
     LDA #$02
@@ -563,7 +571,7 @@ put:
     STA $0200,X
     INX
     JMP loop
-</pre></blockquote>
+</pre></div>
 
 <div class=figure>
 <table border>
@@ -708,7 +716,9 @@ STA $31    <span class=comment>; Aレジスタの値をメモリ $31番地に書
 </table>
 </div>
 
-<blockquote><pre>
+<div class=file>
+プログラム6
+<pre>
     LDA #$00
     STA $30
     LDA #$02
@@ -720,12 +730,12 @@ loop:
 <div class=qqq>    ???          ; 16ビットの加算をおこなう
     ...
 </div>    JMP loop
-</pre></blockquote>
+</pre></div>
 
-<div class=exercise id="ex7-3">
-<div class=header>演習 7-3. 16ビットの演算</div>
+<div class=exercise id="ex-16bit-addition">
+<div class=header>演習. 16ビットの演算</div>
 <p>
-上のプログラムを完成させ、
+上のプログラム 6. を完成させ、
 画面全体を塗りつぶすようにせよ。
 </div>
 
@@ -798,7 +808,7 @@ loop:
 </table>
 </div>
 
-<h3 id="os">6.2. オペレーティングシステム (OS) とは何か?</h3>
+<h3 id="os">6.1. オペレーティングシステム (OS) とは何か?</h3>
 <p>
 現在のコンピュータでは、一般人が上で示したような
 プログラムを書く必要はない。文字表示やファイル処理など非常に基本的な部分は、
