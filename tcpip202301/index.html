@@ -1375,6 +1375,27 @@ IP層の機能を使うと、世界の離れた場所にパケットを送るこ
 TCPパケット (<u>TCPセグメント</u>) が入っている。
 </p>
 
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="170">
+    <g transform="translate(5,5)">
+    <g stroke="black" stroke-width="2" fill="white">
+      <rect x="0" y="0" width="240" height="160" />
+      <rect x="30" y="30" width="200" height="120" />
+      <rect x="60" y="60" width="160" height="80" fill="#88ff88" />
+      <rect x="90" y="90" width="120" height="40" />
+    </g>
+    <g style="font-size: 80%;">
+      <text x="5" y="10" dy="0.5em">Ethernetフレーム</text>
+      <text x="35" y="40" dy="0.5em">IPパケット</text>
+      <text x="65" y="70" dy="0.5em">TCPセグメント</text>
+      <text x="95" y="100" dy="0.5em">アプリケーション</text>
+      <text x="95" y="115" dy="0.5em">データ</text>
+    </g></g>
+  </svg>
+</div>
+
 <h4>TCP セグメントの構造:</h4>
 <table border>
 <tr>
@@ -1887,6 +1908,33 @@ TCPとは別の方法で通信をおこなう。
       <text x="60" y="75" dy="0.5em">IP層</text>
       <text x="60" y="105" dy="0.5em">データリンク層</text>
       <text x="170" y="128" dy="0.5em">ケーブル</text>
+    </g></g>
+  </svg>
+</div>
+
+<p>
+実際のアプリケーション層のデータは、Ethernetフレームの中の、
+IPパケットの中の、
+TCPセグメントのさらに中に記録されている。
+</p>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="170">
+    <g transform="translate(5,5)">
+    <g stroke="black" stroke-width="2" fill="white">
+      <rect x="0" y="0" width="240" height="160" />
+      <rect x="30" y="30" width="200" height="120" />
+      <rect x="60" y="60" width="160" height="80" />
+      <rect x="90" y="90" width="120" height="40" fill="#88ff88" />
+    </g>
+    <g style="font-size: 80%;">
+      <text x="5" y="10" dy="0.5em">Ethernetフレーム</text>
+      <text x="35" y="40" dy="0.5em">IPパケット</text>
+      <text x="65" y="70" dy="0.5em">TCPセグメント</text>
+      <text x="95" y="100" dy="0.5em">アプリケーション</text>
+      <text x="95" y="115" dy="0.5em">データ</text>
     </g></g>
   </svg>
 </div>
