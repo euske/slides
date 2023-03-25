@@ -3,11 +3,40 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" type="text/css" href="./common.css">
 <title>6502 アセンブラ プログラミング入門
 / 新山 祐介</title>
 <style><!--
+@media print {
+    .nop { display: none; }
+}
+@media screen {
+    .bl { color: transparent; }
+    body { line-height: 1.5; }
+}
+h1 { border-bottom: solid 4px #000080; }
+h2 { border-bottom: solid 2px #000080; }
+h3 { border-bottom: solid 1px #000080; }
+table { border-collapse: collapse; margin: 1em; }
+td { padding: 4px; }
+kbd { outline: 1px solid black; padding: 2px; }
+blockquote { outline: 1px solid black; padding: 4px; }
+pre { overflow: auto; margin: 0; }
+mark { font-weight: bold; }
+pre, code { background: #ddd; font-size: 150%; font-family: courier; }
+img { max-width: 80vw; height: auto; }
+dt { text-decoration: underline; font-weight: bold; }
+u { color: green; font-weight: bold; }
+.exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
+.exercise .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.figure { outline: 1px solid black; padding: 4px; margin: 4px; text-align: center; }
+.figure .caption { font-size: 75%; }
+.comment { color: #008800; }
+.file { outline: 1px solid black; margin: 1em; padding: 4px; }
+.file > pre { margin: 0; outline: 2px solid black; padding: 1em; }
+.bl { outline: 1px solid black; padding: 2px; font-size: 120%; color: transparent; }
+.qqq { outline: 1px solid black; padding: 2px; background: #ccffff; }
 .author { text-align: right; }
+
 .bin { font-family: Courier New, Courier, monospace; font-style: italic; font-weight: 900; color: blue; }
 .hex { font-family: Courier New, Courier, monospace; font-style: italic; font-weight: 900; color: darkgreen; }
 .dec { font-family: serif; font-style: italic; font-weight: 900; color: red; }
