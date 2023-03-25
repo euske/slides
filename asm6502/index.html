@@ -177,14 +177,14 @@ CPU にある特別な変数: <u>PC</u> (プログラム・カウンタ)
 CPU の動作 (JavaScript 風、実際にはこれは電子回路によって実現されている)
 <pre>
 <span class=comment>// メモリの内容 (65536要素の配列)</span>
-M = [0, 0, 0, 0, 0, ... ]
+MEMORY = [0, 0, 0, 0, 0, ... ]
 <span class=comment>// PCは現在実行する命令の位置。</span>
 PC = 0
 
 <span class=comment>// 以下を永久にくり返す。</span>
 while (true) {
     <span class=comment>// 現在の命令を調べる。</span>
-    command = M[PC]
+    command = MEMORY[PC]
     if (command == 1) {
         A = A + 1  <span class=comment>// 変数 A に1を足す。</span>
     } else if (command == 2) {
@@ -206,7 +206,6 @@ while (true) {
 6502 に装備されているレジスタ:
 </p>
 
-<div class=figure>
 <table border>
 <tr><th>名前</th><th>大きさ</th><th>機能</th></tr>
 <tr><td>PC</td><td>16ビット</td><td>これから実行する命令のメモリ上の位置。</td></tr>
@@ -216,7 +215,6 @@ while (true) {
 <tr><td>Zフラグ</td><td>1ビット</td><td>計算結果がゼロになったときに 1 になる。(後述)</td></tr>
 <tr><td>Cフラグ</td><td>1ビット</td><td>計算結果が桁あふれしたときに 1 になる。(後述)</td></tr>
 </table>
-</div>
 
 <h3 id="hexadecimal">1.3. 16進数とは</h3>
 
@@ -226,7 +224,6 @@ while (true) {
 <li> 16進数 = 1ケタの文字で 4ビット (=16種類) の数を表す。
 </ul>
 
-<div class=figure>
 <table border>
 <tr><th>10進数</th><th>2進数</th><th>16進数</th></tr>
 <tr><td><span class=dec>0</span></td><td><span class=bin>0000</span></td><td><span class=hex>0</span></td></tr>
@@ -246,7 +243,6 @@ while (true) {
 <tr><td><span class=dec>14</span></td><td><span class=bin>1110</span></td><td><span class=hex>e / E</span></td></tr>
 <tr><td><span class=dec>15</span></td><td><span class=bin>1111</span></td><td><span class=hex>f / F</span></td></tr>
 </table>
-</div>
 
 <div class=exercise id="ex-hex-numbers">
 <div class=header>演習. 16進数から2進数の変換</div>
@@ -304,7 +300,6 @@ while (true) {
 プログラムは、メモリ上の 16進数が書かれている部分を
 ダブルクリックして直接入力する。
 
-<div class=figure>
 <table border>
 <tr><th>命令語 (16進)</th><th>バイト数</th><th>アセンブリ表記</th><th>機能</th></tr>
 <tr><td><code>A9 <span class=hex>XX</span></code></td>
@@ -323,13 +318,12 @@ while (true) {
   <td>制御装置を停止する。</td>
 </tr>
 </table>
-</div>
 
 <p>
 上のプログラムは、JavaScript でいえば以下のような処理に等しい:
 <blockquote><pre>
-A = 1        <span class=comment>// LDA #$01</span>
-M[0x10] = A  <span class=comment>// STA $10</span>
+A = 1             <span class=comment>// LDA #$01</span>
+MEMORY[0x10] = A  <span class=comment>// STA $10</span>
 </pre></blockquote>
 
 <p>
@@ -359,7 +353,6 @@ M[0x10] = A  <span class=comment>// STA $10</span>
 「ジャンプ命令」を命令を実行すると、CPU は PC レジスタの値を書き換える。
 つまり、指定されたアドレスの命令から実行できる。
 
-<div class=figure>
 <table border>
 <tr><th>命令語 (16進)</th><th>バイト数</th><th>アセンブリ表記</th><th>機能</th></tr>
 <tr><td><code>69 <span class=hex>XX</span></code></td>
@@ -370,21 +363,20 @@ M[0x10] = A  <span class=comment>// STA $10</span>
 <tr><td><code>4C <span class=hex>PP</span> <span class=hex>QQ</span></code></td>
   <td>3</td>
   <td><code>JMP $<span class=hex>QQPP</span></code></td>
-  <td>16進数で <span class=hex>QQPP</span> 番地から実行を開始する。
-    <p><strong>アドレスの上2桁、下2桁が逆になっている</strong>ことに注意。
-      (リトルエンディアン)
+  <td>16進数で <span class=hex>QQPP</span> 番地から実行を開始する。<br>
+    <strong>アドレスの上2桁、下2桁が逆になっている</strong>ことに注意。
+    (<a href="https://ja.wikipedia.org/wiki/%E3%82%A8%E3%83%B3%E3%83%87%E3%82%A3%E3%82%A2%E3%83%B3#%E3%83%AA%E3%83%88%E3%83%AB%E3%82%A8%E3%83%B3%E3%83%87%E3%82%A3%E3%82%A2%E3%83%B3">リトルエンディアン</a>)
   </td>
 </tr>
 </table>
-</div>
 
 <p>
 JavaScript でいえば、以下のような処理に(ほぼ)等しい:
 <blockquote><pre>
-A = 1            <span class=comment>// LDA #$01</span>
+A = 1                 <span class=comment>// LDA #$01</span>
 while (true) {
-    M[0x10] = A  <span class=comment>// STA $10</span>
-    A = A + 2    <span class=comment>// ADC #$02</span>
+    MEMORY[0x10] = A  <span class=comment>// STA $10</span>
+    A = A + 2         <span class=comment>// ADC #$02</span>
 }
 </pre></blockquote>
 
@@ -455,7 +447,7 @@ STA $0200
 <h3 id="jumpinst">3.2. アセンブラを使ったジャンプ命令</h3>
 <p>
 アセンブラを使うと、プログラム中のアドレスとして<u>ラベル</u>を使うことができ、
-実際のアドレスを書く必要がない。
+命令語のバイト数を考える必要がない。
 <div class=file>
 プログラム4
 <pre>
@@ -492,8 +484,6 @@ loop:
     JMP loop
 </pre></div>
 
-
-<div class=figure>
 <table border>
 <tr><th>命令語</th><th>機能</th></tr>
 <tr><td><code>LDX #$<span class=hex>XX</span></code></td>
@@ -507,17 +497,16 @@ loop:
   <td>Xレジスタの値を 1だけ増やす。</td>
   </tr>
 </table>
-</div>
 
 <p>
 以下、JavaScript 相当の処理:
 <blockquote><pre>
-A = 1             <span class=comment>// LDA #$01</span>
-X = 0             <span class=comment>// LDX #$00</span>
+A = 1                     <span class=comment>// LDA #$01</span>
+X = 0                     <span class=comment>// LDX #$00</span>
 while (true) {
-    M[0x0200+X] = A  <span class=comment>// STA $0200,X</span>
-    A = A + 2     <span class=comment>// ADC #$02</span>
-    X = X + 1     <span class=comment>// INX</span>
+    MEMORY[0x0200+X] = A  <span class=comment>// STA $0200,X</span>
+    A = A + 2             <span class=comment>// ADC #$02</span>
+    X = X + 1             <span class=comment>// INX</span>
 }
 </pre></blockquote>
 
@@ -566,19 +555,19 @@ put:
   (たとえば 255+1 など)。そうでない場合は 0 になる。
 </ul>
 
-<div class=figure>
 <table border>
 <tr><th>命令語</th><th>機能</th></tr>
 <tr><td><code>CPX #$<span class=hex>XX</span></code></td>
   <td>Xレジスタの値を $<span class=hex>XX</span> と比較し、
-    等しければ Zフラグを 1 にする。</td>
+    等しければ Zフラグを 1 にする。<br>
+  </td>
 </tr>
 <tr><td><code>BEQ <span class=hex>ラベル</span></code></td>
   <td>Zフラグが 1 ならば、
     指定された<span class=hex>ラベル</span>に分岐する。</td>
 </tr>
 </table>
-</div>
+
 <p>
 <code>CPX</code>命令は実際には何も計算してないように見えるが、
 内部的には 2つの数の引き算をおこなっている。これによって、
@@ -587,15 +576,15 @@ put:
 <p>
 JavaScript 相当の処理:
 <blockquote><pre>
-X = 0              <span class=comment>// LDX #$00</span>
+X = 0                     <span class=comment>// LDX #$00</span>
 while (true) {
-    if (X == 0x10) { <span class=comment>// CPX #$10, BEQ on</span>
-        A = 1      <span class=comment>// LDA #$01</span>
+    if (X == 0x10) {      <span class=comment>// CPX #$10, BEQ on</span>
+        A = 1             <span class=comment>// LDA #$01</span>
     } else {
-        A = 2      <span class=comment>// LDA #$01</span>
+        A = 2             <span class=comment>// LDA #$01</span>
     }
-    M[0x0200+X] = A   <span class=comment>// STA $0200,X</span>
-    X = X + 1      <span class=comment>// INX</span>
+    MEMORY[0x0200+X] = A  <span class=comment>// STA $0200,X</span>
+    X = X + 1             <span class=comment>// INX</span>
 }
 </pre></blockquote>
 
@@ -617,7 +606,6 @@ put:
     JMP loop
 </pre></div>
 
-<div class=figure>
 <table border>
 <tr><th>命令語</th><th>機能</th></tr>
 <tr><td><code>BNE <span class=hex>ラベル</span></code></td>
@@ -625,7 +613,6 @@ put:
   指定された<span class=hex>ラベル</span>に分岐する。</td>
 </tr>
 </table>
-</div>
 
 
 <h2 id="16bits">4. 16ビットの値を計算する</h2>
@@ -693,15 +680,12 @@ ADC #$00   <span class=comment>; A = A + 0 <u>+ C</u></span>
 STA $31    <span class=comment>; Aレジスタの値をメモリ $31番地に書き込む。</span>
 </pre></blockquote>
 
-<div class=figure>
 <table border>
-<tr><th>命令語</th><th>バイト数</th><th>機能</th></tr>
+<tr><th>命令語</th><th>機能</th></tr>
 <td><code>CLC</code></td>
-<td>1</td>
 <td>Cフラグの値を 0 にする。</td>
 </tr>
 </table>
-</div>
 
 <h3>4.1. 16ビット値を使った画面書き換え</h3>
 <p>
@@ -709,7 +693,6 @@ STA $31    <span class=comment>; Aレジスタの値をメモリ $31番地に書
 256バイト (=8ビット) 以上のメモリ領域にアクセスできる。
 つまり、画面のより広い領域に描画できるようになる。
 
-<div class=figure>
 <table border>
 <tr><th>命令語</th><th>バイト数</th><th>機能</th></tr>
 <tr>
@@ -752,12 +735,10 @@ STA $31    <span class=comment>; Aレジスタの値をメモリ $31番地に書
 </svg>
 </div>
     <li> その値がさすアドレス ($<span class=hex>QQPP</span>) に A レジスタの値を書き込む。<br>
-      アドレスの上2桁、下2桁が<strong>逆になっている</strong>ことに注意。
-      (リトルエンディアン)
+      <strong>アドレスの上2桁、下2桁が逆になっている</strong>ことに注意。
   </ol>
 </td></tr>
 </table>
-</div>
 
 <div class=file>
 プログラム6
@@ -787,17 +768,26 @@ loop:
 <p>
 <a href="https://ja.wikipedia.org/wiki/%E3%83%95%E3%82%A1%E3%83%9F%E3%83%AA%E3%83%BC%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF">ファミリーコンピュータ</a>
 (Nintendo Entertainment System、ファミコン) は
-1983年に任天堂から発売されたゲーム機で、
-リコー製の改造版 6502 を使っていた。また 2KB のメモリと、
-画面処理のための PPU (Picture Processing Unit) を搭載していた。
+1983年に任天堂から発売されたゲーム機である。
+<ul>
+<li> CPU として、リコー製の 6502 改造版 (廉価版) を使用。
+<li> メモリはわずか 2KB。
+<li> 画面処理のための PPU (Picture Processing Unit) を搭載。
+<li> 表示可能な領域は 256×240ピクセル。
+</ul>
 
 <p>
 ファミコンのハードウェアはかなり複雑で、
-画面表示のためには CPU が PPU と通信する必要がある。
+画面表示には CPU が PPU と通信する必要がある。
 また、初期のゲームは最大 32KB までに制限されていた。
-アドレス構造は以下のようになっている:
+「スーパーマリオブラザーズ」もプログラム・
+グラフィックス・音楽等込みで32KB の領域に収まっている。
+<ul>
+<li> <a href="https://gist.github.com/1wErt3r/4048722">「スーパーマリオブラザーズ」の機械語を解析 (逆アセンブル) したソースコード</a>
+</ul>
 
-<div class=figure>
+<h4>ファミコンのアドレス構造</h4>
+
 <table border>
 <tr><th>アドレス範囲</th><th>機能</th></tr>
 <tr>
@@ -826,21 +816,12 @@ loop:
 <td>プログラム用ROM</td>
 </tr>
 </table>
-</div>
-
-<p>
-ファミコンでもっとも有名なゲーム
-「スーパーマリオブラザーズ」も (プログラム・グラフィックス等込みで)
-32KB の領域で作られていた。
-<ul>
-<li> <a href="https://gist.github.com/1wErt3r/4048722">「スーパーマリオブラザーズ」の機械語を解析 (逆アセンブル) したソースコード</a>
-</ul>
 
 <h2 id="modern">6. 現代のコンピュータとの違い</h2>
 <p>
 現代の <a target="_blank" href="https://en.wikipedia.org/wiki/X86">最新鋭の演算装置</a>でも、
 基本的にやっていることは変わらない。ただ量が増えているだけである。
-<div class=figure>
+
 <table border>
 <tr><th></th><th>1975年</th><th>2021年</th></tr>
 <tr><td>レジスタの数</td><td align=right>4</td><td align=right>40</td></tr>
@@ -849,7 +830,6 @@ loop:
 <tr><td>1秒間の命令実行数</td><td align=right>1,000,000</td><td align=right>1,000,000,000</td></tr>
 <tr><td>プログラムの大きさ</td><td align=right>10,000</td><td align=right>10,000,000,000</td></tr>
 </table>
-</div>
 
 <h3 id="os">6.1. オペレーティングシステム (OS) とは何か?</h3>
 <p>
@@ -857,8 +837,6 @@ loop:
 プログラムを書く必要はない。文字表示やファイル処理など非常に基本的な部分は、
 「<u>オペレーティングシステム</u> (OS, 基本ソフトウェア)」として
 最初からPCと一緒に提供されているためである。
-ほとんどの人は、このオペレーティングシステムを使った
-アプリケーション (応用ソフトウェア) を書く。
 
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"

@@ -9,7 +9,7 @@ body { font-family: sans-serif; }
 h1 { border-bottom: solid 4px #000080; }
 h2 { border-bottom: solid 2px #000080; }
 h3 { border-bottom: solid 1px #000080; }
-table { border-collapse: collapse; }
+table { border-collapse: collapse; margin: 1em; }
 td { padding: 4px; }
 kbd { outline: 1px solid black; padding: 2px; }
 pre { outline: 1px solid black; padding: 4px; overflow: auto; }
