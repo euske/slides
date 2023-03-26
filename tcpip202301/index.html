@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>アプリ開発者のための TCP/IP ネットワーク入門</title>
+<title>アプリ開発者のための TCP/IP ネットワーク入門
+/ 新山 祐介</title>
 <style><!--
 body { line-height: 1.5; }
 h1 { border-bottom: solid 4px #000088; }
@@ -590,7 +591,7 @@ TCP 層によって、インターネット上のあるホストから別のホ�
 <div class=header>演習. Ethernetフレームの中身</div>
 <p>以下の Ethernet フレームについて問いに答えよ:</p>
 <blockquote><pre>
-06 e6 76 53 06 c8 04 e6 76 53 06 c8 00 05 11 22 33 44 55 aa bb cc dd
+<span class=bgb>06 e6 76 53 06 c8</span> <span class=bgy>04 e6 76 53 06 c8</span> 00 05 <span class=bgr>11 22 33 44 55</span> <span class=bgg>aa bb cc dd</span>
 </pre></blockquote>
   <ol type=a>
     <li> 送信元MACアドレスは何か?
@@ -710,7 +711,7 @@ $ <strong>ifconfig</strong>
 <td>送信先MACアドレス</td>
 <td>データ
 長</td>
-<td class=bgr>IPパケット</td>
+<td class=bgg>IPパケット</td>
 <td>CRC</td>
 <td class=bits>00000000</td>
 </tr>
@@ -729,7 +730,7 @@ $ <strong>ifconfig</strong>
 <th>0</th>
 <td align=center>バージョン/ヘッダ長</td>
 <td align=center>タイプ</td>
-<td align=center colspan="2">IPパケット長</td>
+<td class=bgr align=center colspan="2">IPパケット長</td>
 </tr>
 <tr>
 <th>4</th>
@@ -744,11 +745,11 @@ $ <strong>ifconfig</strong>
 </tr>
 <tr>
 <th>12</th>
-<td align=center colspan="4">送信元IPアドレス</td>
+<td class=bgb align=center colspan="4">送信元IPアドレス</td>
 </tr>
 <tr>
 <th>16</th>
-<td align=center colspan="4">送信先IPアドレス</td>
+<td class=bgy align=center colspan="4">送信先IPアドレス</td>
 </tr>
 <tr>
 <th>20</th>
@@ -765,14 +766,14 @@ $ <strong>ifconfig</strong>
 <div class=exercise id="ex-ip-packet">
 <div class=header>演習. IPパケットの中身</div>
 <p>
-以下は イーサネット フレームに含まれる
-実際の IPパケットを表したものである (<span class=bgy>黄色部分</span>)。
+以下の<span class=bgg>緑色部分</span>はイーサネット フレームに含まれる
+実際の IPパケットを表したものである。
 上の図を参考にして、以下の情報を求めよ:
 </p>
 <blockquote><pre>
-0000 94 09 37 28 5b d5 00 23 81 1a f2 8d 08 00 <span class=bgy>45 00
-0010 00 34 6b 7f 40 00 80 06 00 00 c0 a8 00 0c c0 a8
-0020 01 01 c9 34 00 17 25 d0 1e c0 00 00 00 00 80 02
+0000 94 09 37 28 5b d5 00 23 81 1a f2 8d 08 00 <span class=bgg>45 00
+0010 <span class=bgr>00 34</span> 6b 7f 40 00 80 06 00 00 <span class=bgb>c0 a8 00 0c</span> <span class=bgy>c0 a8</span>
+0020 <span class=bgy>01 01</span> c9 34 00 17 25 d0 1e c0 00 00 00 00 80 02
 0030 20 00 82 84 00 00 02 04 05 b4 01 03 03 08 01 01
 0040 04 02</span>
 </pre></blockquote>
@@ -1343,6 +1344,9 @@ IP層の機能を使うと、世界の離れた場所にパケットを送るこ
 各ルータはパケット正しく送るよう精一杯努力するが、これは
 <strong>ベストエフォート方式</strong> (がんばったら、結果がダメでも許してもらえる)
 にすぎない。
+そこで、信頼性のない IPパケットをうまく使って、
+<strong>信頼できる、長い 0/1 の列</strong> を送る仕組みを作る。
+これが TCP 層である。
 </p>
 
 <div class=figure>
@@ -1369,10 +1373,84 @@ IP層の機能を使うと、世界の離れた場所にパケットを送るこ
 </div>
 
 <p>
-そこで、信頼性のない IPパケットをうまく使って、
-<strong>信頼できる、長い 0/1 の列</strong> を送る仕組みを作る。
-これが TCP 層である。IPパケットの中には、さらに
-TCPパケット (<u>TCPセグメント</u>) が入っている。
+TCP層までくると、2つのホストは連続した通信ができるので、
+これはもはやパケット交換ではなく、仮想的な1本の線とみなせる。
+</p>
+<ul>
+<li> 各ホストは最大 65,536本までの<u>仮想回線</u>を持つことができる。
+<li> 各仮想回線は <u>ポート番号</u> によって区別される。
+</ul>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="140">
+    <defs>
+    <symbol id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </symbol>
+    </defs>
+    <g transform="translate(5,15)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="0" y="40" />
+      <use xlink:href="#computer" x="190" y="40" />
+      <path d="M40,60 L60,10"/>
+      <path d="M40,60 L60,30"/>
+      <path d="M40,60 L60,50"/>
+      <path d="M40,60 L60,70"/>
+      <path d="M40,60 L60,90"/>
+      <path d="M40,60 L60,110"/>
+      <path d="M200,60 L180,10"/>
+      <path d="M200,60 L180,30"/>
+      <path d="M200,60 L180,50"/>
+      <path d="M200,60 L180,70"/>
+      <path d="M200,60 L180,90"/>
+      <path d="M200,60 L180,110"/>
+      <circle cx="60" cy="10" r="4" />
+      <circle cx="60" cy="30" r="4" />
+      <circle cx="60" cy="50" r="4" />
+      <circle cx="60" cy="70" r="4" />
+      <circle cx="60" cy="90" r="4" />
+      <circle cx="60" cy="110" r="4" />
+      <circle cx="180" cy="10" r="4" />
+      <circle cx="180" cy="30" r="4" />
+      <circle cx="180" cy="50" r="4" />
+      <circle cx="180" cy="70" r="4" />
+      <circle cx="180" cy="90" r="4" />
+      <circle cx="180" cy="110" r="4" />
+    </g>
+    <g stroke-width="2" fill="none" stroke-dasharray="4,4">
+      <path d="M60,30 L180,70" stroke="red" />
+      <path d="M60,110 L180,30" stroke="blue" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="25" y="90" dy="0.5em">ホスト</text>
+      <text x="60" y="-5" dy="0.5em">ポート</text>
+      <text x="215" y="90" dy="0.5em">ホスト</text>
+      <text x="180" y="-5" dy="0.5em">ポート</text>
+    </g>
+    <g fill="red" style="font-size: 75%;">
+      <text x="65" y="20" dy="0.5em">134</text>
+      <text x="175" y="75" dy="0.5em" text-anchor="end">8962</text>
+    </g>
+    <g fill="blue" style="font-size: 75%;">
+      <text x="65" y="115" dy="0.5em">65535</text>
+      <text x="175" y="20" dy="0.5em" text-anchor="end">134</text>
+    </g>
+    </g>
+  </svg>
+  </div>
+  <div class=caption>TCP層におけるポートと仮想回線</div>
+</div>
+
+<h3 id="tcp-details">4.1. TCPの詳細</h3>
+
+<p>
+TCP層は IP層を利用している。
+つまり IPパケットの中に、さらに
+TCPパケット (<u>TCPセグメント</u>) を入れる。
 </p>
 
 <div class=figure>
@@ -1396,7 +1474,7 @@ TCPパケット (<u>TCPセグメント</u>) が入っている。
   </svg>
 </div>
 
-<h4>TCP セグメントの構造:</h4>
+<h4>TCP セグメントの構造</h4>
 <table border>
 <tr>
 <th></th>
@@ -1407,16 +1485,16 @@ TCPパケット (<u>TCPセグメント</u>) が入っている。
 </tr>
 <tr>
 <th>0</th>
-<td align=center colspan="2">送り元ポート</td>
-<td align=center colspan="2">送り先ポート</td>
+<td class=bgb align=center colspan="2">送り元ポート</td>
+<td class=bgy align=center colspan="2">送り先ポート</td>
 </tr>
 <tr>
 <th>4</th>
-<td align=center colspan="4">シーケンス番号</td>
+<td class=bgr align=center colspan="4">シーケンス番号</td>
 </tr>
 <tr>
 <th>8</th>
-<td align=center colspan="4">確認応答(ACK)番号</td>
+<td class=bgg align=center colspan="4">確認応答(ACK)番号</td>
 </tr>
 <tr>
 <th>12</th>
@@ -1440,72 +1518,53 @@ TCPパケット (<u>TCPセグメント</u>) が入っている。
 </div>
 
 <ul>
-<li> TCP 層では、<u>シーケンス番号</u>
-(sequence number) により長いデータのセグメントを区別する。
-<li> さらに各通信は <u>送り元ポート番号</u> と
-<u>送り先ポート番号</u> によって区別され、
-これらが違うセグメントは別々の通信とみなされる。
+<li> 各回線は、セグメント中の <u>送り元ポート番号</u> と
+  <u>送り先ポート番号</u> により区別する。
+<li> 長いデータの各部分は、
+  <u>シーケンス番号</u> (sequence number) と
+  <u>確認応答番号</u> (acknowledge number)
+により区別する。
 </ul>
 
-<div class=exercise id="ex-tcp-segment">
-<div class=header>演習. TCP セグメントの中身</div>
+<h4>シーケンス番号と確認応答番号</h4>
 <p>
-上の IPパケットから TCP セグメントの部分
-(<span class=bgy>緑色部分</span>) を抜き出し、
-以下の情報を求めよ:
-</p>
-<blockquote><pre>
-0000 94 09 37 28 5b d5 00 23 81 1a f2 8d 08 00 45 00
-0010 00 34 6b 7f 40 00 80 06 00 00 c0 a8 00 0c c0 a8
-0020 01 01 <span class=bgg>c9 34 00 17 25 d0 1e c0 00 00 00 00 80 02
-0030 20 00 82 84 00 00 02 04 05 b4 01 03 03 08 01 01
-0040 04 02</span>
-</pre></blockquote>
-<ol type=a>
-<li> 送信元ポート
-<li> 送信先ポート
-<li> シーケンス番号
-</ol>
-</div>
-
-<h3 id="tcp-details">4.1. TCPの詳細</h3>
-
-<h4>TCP ACKパケット</h4>
-<p>
-TCP で通信をしていると、
-実際には一方的にデータを受けとっているときでも
-帰りのパケットが送られている。これが
-TCP <u>ACK</u> パケット
-(あるいは <u>確認応答</u> パケット) である。
+TCP では通信はつねに双方向である。
+2つのホストは (たとえ送るデータがないときでも)
+つねに次の情報を相手に送っている:
 </p>
 
 <ul>
-<li> 送り側のホストは、「ここまで送った」という
-<u>シーケンス番号</u> (<u>seq</u>uence number)
-をつけてパケットを送る。
-<li> 受け側のホストは、「ここまで受けとった」という
-<u>確認応答番号</u> (<u>ack</u>nowledge number)
-をつけたパケットを返す。
-<table border>
-<tr>
-<th></th>
-<th style="width:4em;">0</th>
-<th style="width:4em;">1</th>
-<th style="width:4em;">2</th>
-<th style="width:4em;">3</th>
-</tr>
-<tr>
-<th>4</th>
-<td class=bgg align=center colspan="4">シーケンス番号</td>
-</tr>
-<tr>
-<th>8</th>
-<td class=bgg align=center colspan="4">確認応答(ACK)番号</td>
-</tr>
-</table>
-<li> しばらくの間、確認応答パケットが来なかったら、
-  送り側は届かなかったパケットをまた送り直す。
+<li> シーケンス番号 (<u>seq</u>) … 「ここまで送った」という位置。
+<li> 確認応答番号 (<u>ack</u>) … 「ここまで受けとった」という位置。
 </ul>
+
+<p>
+seq, ack はそれぞれ送った (受けとった) データのバイト数に応じて増加する:
+
+<table border><tr>
+<th>ホストA</th><th>ホストB</th>
+</tr><tr>
+<td>[seq=<u>1</u>, ack=1, (10バイト)] →<br>seq +10</td>
+<td>ack +10</td>
+</tr><tr>
+<td>ack +5</td>
+<td>← [seq=1, ack=<u>11</u>, (5バイト)]<br>seq +5</td>
+</tr><tr>
+<td>[seq=<u>11</u>, ack=<u>6</u>, (0バイト)] →<br>seq +0</td>
+<td>ack +0</td>
+</tr><tr>
+<td>ack +3</td>
+<td>← [seq=<u>6</u>, ack=<u>11</u>, (3バイト)]<br>seq +3</td>
+</tr><tr>
+<td>[seq=<u>11</u>, ack=<u>9</u>, (1バイト)] →<br>seq +1</td>
+<td>ack +1</td>
+</tr><tr>
+<td>ack +0</td>
+<td>← [seq=<u>9</u>, ack=<u>12</u>, (0バイト)]<br>seq +0</td>
+</tr></table>
+
+<p>
+送り側は、確認応答が来なかったら、以前に送ったパケットを再送信する。
 
 <div class=figure>
   <div>
@@ -1550,78 +1609,40 @@ TCP <u>ACK</u> パケット
   <div class="caption">失われたパケット (13)</div>
 </div>
 
-<p>
-実際には、TCPの通信では双方向にパケットが送られる。
-</p>
-<table border>
-<tr><td>seq=<u>1</u>, ack=1, (10バイト) →</td><td></td></tr>
-<tr><td></td><td>← seq=1, ack=<u>11</u>, (5バイト)</td></tr>
-<tr><td>seq=<u>11</u>, ack=<u>6</u>, (0バイト) →</td><td></td></tr>
-<tr><td></td><td>← seq=<u>6</u>, ack=<u>11</u>, (3バイト)</td></tr>
-<tr><td>seq=<u>11</u>, ack=<u>9</u>, (1バイト) →</td><td></td></tr>
-<tr><td></td><td>← seq=<u>9</u>, ack=<u>12</u>, (0バイト)</td></tr>
-</table>
-
 <h4>TCP SYN パケットとハンドシェイク</h4>
 <p>
-実際の長いデータには、始まりと終わりがある。
-TCP セグメントには、データの「始まり」を示す
-特別なパケット (SYNパケット) がある。
-これは TCP セグメントの「フラグ」部分にある
-「SYN」ビットを 1 にしたパケットを使う。
-</p>
-<table border>
-<tr>
-<th></th>
-<th style="width:4em;">0</th>
-<th style="width:4em;">1</th>
-<th style="width:4em;">2</th>
-<th style="width:4em;">3</th>
-</tr>
-<tr>
-<th>12</th>
-<td align=center class=bgg colspan="2">フラグ</td>
-<td align=center colspan="2">ウィンドウサイズ</td>
-</tr>
-</table>
-
-<p>
-実際のTCP通信は、以下のようにして開始する。
-この処理を <a target="_blank" href="https://ja.wikipedia.org/wiki/3%E3%82%A6%E3%82%A7%E3%82%A4%E3%83%BB%E3%83%8F%E3%83%B3%E3%83%89%E3%82%B7%E3%82%A7%E3%82%A4%E3%82%AF">3ウェイ・ハンドシェイク</a> という。
+TCP 通信は、開始時に特別な処理をおこなう。
+この処理を <a target="_blank" href="https://ja.wikipedia.org/wiki/3%E3%82%A6%E3%82%A7%E3%82%A4%E3%83%BB%E3%83%8F%E3%83%B3%E3%83%89%E3%82%B7%E3%82%A7%E3%82%A4%E3%82%AF">3ウェイ・ハンドシェイク</a> と呼び、
+<u>TCP SYN</u> という目印のついたパケットが使われる。
 </p>
 <ol>
 <li> 送り側が TCP SYN パケットを送る。
-<li> 受け側が TCP SYN+ACK パケットを送る。
+<li> 受け側が TCP SYN+ACK パケットを送る。<br>
+<strong>注意:</strong> ここでいう「ACKパケット」は、
+確認応答(ack)番号とは別である。
 <li> 送り側が TCP ACK パケットを送る。
 <li> 送り側、受け側ともに seq=1, ack=1 で通信を始める。
 </ol>
 
-<div class=notice>
-注意: ここでいう「ACKフラグ」は、
-各セグメントに含まれる確認応答(ACK)番号とは別である。
-</div>
+<p>
+ハンドシェイクが完了すると、2つのホスト間は
+<u>接続された</u> (connected) 状態になり、
+双方向の通信が可能となる。
+</p>
 
 <h3 id="tcp-client-server">4.2. 「クライアント」と「サーバ」</h3>
 <p>
 IP層においては、すべてのホストはパケットを送受信するという意味で等価であった。
-しかし TCP層の通信では、2種類の役割が必ず存在する。
-<u>クライアント</u> (電話をかける側) と<u>サーバ</u> (電話をかけられる側) である。
-TCP ハンドシェイクが行われるときには、必ず最初に
-<strong>クライアント → サーバ</strong> のTCPポートに対して
-TCP SYN パケットが送られる。
-クライアントがサーバに対してTCP通信路を確立することを、
-<u>接続</u> (connect) と呼ぶ。
-</p>
-
+しかし TCP層の通信では、必ず2種類の役割が存在する:
 <ul>
-<li> TCPクライアント …
-  客。いつサーバを呼び出してもよいし、呼び出さなくてもよい。
-<li> TCPサーバ …
-  店。いつクライアントに呼ばれてもいいように 24時間待機していなければならない。
+<li> TCP<u>クライアント</u> (TCP SYN を送り、通信を開始する側)
+  … 客。いつサーバに電話をかけてもよい。
+<li> TCP<u>サーバ</u> (TCP SYN を送られる側)
+  … 店。いつクライアントから電話がかかってきてもいいように、
+  24時間待機していなければならない。
 </ul>
 
 <p>
-TCPクライアントとTCPサーバはどう違うのか?
 TCPサーバとは特定のTCPポートを
 <u>Listen</u> (待ち受け) 状態にしている
 ホスト (プロセス) のことである。
