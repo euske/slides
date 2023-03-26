@@ -761,7 +761,6 @@ $ <strong>ifconfig</strong>
 <td align=center colspan="4">実際のデータ<br>…</td>
 </tr>
 </table>
-</div>
 
 <div class=exercise id="ex-ip-packet">
 <div class=header>演習. IPパケットの中身</div>
@@ -829,10 +828,10 @@ IPアドレスは変化することがある。
 応答があるかどうかを確認せよ:
 </p>
 <blockquote><pre>
-C:\&gt; <strong>ping <em>自分のIPアドレス</em></strong>
-C:\&gt; <strong>ping 127.0.0.1</strong>
-C:\&gt; <strong>ping 192.0.2.1</strong>
-C:\&gt; <strong>ping 1.1.1.1</strong>
+$ <strong>ping <em>自分のIPアドレス</em></strong>
+$ <strong>ping 127.0.0.1</strong>
+$ <strong>ping 192.0.2.1</strong>
+$ <strong>ping 1.1.1.1</strong>
 </pre></blockquote>
 </div>
 
@@ -1515,7 +1514,6 @@ TCPパケット (<u>TCPセグメント</u>) を入れる。
 <td align=center colspan="4">実際のデータ<br>…</td>
 </tr>
 </table>
-</div>
 
 <ul>
 <li> 各回線は、セグメント中の <u>送り元ポート番号</u> と
@@ -1638,7 +1636,9 @@ TCP 通信は、開始時に特別な処理をおこなう。
 <h3 id="tcp-client-server">4.2. 「クライアント」と「サーバ」</h3>
 <p>
 IP層においては、すべてのホストはパケットを送受信するという意味で等価であった。
-しかし TCP層の通信では、必ず2種類の役割が存在する:
+</p><p>
+TCP層の通信では、必ず2種類の役割が存在する:
+</p>
 <ul>
 <li> TCP<u>クライアント</u> (TCP SYN を送り、通信を開始する側)
   … 客。いつサーバに電話をかけてもよい。
@@ -1782,51 +1782,6 @@ TCP の 3ウェイハンドシェイクが行われていることを確認せ�
 </p>
 </div>
 
-<h4>TCP/IP プログラミング</h4>
-<p>
-一般的に、インターネットを使った通信をプログラムによって実装するとき、
-もっともよく使うのは TCP層の機能である。
-現在の OS では「ソケット (socket)」という API が整備されており、
-たとえば Python なら、すぐに TCP のサーバ-クライアント間で通信ができる:
-</p>
-
-<div class=file>
-server.py (サーバ側):
-<pre>
-from socket import *
-<em># TCP用ソケットを準備。</em>
-sock = socket(AF_INET, SOCK_STREAM)
-<em># TCPポート 10000番で listen状態にする。</em>
-sock.bind(('0.0.0.0', 10000))
-sock.listen(1)
-<em># 接続してきたクライアント用のソケットを取得する。</em>
-(client, addr) = sock.accept()
-<em># データを受信する。</em>
-data = client.recv(10)
-print(data)
-</pre></div>
-
-<div class=file>
-client.py (クライアント側):
-<pre>
-from socket import *
-<em># TCP用ソケットを準備。</em>
-sock = socket(AF_INET, SOCK_STREAM)
-<em># ホスト 127.0.0.1 の TCPポート 10000番に接続する。</em>
-sock.connect(('127.0.0.1', 10000))
-<em># データを送信する。</em>
-sock.send(b'hello')
-</pre></div>
-
-<div class=exercise id="ex-tcp-pytho">
-<div class=header>演習. Python を使った TCPプログラミング</div>
-<p>
-上の 2つの Pythonスクリプト
-<code>server.py</code>、<code>client.py</code> を
-同一のホスト上で同時に動かし、通信ができていることを確認せよ。
-</p>
-</div>
-
 <h3 id="tcp-udp">4.3. UDP層</h3>
 <p>
 TCP層は便利だが、いくつか欠点がある:
@@ -1869,6 +1824,11 @@ TCPとは別の方法で通信をおこなう。
   </svg>
 </div>
 
+<ul>
+<li> IPパケットの <strong>プロトコル番号</strong> = 6 なら TCP。
+<li> IPパケットの <strong>プロトコル番号</strong> = 17 なら UDP。
+</ul>
+
 <h4>UDPの用途</h4>
 <ul>
 <li> 動画の実況中継など、データの完全性よりもリアルタイム性が重要なもの。
@@ -1881,25 +1841,8 @@ TCPとは別の方法で通信をおこなう。
 <li> 大きなデータは送れない。
 </ul>
 
-<h4>TCPパケットの場合</h4>
-<table border>
-<tr>
-<th></th>
-<th style="width:8em;">0</th>
-<th style="width:8em;">1</th>
-<th style="width:8em;">2</th>
-<th style="width:8em;">3</th>
-</tr>
-<tr>
-<th>8</th>
-<td align=center>TTL</td>
-<td class=bgg align=center>プロトコル番号 (6)</td>
-<td align=center colspan="2">チェックサム</td>
-</tr>
-</table>
-</div>
+<h4>UDPパケットの構造</h4>
 
-<h4>UDPパケットの場合</h4>
 <table border>
 <tr>
 <th></th>
@@ -1909,21 +1852,27 @@ TCPとは別の方法で通信をおこなう。
 <th style="width:8em;">3</th>
 </tr>
 <tr>
-<th>8</th>
-<td align=center>TTL</td>
-<td class=bgg align=center>プロトコル番号 (17)</td>
+<th>0</th>
+<td align=center colspan="2">送り元ポート</td>
+<td align=center colspan="2">送り先ポート</td>
+</tr>
+<tr>
+<th>4</th>
+<td align=center colspan="2">データ長</td>
 <td align=center colspan="2">チェックサム</td>
 </tr>
+<tr>
+<th>8</th>
+<td align=center colspan="4">実際のデータ<br>…</td>
+</tr>
 </table>
-</div>
 
 
 <h2 id="application">5. アプリケーション層</h2>
 <p>
-普通、TCP/IPのデータリンク層・IP層・TCP層はすべて OS が提供している。
-アプリケーション層は、TCP層の機能を使って実際に人間に意味のある
-情報を送受信するソフトウェアの部分である。一般の人が書く
-プログラムのほとんどは、このアプリケーション層に位置している。
+TCP/IPのデータリンク層・IP層・TCP層はすべて OS が提供している。
+アプリケーション層は、インターネットの機能を実際に活用する部分であり、
+ほとんどのアプリ開発者は「アプリケーション層」を作ることになる。
 </p>
 
 <div class=figure>
@@ -1951,8 +1900,7 @@ TCPとは別の方法で通信をおこなう。
 
 <p>
 実際のアプリケーション層のデータは、Ethernetフレームの中の、
-IPパケットの中の、
-TCPセグメントのさらに中に記録されている。
+IPパケットの中の、TCPセグメントのさらに中に記録されている。
 </p>
 
 <div class=figure>
@@ -1976,92 +1924,94 @@ TCPセグメントのさらに中に記録されている。
   </svg>
 </div>
 
+<h4>TCP/IP プログラミング</h4>
+<p>
+一般的に、もっともよく使われるのは TCP層の機能である。
+現在の OS では「ソケット (socket)」という API が整備されており、
+たとえば Python なら、すぐに TCP のサーバ-クライアント間で通信ができる:
+</p>
+
+<div class=file>
+server.py (サーバ側):
+<pre>
+from socket import *
+<em># TCP用ソケットを準備。</em>
+sock = socket(AF_INET, SOCK_STREAM)
+<em># TCPポート 10000番で listen状態にする。</em>
+sock.bind(('0.0.0.0', 10000))
+sock.listen(1)
+<em># 接続してきたクライアント用のソケットを取得する。</em>
+(client, addr) = sock.accept()
+<em># データを受信する。</em>
+data = client.recv(10)
+print(data)
+</pre></div>
+
+<div class=file>
+client.py (クライアント側):
+<pre>
+from socket import *
+<em># TCP用ソケットを準備。</em>
+sock = socket(AF_INET, SOCK_STREAM)
+<em># ホスト 127.0.0.1 の TCPポート 10000番に接続する。</em>
+sock.connect(('127.0.0.1', 10000))
+<em># データを送信する。</em>
+sock.send(b'hello')
+</pre></div>
+
+<div class=exercise id="ex-tcp-pytho">
+<div class=header>演習. Python を使った TCPプログラミング</div>
+<p>
+上の 2つの Pythonスクリプト
+<code>server.py</code>、<code>client.py</code> を
+同一のホスト上で同時に動かし、通信ができていることを確認せよ。
+</p>
+</div>
+
 <h3 id="app-dns">5.1. ドメイン名検索 (DNS)</h3>
 <p>
-IP アドレスはそのままでは人間にとって覚えにくいので、
-実際には各ホストに名前 (文字列) をつけて、IPアドレスの代わりに
-その文字列を使うことができる。この仕組みを DNS
-(<u>D</u>omain <u>N</u>ame <u>S</u>ystem) といい、
-各ホストにつけられた名前を<u>ホスト名</u> という。
-たとえば、以下の2つは同じ意味である:
-</p>
+IP アドレスはそのままでは人間にとって覚えにくい。
+そこで <u>DNS</u> (Domain Name System) という仕組みが用意されている。
+<ul>
+<li> DNS を使うと、各ホストに名前 (<u>ホスト名</u>) をつけて、
+  IPアドレスの代わりに使うことができる。
+<li> ほとんどのプログラム
+(<code>ping</code>, <code>traceroute</code>, <code>nc</code> など) は
+  デフォルトで DNS に対応しており、これらのコマンドには
+  <strong>IPアドレスの代わりにホスト名を指定してもよい</strong>。
+<li> たとえば、以下の2つは同じ意味である:
 <blockquote><pre>
-C:\&gt; <strong>ping 93.184.216.34</strong>
-C:\&gt; <strong>ping www.example.com</strong>
+$ <strong>ping 166.84.7.55</strong>
+$ <strong>ping www.tabesugi.net</strong>
+$ <strong>ping vc55.tabesugi.net</strong>
 </pre></blockquote>
-
-<p>
-DNS は TCP/IP の機能を使って、<code>www.example.com</code> などの
-文字列から <code>93.184.216.34</code> などの IPアドレスを検索する
-一種の分散データベースである。DNS を使ってホスト名から IPアドレスを得ることを
-「ホスト名の解決 (resolution)」という。
-</p>
-<p>
-なお DNSサーバは
+<li> DNS を使って、(上のように) ホスト名から IPアドレスを得ることを
+「ホスト名の<u>解決</u> (resolution)」という。
+<li> ひとつの IPアドレスに複数の名前がついていることもある。
+<li> DNS は
 「ホスト名 → IPアドレス」の解決 (<u>正引き</u>) だけでなく、
-「IPアドレス → ホスト名」の解決 (<u>逆引き</u>) もサポートしている。
-<code>ping</code> などで IPアドレスを指定したのに
-名前が表示されるのはこのためである。
-なお、ひとつの IPアドレスに複数の名前がついていることもある。
-</p>
+「IPアドレス → ホスト名」の解決 (<u>逆引き</u>) もサポートしている:
+<blockquote><pre>
+$ <strong>host 166.84.7.55</strong>
+55.7.84.166.in-addr.arpa domain name pointer vc55.tabesugi.net.
+</pre></blockquote>
+</ul>
 
 <h4>DNSのしくみ</h4>
 <p>
-DNS は以下のような機構になっている:
+DNS は TCP/IP の機能を使って作られている。
 </p>
 <ul>
-<li> まず、インターネット上のすべてのホストを<u>ドメイン</u> (domain) という区切りに分ける。
-  たとえば <code>www.example.com</code> というホスト名は
-  <code>.com</code>ドメインと、
-  <code>.example.com</code>ドメイン
-  分割される。
+<li> まず、インターネット上のすべてのホストを<u>ドメイン</u> (domain) という区切りに分ける。<br>
+  例: <code>www.example.com</code> というホスト名は
+  <code>www</code>、<code>.example</code>、<code>.com</code> という 3つの部分に分割される。
 <li> 各ドメインについて、そのドメイン内のホスト名について責任を負う
-  <u>ネームサーバ</u> (name server) のIPアドレスを定める。
-  たとえば <code>.com</code> ドメインのネームサーバは
-  <code>192.5.6.30</code>
-  である。
-<li> 世界 13箇所に<a target="_blank" href="https://ja.wikipedia.org/wiki/%E3%83%AB%E3%83%BC%E3%83%88%E3%82%B5%E3%83%BC%E3%83%90">ルートネームサーバ</a> (root name server) をおく。
-  このサーバは各トップレベルドメイン (<code>.com</code>など) の
-  ネームサーバのIPアドレスを記憶している。
+  <u>ネームサーバ</u> (name server) を用意する。
+<li> 世界 13箇所に<a target="_blank" href="https://ja.wikipedia.org/wiki/%E3%83%AB%E3%83%BC%E3%83%88%E3%82%B5%E3%83%BC%E3%83%90">ルートネームサーバ</a> (root name server) を用意する。
 </ul>
 <p>
-このようなサーバを用意したあとで、各ホストは次のようにして
-ホスト名の解決をおこなう:
-</p>
-
-<ol type=a>
-<li> まず、すべてのホストは、13個のルートネームサーバの IPアドレスを知っている
-  (たとえばルートサーバ A の IPアドレスは <code>198.41.0.4</code> など)。
-  ホストは最初にルートサーバに対して、解決したいホスト名の
-  最初のドメイン (トップレベルドメイン、TLD) の
-  ネームサーバの IP アドレスを問い合わせる。
-<li> つぎに、そのネームサーバに対して、それ以下のドメイン (サブドメイン) の
-  ネームサーバの IP アドレスを問い合わせる。以下、繰り返し。
-<li> 最後のネームサーバの IPアドレスが判明したら、それに対して
-  目的のホスト名の IP アドレスを問い合わせる。完了。
-</ol>
-
-<h4>DNSの欠点</h4>
-<p>
-ネームサーバとの通信が正しくできないと、
-IPアドレスがわからないので、そもそも通信ができなくなる。
-また、ネームサーバが間違ったアドレスを返すと関係ないホストに対して
-通信してしまう。そのためネームサーバはふつう複数個用意されていることが多く、
-世界のルートサーバはどれも厳重に管理されている。
-</p>
-
-<h4>localhost</h4>
-<p>
-<code>127.0.0.1</code> は
-特別な IPアドレスであり、これはつねに「自分自身のホスト」をあらわす。
-これをループバックアドレスという。
-なお、ホスト名 <code>localhost</code> は
-つねにループバックアドレスに解決される。
-</p>
-
-<h4>DNS の動作例</h4>
-<p>
-ホスト <code>www.example.com</code> の IPアドレスを求める…
+このようなサーバを用意したあとで、
+<code>www.example.com</code> の IPアドレスを求めるには:
 </p>
 <ol>
 <li> ルートサーバ (<code>198.41.0.4</code>) に
@@ -2076,51 +2026,76 @@ IPアドレスがわからないので、そもそも通信ができなくなる
 <li> 完了。
 </ol>
 
+<h4>localhost</h4>
 <p>
-TCP/IPに対応している多くの API やプログラム
-(<code>ping</code>, <code>traceroute</code>, <code>nc</code> など) では、
-DNS はデフォルトで対応しており、これらの IPアドレスの指定欄には
-代わりにホスト名を直接指定してもよい。
-実際、DNS はインターネットの基幹をなすサービスであり、
+<code>127.0.0.1</code> は
+特別な IPアドレスであり、これはつねに「自分自身のホスト」をあらわす。
+これをループバックアドレスという。
+なお、ホスト名 <code>localhost</code> は
+つねにループバックアドレスに解決される。
+</p>
+
+<blockquote><pre>
+$ <strong>ping localhost</strong>
+PING localhost (127.0.0.1) 56(84) bytes of data.
+64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.029 ms
+64 bytes from localhost (127.0.0.1): icmp_seq=2 ttl=64 time=0.085 ms
+64 bytes from localhost (127.0.0.1): icmp_seq=3 ttl=64 time=0.084 ms
+...
+</pre></blockquote>
+
+<h4>DNSの欠点</h4>
+
+<p>
+DNS はインターネットの基幹をなすサービスであり、
 ほとんどの API やアプリ、サービスなどが DNS に依存している。
+DNS が使えなければ、相手の IPアドレスがわからないので、
+そもそも通信ができないことが多い。
 そのため <strong>DNS がうまく動かない場合、
 多くのサービスやサイトで大規模な障害が発生する</strong>。
+これを防ぐため、ネームサーバは多重化されていることが多い。
 </p>
+
+<blockquote><pre>
+$ <strong>ping www.tabenasugi.com</strong>
+ping: www.tabenasugi.com: Name or service not known
+</pre></blockquote>
 
 <div class=exercise id="ex-nslookup">
 <div class=header>演習. ホスト名から IP アドレスを求める</div>
 <p>
-<code>ping</code> コマンドを使って、
+<code>host</code> コマンドを使って、
 自分がよく知っているホスト名の IPアドレスを求めよ。
+(<code>ping</code> でもよい)
 </p>
 <blockquote><pre>
-C:\&gt; <strong>ping <em>ホスト名</em></strong>
+$ <strong>host <em>ホスト名</em></strong>
 </pre></blockquote>
 </div>
 
 <h3 id="app-web">5.2. ウェブ (HTTP)</h3>
-
-<h4>HTTP のしくみ</h4>
 <p>
-HTTP は、TCP 80番ポート (HTTPS の場合は TCP 443番ポート) を使った
-もっとも有名なアプリケーション層である。
-これは HTML (<u>H</u>yper <u>T</u>ext <u>M</u>arkup <u>L</u>anguage) 型式で
-書かれたデータ (ようするに、Webページ) をブラウザに転送するという意味で
-HTTP (<u>H</u>yper <u>T</u>ext <u>T</u>ransfer <u>P</u>rotocol)
-と呼ばれる。
+HTTP は、おそらくもっとも有名なアプリケーション層である。
 </p>
-
-<ol>
-<li> クライアントがコンテンツを要求する。(要求、<u>リクエスト</u>)
-<li> サーバがコンテンツを提供する。(応答、<u>レスポンス</u>)
-<li> 読み込むページ・画像ファイルの数だけ 1., 2. を繰り返す。
-</ol>
+<ul>
+<li> TCP 80番ポート (HTTPS の場合は TCP 443番ポート) を使う。
+<li> <u>HTML</u> >Hyper Text Markup Language) 型式で
+  書かれたデータ (ようするに、Webページ) をブラウザに転送する。
+</ul>
 <p>
 通常、HTTP を使うクライアントを
 <u>ウェブブラウザ</u> (HTTPクライアント) と呼び、
 それに答えるサーバを
 <u>ウェブサーバ</u> (HTTPサーバ) という。
 </p>
+
+<h4>HTTP のしくみ</h4>
+
+<ol>
+<li> クライアントがコンテンツを要求する。(要求、<u>リクエスト</u>)
+<li> サーバがコンテンツを提供する。(応答、<u>レスポンス</u>)
+<li> 読み込むページ・画像ファイルの数だけ 1., 2. を繰り返す。
+</ol>
 
 <div class=figure>
   <div>
@@ -2187,7 +2162,7 @@ Content-Length: 9022
 
 <h4>HTTPリクエスト</h4>
 <p>
-HTTP リクエストには GET, POST などいくつかの種類があり、
+HTTP リクエストには GET, POST などいくつかの種類がある。
 リクエストはさらに <u>ヘッダ</u> (header) と
 <u>ボディ (ペイロード)</u> (body, payload) に分かれている。
 これらは<em>空行</em>で分けられている。
@@ -2214,8 +2189,7 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:35.0) Gecko/20100101 Firefox/35.0
 <li> その他 (<A target="_blank" href="https://tools.ietf.org/html/rfc2616">RFC 2616</a> 参照)
 </ul>
 <p>
-通常、GETリクエストはヘッダのみで構成され、ボディは空である。
-つまり何も含まれていない。
+ボディは、GETリクエストの場合は空である (つまり何も含まれていない)。
 </p>
 
 <h4>HTTPレスポンス</h4>
@@ -2329,7 +2303,7 @@ User-Agent: Mozilla/5.0
 </div>
 
 <div class=exercise id="ex-http-troubleshooting">
-<div class=header>演習. トラブルシューティング</div>
+<div class=header>演習. HTTPトラブルシューティング</div>
 <p>
 あるユーザが「インターネットが動かない」といっている。
 聞けばブラウザに <code>http://www.example.com/</code> というアドレスを入力したが、
@@ -2348,12 +2322,47 @@ User-Agent: Mozilla/5.0
 </p>
 </div>
 
+<h4>Webアプリとは</h4>
+<p>
+HTTP はあまりにも普及しているため、
+こんにち多くのアプリケーションは TCP層を直接使わず、
+HTTP「層」を使って構築されるようになっている。
+このようなアプリを <u>Webアプリ</u> と呼ぶ。
+</p>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="180">
+    <g transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" fill="#88ff88" />
+      <rect x="0" y="30" width="120" height="30" />
+      <rect x="0" y="60" width="120" height="30" />
+      <rect x="0" y="90" width="120" height="30" />
+      <rect x="0" y="120" width="120" height="30" />
+      <line x1="60" y1="150" x2="60" y2="170" />
+      <line x1="-50" y1="170" x2="170" y2="170" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">Webアプリ</text>
+      <text x="60" y="45" dy="0.5em">HTTP層</text>
+      <text x="60" y="75" dy="0.5em">TCP層</text>
+      <text x="60" y="105" dy="0.5em">IP層</text>
+      <text x="60" y="135" dy="0.5em">データリンク層</text>
+      <text x="170" y="158" dy="0.5em">ケーブル</text>
+    </g></g>
+  </svg>
+  </div>
+</div>
+
 <h3 id="app-email">5.3. 電子メール (SMTP)</h3>
 <p>
-TCP 層の機能を使って、特定のサーバの TCP 25番ポートに
-特定の規約でデータを送ると、電子メールを送ることができる。
-この「規約」は <u>S</u>imple <u>M</u>ail <u>T</u>ransfer <u>P</u>rotocol
-(SMTP) と呼ばれている。
+HTTP 以外のアプリケーション層の例として、<u>SMTP</u>
+(Simple Mail Transfer Protocol) がある。
+これは特定のサーバ (<u>メールサーバ</u>) の TCP 25番ポートに
+データを送ると、電子メールを送ることができる。
 </p>
 <blockquote><pre>
 $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
