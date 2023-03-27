@@ -61,7 +61,7 @@ CPU のネイティブ命令列を直接書くプログラミング方法であ�
 6502 はいまから約50年前に開発され、
 ファミコンや Apple II など多くのハードウェアで利用された。
 しかし、その原理は今日のコンピュータとほとんど変わっていない。
-ここでは 6502 のプログラミングを通して、コンピュータの本質を学習する。
+ここでは 6502 のプログラミングを通して、コンピュータの本質を学ぶ。
 </p>
 
 <ol>
@@ -94,7 +94,6 @@ CPU のネイティブ命令列を直接書くプログラミング方法であ�
   <li> <a href="#os">オペレーティングシステム (OS) とは何か?</a>
 </ul>
 </ol>
-
 
 <h2 id="6502intro">1. 6502 プログラミング入門</h2>
 
@@ -130,13 +129,8 @@ CPU のネイティブ命令列を直接書くプログラミング方法であ�
 <div class=header>演習. 入力装置・出力装置・記憶装置</div>
 <p>
 入力装置・出力装置・記憶装置の例を 2つずつ挙げよ。
-</div>
-
-<p>
-<u>機械語</u> (machine language):
-Python や JavaScript のような現代的なプログラミング言語とは違い、
-文字ではなく数値 (命令語) の列によって表現する。
 </p>
+</div>
 
 <p>
 本日使う CPU (のエミュレータ):
@@ -147,6 +141,12 @@ Python や JavaScript のような現代的なプログラミング言語とは�
 <li> ファミコンや Apple II など初期のパソコンに使われていた。
 <li> 価格は $100 程度で、当時としては破格に安かった。
 </ul>
+
+<p>
+<u>機械語</u> (machine language):
+Python や JavaScript のような現代的なプログラミング言語とは違い、
+文字ではなく数値 (命令語) の列によって表現する。
+</p>
 
 <p>
 6502 の機能:
@@ -230,6 +230,7 @@ while (true) {
 <h3 id="6502register">1.2. レジスタとは</h3>
 <p>
 <u>レジスタ</u> (register): CPU における変数のこと。
+</p>
 
 <p>
 6502 に装備されているレジスタ:
@@ -277,12 +278,14 @@ while (true) {
 <div class=header>演習. 16進数から2進数の変換</div>
 <p>
 以下の 16進数を 2進数に変換せよ:
+</p>
 <ul>
 <li> <span class=hex>64</span>
 <li> <span class=hex>FA</span>
 </ul>
 <p>
 以下の 2進数を 16進数に変換せよ:
+</p>
 <ul>
 <li> <span class=bin>0101 0101</span>
 <li> <span class=bin>1110 0011</span>
@@ -296,6 +299,7 @@ while (true) {
 </ol>
 <p>
 これは本物の 6502 の電子回路の動きをブラウザ上で仮想的に再現するエミュレータである。
+</p>
 
 <ul>
 <li> 赤色の部分 (<span style="background:#ff4d4d; padding-left:2em;">&nbsp;</span>) は、
@@ -309,6 +313,7 @@ while (true) {
 <h3 id="6502mem">2.1. メモリに値を格納する</h3>
 <p>
 最初のプログラムとして、メモリ上のある位置に数値を格納する処理をやってみる。
+</p>
 
 <div class=file>
 プログラム1
@@ -328,6 +333,7 @@ while (true) {
 <p>
 プログラムは、メモリ上の 16進数が書かれている部分を
 ダブルクリックして直接入力する。
+</p>
 
 <table border>
 <tr><th>命令語 (16進)</th><th>バイト数</th><th>アセンブリ表記</th><th>機能</th></tr>
@@ -350,6 +356,7 @@ while (true) {
 
 <p>
 上のプログラムは、JavaScript でいえば以下のような処理に等しい:
+</p>
 <blockquote><pre>
 A = 1             <span class=comment>// LDA #$01</span>
 MEMORY[0x10] = A  <span class=comment>// STA $10</span>
@@ -358,16 +365,19 @@ MEMORY[0x10] = A  <span class=comment>// STA $10</span>
 <p>
 (JavaScript では、<code>0x64</code> や <code>0b1111</code> などと書けば
 16進数・2進数 → 10進数に変換できる)
+</p>
 
 <div class=exercise id="ex-use-emulator-1">
 <div class=header>演習. エミュレータを使った実行</div>
 <p>
 上のプログラム1を Visual 6502 エミュレータ上で実際に実行せよ。
+</p>
 </div>
 
 <h3 id="6502loop">2.2. メモリの値を増加させながらループする</h3>
 <p>
 次に足し算命令 <code>ADC</code>命令 とジャンプ命令 <code>JMP</code> を使ってみる。
+</p>
 
 <div class=file>
 プログラム2
@@ -381,12 +391,13 @@ MEMORY[0x10] = A  <span class=comment>// STA $10</span>
 <p>
 「ジャンプ命令」を命令を実行すると、CPU は PC レジスタの値を書き換える。
 つまり、指定されたアドレスの命令から実行できる。
+</p>
 
 <table border>
 <tr><th>命令語 (16進)</th><th>バイト数</th><th>アセンブリ表記</th><th>機能</th></tr>
 <tr><td><code>69 <span class=hex>XX</span></code></td>
   <td>2</td>
-  <td><code>ADC #$<span class=hex>XX</span></td>
+  <td><code>ADC #$<span class=hex>XX</span></code></td>
   <td>Aレジスタの値に 16進数で <span class=hex>XX</span> を加える。</td>
 </tr>
 <tr><td><code>4C <span class=hex>PP</span> <span class=hex>QQ</span></code></td>
@@ -401,6 +412,7 @@ MEMORY[0x10] = A  <span class=comment>// STA $10</span>
 
 <p>
 JavaScript でいえば、以下のような処理に(ほぼ)等しい:
+</p>
 <blockquote><pre>
 A = 1                 <span class=comment>// LDA #$01</span>
 while (true) {
@@ -414,6 +426,7 @@ while (true) {
 <p>
 上のプログラム2をエミュレータ上で実際に実行せよ。
 Aレジスタの値が <span class=hex>FF</span> を超えるとどうなるか?
+</p>
 </div>
 
 
@@ -421,6 +434,7 @@ Aレジスタの値が <span class=hex>FF</span> を超えるとどうなるか?
 
 <p>
 6502 には数百種類の命令がある:
+</p>
 <ul>
 <li> <a target="_blank" href="http://www.6502.org/tutorials/6502opcodes.html">6502 命令表</a>
 <li> <a target="_blank" href="https://wiki.nesdev.com/w/index.php/CPU_unofficial_opcodes">6502 命令表</a>
@@ -429,6 +443,7 @@ Aレジスタの値が <span class=hex>FF</span> を超えるとどうなるか?
 <p>
 いちいち命令語の数値を調べるのは面倒くさいので、
 ここでは <u>アセンブラ</u> (assembler) というものを使う。
+</p>
 <ul>
 <li> アセンブラ … 命令語をアセンブリ表記で入力すると、
 自動的に機械語の数値列に変換するソフトウェア。
@@ -453,6 +468,7 @@ STA $0200
 
 <p>
 アセンブラではさらに、以下のような表記の決まりがある:
+</p>
 <ul>
 <li> <code><mark>#</mark>$01</code> … <code>$01</code> という値そのもの。
 <li> <code>$0200</code> … <code>$0200</code> という「メモリ上のアドレスに入っている」値。
@@ -466,17 +482,20 @@ STA $0200
 つまり、ここではメモリへの書き込みが出力装置も兼ねている。
 コンピュータにとって、画面やハードディスク (記憶装置) は、
 どれもただの巨大な配列でしかない。
+</p>
 
 <div class=exercise id="ex-use-emulator-3">
 <div class=header>演習. エミュレータを使った実行</div>
 <p>
 上のプログラム3をエミュレータ上で実際に実行せよ。
+</p>
 </div>
 
 <h3 id="jumpinst">3.2. アセンブラを使ったジャンプ命令</h3>
 <p>
 アセンブラを使うと、プログラム中のアドレスとして<u>ラベル</u>を使うことができ、
 命令語のバイト数を考える必要がない。
+</p>
 <div class=file>
 プログラム4
 <pre>
@@ -490,17 +509,20 @@ STA $0200
 <p>
 <strong>注意:</strong>
 ラベル (<code>loop:</code>) 自体はただプログラム中の位置を表すもので、実際の命令ではない。
+</p>
 
 <div class=exercise id="ex-use-emulator-4">
 <div class=header>演習. エミュレータを使った実行</div>
 <p>
 上のプログラム4をエミュレータ上で実際に実行せよ。
+</p>
 </div>
 
 <h3 id="dispaddr">3.3. 差分アドレッシング</h3>
 <p>
 差分アドレッシングという機能を使うと、
 メモリ上の可変の位置のデータを読み書きできる。
+</p>
 <div class=file>
 プログラム5
 <pre>
@@ -529,6 +551,7 @@ loop:
 
 <p>
 以下、JavaScript 相当の処理:
+</p>
 <blockquote><pre>
 A = 1                     <span class=comment>// LDA #$01</span>
 X = 0                     <span class=comment>// LDX #$00</span>
@@ -544,11 +567,13 @@ while (true) {
 <p>
 上のプログラム5をエミュレータ上で実際に実行せよ。
 なぜ画面の一部しか更新されないのか?
+</p>
 </div>
 
 <h3 id="#branch">3.4. 条件分岐</h3>
 <p>
 「画面の特定の場所のみ、色を変える」にはどうするか?
+</p>
 
 <div class=file>
 プログラム5
@@ -573,6 +598,7 @@ put:
 6502 では、比較・演算命令
 (<code>ADC</code>, <code>CPX</code>, <code>INX</code> など) の結果によって
 内部の<u>フラグ</u> (flag) が変化する。
+</p>
 <ul>
 <li> フラグ … 1ビットの特殊な変数で、
 直前の計算によって生じた変化を記憶している。
@@ -601,9 +627,11 @@ put:
 <code>CPX</code>命令は実際には何も計算してないように見えるが、
 内部的には 2つの数の引き算をおこなっている。これによって、
 2つの数が等しいときに結果が 0 になり、結果として Zフラグが 1 になる。
+</p>
 
 <p>
 JavaScript 相当の処理:
+</p>
 <blockquote><pre>
 X = 0                     <span class=comment>// LDX #$00</span>
 while (true) {
@@ -620,6 +648,7 @@ while (true) {
 <h3 id="branch2">3.5. 条件分岐 その2</h3>
 <p>
 上の条件分岐は、以下のようにも書ける:
+</p>
 <div class=file>
 プログラム5 (改良版)
 <pre>
@@ -650,6 +679,7 @@ MOS 6502 ではほとんどの計算は 8ビットでしかできないが、
 工夫することで 16ビットの計算が可能である。じつは "<code>ADC</code>" 命令は
 与えられた数に加えて <strong>C フラグの値も加える</strong> ようにできており、
 これを使って 8ビットの数を 2回に分けて計算する。
+</p>
 
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -711,6 +741,7 @@ STA $31    <span class=comment>; Aレジスタの値をメモリ $31番地に書
 
 <table border>
 <tr><th>命令語</th><th>機能</th></tr>
+<tr>
 <td><code>CLC</code></td>
 <td>Cフラグの値を 0 にする。</td>
 </tr>
@@ -721,6 +752,7 @@ STA $31    <span class=comment>; Aレジスタの値をメモリ $31番地に書
 以上のテクニックと以下の「間接差分アドレッシング」を組み合わせると、
 256バイト (=8ビット) 以上のメモリ領域にアクセスできる。
 つまり、画面のより広い領域に描画できるようになる。
+</p>
 
 <table border>
 <tr><th>命令語</th><th>バイト数</th><th>機能</th></tr>
@@ -790,6 +822,7 @@ loop:
 <p>
 上のプログラム 6. を完成させ、
 画面全体を塗りつぶすようにせよ。
+</p>
 </div>
 
 
@@ -798,6 +831,7 @@ loop:
 <a href="https://ja.wikipedia.org/wiki/%E3%83%95%E3%82%A1%E3%83%9F%E3%83%AA%E3%83%BC%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF">ファミリーコンピュータ</a>
 (Nintendo Entertainment System、ファミコン) は
 1983年に任天堂から発売されたゲーム機である。
+</p>
 <ul>
 <li> CPU として、リコー製の 6502 改造版 (廉価版) を使用。
 <li> メモリはわずか 2KB。
@@ -811,6 +845,7 @@ loop:
 また、初期のゲームは最大 32KB までに制限されていた。
 「スーパーマリオブラザーズ」もプログラム・
 グラフィックス・音楽等込みで32KB の領域に収まっている。
+</p>
 <ul>
 <li> <a href="https://gist.github.com/1wErt3r/4048722">「スーパーマリオブラザーズ」の機械語を解析 (逆アセンブル) したソースコード</a>
 </ul>
@@ -850,6 +885,7 @@ loop:
 <p>
 現代の <a target="_blank" href="https://en.wikipedia.org/wiki/X86">最新鋭の演算装置</a>でも、
 基本的にやっていることは変わらない。ただ量が増えているだけである。
+</p>
 
 <table border>
 <tr><th></th><th>1975年</th><th>2021年</th></tr>
@@ -866,6 +902,7 @@ loop:
 プログラムを書く必要はない。文字表示やファイル処理など非常に基本的な部分は、
 「<u>オペレーティングシステム</u> (OS, 基本ソフトウェア)」として
 最初からPCと一緒に提供されているためである。
+</p>
 
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -888,6 +925,7 @@ loop:
 
 <p>
 また、OS は多くの仮想化処理を実現している。
+</p>
 
 <h4>OS によって作り出されている見せかけの例</h4>
 <ul>
@@ -911,9 +949,12 @@ loop:
 結局のところ、コンピュータはみな非常に単純な原理で動いている。
 これをソフトウェアの力で処理をしているように見せかけているのが、
 現代のコンピュータである。
-
+</p>
 
 <hr>
 <address>
 Yusuke Shinyama
 </address>
+
+</body>
+</html>
