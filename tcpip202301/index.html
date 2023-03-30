@@ -1392,7 +1392,7 @@ TCP層までくると、2つのホストは連続した通信ができるので�
     </symbol>
     </defs>
     <g transform="translate(5,15)">
-    <g stroke="black" stroke-width="2" fill="none">
+      <g stroke="black" stroke-width="2" fill="none">
       <use xlink:href="#computer" x="0" y="40" />
       <use xlink:href="#computer" x="190" y="40" />
       <path d="M40,60 L60,10"/>
@@ -1542,23 +1542,23 @@ seq, ack はそれぞれ送った (受けとった) データのバイト数に�
 <table border><tr>
 <th>ホストA</th><th>ホストB</th>
 </tr><tr>
-<td>[seq=<u>1</u>, ack=1, (10バイト)] →<br>seq +10</td>
+<td class="bgb">[seq=<u>1</u>, ack=1, (10バイト)] →<br>seq +10</td>
 <td>ack +10</td>
 </tr><tr>
 <td>ack +5</td>
-<td>← [seq=1, ack=<u>11</u>, (5バイト)]<br>seq +5</td>
+<td class="bgr">← [seq=1, ack=<u>11</u>, (5バイト)]<br>seq +5</td>
 </tr><tr>
-<td>[seq=<u>11</u>, ack=<u>6</u>, (0バイト)] →<br>seq +0</td>
+<td class="bgb">[seq=<u>11</u>, ack=<u>6</u>, (0バイト)] →<br>seq +0</td>
 <td>ack +0</td>
 </tr><tr>
 <td>ack +3</td>
-<td>← [seq=<u>6</u>, ack=<u>11</u>, (3バイト)]<br>seq +3</td>
+<td class="bgr">← [seq=<u>6</u>, ack=<u>11</u>, (3バイト)]<br>seq +3</td>
 </tr><tr>
-<td>[seq=<u>11</u>, ack=<u>9</u>, (1バイト)] →<br>seq +1</td>
+<td class="bgb">[seq=<u>11</u>, ack=<u>9</u>, (1バイト)] →<br>seq +1</td>
 <td>ack +1</td>
 </tr><tr>
 <td>ack +0</td>
-<td>← [seq=<u>9</u>, ack=<u>12</u>, (0バイト)]<br>seq +0</td>
+<td class="bgr">← [seq=<u>9</u>, ack=<u>12</u>, (0バイト)]<br>seq +0</td>
 </tr></table>
 
 <p>
@@ -1582,12 +1582,12 @@ seq, ack はそれぞれ送った (受けとった) データのバイト数に�
       <use xlink:href="#computer" x="0" y="0" />
       <use xlink:href="#computer" x="300" y="0" />
       <line x1="60" y1="32" x2="290" y2="32" />
-      <rect x="100" y="2" width="30" height="20" />
-      <rect x="150" y="2" width="30" height="20" />
-      <rect x="200" y="2" width="30" height="20" stroke-dasharray="2,2" />
-      <rect x="250" y="2" width="30" height="20" />
-      <rect x="180" y="42" width="30" height="20" />
-      <rect x="130" y="62" width="30" height="20" />
+      <rect x="100" y="2" width="30" height="20" fill="#88ffff" />
+      <rect x="150" y="2" width="30" height="20" fill="#88ffff" />
+      <rect x="200" y="2" width="30" height="20" fill="#88ffff" stroke-dasharray="2,2" />
+      <rect x="250" y="2" width="30" height="20" fill="#88ffff" />
+      <rect x="180" y="42" width="30" height="20" fill="#ffbbff" />
+      <rect x="130" y="62" width="30" height="20" fill="#ffbbff" />
       <g marker-end="url(#arrow)" stroke-width="4">
         <line x1="90" x2="70" y1="12" y2="12" />
         <line x1="220" x2="240" y1="52" y2="52" />
@@ -1627,10 +1627,10 @@ TCP 通信は、開始時に特別な処理をおこなう。
 双方向の通信が可能となる。ひとつの仮想回線では、次のものが決まっている:
 </p>
 <ul>
-<li> クライアント側のIPアドレス
-<li> クライアント側のTCPポート
-<li> サーバ側のIPアドレス
-<li> サーバ側のTCPポート
+<li> ホストAのIPアドレス
+<li> ホストAのTCPポート
+<li> ホストBのIPアドレス
+<li> ホストBのTCPポート
 </ul>
 
 <h3 id="tcp-client-server">4.2. 「クライアント」と「サーバ」</h3>
@@ -1640,7 +1640,7 @@ IP層においては、すべてのホストはパケットを送受信すると
 TCP層の通信では、必ず2種類の役割が存在する:
 </p>
 <ul>
-<li> TCP<u>クライアント</u> (TCP SYN を送り、通信を開始する側)
+<li> TCP<u>クライアント</u> (TCP SYN を送り、<strong>通信を開始する側</strong>)
   … 客。いつサーバに電話をかけてもよい。
 <li> TCP<u>サーバ</u> (TCP SYN を送られる側)
   … 店。いつクライアントから電話がかかってきてもいいように、
@@ -1681,6 +1681,21 @@ TCPサーバは、特定のTCPポートに TCP SYN が送られるかどうか�
     </g>
   </svg></div>
   <div class="caption">クライアントからサーバへの「接続」</div>
+</div>
+
+<div class=notice>
+注意:
+ここでいう「クライアント」「サーバ」は、あくまで特定の動きをするソフトウェア（プロセス）のことであり、
+<strong>物理的なクライアントやサーバマシンとは関係が必要ない。</strong>
+実際、ひとつのPC上にクライアントプロセスとサーバプロセスが同時に存在することもある。
+</div>
+
+<div class=exercise id="ex-client-server">
+<div class=header>演習. クライアントとサーバ</div>
+<p>
+自分のPC上で動いているTCPクライアント、TCPサーバの例を挙げよ。
+逆に、サーバ上で動いているTCPクライアントは存在するか?
+</p>
 </div>
 
 <h4>TCPサーバ側の手順:</h4>
