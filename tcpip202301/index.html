@@ -1693,9 +1693,17 @@ TCPサーバは、特定のTCPポートに TCP SYN が送られるかどうか�
 <div class=exercise id="ex-client-server">
 <div class=header>演習. クライアントとサーバ</div>
 <p>
-自分のPC上で動いているTCPクライアント、TCPサーバの例を挙げよ。
-逆に、サーバ上で動いているTCPクライアントは存在するか?
-</p>
+自分のPC上で動いているTCPクライアント、TCPサーバを表示してみよう。
+<p>
+Linuxの場合:
+<pre>
+$ <strong>netstat -n -a -t -p</strong>
+</pre>
+<p>
+macOSの場合:
+<pre>
+$ <strong>lsof -n -P -iTCP</strong>
+</pre>
 </div>
 
 <h4>TCPサーバ側の手順:</h4>
