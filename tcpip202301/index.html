@@ -1787,20 +1787,26 @@ Listen/Established状態になっている TCPポート一覧を見ることが�
 <p>
 <a href="#ex-tcp-connection">上の演習</a> を実行中に、
 サーバ・クライアントの両方で別のウィンドウを開き、
-以下のコマンドを実行せよ。
+以下のコマンドを実行して、現在通信中のポートが表示されていることを確認せよ。
 </p>
-<blockquote><pre>
+<p>
+Linuxの場合:
+<pre>
 $ <strong>netstat -n -t</strong>
-</pre></blockquote>
-現在通信中のポートが表示されていることを確認せよ。
+</pre>
+<p>
+macOSの場合:
+<pre>
+$ <strong>lsof -n -P -iTCP</strong>
+</pre>
 </div>
 
 <div class=exercise id="ex-tcp-wireshark">
 <div class=header>演習. Wireshark を使って TCPハンドシェイクを観察する</div>
 <p>
-Wireshark を起動後、パケットキャプチャーを開始し、
-フィルタバーに <code>ip.addr == 93.184.216.34</code> と入力せよ。
-ブラウザで <a target="_blank" href="https://www.example.com/">https://www.example.com/</a> を開き、
+Wireshark を起動、パケットキャプチャーを開始し、
+フィルタバーに <code>ip.addr == <em>サーバIPアドレス</em></code> と入力せよ。
+その後、 <a href="#ex-tcp-connection">上の演習</a> をもう一度くりかえし
 TCP の 3ウェイハンドシェイクが行われていることを確認せよ。
 </p>
 </div>
@@ -1947,7 +1953,7 @@ IPパケットの中の、TCPセグメントのさらに中に記録されてい
   </svg>
 </div>
 
-<h4>TCP/IP プログラミング</h4>
+<h4 id="socket">TCP/IP プログラミング (Socket API)</h4>
 <p>
 一般的に、もっともよく使われるのは TCP層の機能である。
 現在の OS では「ソケット (socket)」という API が整備されており、
@@ -2266,9 +2272,9 @@ HTTP/1.1 <u>200</u> OK
 <li> 指定されたファイルが存在しない。いわゆる「ページが見つかりません」エラー。
     この場合、サーバはペイロードとして HTML を返すこともある。
   <blockquote><pre>HTTP/1.1 <u>404</u> Not Found</pre></blockquote>
-  <p> 例: <a target="_blank" href="https://www.yahoo.co.jp/nonexistent">https://www.yahoo.co.jp/nonexistent</a>
+  <p> 例: <a target="_blank" href="https://www.google.com/nonexistent">https://www.google.com/nonexistent</a>
 <li> 別の場所を参照せよ。これが返されると、ブラウザのアドレスバーが変化する。
-  <blockquote><pre>HTTP/1.1 <u>302</u> Moved</pre></blockquote>
+  <blockquote><pre>HTTP/1.1 <u>301</u> Moved</pre></blockquote>
   <p> 例: <a target="_blank" href="https://ja.wikipedia.org/">https://ja.wikipedia.org/</a>
 </ul>
 
@@ -2351,6 +2357,8 @@ HTTP はあまりにも普及しているため、
 こんにち多くのアプリケーションは TCP層を直接使わず、
 HTTP「層」を使って構築されるようになっている。
 このようなアプリを <u>Webアプリ</u> と呼ぶ。
+また、上で紹介した <a href="#socket">socket API</a> に似た機構を HTTP層の上で実現した
+<u>WebSocket</u> という仕組みもある。
 </p>
 
 <div class=figure>
@@ -2636,6 +2644,10 @@ Content-Type: text/html; charset=UTF-8
 …
 </pre></blockquote>
 </div>
+
+<h4 id="curl">curlコマンド</h4>
+<p>
+  
 
 <h3 id="encryption-ssh">6.2. SSH層</h3>
 <p>
