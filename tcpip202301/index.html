@@ -68,7 +68,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 <ul>
 <li> <a href="#internet">第1回 (3/15): インターネットの概要、データリンク層、IP層</a>
 <li> <a href="#tcp">第2回 (3/31): TCP層、DNS、HTTP</a>
-<li class=wip> 第3回 (?): 暗号化、NAT、ファイヤーウォール、VPN、SSH
+<li> <a href="#encryption">第3回 (4/11): 暗号化、NAT、ファイヤーウォール、VPN、SSH</a>
 </ul>
 
 <h4>使用するツール</h4>
@@ -114,7 +114,6 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <li> <a href="#app-web">ウェブ (HTTP)</a>
   <li> <a href="#app-email">電子メール (SMTP)</a>
 </ul>
-<!--
 <li> <a href="#encryption">暗号化</a>
 <ul>
   <li> <a href="#encryption-tls">TLS/SSL層</a>
@@ -129,7 +128,6 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <li> <a href="#security-vpn">VPN</a>
   <li> <a href="#security-ssh-tunnel">SSHによるトンネリング</a>
 </ul>
--->
 </ol>
 </div>
 
@@ -2419,13 +2417,11 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 </pre></blockquote>
 
 
-<!--
-
-<h2 id="encryption">6. 暗号化</h2>
+<h2 style="margin-top:4em;" id="encryption">6. 暗号化</h2>
 <p>
 本来、TCP/IP の公式な範疇はTCP層までで、それより上は
 アプリケーションの責任となっている。しかし TCP 層まででは
-真に安全な通信は実現できない。とくに、TCP 層には以下のような欠点がある:
+真に安全な通信は実現できない:
 </p>
 <ul>
 <li> 短所: 通信内容が中継ホストにまる見えであること。
@@ -2436,7 +2432,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 
 <p>
 そこで最近では、これらの欠点を補うため TCP層の上にさらにもう一段、
-暗号化をおこなう層を追加して使うことが多い。
+(TCP/IPの範疇ではない) 暗号化をおこなう層を追加して使うことが多い。
 </p>
 
 <div class=figure>
@@ -2456,7 +2452,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
     </g>
     <g text-anchor="middle" style="font-size: 80%;">
       <text x="60" y="15" dy="0.5em">アプリケーション層</text>
-      <text x="60" y="45" dy="0.5em">暗号化層</text>
+      <text x="60" y="45" dy="0.5em">(暗号化層)</text>
       <text x="60" y="75" dy="0.5em">TCP層</text>
       <text x="60" y="105" dy="0.5em">IP層</text>
       <text x="60" y="135" dy="0.5em">データリンク層</text>
@@ -2647,7 +2643,15 @@ Content-Type: text/html; charset=UTF-8
 
 <h4 id="curl">curlコマンド</h4>
 <p>
-  
+HTTP/HTTPS を使う場合、<code>nc</code> コマンドや
+<code>openssl</code> コマンドを使って手でリクエストを入力するよりも、
+<code>curl</code> コマンドを使うのが便利:
+<blockquote><pre>
+$ <strong>curl https://www.example.com/</strong>
+$ <strong>curl -i https://www.example.com/</strong>
+$ <strong>curl -H "Header: Value" https://www.example.com/</strong>
+</pre></blockquote>
+
 
 <h3 id="encryption-ssh">6.2. SSH層</h3>
 <p>
@@ -3171,6 +3175,80 @@ VPN では、別々の場所にある2つのサーバ間を暗号化通信でつ
   <div class="caption">VPNにより2つのネットワークを接続した図</div>
 </div>
 
+<p>
+実際に VPN を実現する方法にはさまざまなものがあるが、
+もっとも単純なのは TCP/IP層、TLS層までをまるごと「データリンク層」として扱い、
+その上にさらに VPN用の IP層、TCP層を構築するというやりかたである (OpenVPNなど)。
+しかしこれは効率が悪いので、IP層の拡張である <u>IPSec</u> という規格を使って、
+IP層を直接暗号化する方法もある。
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="240">
+    <g transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" />
+      <rect x="0" y="30" width="120" height="30" />
+      <rect x="0" y="60" width="120" height="30" />
+      <g stroke="#888" fill="#ffff88">
+      <rect x="0" y="90" width="120" height="30" />
+      <rect x="0" y="120" width="120" height="30" />
+      <rect x="0" y="150" width="120" height="30" />
+      <rect x="0" y="180" width="120" height="30" />
+      </g>
+      <rect x="0" y="90" width="120" height="120" />
+      <line x1="60" y1="210" x2="60" y2="230" />
+      <line x1="-50" y1="230" x2="170" y2="230" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">アプリケーション層</text>
+      <text x="60" y="45" dy="0.5em">TCP層</text>
+      <text x="60" y="75" dy="0.5em">IP層</text>
+      <text fill="#888" x="60" y="105" dy="0.5em">TLS層</text>
+      <text fill="#888" x="60" y="135" dy="0.5em">TCP層</text>
+      <text fill="#888" x="60" y="165" dy="0.5em">IP層</text>
+      <text fill="#888" x="60" y="195" dy="0.5em">データリンク層</text>
+      <text x="170" y="218" dy="0.5em">ケーブル</text>
+    </g>
+    <g text-anchor="middle" style="font-weight: bold;">
+      <text x="60" y="150" dy="-0.5em">データ</text>
+      <text x="60" y="150" dy="+0.5em">リンク層</text>
+    </g></g>
+  </svg>
+  </div>
+  <div class=caption>VPNの実現手法 (OpenVPN)</div>
+</div>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="180">
+    <g transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" />
+      <rect x="0" y="30" width="120" height="30" />
+      <rect x="0" y="60" width="120" height="30" />
+      <rect fill="#ffff88" x="0" y="90" width="120" height="30" />
+      <rect x="0" y="120" width="120" height="30" />
+      <line x1="60" y1="150" x2="60" y2="170" />
+      <line x1="-50" y1="170" x2="170" y2="170" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">アプリケーション層</text>
+      <text x="60" y="45" dy="0.5em">TCP層</text>
+      <text x="60" y="75" dy="0.5em">IP層</text>
+      <text x="60" y="105" dy="0.5em" style="font-weight:bold;">IPSec層</text>
+      <text x="60" y="135" dy="0.5em">データリンク層</text>
+      <text x="170" y="158" dy="0.5em">ケーブル</text>
+    </g></g>
+  </svg>
+  </div>
+  <div class=caption>VPNの実現手法 (L2TP)</div>
+</div>
+
 <h3 id="security-ssh-tunnel">7.6. SSHによるトンネリング</h3>
 <p>
 一般に VPN を自分で構築・設定するのはかなり手間がかかる。
@@ -3310,7 +3388,6 @@ TCP 80番にリモートからアクセスさせる設定である。
   </div>
   <div class="caption">リモート→ローカル転送 (<code>-R 8080:192.168.1.2:80</code>)</div>
 </div>
--->
 
 
 <hr>
