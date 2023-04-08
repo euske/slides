@@ -2420,18 +2420,18 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 <h2 style="margin-top:4em;" id="encryption">6. 暗号化</h2>
 <p>
 本来、TCP/IP の公式な範疇はTCP層までで、それより上は
-アプリケーションの責任となっている。しかし TCP 層まででは
+アプリケーションの責任となっている。しかし TCP 層では
 真に安全な通信は実現できない:
 </p>
 <ul>
-<li> 短所: 通信内容が中継ホストにまる見えであること。
-<li> 短所: 通信相手が本物かどうか確認できないこと。
-  (中継するホストが最終目的のIPアドレスのふりをすることが可能である)
-<li> 短所: 通信内容が途中で改竄される可能性があること。
+<li> 短所: 通信内容が中継ホストに<strong>まる見え</strong>であること。
+<li> 短所: 通信相手が<strong>本物かどうか確認できない</strong>こと。
+  (中継するルータが、最終目的のホストのふりをすることが可能である)
+<li> 短所: 通信内容が途中で<strong>改竄される</strong>可能性があること。
 </ul>
 
 <p>
-そこで最近では、これらの欠点を補うため TCP層の上にさらにもう一段、
+最近では、これらの欠点を補うために TCP層の上にさらにもう一段、
 (TCP/IPの範疇ではない) 暗号化をおこなう層を追加して使うことが多い。
 </p>
 
@@ -2461,12 +2461,16 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 </div>
 
 <p>
-暗号化通信において特に重要なのは、
-「<strong>暗号化は、必ず通信相手の確認とセットで使わなければ意味がない</strong>」
-ということである。
-悪者も暗号は使えるので、たとえば中継ホストが正当な相手のフリをして
-自分と暗号を使って通信すれば、結局のところ情報は悪者の手に渡ってしまう。
-(中間者攻撃)
+暗号化通信において特に重要なこと:
+<div class=formula>
+暗号化は、必ず通信相手の確認と<strong>セットで使わなければ</strong>意味がない。
+</div>
+
+<p>
+なぜなら悪者も暗号は使えるからだ。
+たとえば、中継するホストが正当な相手のフリをして、暗号を使って通信すれば、
+結局のところ情報は悪者の手に渡ってしまう (中間者攻撃)。
+したがって、暗号はつねに <u>end-to-end</u> で利用する必要がある。
 </p>
 <div class=figure>
   <div>
@@ -2502,30 +2506,29 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 </div>
 
 <p>
-現在、普及している暗号化層は 2種類存在する。
-<u>TLS/SSL</u>層または<u>SSH</u>層である。
-TLS/SSL は <u>認証局 (CA)</u> という中央集権的な
-枠組みを導入することにより、相手のホストを識別する枠組みである。
-いっぽう SSH は個人の信頼にもとづいたホスト間の
-簡単な認証システムを提供している。
-</p>
+現在普及している暗号化層:
+<ul>
+<li> <u>TLS/SSL</u>層 … <u>認証局 (CA)</u> という中央集権的な
+認証の枠組みを導入することにより、相手ホストの正当性を判定する。
+<li> <u>SSH</u>層 … 個人の信頼にもとづいた、
+  ホスト間の簡単な認証システム。
+</ul>
+
 <p>
-TLS/SSL も SSH も (本来は TCP/IP 層の一部ではなくアプリケーション層なので)、
-アプリケーションまたはライブラリの形で提供されており、
-利用者に対して end-to-end の安全な通信を提供する。
 どちらもベースになっているのは<u>公開鍵暗号</u>技術である。
+TLS/SSL も SSH も (本来は TCP/IP 層の一部ではなくアプリケーション層なので)、
+アプリケーションまたはライブラリの形で提供されている。
 </p>
 
 <h3 id="encryption-tls">6.1. TLS/SSL層</h3>
 
-<p>
-TLS/SSL はもともと HTTP を暗号化するための方式 (HTTPS) として
-提案されたものである。これは、ブラウザ上にいわゆる
-「鍵マーク」を表示する仕組みで、<u>デジタル証明書</u> を使って
-接続先のサーバ名が正しいかどうかを
-<u>認証局 (CA)</u> と呼ばれる第三者機関に確認してもらい、
-「安全」というお墨付きを得ている。
-</p>
+<ul>
+<li> もともと HTTP を暗号化するための方式 (HTTPS) として提案された。
+<li> ブラウザ上にいわゆる「鍵マーク」を表示する仕組み。
+<li> 接続先のサーバ名が正しいかどうかを、<u>認証局 (CA)</u> と呼ばれる第三者機関が、
+<u>デジタル証明書</u> を使って確認する。
+</ul>
+
 <p>
 デジタル証明書は認証局が発行し、
 ここで使われる公開鍵が本当にその個人・組織に
@@ -2590,7 +2593,7 @@ TLS/SSL はもともと HTTP を暗号化するための方式 (HTTPS) として
 
 <p>
 実際の TLS/SSL による通信は <code>openssl</code> コマンドを使って
-おこなうことができる:
+おこなう (なお、HTTPS では通常 TCP 443番ポートが使われる):
 </p>
 <blockquote><pre>
 $ <strong>openssl s_client -connect www.example.com:443</strong>
@@ -2605,23 +2608,22 @@ verify return:1
 </pre></blockquote>
 
 <p>
-TLS/SSL層を使った通信では、
-まず相手のサーバに TCP接続した後、
-デジタル証明書を送る処理 (TLS/SSLハンドシェイク) が追加されている。
-上の例では <code>www.example.com</code> サーバが証明書を送っているところが見える。
-この処理が完了すると、TLS/SSL層はその上のアプリケーション層に対して
-通常の TCP層と同じようにふるまうため、
-アプリ側は何も考えずに普通の HTTP の処理を行えばよい。
-つまり、<code>https://…</code> という URL に対する処理は、
-TLS/SSL層を使った部分以外は通常の <code>http://…</code> と同じである。
-なお、HTTPS には通常 TCP 443番ポートが使われる。
+TLS/SSL層は以下のような手順で動作する:
+<ol>
+<li> 相手のサーバに TCP接続する。
+<li> 暗号化通信を開始する。
+<li> サーバからデジタル証明書を受けとり、正しいサーバであることを確認する (TLS/SSLハンドシェイク)。
+</ol>
+<p>
+以上が完了すると、TLS/SSL層は通常の TCP層と同じようにふるまう。
+そのため、HTTPS の処理は、TLS/SSL層を使う部分以外は HTTP と同じである。
 </p>
 
 <div class=exercise id="ex-openssl-http-client">
 <div class=header>演習. openssl コマンドを使って HTTPリクエストを送る</div>
 <p>
 上で示した openssl コマンドを使って、
-<a href="#">先の演習</a>にならい
+<a href="#ex-human-http-client">先の演習</a>にならい
 サーバに HTTPリクエストを送り、応答を確認せよ。
 </p>
 <blockquote><pre>
@@ -2640,42 +2642,201 @@ Content-Type: text/html; charset=UTF-8
 
 <h4 id="curl">curlコマンド</h4>
 <p>
-HTTP/HTTPS を使う場合、<code>nc</code> コマンドや
-<code>openssl</code> コマンドを使って手でリクエストを入力するよりも、
-<code>curl</code> コマンドを使うのが便利:
+<code>curl</code> コマンドを使うと、指定した URL に
+HTTP/HTTPS リクエストを送り、レスポンスを画面に表示する。
+<code>nc</code> コマンドや
+<code>openssl</code> コマンドを使って手で直接 HTTP リクエストを入力するよりも、
+こちらのほうが便利。
+Webサーバの挙動を調べるのにおすすめ。
+
 <blockquote><pre>
 $ <strong>curl https://www.example.com/</strong>
-$ <strong>curl -i https://www.example.com/</strong>
-$ <strong>curl -H "Header: Value" https://www.example.com/</strong>
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+...
+</pre></blockquote>
+<p>
+<code>-i</code> オプションをつけると、HTTP のレスポンスヘッダも表示する。
+<blockquote><pre>
+$ <strong>curl <mark>-i</mark> https://www.example.com/</strong>
+HTTP/2 200
+accept-ranges: bytes
+age: 49533
+cache-control: max-age=604800
+...
+</pre></blockquote>
+<p>
+<code>-H</code> オプションを使えば、リクエストヘッダに任意の値を指定できる:
+<blockquote><pre>
+$ <strong>curl -i <mark>-H</mark> "<u>If-Modified-Since</u>: <u>Sun, 1 Jan 2023 00:00:00 GMT</u>" https://www.example.com/</strong>
+HTTP/2 304
+...
 </pre></blockquote>
 
+<div class=exercise id="ex-curl-http-client">
+<div class=header>演習. curl コマンドを使って HTTPリクエストを送る</div>
+<p>
+上で示した <code>curl</code> コマンドの使用例を実際に実行せよ。
+</div>
 
 <h3 id="encryption-ssh">6.2. SSH層</h3>
 <p>
-TLS/SSL 層の大きな欠点は、認証局を頂点とする、中央集権化された、
+TLS/SSL 層の大きな欠点は、ルート認証局を頂点とする、中央集権化された、
 全世界規模の <u>公開鍵基盤</u> (PKI) を構築する必要があることである。
 これには大きなコストがかかるうえに、認証局が信頼できない場合がある
 というリスクも抱えている (参考:
 <a href="https://ja.wikipedia.org/wiki/2011%E5%B9%B4%E3%83%87%E3%82%B8%E3%83%8E%E3%82%BF%E3%83%BC%E4%BA%8B%E4%BB%B6">2011年デジノター事件</a>)。
 </p>
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="300"
+       transform="scale(1,1)">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="ca" fill="none" stroke="black" stroke-width="2">
+      <rect x="5" y="0" width="40" height="50" />
+      <path d="M10,10 l0,40 M15,10 l0,40 M20,10 l0,40 M25,10 l0,40 M30,10 l0,40 M35,10 l0,40 M40,10 l0,40" />
+    </g>
+    <g id="site" fill="none" stroke="black" stroke-width="2">
+      <rect x="15" y="0" width="20" height="50" />
+      <rect x="0" y="20" width="50" height="30" />
+    </g>
+    <g id="key" fill="none" stroke="black" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="keyr" fill="none" stroke="red" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="keyb" fill="none" stroke="blue" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="keyg" fill="none" stroke="green" stroke-width="3">
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="cert">
+      <rect stroke="black" fill="none" stroke-width="1" x="0" y="0" width="70" height="20" />
+      <text stroke="none" fill="black" style="font-size: 75%;" x="2" y="15">証明書</text>
+    </g>
+    </defs>
+    <use xlink:href="#ca" x="300" y="15" />
+    <use xlink:href="#ca" x="200" y="85" />
+    <use xlink:href="#ca" x="100" y="155" />
+    <use xlink:href="#site" x="20" y="225" />
+    <use xlink:href="#key" x="360" y="40" />
+    <use xlink:href="#keyr" x="260" y="120" />
+    <use xlink:href="#keyb" x="160" y="190" />
+    <use xlink:href="#keyg" x="80" y="260" />
+    <use xlink:href="#cert" x="230" y="40" />
+    <use xlink:href="#keyr" x="270" y="50" />
+    <use xlink:href="#cert" x="130" y="110" />
+    <use xlink:href="#keyb" x="170" y="120" />
+    <use xlink:href="#cert" x="30" y="180" />
+    <use xlink:href="#keyg" x="70" y="190" />
+    <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
+      <path d="M305,70 l-50,20" />
+      <path d="M320,70 l-30,20" />
+      <path d="M340,70 l30,20" />
+      <path d="M205,140 l-50,20" />
+      <path d="M220,140 l-30,20" />
+      <path d="M240,140 l30,20" />
+      <path d="M105,210 l-40,20" />
+      <path d="M120,210 l-20,20" />
+      <path d="M140,210 l30,20" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle">
+      <text x="320" y="12">ルート認証局A</text>
+      <text x="220" y="82" fill="red">中間認証局B</text>
+      <text x="120" y="152" fill="blue">中間認証局C</text>
+      <text x="60" y="290" fill="green">www.example.com</text>
+    </g>
+    <text x="320" y="90">...</text>
+    <text x="220" y="160">...</text>
+    <text x="120" y="240">...</text>
+  </svg>
+  <div class=caption>公開鍵基盤</div>
+  </div>
+</div>
+
 <p>
-SSH はこれに対して「サーバが公開鍵を提示し、ユーザにそれを信頼するか否かを
-判断させる」という簡単な仕組みで暗号化された通信を実現している。
+SSH はもっと簡単な仕組みを使って暗号化された通信を実現している:
 </p>
 
 <ol>
-<li> ユーザは、まず接続しようとするサーバの公開鍵の
-<u>指紋</u> (fingerprint) を、なんらかの方法によってあらかじめ知っておく。
-<li> サーバの初回接続時に、サーバがその公開鍵の指紋を提示する。
-これは以下のように表示される:
+<li> ユーザは、あらかじめ接続しようとするサーバの公開鍵の
+<u>指紋</u> (fingerprint) を、なんらかの方法によって知っておく。
+<li> サーバの初回接続時に、サーバは自分の公開鍵の指紋を提示し、その持ち主であることを証明する。
+<li> ユーザがそれを認めれば、暗号化された通信が確立する。
+</ol>
+
+<p>
+SSH はもともと Unixマシンの遠隔操作のために開発されたため、
+暗号化通信に加えて、<strong>ユーザの認証処理</strong>もおこなう。
+現在、SSH はサーバ管理などでアプリ開発者がよく利用するツールとなっている。
+</p>
+
+<p>
+<strong>注意:</strong>
+SSH ではユーザ認証にも公開鍵暗号を使っているため、混乱しやすい。
+</p>
+<ol>
+<li> ユーザは、あらかじめ接続しようとするサーバ上に、自分の公開鍵を登録しておく。
+<li> ユーザはログイン時に、自分がその公開鍵の持ち主であることを証明する。
+<li> サーバがそれを認めれば、ログインが許可される。
+</ol>
+
+<p>
+したがって、SSH では 2種類の「公開鍵」が存在する:
+</p>
+<ul>
+<li> サーバ公開鍵 … 相手のサーバが正当かどうか確認するためのもの。<br>
+  サーバ上に置いておくが、自動で生成されるため、ほとんどのユーザが気にする必要はない。
+<li> 認証用の公開鍵 … 自分が正当なユーザであることをサーバに確認させるためのもの。<br>
+  クライアントPC上に置いておく。
+</ul>
+
+<h4>SSH の使い方</h4>
+<p>
+ここでは典型的な例 (Unixサーバに SSH を使ってログインする) をあげる:
+<ol>
+<li> SSHサーバを起動する。SSHサーバは初回起動時、自動的にそのサーバの公開鍵を生成する。
+<li> あらかじめクライアントPC上で認証用の秘密鍵・公開鍵ペアを生成しておく。
+(これは一度だけおこなう。)
 <blockquote><pre>
-$ <strong>ssh server.example.com</strong>
+client$ <strong>ssh-keygen -t ed25519</strong>
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/home/euske/.ssh/id_ed25519):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/euske/.ssh/id_ed25519
+Your public key has been saved in /home/euske/.ssh/id_ed25519.pub
+The key fingerprint is:
+SHA256:aEpvBZ1w/NJBvwZwpaWqdnPtCbHQFc0XDo0Gv+OlN50 euske@laptop
+...
+</pre></blockquote>
+<li> 秘密鍵は秘密なので、そのマシンの外には持ち出さない。
+(複数のマシンで SSH を使う場合、マシンごとに異なる秘密鍵を持たせる)
+<li> いっぽう公開鍵は誰に見せてもよいので、ログイン先のSSHサーバ上アカウントの
+<code>~/.ssh/authorized_keys</code> にコピーしておく。
+<li> SSHサーバ公開鍵の指紋を覚えておく。<br>
+たとえば、<code>server.example.com</code> の公開鍵の指紋は
+<code>SHA256:HLfnjG5dDqVPIfWtG6sNGG5JyY5AYtkxaupGsJffyYs</code> であるとしよう。
+<li> クライアントPC上で、 <code>ssh</code> コマンドを使ってサーバに接続する。<br>
+初回接続時には、サーバ公開鍵の指紋が表示され、確認が要求される。
+<blockquote><pre>
+client$ <strong>ssh server.example.com</strong>
 The authenticity of host '[server.example.com]:22 ([192.168.1.10]:22)' can't be established.
 ED25519 key fingerprint is <mark>SHA256:HLfnjG5dDqVPIfWtG6sNGG5JyY5AYtkxaupGsJffyYs</mark>.
 This key is not known by any other names.
 Are you sure you want to continue connecting (yes/no/[fingerprint])?
 </pre></blockquote>
-<li> ユーザがこれを信頼すれば (<code>yes</code>)、暗号化された通信が確立する。
+<li> ユーザがこれに <code>yes</code> と答えればログインできる。
 </ol>
 
 <p>
@@ -2693,7 +2854,7 @@ SSH のよくある使い方はサーバ上のシェルをリモートから実�
 
 <h2 id="security">7. セキュリティ</h2>
 <p>
-一般的に、ネットワークにおける「セキュリティ」とは、以下の性質をさす:
+一般に、ネットワークにおける「セキュリティ」とは、以下の性質をさす:
 </p>
 <ol type=a>
   <li> 機密性 (情報が不正に閲覧されない)
@@ -2703,22 +2864,25 @@ SSH のよくある使い方はサーバ上のシェルをリモートから実�
 <p>
 先に述べた暗号化は上の性質 a., b. に対してある程度は有効だが、
 完全ではない (そもそも「完全な」セキュリティなど現実にありえない)。
-インターネットは本質的に信頼できないネットワークであり、
+インターネットは本質的に信頼できないため、
 暗号化以外にもネットワークからの攻撃を防ぐ仕組みがいくつも存在する。
 </p>
 
 <h3 id="security-privateip">7.1. プライベートIPアドレス</h3>
-<p>
-インターネットを使う<strong>すべての</strong>機器には
-IPアドレスが必要であり、しかも同じアドレスを 2つの場所で使ってはならない。
-しかし、IP アドレスは 32ビットで表現されているため、
-たかだか 2<sup>32</sup> ≒ 42億個しか表現できない。
-→ IPアドレスが足りない。
-</p>
+<ul>
+<li> インターネットを使う<strong>すべての</strong>機器には
+IPアドレスが必要である。
+<li> しかも、同じアドレスを 2つの場所で使ってはならない。
+<li> しかし、IP アドレスは 32ビットで表現されているため、
+たかだか 2<sup>32</sup> ≒ 42億個しか存在しない。
+<li> 現在、世界にはこれを超える台数のコンピュータが存在する。
+<li> IPアドレスが足りない。
+</ul>
+
 <p>
 そこで、以下のアドレスは組織内で勝手に使ってよいという
 決まりになっている。これを <u>プライベート IPアドレス</u> といい、
-このような IPアドレスで構成したネットワークを
+プライベート IPアドレスを使ったネットワークを
 <u>プライベート ネットワーク</u> (private network) という。
 </p>
 <ul>
@@ -2727,12 +2891,15 @@ IPアドレスが必要であり、しかも同じアドレスを 2つの場所�
 <li> <code>192.168.0.0/16</code>
 <li> ...
 </ul>
-
 <div class=notice>
 注意:
 プライベートIPアドレスのホストは、
 インターネット (その組織の外) からは到達できない。
 </div>
+<p>
+これに対して、世界中から実際に到達可能な「普通の」IPアドレスのことを
+<u>グローバル IPアドレス</u>という。
+</p>
 
 <div class=figure>
   <div>
@@ -2779,8 +2946,6 @@ IPアドレスが必要であり、しかも同じアドレスを 2つの場所�
 </div>
 
 <p>
-これに対して、世界中から実際に到達可能な「普通の」IPアドレスのことを
-<u>グローバル IPアドレス</u>という。
 現在の日本のオフィス・家庭では、ルータ以外の
 機器はほとんどプライベート IP アドレスを使っている。
 プライベートネットワークに接続された機器は外部のインターネットから
@@ -2794,7 +2959,7 @@ IPアドレスが必要であり、しかも同じアドレスを 2つの場所�
 <p>
 アドレスの不足を解決するため、現在の IP 層を変更して
 128ビットのアドレスを使えるようにしたものが <u>IPv6</u> である。
-これに対して、従来の IP層は <u>IPv4</u> という。
+(これに対して、従来の IP層は <u>IPv4</u> という。)
 IPv6 を使えばすべての機器がグローバル IP アドレスを持つことができる。
 しかし IPv6 は従来の IPv4 とは互換性がないため、
 世界じゅうのルータを入れ換えなければならない。
