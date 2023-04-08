@@ -21,8 +21,8 @@ img { max-width: 80vw; height: auto; }
 dt { text-decoration: underline; font-weight: bold; }
 u { color: #880000; font-weight: bold; }
 .author { text-align: right; }
-.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
-.figure .caption { margin-top: 1em; font-size: 80%; font-weight: bold; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; }
+.figure .caption { font-size: 80%; font-weight: bold; }
 .notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
@@ -173,8 +173,8 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
       <path d="M 290,60 C 290,70 290,110 280,130 C 270,150 240,160 230,160 C 210,160 170,140 150,120 C 140,110 140,90 140,90" marker-end="url(#arrow)" stroke="blue" />
     </g>
   </svg>
-</div>
   <div class="caption">コンピュータのネットワーク</div>
+</div>
 </div>
 
 <p>
@@ -228,8 +228,8 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
       <text x="320" y="165" dy="0.5em" text-anchor="end">20.10.8.5</text>
     </g>
   </svg>
-</div>
 <div class="caption">双方向に流れるパケット</div>
+</div>
 </div>
 
 <h4>インターネット以外に使われている (いた) ネットワーク規格</h4>
@@ -528,8 +528,8 @@ TCP 層によって、インターネット上のあるホストから別のホ�
       </g>
     </g>
   </svg>
-</div>
 <div class="caption">イーサネット</div>
+</div>
 </div>
 
 <h3 id="datalink-macaddr">2.1. 物理アドレス (MACアドレス)</h3>
@@ -609,8 +609,8 @@ TCP 層によって、インターネット上のあるホストから別のホ�
 <div class=figure>
   <div>
 <img src="wireshark.png" width="700" height="464">
-</div>
 <div class="caption">Wireshark</div>
+</div>
 </div>
 </div>
 
@@ -655,8 +655,8 @@ TCP 層によって、インターネット上のあるホストから別のホ�
       <text x="110" y="50">仮想インターフェイス</text>
     </g>
   </svg>
-</div>
 <div class="caption">本物のインターフェイスと仮想インターフェイス</div>
+</div>
 </div>
 
 <div class=exercise id="ex-virtual-interface">
@@ -983,8 +983,8 @@ else
       </g>
     </g>
   </svg>
-</div>
 <div class="caption">サブネット 192.168.1.0 に接続されているホスト</div>
+</div>
 </div>
 
 <p>
@@ -1001,8 +1001,8 @@ else
 <div class=figure>
 <div>
 <img src="netcpl.png" width="482" height="279">
-</div>
 <div class="caption">macOSにおけるTCP/IPの設定</div>
+</div>
 </div>
 
 <h4>ルータの場合:</h4>
@@ -1040,8 +1040,8 @@ else
       <text x="90" y="35">192.168.2.1</text>
     </g>
   </svg>
-  </div>
   <div class="caption">ルータが2つのサブネットを中継する</div>
+  </div>
 </div>
 
 <p>
@@ -1258,8 +1258,8 @@ else
 </g>
 </g>
 </svg>
-</div>
 <div class="caption">リンク・ステート方式で作成される地図の一例</div>
+</div>
 </div>
 
 <h4>経路ベクトル方式 (Path vector routing)</h4>
@@ -1438,8 +1438,8 @@ TCP層までくると、2つのホストは連続した通信ができるので�
     </g>
     </g>
   </svg>
-  </div>
   <div class=caption>TCP層におけるポートと仮想回線</div>
+  </div>
 </div>
 
 <h3 id="tcp-details">4.1. TCPの詳細</h3>
@@ -1601,8 +1601,8 @@ seq, ack はそれぞれ送った (受けとった) データのバイト数に�
       <text x="145" y="72" dy="0.5em">8</text>
     </g>
   </svg>
-  </div>
   <div class="caption">失われたパケット (13)</div>
+  </div>
 </div>
 
 <h4>TCP SYN パケットとハンドシェイク</h4>
@@ -1677,8 +1677,9 @@ TCPサーバは、特定のTCPポートに TCP SYN が送られるかどうか�
       <text x="190" y="40">接続する</text>
       <text x="310" y="10">Listen</text>
     </g>
-  </svg></div>
+  </svg>
   <div class="caption">クライアントからサーバへの「接続」</div>
+  </div>
 </div>
 
 <div class=notice>
@@ -2150,8 +2151,9 @@ HTTP は、おそらくもっとも有名なアプリケーション層である
       <text x="110" y="12">リクエスト</text>
       <text x="270" y="48">レスポンス</text>
     </g>
-  </svg></div>
+  </svg>
   <div class="caption">HTTPにおけるリクエストとレスポンス</div>
+  </div>
 </div>
 
 <p>
@@ -2360,7 +2362,6 @@ HTTP「層」を使って構築されるようになっている。
 </p>
 
 <div class=figure>
-  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="250" height="180">
@@ -2383,7 +2384,6 @@ HTTP「層」を使って構築されるようになっている。
       <text x="170" y="158" dy="0.5em">ケーブル</text>
     </g></g>
   </svg>
-  </div>
 </div>
 
 <h3 id="app-email">5.3. 電子メール (SMTP)</h3>
@@ -2436,7 +2436,6 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 </p>
 
 <div class=figure>
-  <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="250" height="180">
@@ -2459,7 +2458,6 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
       <text x="170" y="158" dy="0.5em">ケーブル</text>
     </g></g>
   </svg>
-  </div>
 </div>
 
 <p>
@@ -2472,8 +2470,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 </p>
 <div class=figure>
   <div>
-  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="500" height="120"
-       transform="scale(1,1)">
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="500" height="110">
     <defs>
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
       <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
@@ -2500,8 +2497,8 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
       <text x="435" y="90">本当に通信したい相手</text>
     </g>
   </svg>
+  <div class="caption">悪者が暗号を使ったら…?</div>
   </div>
-    <div class="caption">悪者が暗号を使ったら…?</div>
 </div>
 
 <p>
@@ -2537,7 +2534,7 @@ TLS/SSL はもともと HTTP を暗号化するための方式 (HTTPS) として
 </p>
 
 <div class=figure>
-  <div style="align-items: flex-end;">
+  <div>
   <img src="key.png" width="389" height="131">
 
   <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="200"
@@ -2587,8 +2584,8 @@ TLS/SSL はもともと HTTP を暗号化するための方式 (HTTPS) として
       <text x="170" y="170" fill="green" style="font-size: 125%; font-weight: bold; font-style: italic;">Google</text>
     </g>
   </svg>
-    </div>
   <div class="caption">鍵マークが表示されるしくみ</div>
+  </div>
 </div>
 
 <p>
@@ -2776,8 +2773,9 @@ IPアドレスが必要であり、しかも同じアドレスを 2つの場所�
       <text x="340" y="155" dy="0.5em">プライベート</text>
       <text x="340" y="170" dy="0.5em">ネットワーク</text>
     </g>
-  </svg></div>
+  </svg>
   <div class="caption">プライベートIPアドレス と プライベートネットワーク</div>
+  </div>
 </div>
 
 <p>
@@ -2857,8 +2855,9 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
       <text x="120" y="92" dy="0.5em">Src: 166.84.7.55</text>
       <text x="120" y="107" dy="0.5em">Dst: 192.168.1.2</text>
     </g>
-  </svg></div>
+  </svg>
   <div class="caption">NATによるIPアドレスの書き換え</div>
+  </div>
 </div>
 
 <div class=exercise id="ex-nat">
@@ -2969,8 +2968,8 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
       </g>
     </g>
   </svg>
-  </div>
   <div class="caption">パケットをフィルタする</div>
+  </div>
 </div>
 
 <p>
@@ -3031,8 +3030,9 @@ IPパケットが来るたびにそのアドレスを書き換えることによ
       <text x="325" y="200" dy="0.5em">ファイヤウォール</text>
       <text x="500" y="180" dy="0.5em">インターネット</text>
     </g>
-  </svg></div>
+  </svg>
   <div class="caption">WAF・IDS・IPS</div>
+  </div>
 </div>
 
 <h3 id="security-proxy">7.4. プロキシサーバ</h3>
@@ -3072,8 +3072,9 @@ NAT とは異なり、IP層 (レイヤー3) ではなく TCP層 (レイヤー4) 
       <text x="225" y="70" dy="0.5em">192.168.1.1</text>
       <text x="425" y="70" dy="0.5em">166.84.7.55</text>
     </g>
-  </svg></div>
+  </svg>
   <div class="caption">プロキシサーバ</div>
+  </div>
 </div>
 
 <ol>
@@ -3171,8 +3172,9 @@ VPN では、別々の場所にある2つのサーバ間を暗号化通信でつ
       </g>
     </g>
   </g>
-  </svg></div>
+  </svg>
   <div class="caption">VPNにより2つのネットワークを接続した図</div>
+  </div>
 </div>
 
 <p>
@@ -3217,11 +3219,9 @@ IP層を直接暗号化する方法もある。
       <text x="60" y="150" dy="+0.5em">リンク層</text>
     </g></g>
   </svg>
-  </div>
   <div class=caption>VPNの実現手法 (OpenVPN)</div>
-</div>
+  </div>
 
-<div class=figure>
   <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -3245,8 +3245,8 @@ IP層を直接暗号化する方法もある。
       <text x="170" y="158" dy="0.5em">ケーブル</text>
     </g></g>
   </svg>
-  </div>
   <div class=caption>VPNの実現手法 (L2TP)</div>
+  </div>
 </div>
 
 <h3 id="security-ssh-tunnel">7.6. SSHによるトンネリング</h3>
@@ -3320,8 +3320,8 @@ TCP層でしか動作しないが、相手ネットワーク内にあるサー�
     </g>
   </g>
   </svg>
-  </div>
   <div class="caption">ローカル→リモート転送 (<code>-L 8080:10.0.1.2:80</code>)</div>
+  </div>
 </div>
 
 <p>
@@ -3385,8 +3385,8 @@ TCP 80番にリモートからアクセスさせる設定である。
     </g>
   </g>
   </svg>
-  </div>
   <div class="caption">リモート→ローカル転送 (<code>-R 8080:192.168.1.2:80</code>)</div>
+  </div>
 </div>
 
 
