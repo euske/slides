@@ -1760,7 +1760,7 @@ TCP 層の機能は、現代のほとんど OS にデフォルトで搭載され
 (どちらも仮想マシンでよい)。
 <li> サーバ側PCで、以下のコマンドを実行する:
 <blockquote><pre>
-$ <strong>nc -l -p 10000</strong>
+$ <strong>nc -l 10000</strong>
 </pre></blockquote>
 <li> クライアント側PCで、以下のコマンドを実行する:
 <blockquote><pre>
@@ -2316,7 +2316,7 @@ Date: Mon, 23 Jan 2023 13:39:22 GMT
 応答を入力せよ。
 </p>
 <blockquote><pre>
-$ <strong>nc -l -p 8080</strong>
+$ <strong>nc -l 8080</strong>
 <em>(クライアントからのリクエスト)</em>
 GET / HTTP/1.1
 User-Agent: Mozilla/5.0
@@ -2551,6 +2551,9 @@ Bさんは Aさんに会ったことはないが、
     <g id="user" fill="none" stroke="black" stroke-width="2">
       <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
     </g>
+    <g id="baddie" fill="black" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
     <g id="key1" fill="none" stroke="white" stroke-width="3">
       <rect x="-5" y="-10" width="35" height="20" stroke="black" fill="black" />
       <circle cx="20" cy="0" r="5" />
@@ -2562,24 +2565,25 @@ Bさんは Aさんに会ったことはないが、
       <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
     </g>
     </defs>
-    <use xlink:href="#user" x="10" y="10" />
+    <use xlink:href="#user" x="50" y="10" />
     <use xlink:href="#user" x="290" y="10" />
-    <use xlink:href="#user" x="150" y="100" />
-    <use xlink:href="#key1" x="70" y="20" />
-    <use xlink:href="#key2" x="70" y="45" />
+    <use xlink:href="#baddie" x="150" y="100" />
+    <use xlink:href="#key1" x="10" y="45" />
+    <use xlink:href="#key2" x="110" y="45" />
     <use xlink:href="#key2" x="250" y="45" />
     <use xlink:href="#key2" x="210" y="130" />
     <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
-      <path d="M110,50 l120,0" />
+      <path d="M150,50 l80,0" />
       <path d="M230,110 l30,-40" />
     </g>
     <g style="font-size: 75%;" text-anchor="middle">
-      <text x="35" y="70">Aさん</text>
+      <text x="75" y="70">Aさん</text>
       <text x="315" y="70">Bさん</text>
-      <text x="175" y="160">Cさん</text>
+      <text x="175" y="165">Cさん</text>
+      <text x="22" y="30">秘密鍵</text>
+      <text x="122" y="30">公開鍵</text>
     </g>
   </svg>
-  <div class="caption">公開鍵による認証</div>
   </div>
 </div>
 <ol>
@@ -2595,15 +2599,15 @@ Bさんは Aさんに会ったことはないが、
 <ul>
 <li> もともと HTTP を暗号化するための方式 (HTTPS) として提案された。
 <li> ブラウザ上にいわゆる「鍵マーク」を表示する仕組み。
-<li> 接続先のサーバ名が正しいかどうかを、<u>認証局 (CA)</u> と呼ばれる第三者機関が、
+<li> 接続先のサーバ名が正しいかどうかを、<u>認証局 (CA)</u> と呼ばれる第三者機関を介して、
 <u>デジタル証明書</u> を使って確認する。
 </ul>
 
 <p>
-デジタル証明書は認証局が発行し、
-ここで使われる公開鍵が本当にその個人・組織に
-所属するという証明として使われる。詳細は
-<a href="../certs202301/index.html">「デジタル証明書とは何か?」</a>を参照。
+デジタル証明書にはサーバの公開鍵が記載されている。
+デジタル証明書は認証局が正当性を保証するもので、
+これもまた公開鍵暗号技術を使っている。
+詳細は <a href="../certs202301/index.html">「デジタル証明書とは何か?」</a>を参照。
 </p>
 
 <div class=figure>
@@ -2634,9 +2638,9 @@ Bさんは Aさんに会ったことはないが、
     </defs>
     <use xlink:href="#user" x="10" y="120" />
     <use xlink:href="#ca" x="160" y="20" />
-    <use xlink:href="#site" x="310" y="120" />
+    <use xlink:href="#site" x="320" y="120" />
     <use xlink:href="#keyg" x="75" y="80" />
-    <use xlink:href="#keyg" x="370" y="150" />
+    <use xlink:href="#keyg" x="290" y="150" />
     <g stroke="black" fill="none" stroke-width="1">
       <rect x="20" y="50" width="85" height="40" />
       <rect x="18" y="48" width="89" height="44" />
@@ -2648,7 +2652,7 @@ Bさんは Aさんに会ったことはないが、
     <g style="font-size: 75%;" text-anchor="middle">
       <text x="185" y="85">認証局 (CA)</text>
       <text x="35" y="185">ブラウザ</text>
-      <text x="335" y="185" fill="green">www.google.com</text>
+      <text x="345" y="185" fill="green">www.google.com</text>
     </g>
     <g style="font-size: 75%;">
       <text x="40" y="65">証明書</text>
@@ -2682,11 +2686,11 @@ TLS/SSL層は以下のような手順で動作する:
 <ol>
 <li> 相手のサーバに TCP接続する。
 <li> 暗号化通信を開始する。
-<li> サーバからデジタル証明書を受けとり、正しいサーバであることを確認する (TLS/SSLハンドシェイク)。
+<li> サーバからデジタル証明書 (公開鍵) を受けとり、それが正しい相手であることを確認する (TLS/SSLハンドシェイク)。
 </ol>
 <p>
 以上が完了すると、TLS/SSL層は通常の TCP層と同じようにふるまう。
-そのため、HTTPS の処理は、TLS/SSL層を使う部分以外は HTTP と同じである。
+HTTPS の処理は、TLS/SSL層を使う部分以外は HTTP と同じである。
 </p>
 
 <div class=exercise id="ex-openssl-http-client">
@@ -2750,11 +2754,12 @@ HTTP/2 304
 上で示した <code>curl</code> コマンドの使用例を実際に実行せよ。
 </div>
 
-<h3 id="encryption-ssh">6.2. SSH層</h3>
+<h4>TLS/SSL 層の欠点</h4>
 <p>
-TLS/SSL 層の大きな欠点は、ルート認証局を頂点とする、中央集権化された、
-全世界規模の <u>公開鍵基盤</u> (PKI) を構築する必要があることである。
-これには大きなコストがかかるうえに、認証局が信頼できない場合がある
+TLS/SSL 層の大きな欠点は、コストがかかることである。
+TLS を使うには、ルート認証局を頂点とする、中央集権化された、
+全世界規模の <u>公開鍵基盤</u> (PKI) を構築する必要がある。
+これには大きな手間がかかるうえに、認証局が信頼できない場合がある
 というリスクも抱えている (参考:
 <a href="https://ja.wikipedia.org/wiki/2011%E5%B9%B4%E3%83%87%E3%82%B8%E3%83%8E%E3%82%BF%E3%83%BC%E4%BA%8B%E4%BB%B6">2011年デジノター事件</a>)。
 </p>
@@ -2834,16 +2839,61 @@ TLS/SSL 層の大きな欠点は、ルート認証局を頂点とする、中央
   </div>
 </div>
 
+<h3 id="encryption-ssh">6.2. SSH層</h3>
+
 <p>
-SSH はもっと簡単な仕組みを使って暗号化された通信を実現している:
+これに対して、SSH はもっと簡単な仕組みを使って暗号化された通信を実現している:
 </p>
 
 <ol>
-<li> ユーザは、あらかじめ接続しようとするサーバの公開鍵の
-<u>指紋</u> (fingerprint) を、なんらかの方法によって知っておく。
-<li> サーバの初回接続時に、サーバは自分の公開鍵の指紋を提示し、その持ち主であることを証明する。
+<li> ユーザは、あらかじめ接続しようとするサーバの公開鍵を、なんらかの方法によって知っておく。
+<li> 初回接続時に、サーバは自分の公開鍵の指紋を提示し、その秘密鍵の持ち主であることを証明する。
 <li> ユーザがそれを認めれば、暗号化された通信が確立する。
 </ol>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="350" height="80">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="user" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+    <g id="computer" fill="white" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    <g id="key1" fill="none" stroke="white" stroke-width="3">
+      <rect x="-5" y="-10" width="35" height="20" stroke="black" fill="black" />
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="key2" fill="none" stroke="black" stroke-width="3">
+      <rect x="-5" y="-10" width="35" height="20" />
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    </defs>
+    <use xlink:href="#user" x="10" y="10" />
+    <use xlink:href="#computer" x="245" y="15" />
+    <use xlink:href="#key2" x="70" y="45" />
+    <use xlink:href="#key2" x="210" y="45" />
+    <use xlink:href="#key1" x="310" y="45" />
+    <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
+      <path d="M195,50 l-80,0" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle">
+      <text x="35" y="70">ユーザ</text>
+      <text x="270" y="70">サーバ</text>
+      <text x="222" y="30">公開鍵</text>
+      <text x="322" y="30">秘密鍵</text>
+    </g>
+  </svg>
+  <div class="caption">公開鍵によるサーバ認証</div>
+  </div>
+</div>
 
 <p>
 SSH はもともと Unixマシンの遠隔操作のために開発されたため、
@@ -2853,31 +2903,70 @@ SSH はもともと Unixマシンの遠隔操作のために開発されたた�
 
 <p>
 <strong>注意:</strong>
-SSH ではユーザ認証にも公開鍵暗号を使っているため、混乱しやすい。
+SSH ではユーザの認証にも公開鍵を使っているため、
+2種類の「公開鍵」が存在する:
 </p>
 <ol>
-<li> ユーザは、あらかじめ接続しようとするサーバ上に、自分の公開鍵を登録しておく。
+<li> ユーザは、あらかじめ接続しようとするサーバ上の
+<code>~/.ssh/authorized_keys</code> ファイルに、自分の<strong>認証用の公開鍵</strong>を登録しておく。
 <li> ユーザはログイン時に、自分がその公開鍵の持ち主であることを証明する。
 <li> サーバがそれを認めれば、ログインが許可される。
 </ol>
 
-<p>
-したがって、SSH では 2種類の「公開鍵」が存在する:
-</p>
-<ul>
-<li> サーバ公開鍵 … 相手のサーバが正当かどうか確認するためのもの。<br>
-  サーバ上に置いておくが、自動で生成されるため、ほとんどのユーザが気にする必要はない。
-<li> 認証用の公開鍵 … 自分が正当なユーザであることをサーバに確認させるためのもの。<br>
-  クライアントPC上に置いておく。
-</ul>
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="350" height="80">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="user" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+    <g id="computer" fill="white" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    <g id="key1" fill="none" stroke="white" stroke-width="3">
+      <rect x="-5" y="-10" width="35" height="20" stroke="black" fill="black" />
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="key2" fill="none" stroke="black" stroke-width="3">
+      <rect x="-5" y="-10" width="35" height="20" />
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    </defs>
+    <use xlink:href="#user" x="50" y="10" />
+    <use xlink:href="#computer" x="290" y="15" />
+    <use xlink:href="#key1" x="10" y="45" />
+    <use xlink:href="#key2" x="110" y="45" />
+    <use xlink:href="#key2" x="250" y="45" />
+    <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
+      <path d="M150,50 l80,0" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle">
+      <text x="75" y="70">ユーザ</text>
+      <text x="315" y="70">サーバ</text>
+      <text x="22" y="30">秘密鍵</text>
+      <text x="122" y="30">公開鍵</text>
+    </g>
+  </svg>
+  <div class="caption">公開鍵によるユーザ認証</div>
+  </div>
+</div>
 
 <h4>SSH の使い方</h4>
 <p>
 ここでは典型的な例 (Unixサーバに SSH を使ってログインする) をあげる:
 <ol>
-<li> SSHサーバを起動する。SSHサーバは初回起動時、自動的にそのサーバの公開鍵を生成する。
-<li> あらかじめクライアントPC上で認証用の秘密鍵・公開鍵ペアを生成しておく。
-(これは一度だけおこなう。)
+<li> サーバ側で、SSHサーバを起動する。SSHサーバは初回起動時、自動的にそのサーバの公開鍵を生成する。
+<li> クライアントPC上で <code>ssh-keygen</code> コマンドを使って、
+  あらかじめ認証用の秘密鍵・公開鍵ペアを生成しておく。
+  (これは最初の一度だけ実行すればよい。)<br>
+<strong>注意:</strong>
+ 既存の鍵ファイルがある場合、<code>ssh-keygen</code> は勝手に上書きしてしまうので注意。
 <blockquote><pre>
 client$ <strong>ssh-keygen -t ed25519</strong>
 Generating public/private ed25519 key pair.
@@ -2888,17 +2977,18 @@ Your identification has been saved in <mark>/home/euske/.ssh/id_ed25519</mark>  
 Your public key has been saved in <mark>/home/euske/.ssh/id_ed25519.pub</mark>  <em>(公開鍵ファイル)</em>
 ...
 </pre></blockquote>
-<li> 秘密鍵は秘密なので、そのマシンの外には持ち出さない。
-(複数のマシンで SSH を使う場合、マシンごとに異なる秘密鍵を持たせる)
-<li> いっぽう公開鍵は誰に見せてもよいので、ログイン先のSSHサーバ上アカウントの
+<li> 秘密鍵ファイルは、そのマシンの外には持ち出さない。
+(複数のマシンで SSH を使う場合、マシンごとに異なる秘密鍵を生成する)
+<li> いっぽう公開鍵ファイルは誰に見せてもよいので、ログイン先のSSHサーバ上アカウントの
 <code>~/.ssh/authorized_keys</code> にコピーしておく。
-<li> SSHサーバ公開鍵の指紋を覚えておく。<br>
+<li> SSHサーバ公開鍵の指紋 (fingerprint) を覚えておく。<br>
 たとえば、<code>server.example.com</code> の公開鍵の指紋は
 <code>SHA256:HLfnjG5dDqVPIfWtG6sNGG5JyY5AYtkxaupGsJffyYs</code> であるとしよう。
-<li> クライアントPC上で、 <code>ssh</code> コマンドを使ってサーバに接続する。<br>
+<li> クライアントPC上で <code>ssh</code> コマンドを使ってサーバに接続する。<br>
+SSH では、通常 TCP 22番ポートが使われる。<br>
 初回接続時には、サーバ公開鍵の指紋が表示され、確認が要求される。
 <blockquote><pre>
-client$ <strong>ssh server.example.com</strong>
+client$ <strong>ssh user@server.example.com</strong>
 The authenticity of host '[server.example.com]:22 ([192.168.1.10]:22)' can't be established.
 ED25519 key fingerprint is <mark>SHA256:HLfnjG5dDqVPIfWtG6sNGG5JyY5AYtkxaupGsJffyYs</mark>.
 This key is not known by any other names.
@@ -2908,16 +2998,44 @@ Are you sure you want to continue connecting (yes/no/[fingerprint])?
 </ol>
 
 <p>
-SSH では、通常 TCP 22番ポートが使われる。
-SSH のよくある使い方はサーバ上のシェルをリモートから実行するためのものだが
-(ログイン)、SSH 層自体がいくつかのレイヤーから構成されており、
+SSH のよくある使い方はサーバ上のシェルを遠隔実行するためのものだが、
+SSH 層自体がいくつかのレイヤーから構成されており、
 シェル以外の用途にも利用可能である:
 </p>
 
 <ul>
 <li> ファイル転送機能 (SFTP)
-<li> ポート転送機能
+<li> ポート転送機能 (<a href="#security-ssh-tunnel">後述</a>)
 </ul>
+
+<h4>SSH の設定ファイル</h4>
+<p>
+<code>ssh</code> コマンドは、自分のホームディレクトリ下にある
+<code>~/.ssh/config</code> という設定ファイルを利用する。
+<p>
+たとえば、以下のような内容:
+<div class=file>
+~/.ssh/config
+<pre>
+Host <mark>myhost</mark>
+        Port <mark>222</mark>                            <em>(TCPポート番号)</em>
+        User <mark>aws-user-1</mark>                     <em>(ログインするユーザ名)</em>
+        IdentityFile <mark>~/.ssh/id_ed25519_aws</mark>  <em>(認証に使う秘密鍵)</em>
+        Hostname <mark>myhost.something.us-east-1.servers.aws.com</mark>  <em>(実際のホスト名)</em>
+</pre>
+</div>
+<p>
+を書いておくと、以下のコマンド
+<blockquote><pre>
+client$ <strong>ssh <mark>myhost</mark></strong>
+</pre></blockquote>
+を入力しただけで、
+自動的に対象のホスト名・ユーザ・秘密鍵ファイルなどが指定される。
+<p>
+同様のことをコマンドラインで指定すると以下のようになる:
+<blockquote><pre>
+client$ <strong>ssh -p <mark>222</mark> -f <mark>~/.ssh/id_ed25519_aws</mark> <mark>aws-user-1@myhost.something.us-east-1.servers.aws.com</mark></strong>
+</pre></blockquote>
 
 
 <h2 id="security">7. セキュリティ</h2>
@@ -3495,7 +3613,7 @@ TCP層でしか動作しないが、相手ネットワーク内にあるサー�
 <p>
 以下の構成は、ポート転送機能を使って相手ネットワーク内
 (リモート) にあるサーバの TCP 80番にアクセスする設定である。
-この場合、ローカルの SSHクライアント自身がサーバとして動作し、
+この場合、クライアントPC (ローカル) 上の SSHコマンド自身がサーバとして動作し、
 この 8080番ポートに接続された TCP の通信はすべて相手サーバの
 80番に転送される。
 </p>
@@ -3555,6 +3673,25 @@ TCP層でしか動作しないが、相手ネットワーク内にあるサー�
   </svg>
   <div class="caption">ローカル→リモート転送 (<code>-L 8080:10.0.1.2:80</code>)</div>
   </div>
+</div>
+
+<div class=exercise id="ex-ssh-local-port-forwarding">
+<div class=header>演習. ssh コマンドを使ってローカル→リモート転送</div>
+<ol>
+<li> リモートのサーバ上で、以下のようにして簡単なサーバプロセスを起動する:
+<pre>
+server$ <strong>nc -l 10000</strong>
+</pre>
+<li> クライアントPC上で、「ローカル→リモート転送」を有効にしてサーバにログインする。
+<pre>
+client$ <strong>ssh <mark>-L 10000:localhost:10000</mark> server.example.com</strong>
+</pre>
+<li> クライアントPC上で、自分自身の TCP 10000番ポートに接続し、
+  サーバ上のプロセスに接続できていることを確認する。
+<pre>
+client$ <strong>nc localhost 10000</strong>
+</pre>
+</ol>
 </div>
 
 <p>
@@ -3622,6 +3759,24 @@ TCP 80番にリモートからアクセスさせる設定である。
   </div>
 </div>
 
+<div class=exercise id="ex-ssh-remote-port-forwarding">
+<div class=header>演習. ssh コマンドを使ってリモート→ローカル転送</div>
+<ol>
+<li> クライアントPC上で、以下のようにして簡単なサーバプロセスを起動する:
+<pre>
+client$ <strong>nc -l 10000</strong>
+</pre>
+<li> クライアントPC上で、「リモート→ローカル転送」を有効にしてサーバにログインする。
+<pre>
+client$ <strong>ssh <mark>-R 10000:localhost:10000</mark> server.example.com</strong>
+</pre>
+<li> サーバ上で、自分自身の TCP 10000番ポートに接続し、
+  クライアントPCのプロセスに接続できていることを確認する。
+<pre>
+server$ <strong>nc localhost 10000</strong>
+</pre>
+</ol>
+</div>
 
 <hr>
 <address>Yusuke Shinyama</address>
