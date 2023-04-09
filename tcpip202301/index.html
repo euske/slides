@@ -2515,10 +2515,80 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 </ul>
 
 <p>
-どちらもベースになっているのは<u>公開鍵暗号</u>技術である。
 TLS/SSL も SSH も (本来は TCP/IP 層の一部ではなくアプリケーション層なので)、
 アプリケーションまたはライブラリの形で提供されている。
+どちらもベースになっているのは<u>公開鍵暗号</u>技術である。
 </p>
+
+<h4>公開鍵暗号技術とは</h4>
+<p>
+公開鍵暗号技術については、以下のことだけ覚えておけばよい:
+<ul>
+<li> <u>秘密鍵</u>と、それに数学的に対応した<u>公開鍵</u>を使う。
+  これらは<strong>必ずペアで生成される</strong>。
+  (実際には物理的な鍵ではなく、ただのデータである)
+<li> 秘密鍵は他人に<strong>見せてはならない</strong>。(パスワードのようなもの)
+<li> 公開鍵は<strong>誰に見せてもよく</strong>、むしろ積極的に配布してよい。(名刺のようなもの)
+<li> 公開鍵を秘密鍵に変換することは<strong>できない</strong>。
+<li> 秘密鍵の所持者は、<strong>そのデータ自体を見せずに</strong>
+  自分がそれを所持している事実を証明できる。(<u>ゼロ知識証明</u>)
+</ul>
+
+<div class=exercise id="ex-public-key-auth">
+<div class=header>演習. 公開鍵を使った認証</div>
+<p>
+Aさんは、自分用の秘密鍵と公開鍵のペアを所持している。
+Bさんは Aさんに会ったことはないが、
+ネット上でたまたま Aさんの公開鍵を入手した。
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="350" height="170">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="user" fill="none" stroke="black" stroke-width="2">
+      <path d="M0,50 Q0,40,15,35 Q5,30,5,20 Q5,0,25,0 Q45,0,45,20 Q45,30,35,35 Q50,40,50,50" />
+    </g>
+    <g id="key1" fill="none" stroke="white" stroke-width="3">
+      <rect x="-5" y="-10" width="35" height="20" stroke="black" fill="black" />
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    <g id="key2" fill="none" stroke="black" stroke-width="3">
+      <rect x="-5" y="-10" width="35" height="20" />
+      <circle cx="20" cy="0" r="5" />
+      <path d="M15,0 l-15,0 l0,7 M7,0 l0,7" />
+    </g>
+    </defs>
+    <use xlink:href="#user" x="10" y="10" />
+    <use xlink:href="#user" x="290" y="10" />
+    <use xlink:href="#user" x="150" y="100" />
+    <use xlink:href="#key1" x="70" y="20" />
+    <use xlink:href="#key2" x="70" y="45" />
+    <use xlink:href="#key2" x="250" y="45" />
+    <use xlink:href="#key2" x="210" y="130" />
+    <g stroke="black" fill="none" stroke-width="4" marker-end="url(#arrow)">
+      <path d="M110,50 l120,0" />
+      <path d="M230,110 l30,-40" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle">
+      <text x="35" y="70">Aさん</text>
+      <text x="315" y="70">Bさん</text>
+      <text x="175" y="160">Cさん</text>
+    </g>
+  </svg>
+  <div class="caption">公開鍵による認証</div>
+  </div>
+</div>
+<ol>
+  <li> Bさんが Aさんと実際に通信したとき、
+    相手が Aさん本人であることをどうやって確認すればよいか?
+  <li> いっぽう、Aさんのフリをしたがっている偽物 C さんが Bさんと通信したとする。
+    なぜ Bさんは Aさん本人ではないと見抜けるのか?
+</ol>
+</div>
 
 <h3 id="encryption-tls">6.1. TLS/SSL層</h3>
 
@@ -2538,7 +2608,7 @@ TLS/SSL も SSH も (本来は TCP/IP 層の一部ではなくアプリケーシ
 
 <div class=figure>
   <div>
-  <img src="key.png" width="389" height="131">
+  <img src="addressbar.png" width="389" height="131">
 
   <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="400" height="200"
        transform="scale(1,1)">
@@ -2814,10 +2884,8 @@ Generating public/private ed25519 key pair.
 Enter file in which to save the key (/home/euske/.ssh/id_ed25519):
 Enter passphrase (empty for no passphrase):
 Enter same passphrase again:
-Your identification has been saved in /home/euske/.ssh/id_ed25519
-Your public key has been saved in /home/euske/.ssh/id_ed25519.pub
-The key fingerprint is:
-SHA256:aEpvBZ1w/NJBvwZwpaWqdnPtCbHQFc0XDo0Gv+OlN50 euske@laptop
+Your identification has been saved in <mark>/home/euske/.ssh/id_ed25519</mark>  <em>(秘密鍵ファイル)</em>
+Your public key has been saved in <mark>/home/euske/.ssh/id_ed25519.pub</mark>  <em>(公開鍵ファイル)</em>
 ...
 </pre></blockquote>
 <li> 秘密鍵は秘密なので、そのマシンの外には持ち出さない。
