@@ -2990,8 +2990,10 @@ Your identification has been saved in <mark>/home/euske/.ssh/id_ed25519</mark>  
 Your public key has been saved in <mark>/home/euske/.ssh/id_ed25519.pub</mark>  <em>(公開鍵ファイル)</em>
 ...
 </pre></blockquote>
-<li> 秘密鍵ファイルは、そのマシンの外には持ち出さない。
-(複数のマシンで SSH を使う場合、マシンごとに異なる秘密鍵を生成する)
+<li> 秘密鍵ファイルは危険なので、普通は暗号化して記録される。また、そのマシンの外には持ち出さない。<br>
+(複数のマシンで SSH を使う場合、マシンごとに異なる秘密鍵を生成する)<br>
+<strong>注意:</strong>
+ <code>ssh-keygen</code> で入力するパスフレーズは秘密鍵の暗号化に使うものであって、<strong>サーバのログインに使うパスワードとは関連がない</strong>。<br>
 <li> いっぽう公開鍵ファイルは誰に見せてもよいので、ログイン先のSSHサーバ上アカウントの
 <code>~/.ssh/authorized_keys</code> にコピーしておく。
 <li> SSHサーバ公開鍵の指紋 (fingerprint) を覚えておく。<br>
@@ -3007,7 +3009,8 @@ ED25519 key fingerprint is <mark>SHA256:HLfnjG5dDqVPIfWtG6sNGG5JyY5AYtkxaupGsJff
 This key is not known by any other names.
 Are you sure you want to continue connecting (yes/no/[fingerprint])?
 </pre></blockquote>
-<li> ユーザがこれに <code>yes</code> と答えればログインできる。
+<li> ユーザがこれに <code>yes</code> と答えれば接続が続行する。<br>
+  この後、暗号化された秘密鍵を使うためのパスフレーズを入力する。
 </ol>
 
 <p>
@@ -3050,6 +3053,21 @@ client$ <strong>ssh <mark>myhost</mark></strong>
 client$ <strong>ssh -p <mark>222</mark> -f <mark>~/.ssh/id_ed25519_aws</mark> <mark>aws-user-1@myhost.something.us-east-1.servers.aws.com</mark></strong>
 </pre></blockquote>
 
+<h4>SSH の秘密鍵保持エージェント (ssh-agent)</h4>
+<p>
+SSHで認証に使う秘密鍵は、通常は暗号化されており、解凍するには毎回パスフレーズの入力が必要である。
+秘密鍵保持エージェントを使うと、一度解凍した秘密鍵を一定時間保持しておくことができるため、
+毎回パスフレーズを入力する必要がなくなる。
+</p>
+<p>
+  現在のほとんどのOSでは、秘密鍵保持エージェントは自動的に起動されている。
+  ここに秘密鍵を追加・削除するには、<code>ssh-add</code> コマンドを使う。
+</p>
+<ul>
+  <li> <code>ssh-add <em>秘密鍵ファイル</em></code>: 秘密鍵をエージェントに追加する。</li>
+  <li> <code>ssh-add -D</code>: エージェント上の秘密鍵をすべて削除する。</li>
+  <li> <code>ssh-add -l</code>: エージェント上の秘密鍵を一覧表示する。</li>
+</ul>
 
 <h2 id="security">7. セキュリティ</h2>
 <p>
