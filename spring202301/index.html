@@ -55,7 +55,7 @@ Yusuke Shinyama, Jan. 2023
 </ol>
 
 
-<h1>1. ソフトウェア開発において重要なこと</h1>
+<h2>1. ソフトウェア開発において重要なこと</h2>
 
 <p>開発者はみな、以下のようなソフトウェアを開発したい:</p>
 <ul>
@@ -97,90 +97,23 @@ Yusuke Shinyama, Jan. 2023
 <li> ... </li>
 </ul>
 
+<div class=exercise>
+自分が思いつく「分離する技術」を書き出してみよう。
+</div>
 
-<h1>2. Springのメリット</h1>
+<h4>重要なコンセプト</h4>
 
-<p>
-たとえば、以下のようなコードがあるとする:
-</p>
-<ul>
-<li> <code>App</code>クラスは、<code>Client</code>クラスと<code>Database</code>クラスに<u>依存</u>している。</li>
-<li> <code>Client</code>クラスは、<code>Connection</code>クラスに<u>依存</u>している。</li>
-<li> <code>Connection</code>クラスは、<code>"server01"</code>というサーバ名に<u>依存</u>している。
-</ul>
+<dl>
+  <dt> Dependency Injection (DI)</dt>
+  <dt> Dependency Inversion Principle (DIP)</dt>
+  <dt> Inversion of Control (IoC)</dt>
+</dt>
 
-<blockquote><pre>
-class Client {
+<div class=exercise>
+自分が思いつく「制御の反転」を書き出してみよう。
+</div>
 
-    Client() {
-        this.connection <span class=noinj>= new Connection("server01")</span>
-    }
-    get() {
-        return this.connection.fetch()
-    }
-}
-
-class Database {
-    store(data) { ... }
-}
-
-class App {
-    main() {
-        client <span class=noinj>= new Client()</span>
-        db <span class=noinj>= new Database()</span>
-        data = client.get()
-        db.store(data)
-    }
-}
-</pre></blockquote>
-
-<p>
-問題は、このようなデータの依存は
-コード中に<strong>固定されている</strong>ということである。
-これにより以下のような弊害が生じる:
-</p>
-<ul>
-<li> 個々のクラスを個別にテストできない。
-<li> <code>Client</code> や <code>Database</code>、<code>Connection</code> などのクラスを
-  別のものに置き換えたり、拡張したりできない。
-</ul>
-<p>
-Spring Framework を使うと、上のようなコードは以下のように書き直せる:
-</p>
-
-<blockquote><pre>
-class Client {
-    Client(<span class=depinj>Connection connection</span>) {
-        this.connection = connection
-    }
-    get() {
-        return this.connection.fetch()
-    }
-}
-
-class Database {
-    store(data) { ... }
-}
-
-class App {
-    main(<span class=depinj>Client client</span>, <span class=depinj>Database db</span>) {
-        data = client.get()
-        db.store(data)
-    }
-}
-</pre></blockquote>
-
-<ul>
-<li> アプリが依存している
-  <code>Client</code>、<code>Database</code>、<code>Connection</code> の各クラスは
-  コード中で直接作成されておらず、外から<u>注入</u>されるようになっている。
-<li> 同様に <code>Connection</code> クラスで利用されるサーバ名も
-  コード中には含まれず、外から与えられるようになっている。
-<li> 同時に、これらの型は実際のクラスではなく、interface になっている。
-<li> これらの特徴により
-  各依存クラスを別のクラスで置き換えることが可能となり、
-  個別テストや再利用の促進につながる。
-</ul>
+<h2>2. Spring Boot とは</h2>
 
 <p>
 Spring Framework は、その名のとおり「フレームワーク」と呼ばれる枠組みを使っている。
@@ -189,20 +122,96 @@ Spring Framework は、その名のとおり「フレームワーク」と呼ば
 外から制御されるような構造のことである。
 (<a href="https://www.martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>)
 </p>
+<p>
+何に使うのか:
+<a href="https://blogs.vmware.com/vmware-japan/2023/03/state-of-spring-2022.html">この調査</a>によれば、
+「データベースを使ったバックエンドが簡単に書ける」
+用途が一番多い。
 
-<h1>3. Springのデメリット</h1>
+<h2>3. はじめる</h2>
+
+<ol>
+<li> <code>java -version</code> でバージョン確認。
+<li> <a href="https://start.spring.io/">spring initializr</a> で以下を選択:
+<ul>
+<li> Project: Gradle - Kotlin
+<li> Language: Kotlin
+<li> Spring Boot: (デフォルト)
+<li> Project Metadata: (デフォルト)
+<li> Dependencies:
+<ul>
+  <li> Spring Web
+</ul>
+</ul>
+<li> <code>demo.zip</code> を展開する。
+<li> <code>./gradlew bootrun</code> を実行。
+<li> <code>http://localhost:8080/</code> にアクセス。
+</ol>
+
+<div class=file>
+MyComponent.kt:
+<pre>
+package com.example.demo
+
+import org.springframework.stereotype.Component
+
+@Component
+class MyComponent {
+    init {
+        println("this is my component.")
+    }
+}
+</pre>
+</div>
+
+<div class=file>
+MyController.kt:
+<pre>
+package com.example.demo
+
+import org.springframework.stereotype.Controller
+
+@Controller
+class MyController {
+
+    init {
+        println("this is my controller.")
+    }
+}
+</pre>
+</div>
+
+<div class=file>
+MyController.kt:
+<pre>
+package com.example.demo
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Controller
+
+@Controller
+class MyController(@Autowired val component: MyComponent) {
+
+    init {
+        println("this is my controller: mycomponent=$component")
+    }
+}
+</pre>
+</div>
+
+<pre>
+dependencies {
+        ...
+        implementation("org.springframework.boot:spring-boot-starter-jdbc")
+}
+</pre>
+
+
+<h4>Springのデメリット</h4>
 
 <p>
 制御フロー・データフローの一部が「ぶった切られている」。
 </p>
-
-<h1>4. 重要なコンセプト</h1>
-
-<dl>
-  <dt> Inversion of Control (IoC)</dt>
-  <dt> Dependency Injection (DI)</dt>
-  <dt> Dependency Inversion Principle (DIP)</dt>
-</dt>
 
 <hr>
 <address>Yusuke Shinyama</address>
