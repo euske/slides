@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spring (Boot) と IoC (制御の反転)</title>
+<title>Spring (Boot) 超入門</title>
 <style><!--
 body { line-height: 1.5; }
 h1 { border-bottom: solid 4px #000088; }
@@ -45,7 +45,8 @@ code em { color: #000088; }
 <div class=nav>
 <a href="../index.html">&lt; もどる</a>
 </div>
-<h1>Spring (Boot) と IoC (制御の反転)</h1>
+
+<h1>Spring (Boot) 超入門</h1>
 
 <div class=author>
 Yusuke Shinyama, Jan. 2023
@@ -79,12 +80,15 @@ Yusuke Shinyama, Jan. 2023
 
 <p>
 しかし、これはとてつもなく難しい。
-なぜなら、ソフトウェアというものは非常に複雑だからである。
-この複雑さは、そもそもソフトウェアが扱っている問題（社会）の複雑さに起因する。
+</p>
+<ul>
+<li> なぜなら、ソフトウェアというものが非常に複雑だから。
+<li> この複雑さは、そもそもソフトウェアが扱っている問題（社会）の複雑さに起因するから。
+</ul>
+<p>
 過去数十年、ソフトウェアの先人達はこの複雑なシステムを分解
 (<a href="https://ja.wikipedia.org/wiki/%E9%96%A2%E5%BF%83%E3%81%AE%E5%88%86%E9%9B%A2">separation of concerns</a>) し、
-人間の小さい脳が扱えるようにするために、さまざまな技法をあみだしてきた。
-プログラミング技術の歴史とは、ほとんど「分解する技術の歴史」といってもいい。
+人間の小さい脳が扱えるようにするために、さまざまな技法をあみだしてきた:
 </p>
 
 <ul>
@@ -92,44 +96,89 @@ Yusuke Shinyama, Jan. 2023
 <li> 1980年代: OOP (カプセル化、データ抽象)</li>
 <li> 1990年代: AOP (複数箇所をまとめる)</li>
 <li> 1980年代: 関数型 (状態の除去)</li>
+<li> 1990年代: バージョン管理システム</li>
 <li> 2000年代: フレームワーク (IoC, DI, etc.)</li>
 <li> 2010年代: コンテナ関連技術</li>
 <li> ... </li>
 </ul>
 
-<div class=exercise>
-自分が思いつく「分離する技術」を書き出してみよう。
-</div>
-
-<h4>重要なコンセプト</h4>
-
-<dl>
-  <dt> Dependency Injection (DI)</dt>
-  <dt> Dependency Inversion Principle (DIP)</dt>
-  <dt> Inversion of Control (IoC)</dt>
-</dt>
+<p>
+ソフトウェア技術の歴史とは、ほとんど「複雑さを分解する技術の歴史」といってもいい。
+</p>
 
 <div class=exercise>
-自分が思いつく「制御の反転」を書き出してみよう。
+<div class=header>演習. 分解する技術</div>
+<p>
+自分が思いつく「複雑さを分解する技術」を書き出してみよう。
+</p>
 </div>
+
 
 <h2>2. Spring Boot とは</h2>
 
 <p>
-Spring Framework は、その名のとおり「フレームワーク」と呼ばれる枠組みを使っている。
-ソフトウェアにおける「フレームワーク」とは、
-処理の流れがプログラム本体に書かれておらず、
-外から制御されるような構造のことである。
-(<a href="https://www.martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>)
+Spring Framework および Spring Boot は、
+その名のとおり「<u>フレームワーク</u>」の一種である。
 </p>
+<ul>
+<li> Java/Kotlin を使ったアプリケーション開発に使われている。
+<li> ソフトウェアにおける「フレームワーク」 = 
+プログラム (アプリケーション) の設計方法を規定する枠組み。
+</ul>
+
 <p>
-何に使うのか:
+一般的なフレームワークでは、プログラマはアプリケーション全体の流れを
+直接指定せず、フレームワークが制御する。
+これを<u>制御の反転</u> (<a href="https://www.martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>)
+という。別名「ハリウッドの原則 (the Hollywoord Principle)」とも呼ばれる。
+</p>
+
+<div class="formula">
+<strong>ハリウッドの原則:</strong>
+"Don't call us. We call you." (我々を呼ぶな。必要なときは、我々が呼ぶ。)
+</div>
+
+<h4>何に使うのか</h4>
+<p>
 <a href="https://blogs.vmware.com/vmware-japan/2023/03/state-of-spring-2022.html">この調査</a>によれば、
-「データベースを使ったバックエンドが簡単に書ける」
-用途が一番多い。
+Spring を使う理由で一番多いのは
+「データベースを使ったバックエンドが簡単に書けるから」
+である。
+</p>
 
-<h2>3. はじめる</h2>
+<h4>Springの主要な機能</h4>
+<p>
+Springには多くの機能が搭載されているが、それらの根幹となっているのは以下の2つの機能である:
+</p>
+<ol type="a">
+<li> <strong>くれくれ宣言</strong> (Autowired) …
+    「これこれのオブジェクトが欲しい」と書いておけば、その要件を満たすオブジェクトを自動的にゲットしてくれる。
+<li> <strong>あるある宣言</strong> (Component) …
+    「この要件を満たすオブジェクトがここだ」と書いておけば、そのオブジェクトを自動的に他で使ってもらえる。
+</ol>
 
+
+<h4>重要なコンセプト</h4>
+<p>
+Springを使うにあたって知っておきたい重要なコンセプトは以下のとおりである:
+</p>
+<dl>
+  <dt> Dependency Injection (依存性注入、DI)</dt>
+  <dt> Dependency Inversion Principle (依存性逆転の法則、DIP)</dt>
+  <dt> Inversion of Control (制御の反転、IoC)</dt>
+</dt>
+
+<div class=exercise>
+<div class=header>演習. 制御の反転</div>
+<p>
+自分が知っている「制御の反転」をおこなっているフレームワークを書き出してみよう。
+</p>
+</div>
+
+
+<h2>3. 実際に使ってみる</h2>
+
+<h4>準備</h4>
 <ol>
 <li> <code>java -version</code> でバージョン確認。
 <li> <a href="https://start.spring.io/">spring initializr</a> で以下を選択:
@@ -147,6 +196,8 @@ Spring Framework は、その名のとおり「フレームワーク」と呼ば
 <li> <code>./gradlew bootrun</code> を実行。
 <li> <code>http://localhost:8080/</code> にアクセス。
 </ol>
+
+<h4>「あるある宣言」を書いてみる</h4>
 
 <div class=file>
 MyComponent.kt:
@@ -181,6 +232,8 @@ class MyController {
 </pre>
 </div>
 
+<h4>「くれくれ宣言」を書いてみる</h4>
+
 <div class=file>
 MyController.kt:
 <pre>
@@ -190,7 +243,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 
 @Controller
-class MyController(@Autowired val component: MyComponent) {
+class MyController(<mark>@Autowired val component: MyComponent</mark>) {
 
     init {
         println("this is my controller: mycomponent=$component")
@@ -198,6 +251,9 @@ class MyController(@Autowired val component: MyComponent) {
 }
 </pre>
 </div>
+
+
+<h2>4. 応用例</h2>
 
 <pre>
 dependencies {
@@ -207,7 +263,7 @@ dependencies {
 </pre>
 
 
-<h4>Springのデメリット</h4>
+<h2>5. Springのデメリット</h2>
 
 <p>
 制御フロー・データフローの一部が「ぶった切られている」。
