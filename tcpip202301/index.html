@@ -132,7 +132,6 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <li> <a href="#security-ssh-tunnel">SSHによるトンネリング</a>
 </ul>
 </ol>
-</div>
 
 
 <h4>使用するツール</h4>
@@ -188,6 +187,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 
 <p>
 これを実現するには、2通りの方法がある:
+</p>
 <ul>
 <li> <a target="_blank" href="https://www.youtube.com/embed/-uuNf3_FZH0">回線交換</a>
   (使用中はずっと回線を占有する)
@@ -461,7 +461,7 @@ TCP 層によって、インターネット上のあるホストから別のホ�
 <p>
 最近では、この短所を解決するため、さらにこの上に TLS/SSL層などを導入することもある
 (HTTPSなど)。
-
+</p>
 
 <h2 id="datalink">2. データリンク層のしくみ</h2>
 <div class=figure>
@@ -911,7 +911,7 @@ IPパケットは、ふつう複数のコンピュータを中継して送信さ
 <a target="_blank" href="https://www.cisco.com/c/en/us/products/routers/8000-series-routers/index.html">Cisco 8000</a>
 など。
 10Tbps〜200Tbps の処理能力があり、非常に高価。
-</ul>
+</p>
 
 <h4>ルーティングは難しい</h4>
 
@@ -1203,6 +1203,7 @@ else
 (ルーティング情報) を持っている。
 これはつねに変化するため、たえず更新されている。
 (ちなみに、この情報も TCP/IP ネットワーク自身を使って送られる。)
+</p>
 
 <h4>リンク・ステート方式 (Link state routing)</h4>
 <p>
@@ -1545,6 +1546,7 @@ TCP では通信はつねに双方向である。
 
 <p>
 seq, ack はそれぞれ送った (受けとった) データのバイト数に応じて増加する:
+</p>
 
 <table border><tr>
 <th>ホストA</th><th>ホストB</th>
@@ -1570,6 +1572,7 @@ seq, ack はそれぞれ送った (受けとった) データのバイト数に�
 
 <p>
 送り側は、確認応答が来なかったら、以前に送ったパケットを再送信する。
+</p>
 
 <div class=figure>
   <div>
@@ -2009,6 +2012,7 @@ sock.send(b'hello')
 <p>
 IP アドレスはそのままでは人間にとって覚えにくい。
 そこで <u>DNS</u> (Domain Name System) という仕組みが用意されている。
+</p>
 <ul>
 <li> DNS を使うと、各ホストに名前 (<u>ホスト名</u>) をつけて、
   IPアドレスの代わりに使うことができる。
@@ -2483,6 +2487,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 
 <p>
 暗号化通信において特に重要なこと:
+</p>
 <div class=formula>
 暗号化は、必ず通信相手の確認と<strong>セットで使わなければ</strong>意味がない。
 </div>
@@ -2528,6 +2533,7 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 
 <p>
 現在普及している暗号化層:
+</p>
 <ul>
 <li> <u>TLS/SSL</u>層 … <u>認証局 (CA)</u> という中央集権的な
 認証の枠組みを導入することにより、相手ホストの正当性を判定する。
@@ -2544,6 +2550,7 @@ TLS/SSL も SSH も (本来は TCP/IP 層の一部ではなくアプリケーシ
 <h4>公開鍵暗号技術とは</h4>
 <p>
 公開鍵暗号技術については、以下のことだけ覚えておけばよい:
+</p>
 <ul>
 <li> <u>秘密鍵</u>と、それに数学的に対応した<u>公開鍵</u>を使う。
   これらは<strong>必ずペアで生成される</strong>。
@@ -2561,6 +2568,7 @@ TLS/SSL も SSH も (本来は TCP/IP 層の一部ではなくアプリケーシ
 Aさんは、自分用の秘密鍵と公開鍵のペアを所持している。
 Bさんは Aさんに会ったことはないが、
 ネット上でたまたま Aさんの公開鍵を入手した。
+</p>
 
 <div class=figure>
   <div>
@@ -2704,6 +2712,7 @@ verify return:1
 
 <p>
 TLS/SSL層は以下のような手順で動作する:
+</p>
 <ol>
 <li> 相手のサーバに TCP接続する。
 <li> 暗号化通信を開始する。
@@ -2743,6 +2752,7 @@ HTTP/HTTPS リクエストを送り、レスポンスを画面に表示する。
 <code>openssl</code> コマンドを使って手で直接 HTTP リクエストを入力するよりも、
 こちらのほうが便利。
 Webサーバの挙動を調べるのにおすすめ。
+</p>
 
 <blockquote><pre>
 $ <strong>curl https://www.example.com/</strong>
@@ -2751,8 +2761,10 @@ $ <strong>curl https://www.example.com/</strong>
 &lt;head&gt;
 ...
 </pre></blockquote>
+
 <p>
 <code>-i</code> オプションをつけると、HTTP のレスポンスヘッダも表示する。
+</p>
 <blockquote><pre>
 $ <strong>curl <mark>-i</mark> https://www.example.com/</strong>
 HTTP/2 200
@@ -2761,8 +2773,10 @@ age: 49533
 cache-control: max-age=604800
 ...
 </pre></blockquote>
+
 <p>
 <code>-H</code> オプションを使えば、リクエストヘッダに任意の値を指定できる:
+</p>
 <blockquote><pre>
 $ <strong>curl -i <mark>-H</mark> "<u>If-Modified-Since</u>: <u>Sun, 1 Jan 2023 00:00:00 GMT</u>" https://www.example.com/</strong>
 HTTP/2 304
@@ -2981,6 +2995,7 @@ SSH ではユーザの認証にも公開鍵を使っているため、
 <h4>SSH の使い方</h4>
 <p>
 ここでは典型的な例 (Unixサーバに SSH を使ってログインする) をあげる:
+</p>
 <ol>
 <li> サーバ側で、SSHサーバを起動する。SSHサーバは初回起動時、自動的にそのサーバの公開鍵を生成する。
 <li> クライアントPC上で <code>ssh-keygen</code> コマンドを使って、
@@ -3036,8 +3051,10 @@ SSH 層自体がいくつかのレイヤーから構成されており、
 <p>
 <code>ssh</code> コマンドは、自分のホームディレクトリ下にある
 <code>~/.ssh/config</code> という設定ファイルを利用する。
+</p>
 <p>
 たとえば、以下のような内容:
+</p>
 <div class=file>
 ~/.ssh/config
 <pre>
@@ -3050,13 +3067,17 @@ Host <mark>myhost</mark>
 </div>
 <p>
 を書いておくと、以下のコマンド
+</p>
 <blockquote><pre>
 client$ <strong>ssh <mark>myhost</mark></strong>
 </pre></blockquote>
+<p>
 を入力しただけで、
 自動的に対象のホスト名・ユーザ・秘密鍵ファイルなどが指定される。
+</p>
 <p>
 同様のことをコマンドラインで指定すると以下のようになる:
+</p>
 <blockquote><pre>
 client$ <strong>ssh -p <mark>222</mark> -f <mark>~/.ssh/id_ed25519_aws</mark> <mark>aws-user-1@myhost.something.us-east-1.servers.aws.com</mark></strong>
 </pre></blockquote>
@@ -3068,8 +3089,8 @@ SSHで認証に使う秘密鍵は、通常は暗号化されており、解凍�
 毎回パスフレーズを入力する必要がなくなる。
 </p>
 <p>
-  現在のほとんどのOSでは、秘密鍵保持エージェントは自動的に起動されている。
-  ここに秘密鍵を追加・削除するには、<code>ssh-add</code> コマンドを使う。
+現在のほとんどのOSでは、秘密鍵保持エージェントは自動的に起動されている。
+ここに秘密鍵を追加・削除するには、<code>ssh-add</code> コマンドを使う。
 </p>
 <ul>
   <li> <code>ssh-add <em>秘密鍵ファイル</em></code>: 秘密鍵をエージェントに追加する。</li>
@@ -3610,6 +3631,7 @@ VPN では、別々の場所にある2つのサーバ間を暗号化通信でつ
 
 <p>
 実際に VPN を実現する手法にはさまざまなものがある:
+</p>
 <ul>
 <li> もっとも単純なのは TCP/IP層、TLS層までをまるごと「データリンク層」として扱い、
   その上にさらに VPN用の IP層、TCP層を構築するというやりかたである (OpenVPNなど)。
@@ -3687,6 +3709,7 @@ IP層を直接暗号化する方法もある。
 一般に VPN を自分で構築・設定するのはかなり手間がかかる。
 いっぽう SSH の<u>ポート転送機能</u>を使うと、異なるネットワーク間における
 サーバの共有が簡単にできる。
+</p>
 <ul>
 <li> 長所: SSHさえあれば、2つのネットワークにあるサーバに相互にアクセスできる。
 <li> 短所: (IPパケットをすべて転送できる VPN とは違って) TCP層でしか動作しない。
