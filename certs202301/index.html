@@ -84,7 +84,7 @@ Yusuke Shinyama, Jan. 2023
 </p>
 
 <div class="figure">
-<img src="certs.png">
+<img width="839" height="797" src="certs.png">
 </div>
 
 <p>
@@ -431,7 +431,7 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
 <p>
 通常は、エンドユーザがとくにデジタル証明書を意識することはない。
 しかしサイトを管理する場合 (あるいはソフトウェアを配布する場合) は
-認証局から証明書を発行してもらう必要がある:
+認証局から定期的に証明書を発行してもらう必要がある:
 </p>
 <ol>
   <li> 秘密鍵と公開鍵を作成する。
@@ -448,6 +448,15 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
     <li> 組織の秘密鍵であれば、それが入っているPCはそもそもネットに接続しない。</li>
   </ul>
 </ul>
+
+<h3>有効期限が切れるとどうなるのか?</h3>
+<p>
+証明書の有効期限が切れたサイトにアクセスすると、以下のような恐ろしいメッセージが表示され、
+ユーザに不安を与えることになる。
+</p>
+<div class=figure>
+<img src="expired.png" width="1068" height="895">
+</div>
 
 <hr>
 <address>Yusuke Shinyama</address>
