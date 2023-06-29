@@ -73,14 +73,28 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 ネットワーク機器の具体的な設定方法や診断については、より専門的な資料を参照のこと。
 </p>
 
+<p>
+<strong>目的:</strong>
+この記事を理解すると、
+<a href="#ex-matome-1">まとめ問題1</a>、
+<a href="#ex-matome-2">まとめ問題2</a> および
+<a href="#ex-nat">NATの動きを理解する</a>
+のような問題に答えることができる。
+(逆に、現時点でこれができる人には本記事は不要。)
+</p>
+
+
+<div class="formula">
 <ul>
 <li> <a href="#internet">第1回 (3/15): インターネットの概要、データリンク層、IP層</a>
 <li> <a href="#tcp">第2回 (3/31): TCP層、DNS、HTTP</a>
 <li> <a href="#encryption">第3回 (4/11): 暗号化、NAT、ファイヤーウォール、VPN、SSH</a>
 </ul>
+</div>
 
 <h4>目次</h4>
-<ol>
+<ol start="0">
+<li> <a href="#setup">使用するツールの準備</a></li>
 <li> <a href="#internet">インターネットの作り方・概要</a>
 <ul>
   <li> <a href="#internet-basic">ネットワーク通信の原理</a>
@@ -134,11 +148,12 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 </ol>
 
 
-<h4>使用するツール</h4>
-<div class=formula>
-<a target="_blank" href="https://www.wireshark.org/">Wireshark</a> :
+<h2 id="setup">0. 使用するツールの準備</h2>
+<p>以下のツールをインストールして使うこと:</p>
+<ul>
+  <li> <a target="_blank" href="https://www.wireshark.org/">Wireshark</a> :
 パケットキャプチャ・解析ツール。
-</div>
+</ul>
 
 <h2 id="internet">1. インターネットの作り方・概要</h2>
 
@@ -1325,8 +1340,8 @@ C:\&gt; <strong>tracert 166.84.7.55</strong>
 
 <h2 style="margin-top:4em;" id="tcp">4. TCP層 (トランポート層) のしくみ</h2>
 
-<div class=exercise id="ex-1">
-<div class=header>演習. 前回までのおさらい</div>
+<div class=exercise id="ex-matome-1">
+<div class=header>演習. まとめ問題1</div>
 <ul>
 <li> インターネットでは、情報は小さな
   <nobr><span class=bl>パケット</span></nobr>に分けて送信される。
@@ -2432,14 +2447,22 @@ $ <strong>nc gmail-smtp-in.l.google.com 25</strong>
 
 <h2 style="margin-top:4em;" id="encryption">6. 暗号化</h2>
 
-<div class=exercise id="ex-2">
-<div class=header>演習. 前回までのおさらい</div>
+<div class=exercise id="ex-matome-2">
+<div class=header>演習. まとめ問題2</div>
 <ul>
 <li> IP層における通信と比較したときの、TCP層の長所・短所を挙げよ。
 <li> HTTP は、TCP の <nobr><span class=bl>80</span></nobr> 番ポートを使用する。
 <li> <code>ping 93.184.216.34</code> とやると成功するのに、
 <code>ping www.example.com</code> ではエラーになる。<br>
 この場合、<nobr><span class=bl>DNS</span></nobr> が正常に動作していない可能性がある。
+<li> ブラウザで <code>http://test.example.com/foo/bar</code> を開いた時に送られるHTTPリクエストについて、
+  以下の空欄を埋めよ:
+<pre>
+GET <span class="bl">/foo/bar</span> HTTP/1.1
+Location: <span class="bl">test.example.com</span>
+User-Agent: Mozilla/5.0
+...
+</pre>
 </ul>
 </div>
 
