@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>(プログラマのための) UNIXの基礎</title>
+<meta name="author" content="Yusuke Shinyama">
+<meta name="keywords" content="UNIX, Linux, ファイル, プロセス, 標準出力, 標準入力, パイプ, シェル, 環境変数, シェルスクリプト">
+<meta name="description" content="アプリ開発者の役に立ちそうなUNIX/Linuxに関する知識まとめ。">
+<meta name="twitter:card" content="summary" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="アプリ開発者のための UNIXの基礎" />
+<meta property="og:url" content="https://euske.github.io/slides/bc20221024/index.html" />
+<meta property="og:description" content="アプリ開発者の役に立ちそうなUNIX/Linuxに関する知識まとめ。" />
+<title>アプリ開発者のための UNIXの基礎</title>
 <style><!--
 body { line-height: 1.5; }
 h1 { border-bottom: solid 4px #000088; }
@@ -36,15 +44,27 @@ code em { color: #000088; }
 <div class=nav>
 <a href="../index.html">&lt; もどる</a>
 </div>
-<h1>(プログラマのための) UNIXの基礎</h1>
-<p>
-勉強会資料 2022/10/24
+<h1>アプリ開発者のための<br>UNIXの基礎</h1>
 
 <div class=author>
 Yusuke Shinyama<br>
 </div>
 
-<ol>
+<p>
+<strong>概要:</strong>
+この記事では、アプリ開発者の役に立ちそうな
+UNIX/Linux の使い方に関する最低限の知識をまとめた。
+</p>
+
+<p>
+<strong>目的:</strong>
+この記事を理解すると、<a href="#ex15">まとめ問題</a>に答えることができる。
+(逆に、現時点でこれができる人には本記事は不要。)
+</p>
+
+<h4>目次</h4>
+<ol start="0">
+<li> <a href="#preps">実行環境の準備</a></li>
 <li> <a href="#unix">UNIXとは</a>
 <ul>
   <li> <a href="#unix-os">オペレーティングシステム (OS) とは?</a>
@@ -99,25 +119,19 @@ Yusuke Shinyama<br>
   <li> <a href="#control-args">$* 引数</a>
 </ul>
 <li> <a href="#oneliner">ワンライナー (one-liner) を書く時の注意点</a>
-<li> <a href="#summary">まとめ</a>
+<li> <a href="#books">おすすめの書籍</a></li>
 </ol>
 
-<h4>実行環境の準備</h4>
-<div class=formula>
-<a target="_blank" href="https://bellard.org/jslinux/vm.html?url=alpine-x86.cfg&amp;mem=192">JSLinux: ブラウザ上で動くLinuxエミュレータ</a>
-</div>
-<div class=formula>
-<a target="_blank" href="https://mac.getutm.app/">UTM: M1 Mac上で動く仮想マシン</a>
+
+<h2 id="preps">0. 実行環境の準備</h2>
+<p>
+  必要に応じて、次のどれかの環境を使うこと:
+</p>
+<ul>
+<li> <a target="_blank" href="https://bellard.org/jslinux/vm.html?url=alpine-x86.cfg&amp;mem=192">JSLinux: ブラウザ上で動くLinuxエミュレータ</a>
+<li> <a target="_blank" href="https://mac.getutm.app/">UTM: M1 Mac上で動く仮想マシン</a>
 に
 <a target="_blank" href="https://docs.getutm.app/guides/ubuntu/">Ubuntu 22.04 をインストールする方法</a>。
-</div>
-
-<h4>おすすめの本</h4>
-<ul>
-<li> <a href="https://www.amazon.co.jp/dp/429713148X/">［試して理解］Linuxのしくみ　―実験と図解で学ぶOS、仮想マシン、コンテナの基礎知識【増補改訂版】</a>
-- 最近評判のよい本。OS の内部まで学習したい人向け。
-<li> <a href="https://www.amazon.co.jp/dp/B00KRB9U8K/">詳解UNIXプログラミング 第3版</a>
-- 通称「Stevensの本」と呼ばれる歴史的名著。
 </ul>
 
 
@@ -2349,13 +2363,8 @@ for file in dir1/&ast;.txt; do echo "cat ${file} footer.txt &gt; dir2/${file}"; 
 </pre>
 </ol>
 
-
-<h2 id="summary">11. まとめ</h2>
-<p>
-本日紹介したコマンド・概念は以下のとおり (出てきた順):
-
-<div class=exercise id="ex12">
-<div class=header>演習 12. まとめ問題</div>
+<div class=exercise id="ex15">
+<div class=header>演習 15. まとめ問題</div>
 <ol>
 <li> 以下の用語の違いを説明せよ:
 <ul>
@@ -2384,8 +2393,8 @@ $ <strong>echo &gt; world</strong>
 $ <strong>echo &ast;</strong>
 </pre></blockquote>
 <li> TODO リストを管理するための簡単なスクリプト todo を作りたい。
-これは特定のテキストファイルにやることの一覧を記録する。
-以下のように使うものとする:
+これは特定のテキストファイルに「やることの一覧」を記録する。<br>
+このスクリプトは、以下のように使うものとする:
 <ul>
 <li> <code>todo</code> だけを実行すると、そのテキストファイルが表示される。
 <li> <code>todo edit</code> と実行すると、そのテキストファイルが
@@ -2395,6 +2404,7 @@ $ <strong>echo &ast;</strong>
 <li> そのテキストファイルの位置は、環境変数 <code>TODOFILE</code> によって
 決まるものとする。
 </ul>
+<p>以下の空欄を埋めよ:</p>
 <div class=file>
 <div class=header>todo</div>
 <pre>
@@ -2413,6 +2423,14 @@ fi
 </div>
 </ol>
 </div>
+
+<h2 id="books">11. おすすめの書籍</h2>
+<ul>
+<li> <a href="https://www.amazon.co.jp/dp/429713148X/">［試して理解］Linuxのしくみ　―実験と図解で学ぶOS、仮想マシン、コンテナの基礎知識【増補改訂版】</a>
+- 最近評判のよい本。OS の内部まで学習したい人向け。
+<li> <a href="https://www.amazon.co.jp/dp/B00KRB9U8K/">詳解UNIXプログラミング 第3版</a>
+- 通称「Stevensの本」と呼ばれる歴史的名著。
+</ul>
 
 
 <hr>
