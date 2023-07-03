@@ -320,7 +320,7 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
 
 <p>
 これを解決するために、認証局はいくつかの階層に分けられている。
-まず、もっとも上位にある「ルート認証局」が、その下位の「中間認証局」の証明書を発行し、
+まず、もっとも上位にある「ルート認証局 (Root CA)」が、その下位の「中間認証局」の証明書を発行し、
 いくつかの段階をへて、中間認証局が最終的なウェブサイトの証明書を発行する。
 たとえば、以下のような証明書チェーンを考える:
 </p>
@@ -441,13 +441,63 @@ MIIFYjCCBEqgAwIBAgIQd70NbNs2+RrqIQ/E8FjTDTANBgkqhkiG9w0BAQsFADBX
 <p>
 このときに注意すべきこととして:
 <ul>
-  <li> すべての証明書には<u>有効期間</u>がある。有効期間をすぎた (失効した) 証明書は信頼されないので、定期的に更新する必要がある。</li>
+  <li> すべての証明書には<u>有効期間</u>がある。有効期間が切れた (失効した) 証明書は信頼されないので、定期的に更新する必要がある。</li>
   <li> 証明書に使う秘密鍵は、外部に持ち出してはならない。</li>
   <ul>
     <li> 個人の秘密鍵であれば、秘密鍵ファイルはそのPCから持ち出さない。</li>
     <li> 組織の秘密鍵であれば、それが入っているPCはそもそもネットに接続しない。</li>
   </ul>
 </ul>
+
+<h3>なぜ証明書には有効期限があるのか?</h3>
+<p>
+証明書の有効期限も、証明書のチェーンと同様に<strong>リスク緩和</strong>が目的である。 
+未来は予測できないため、現在は正しい情報も、将来のある時点で正しくなくなるかもしれない。
+正しくなくなった証明書を失効させるために
+<a href="https://ja.wikipedia.org/wiki/%E8%A8%BC%E6%98%8E%E6%9B%B8%E5%A4%B1%E5%8A%B9%E3%83%AA%E3%82%B9%E3%83%88">証明書失効リスト</a>や
+<a href="https://ja.wikipedia.org/wiki/Online_Certificate_Status_Protocol">OCSP</a>のような仕組みが用意されているが、
+証明書の有効期限はこれらの仕組みが使えない場合にそなえて時間的な「柵」を提供している。
+</p>
+<ul>
+<li> ルート認証局の証明書の有効期間は、通常20〜30年程度。
+<li> 末端のサーバがもつ証明書の有効期間は、数ヶ月〜数年程度。
+</ul> 
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="370" height="100"
+       transform="scale(1,1)">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    </defs>
+    <g id="cert" transform="translate(65,20)">
+      <rect stroke="black" fill="none" stroke-width="1" x="0" y="0" width="40" height="20" />
+      <text stroke="none" fill="black" style="font-size: 75%;" x="2" y="15">証明書</text>
+    </g>
+    <g stroke="black" fill="none" marker-end="url(#arrow)">
+      <path d="M110,30 l145,0" stroke-width="4" />
+      <path d="M10,60 l350,0" stroke-width="2" />
+    </g>
+    <g stroke="black" fill="none" stroke-width="6">
+      <path d="M40,60 l20,0" stroke="#aaa" />
+      <path d="M60,60 l150,0" stroke="black" />
+      <path d="M210,60 l50,0" stroke="red" />
+      <path d="M260,60 l70,0" stroke="#faa" />
+      <path d="M60,20 l0,50 M260,20 l0,50" stroke-width="2" />
+      <path d="M265,22 l16,16 m0,-16 l-16,16" stroke="red" stroke-width="4" />
+    </g>
+    <g style="font-size: 75%;" text-anchor="middle" fill="black"> 
+      <text x="180" y="25">証明書の有効期間</text>
+      <text x="272" y="15" fill="red">失効</text>
+    </g>
+    <g style="font-size: 75%;" text-anchor="start" fill="black">
+      <text x="60" y="80">情報が</text>
+      <text x="60" y="95">正しい期間</text>
+      <text x="220" y="80" fill="red">情報が</text>
+      <text x="220" y="95" fill="red">正しくない期間</text>
+    </g>
+  </svg>
+</div>
 
 <h3>有効期限が切れるとどうなるのか?</h3>
 <p>
