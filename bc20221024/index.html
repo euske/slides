@@ -140,6 +140,7 @@ UNIX/Linux の使い方に関する最低限の知識をまとめた。
 1970年ごろに作られた<u>オペレーティングシステム</u> (OS)。
 以後の多くの OS が UNIX を継承あるいは模倣している。
 以下ではこれらの「UNIX風OS」も含めて UNIX と呼称する。
+</p>
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -185,6 +186,7 @@ UNIX/Linux の使い方に関する最低限の知識をまとめた。
 </div>
 <p>
 従来の (UNIXでない) OS と比べると、UNIX は非常に単純であった:
+</p>
 <ul>
 <li> ファイルはただのバイト列
 <li> ユーザは基本的に 2種類のみ (<u>スーパーユーザ</u>・<u>一般ユーザ</u>)
@@ -200,7 +202,7 @@ UNIX/Linux の使い方に関する最低限の知識をまとめた。
 実際には、アプリはコンピュータで動いているソフトウェア全体のごく一部である。
 また、OS は多くの仮想化処理 (ファイルシステム、遠隔操作、同時並列処理)
 を実現している。
-
+</p>
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -229,12 +231,13 @@ Linuxの世界では、実際には "RedHat", "Ubuntu", "Debian" といった
 ということはあり得ない。核となる Linux カーネルにさまざまな部品
  (ファイルシステム、パッケージ管理など) を追加して一般的な OS として
  使えるようにしたものが「ディストリビューション」である。
- <p>
+</p><p>
 Linuxの各ディストリビューションのおもな違いはファイルシステムの構造の差異
 (/etc以下にある設定ファイルの違いなど) およびシステム管理の方法の差異である。
 とくに、パッケージ管理方式は各ディストリビューションによって大きく違っている。
 しかしこの記事では UNIXのシステム管理の方法までは扱わないので、
 内容の大部分はどのディストリビューションにもあてはまる。
+</p>
 
 <h2 id="filesystem">2. ファイルシステム</h2>
 <p>
@@ -244,11 +247,13 @@ UNIXは<u>階層型ファイルシステム</u> (hierarchical filesystem) とい
 そのため、メモリや画面 (端末) も <code>mem</code> や <code>tty</code> といった
 特殊ファイルとして表現されている。
 なお、 UNIXではフォルダのことを <u>ディレクトリ</u> (directory) と呼ぶ。
+</p>
 
 <h3 id="fs-path">2.1. パス名とは</h3>
 <p>
 ファイルシステム中のあらゆるファイルの位置は、
 <u>パス名</u> (path) で表すことができる:
+</p>
 
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -337,6 +342,7 @@ UNIXは<u>階層型ファイルシステム</u> (hierarchical filesystem) とい
 <p>
 UNIX では、いくつかのパス名は
 「お約束」として決められている。
+</p>
 <ul>
   <li> <code>/bin</code>: 実行可能ファイル (プログラム)</li>
   <li> <code>/home</code>: 各ユーザのホームディレクトリ</li>
@@ -383,6 +389,7 @@ $ <strong>less /etc/services</strong>
 </pre></blockquote>
 <p>
 lessでは以下のキー操作が使える:
+</p>
 <ul>
 <li> <kbd>Space</kbd> … 次のページへ進む。
 <li> <kbd>b</kbd> … 前のページへ戻る。
@@ -396,6 +403,7 @@ lessでは以下のキー操作が使える:
 
 <p>
 UNIXでは、各ファイルには以下のようなメタデータが付与されている:
+</p>
 <ul>
 <li> ファイル名
 <li> 所有者 (ユーザ)
@@ -489,13 +497,12 @@ UNIXでは、各ファイルには以下のようなメタデータが付与さ�
   </g>
 </svg>
 </div>
-</div>
-</ul>
 
 <h3 id="fs-abspath">2.3. 絶対パス名と相対パス名</h3>
 <p>
 実は「パス名」と呼ばれているものには 2つの種類がある。
 上で説明した「パス名」は「<u>絶対パス名</u>」のことであった。
+</p>
 <ul>
 <li> <u>絶対パス名</u>: <mark>ディスクの先頭から</mark>たどったパス名。
 <li> <u>相対パス名</u>: <mark>カレント・ディレクトリから</mark>たどったパス名。
@@ -579,6 +586,7 @@ UNIXでは、各ファイルには以下のようなメタデータが付与さ�
 
 <p>
 つまり、上のディレクトリ <code>X</code> の位置は、次の2通りで表せる:
+</p>
 <ul>
   <li> 絶対パス名: <code>/A/<span style="color:red;">E</span>/<span style="color:blue;">X</span></code>
   <li> 相対パス名: <code><mark>.</mark>/<span style="color:blue;">X</span></code>
@@ -679,6 +687,7 @@ UNIXでは、各ファイルには以下のようなメタデータが付与さ�
 <div class=header>演習 3. 相対パスの練習</div>
 <p>
 カレント・ディレクトリが <code>E</code> のとき…
+</p>
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -788,6 +797,7 @@ $ <strong>pwd</strong>
 少しずつ (10ms程度) 実行される (時分割処理)。
 これらプロセス切り替え処理は、OS の
 <u>カーネル</u> (kernel) という部分がおこなう。
+</p>
 
 <h4>UNIXプロセスの特徴</h4>
 
@@ -815,6 +825,7 @@ UNIX 起動時には、まず最初のプロセスである <code>init</code>
 (プロセスID: 1) が実行される。ここから他のすべてのプロセスが起動される。
 UNIX の各プロセスは、<code>init</code> から先祖-子孫関係が存在し、
 全体として木構造を形成している。
+</p>
 <blockquote><pre>
 $ <strong>pstree</strong>
 systemd─┬─agetty
@@ -866,6 +877,7 @@ brewを使ってインストールする)
 <p>
 UNIX のプロセスには、<u>シグナル</u> (signal) を送ることができる。
 シグナルにはいくつかの種類がある:
+</p>
 <ul>
 <li> <code>SIGTERM</code> … プロセスを正常終了させる。
 <li> <code>SIGKILL</code> … プロセスを強制終了させる。(SIGTERMよりも強力で、最後の手段)
@@ -903,14 +915,13 @@ UNIX の各プロセスには
 という 3つの仮想的な装置が付属している。
 これらはプロセスが画面に文字を表示したり、
 キーボードから文字を入力するために使用する。
-
-<p>
+</p><p>
 まず、通常の状態では、プロセスの
 標準入力・標準出力・標準エラー出力は、
 どれも「<u>端末</u> (画面)」に接続されている。
 (昔はこれはタイプライタや電話線だったが、現在ではおもに
 ウィンドウ上の<u>仮想端末</u>が使われる。)
-
+</p>
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -943,6 +954,7 @@ UNIX の各プロセスには
 
 <p>
 標準出力は、プロセスからの出力を表示するのに使われる:
+</p>
 <blockquote><pre>
 $ <strong>./hello</strong>
 hello, world.
@@ -950,6 +962,7 @@ hello, world.
 
 <p>
 いっぽう標準入力は、ユーザが文字を入力するのに使われる:
+</p>
 <blockquote><pre>
 $ <strong>./greet</strong>
 your name?
@@ -961,6 +974,7 @@ greetings, euske
 さて UNIX では、後述するシェルの機能を使うと、
 標準出力を端末ではなくファイルに切り替える (<u>リダイレクト</u>する)
 ことができる:
+</p>
 <blockquote><pre>
 $ <strong>./hello &gt; output.txt</strong>
 (テキストファイル output.txt が生成される)
@@ -999,6 +1013,7 @@ $ <strong>./hello &gt; output.txt</strong>
 <p>
 また、標準<strong>入力</strong>を端末ではなくファイルにリダイレクトすることも
 可能である:
+</p>
 <blockquote><pre>
 (テキストファイル input.txt を作成する)
 $ <strong>./greet &lt; input.txt</strong>
@@ -1041,7 +1056,7 @@ greetings, test
 これを使うと
 「あるプロセスの標準<strong>出力</strong>を、別のプロセスの標準<strong>入力</strong>に」
 リダイレクトすることができる:
-
+</p>
 <blockquote><pre>
 $ <strong>./hello | ./greet</strong>
 your name?
@@ -1123,7 +1138,7 @@ $ <strong>ls -l | sort -n -r +4</strong> (reverse, 逆順に表示)
 文字列を与えることにより異なった動きをするものが多い。
 (これは何か規則があるわけではなく、ただの慣例である。)
 このような文字列を一般にコマンドの「<u>オプション</u> (option)」と呼ぶ。
-
+</p>
 </ul>
 </div>
 
@@ -1131,6 +1146,7 @@ $ <strong>ls -l | sort -n -r +4</strong> (reverse, 逆順に表示)
 パイプによる複数プロセスの接続は UNIX (シェル) の特徴的な機能のひとつである。
 これをうまく使うと、複雑な処理をいくつかのコマンドの組み合わせによって
 実現することができる。
+</p>
 <blockquote><pre>
 (ls コマンドの出力を検索し、さらにそれをソートして最初の10行を表示する)
 $ <strong>ls -l | grep euske | sort | head -n10</strong>
@@ -1166,9 +1182,9 @@ UNIX 上で「<u>コマンド</u> (command)」と呼ばれるものは、
 通常の PC では、アプリ (これもプロセス) は一度起動したら
 長時間走らせておくのが普通だが、
 UNIX は「湯水のようにプロセスを消費する」OSである。
-
-<p>
+</p><p>
 シェルの役割には、以下のものがある:
+</p>
 <ul>
 <li> プロセスの起動
 <li> プロセスの終了 (シグナルの送信)
@@ -1182,6 +1198,7 @@ UNIX は「湯水のようにプロセスを消費する」OSである。
 そのため (<code>sh</code>, <code>csh</code>, <code>bash</code>, <code>zsh</code> など)
 いろいろなシェルが開発されている。
 ほとんどの場合、シェルは以下の動作を繰り返しているだけである:
+</p>
 <ol>
 <li> 端末 (標準入力) からコマンド文字列が入力されるのを待つ。
 <li> 文字列を解析し、スペースで区切られた引数のリストを作成する (<u>引数展開</u>)。
@@ -1195,6 +1212,7 @@ UNIX は「湯水のようにプロセスを消費する」OSである。
 先に述べたように、UNIX コマンドのほとんどは実はプロセスであり (例外も存在する)、
 シェルの主な機能はコマンド文字列を解析し、プロセスを起動することである。
 たとえば
+</p>
 <blockquote><pre>
 $ <strong>ls -l /etc</strong>
 </pre></blockquote>
@@ -1204,6 +1222,7 @@ $ <strong>/bin/ls -l /etc</strong>
 </pre></blockquote>
 <p>
 この行が入力されたとき、シェルは以下のことをおこなう:
+</p>
 <ol>
 <li> <code>/bin/ls</code> というプログラムを子プロセスとして起動する。
 <li> このとき、各引数を文字列としてプロセスに渡す:
@@ -1225,6 +1244,7 @@ $ <strong>/bin/ls -l /etc</strong>
 API の使い方を学ぶのに似ている。
 個々の関数・メソッドの引数がどのような意味をもつのか学習し、
 それらを組み合わせて必要な処理を実現する。
+</p>
 
 <div class=note>
 <strong>注意:</strong>
@@ -1237,6 +1257,7 @@ API の使い方を学ぶのに似ている。
 <p>
 たとえば <code>echo</code> というコマンドは、シェルから与えらえた引数をただそのまま
 表示するだけのコマンドである:
+</p>
 <blockquote><pre>
 $ <strong>echo abc 1234</strong>
 abc 1234
@@ -1248,6 +1269,7 @@ $ <strong>echo -l /etc</strong>
 一般にシェルの引数は「<code> </code> 」(スペース) で
 区切られるが、<code>"〜"</code> で囲むことにより
 スペースが入っている文字列を「ひとつの引数」として認識させることができる:
+</p>
 <blockquote><pre>
 $ <strong>ls -l /etc</strong>
 …
@@ -1261,6 +1283,7 @@ ls -l: command not found
 <div class=header>演習 8. シェルの引数展開</div>
 <p>
 以下のコマンドラインの引数を 0番目からすべて挙げよ:
+</p>
 <ol class=spacy>
 <li> <code>ls /etc /bin</code>
 <li> <code>ls "/etc /bin"</code>
@@ -1275,7 +1298,7 @@ ls -l: command not found
 シェルでは、ディレクトリ上に複数のファイルがあるとき、
 それらのファイル名を複数の引数として展開する機能がある
 (<u>ファイル名展開</u>, filename expansion)。
-<p>
+</p><p>
 たとえば、カレント・ディレクトリ内に
 <code>a</code>, <code>bb</code>, <code>ccc</code>
 というファイルがあるとき…
@@ -1291,7 +1314,7 @@ $ <strong>cat &ast;</strong>
 <blockquote><pre>
 $ <strong>cat a bb ccc</strong>
 </pre></blockquote>
-<p>
+</p><p>
 ワイルドカードには、パターンを指定することもできる。
 たとえば <code>/etc</code> 内に多くの「<code>.conf</code>」で終わるファイルがあるとき…
 <blockquote><pre>
@@ -1309,14 +1332,15 @@ $ <strong>cat /etc/&ast;.conf</strong>
 <blockquote><pre>
 $ <strong>cat /etc/ca-certificates<mark>.conf</mark> /etc/dhcpcd<mark>.conf</mark> …</strong>
 </pre></blockquote>
-<p>
+</p><p>
 繰り返すが、ここで展開されたパス名をどのように扱うかは
 <strong>各コマンド次第</strong>である。
 シェルがファイル名展開したからといって、
 各コマンドがこれらをファイル名として扱う保証はない。
-<p>
+</p><p>
 ここで、<code>echo</code> コマンドは
 シェルが各引数をどのように展開したかを表示するのに使える:
+</p>
 <blockquote><pre>
 $ <strong>echo /etc/&ast;.conf</strong>
 /etc/ca-certificates.conf /etc/dhcpcd.conf …
@@ -1326,6 +1350,7 @@ $ <strong>echo /etc/&ast;.conf</strong>
 <div class=header>演習 9. ファイル名展開</div>
 <p>
 <code>/etc</code> 以下に次のようなファイルがあるとする:
+</p>
 <ul>
 <li> <code>a.conf</code>
 <li> <code>b.conf</code>
@@ -1347,26 +1372,28 @@ $ <strong>echo /etc/&ast;.conf</strong>
 各プロセスに所属する Control Group (cgroup) という機能を使うと、
 あるプロセス (およびその子孫プロセスすべて) からアクセスできる
 ファイルやネットワークを制限することができる。
-
+</p><p>
 つまるところ、docker がやっているのは、ある Control Group 内で
 プロセスを起動し、それ以降のすべての子プロセスを
 特定の空間に閉じ込める (containする) ことによって
 各プロセスが独立したマシン上で動いているかのように
 見せかけているだけなのである。
+</p>
 
 <h3 id="command-exp">5.3. コマンド出力の展開</h3>
 <p>
 さらにシェルは、あるコマンドが (標準出力に) 出力した文字列を
 まるごと引数として展開することができる。
-<p>
+</p><p>
 たとえば、<code>ls</code> コマンドが以下のような出力をしたとする:
 <blockquote><pre>
 $ <strong>ls</strong>
 a   bb   ccc
 </pre></blockquote>
-<p>
+</p><p>
 このコマンドの出力は <code>a</code>, <code>bb</code>, <code>ccc</code> という
 3つの引数に展開される:
+</p>
 <blockquote><pre>
 $ <strong>echo $(<mark>ls</mark>)</strong>
 a bb ccc
@@ -1374,6 +1401,7 @@ a bb ccc
 <p>
 ここでコマンドの出力からは、余分な空白が除かれていることに注意。
 これは通常のコマンドライン引数で
+</p>
 <blockquote><pre>
 $ <strong>echo <mark>a   bb   ccc</mark></strong>
 a bb ccc
@@ -1394,7 +1422,7 @@ ccc
 UNIX では、各プロセスに<u>環境変数</u> (environment variable) というものが
 付属している。これは各種の設定を保持しておくための文字列型の変数で、
 プログラムの変数と同様に、好きな数だけ作成することができる。
-<p>
+</p><p>
 現在の環境変数一覧を見るためには <code>env</code>コマンドを使う:
 <blockquote><pre>
 $ <strong>env</strong>
@@ -1404,8 +1432,9 @@ OLDPWD=/root
 PAGER=less
 …
 </pre></blockquote>
-<p>
+</p><p>
 順序がばらばらで見にくいので <code>sort</code>で並べ変えてみる:
+</p>
 <blockquote><pre>
 $ <strong>env | sort</strong>
 HOME=/root
@@ -1459,6 +1488,7 @@ Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
 プログラム中のどこからでも文字列値として
 アクセス可能である。
 たとえば、環境変数 <code>USER</code> の値を取得したいとき:
+</p>
 
 <h4>Node (JavaScript) の場合</h4>
 <blockquote><pre>
@@ -1478,11 +1508,13 @@ val user: String? = System.getenv("<mark>USER</mark>")
 <p>
 慣例により、環境変数の名前には大文字が使われることが多い
 (実際には、英数字であればなんでもよい)。
+</p>
 
 <h4>シェルの場合</h4>
 <p>
 シェルでは、コマンドライン引数に含まれる環境変数の値が展開される。
 たとえば環境変数 <code>USER</code> に <code>euske</code> という値が入っている場合、
+</p>
 <blockquote><pre>
 $ <strong>ls /home/<mark>${USER}</mark>/foo</strong>
 </pre></blockquote>
@@ -1492,18 +1524,21 @@ $ <strong>ls /home/euske/foo</strong>
 </pre></blockquote>
 <p>
 <code>echo</code>コマンドは、環境変数の内容を確認するためによく使われる:
+</p>
 <blockquote><pre>
 $ <strong>echo ${USER}</strong>
 euske
 </pre></blockquote>
 <p>
 未定義の環境変数を展開してもエラーにはならず、空文字列として扱われる:
+</p>
 <blockquote><pre>
 $ <strong>echo /home/${USSR}/foo</strong>
 /home//foo
 </pre></blockquote>
 <p>
 なお、<code>${〜}</code>の中カッコは省略可能である:
+</p>
 <blockquote><pre>
 $ <strong>echo $USER</strong>
 euske
@@ -1513,6 +1548,7 @@ euske
 <p>
 シェルには変数を展開するさいにさまざまな演算をおこなう機能がある。
 たとえば
+</p>
 <blockquote><pre>
 $ <strong>echo ${USER/xxx/yyy}</strong>  <em>(USER中の xxx を yyyに置換した文字列に展開される)</em>
 $ <strong>echo ${LANG:-ja}</strong>      <em>(LANGが定義されていない場合、デフォルト値としてjaに展開される)</em>
@@ -1524,6 +1560,7 @@ $ <strong>echo ${LANG:-ja}</strong>      <em>(LANGが定義されていない場
 環境変数 <code>USER</code> に <code>jon</code> という文字列が、
 環境変数 <code>FILE</code> に <code>athan</code> という文字列が、
 入っているとき、以下のコマンドの出力を答えよ:
+</p>
 <ol>
 <li> <code>echo /home/${USER}/${FILE}</code>
 <li> <code>echo $USER$FILE</code>
@@ -1539,6 +1576,7 @@ $ <strong>echo ${LANG:-ja}</strong>      <em>(LANGが定義されていない場
 「<code><strong>変数名</strong>=<strong>値</strong></code>」のような形式を追加する。
 たとえば <code>date</code> コマンドは、
 環境変数 <code>TZ</code> の値によって異なる時間帯の時刻を返す:
+</p>
 <blockquote><pre>
 $ <strong>date</strong>
 Mon Oct 31 06:56:48 JST 2022
@@ -1550,6 +1588,7 @@ Sun Oct 30 17:56:48 EDT 2022
 <p>
 また、親プロセスが持っている環境変数はすべて子プロセスに継承される。
 そのため親プロセスに環境変数を設定しておけば、すべての子プロセスで共通の値が使える:
+</p>
 <blockquote><pre>
 $ <strong>echo $XYZ</strong>       <em>(環境変数XYZは未定義)</em>
 
@@ -1563,6 +1602,7 @@ ABC123
 実際には、環境変数はより一般的な<u>シェル変数</u> (shell variable) の一部として扱われる。
 シェル変数の一覧 (環境変数も含む) を表示するには
 <code>set</code>コマンドを使う:
+</p>
 <blockquote><pre>
 $ <strong>set</strong>
 BASH=/bin/bash
@@ -1575,6 +1615,7 @@ EDITOR=vi
 シェル変数は、ただ
 「<code><strong>変数名</strong>=<strong>値</strong></code>」のように書けば
 値を設定できる。
+</p>
 <blockquote><pre>
 $ <strong>XYZ=abc123</strong>  <em>(シェル変数XYZにabc123を設定)</em>
 $ <strong>echo $XYZ</strong>   <em>(シェル変数XYZの値を表示する)</em>
@@ -1586,6 +1627,7 @@ $ <strong>echo $XYZ</strong>   <em>(シェル変数XYZの値を表示する)</em
 「export属性」をもつものだけである。
 Export属性をもったシェル変数は、何も指定しなくても
 以後シェルから起動したすべてのプロセスに環境変数として渡される:
+</p>
 <blockquote><pre>
 $ <strong>XYZ=abc123</strong>  <em>(シェル変数XYZにabc123を設定)</em>
 $ <strong>echo $XYZ</strong>   <em>(シェル変数XYZの値を表示する)</em>
@@ -1619,9 +1661,11 @@ XYZ=abc123
 <p>
 UNIX の環境変数のなかでも <code>PATH</code> と <code>HOME</code> は
 とくに重要である。
+</p>
 <h4>環境変数 PATH</h4>
 <p>
 通常、UNIX シェルでは第0引数としてコマンド (プログラム) のパス名を指定する:
+</p>
 <blockquote><pre>
 $ <strong>/bin/ls -l /etc</strong>
 </pre></blockquote>
@@ -1644,6 +1688,7 @@ $ <strong>echo $PATH</strong>
 のいずれかのプログラムを実行せよ」ということを表している。
 PATH にはこのようなコマンドの「検索順序」が記録されている。
 その証拠に、<code>PATH</code> をおかしな値にすると動かない:
+</p>
 
 <blockquote><pre>
 $ <strong>PATH=xxx</strong>
@@ -1656,6 +1701,7 @@ $ <strong>/bin/ls</strong>
 <p>
 なお、<code>PATH</code> はよくシステムのデフォルト値をカスタマイズして
 使うことが多い。<code>PATH</code> に独自のディレクトリを追加するには、以下のようにする:
+</p>
 <blockquote><pre>
 PATH=$PATH:/home/euske/bin  <em>(/home/euske/bin もコマンド検索順序に追加する)</em>
 </pre></blockquote>
@@ -1670,6 +1716,7 @@ UNIX では、各ユーザのホームディレクトリは
 これは起動時には通常そのユーザのデフォルト値が設定されているが、
 この値を変更することで、どんなディレクトリでもホームディレクトリとして
 使用することができる:
+</p>
 <blockquote><pre>
 $ <strong>echo $HOME</strong>  <em>(環境変数HOMEの内容を表示する)</em>
 /home/euske
@@ -1685,6 +1732,7 @@ $ <strong>pwd</strong>         <em>(カレント・ディレクトリを表示)<
 また、シェルのコマンドライン上では <code>~</code> が
 自分のホームディレクトリに展開されるが、
 この値も実際には環境変数 <code>HOME</code> を展開しているだけである:
+</p>
 <blockquote><pre>
 $ <strong>echo $HOME/work</strong>
 /home/euske/work
@@ -1695,6 +1743,7 @@ $ <strong>echo ~/work</strong>
 UNIX では、各ユーザのデフォルトのホームディレクトリ (やシェル) は
 <code>/etc/passwd</code> というテキストファイル内に記載されている。
 UNIX におけるホームディレクトリとは、つまるところ:
+</p>
 <ul>
 <li> そのユーザが所有している
 <li> 環境変数 <code>HOME</code> が、そのパス名に設定されている
@@ -1705,6 +1754,7 @@ UNIX におけるホームディレクトリとは、つまるところ:
 <h2 id="fileops">7. ファイル操作コマンド</h2>
 <p>
 シェル上でファイル操作を行うためのおもなコマンドは以下のとおり:
+</p>
 <dl>
 <dt id="cmd-ls"> <code>ls</code>
 <dd> 指定したディレクトリに含まれるファイル一覧を表示する。
@@ -1765,6 +1815,7 @@ $ <strong>cp &ast;.txt dest/</strong>
 <code>cp</code> で複製できるのは、通常はファイルのみである。
 あるディレクトリ内のファイルを (ディレクトリごと) 複製したい場合には
 <code>-r</code> オプションを使う:
+</p>
 <pre>
 $ <strong>cp -r foo dest/</strong>
 <em>(foo ディレクトリ内とその中のファイルをすべて dest/ 内に複製する)</em>
@@ -1819,6 +1870,7 @@ $ <strong>rm &ast;.txt</strong>
 <code>rm</code> で削除できるのは、通常はファイルのみである。
 あるディレクトリ内のファイルを (ディレクトリごと) 削除したい場合には
 <code>-r</code> オプションを使う:
+</p>
 <pre>
 $ <strong>rm -r dest/</strong>
 <em>(dest/ ディレクトリ内とその中のファイルをすべて削除する)</em>
@@ -1852,6 +1904,7 @@ $ <strong>du -s .</strong>
 「<code>-</code>」で始まる引数はオプションとみなされる。
 もし実際に "<code>-i</code>" というファイルを複製したい場合、
 <code>cp -i a.txt</code> などとやってもうまくいかない:
+</p>
 <blockquote><pre>
 $ <strong>cp -i a.txt</strong>
 cp: missing destination file operand after 'a'
@@ -1859,6 +1912,7 @@ cp: missing destination file operand after 'a'
 </pre></blockquote>
 <p>
 このような場合には、2つの方法がある:
+</p>
 <ol type=a>
 <li> 引数が「<code>-</code>」で始まらなけれさえすればよいので、
 <code>-i</code> がカレント・ディレクトリにあることを利用して、
@@ -1884,6 +1938,7 @@ $ <strong>cp -- -i a.txt</strong>
 もっとも基本的なシェルスクリプトは、単に実行するコマンド列を1行にひとつずつ
 並べたテキストファイルである。
 (<code>#</code> 以降の文字列はコメントとして解釈される。)
+</p>
 <div class=file>
 <div class=header>hello.sh</div>
 <pre>
@@ -1897,6 +1952,7 @@ ls /etc
 シェルスクリプトを実行するには、シェルの引数としてスクリプトの
 ファイル名を与えればよい。シェルスクリプトの実行には通常 Bourne shell
 (<code>/bin/sh</code>) が使われる:
+</p>
 <blockquote><pre>
 $ <strong>sh hello.sh</strong>
 Hello!                                                 <em>(echo が実行される)</em>
@@ -1913,6 +1969,7 @@ alpine-release        lynx.lss              services
 プロセス起動時に与えられた引数は、
 第0引数から順に <code>$0</code>、<code>$1</code> …
 というシェル変数として利用できる。
+</p>
 <div class=file>
 <div class=header>showargs.sh</div>
 <pre>
@@ -1924,6 +1981,7 @@ echo "Arg2: $2"
 <p>
 上のシェルスクリプトを実行すると、以下のように表示される。
 第0引数はスクリプトの名前 (パス名) になっているのがわかる:
+</p>
 <blockquote><pre>
 $ <strong>sh showargs.sh foo bar baz</strong>
 Arg0: showargs.sh  <em>(第0引数が表示される)</em>
@@ -1935,6 +1993,7 @@ Arg2: bar          <em>(第2引数が表示される)</em>
 <div class=header>演習 11. シェルスクリプトの説明</div>
 <p>
 以下のシェルスクリプトが何をするか推測せよ。
+</p>
 <pre>
 # showhome.sh
 ls -l "/home/$1"
@@ -1949,9 +2008,10 @@ UNIX では、通常実行するプログラムはその CPU 用にコンパイ�
 実行できるような仕組みが用意されている。あるテキストファイルの
 先頭が "<code>#!</code>" という特殊な 2バイトで始まっている場合、
 UNIX はその行をもとに別のコマンドを呼び出すことができる。
-<p>
+</p><p>
 例をあげて説明しよう。
 たとえば、以下のようなテキストファイル <code>foobar</code> を作成する:
+</p>
 <div class=file>
 <div class=header>foobar</div>
 <pre>
@@ -1965,11 +2025,13 @@ UNIX では、実行するプログラム (ファイル) には必ず
 <u>実行可能フラグ</u>が有効になっていなければならない。
 そのため、まず <code>chmod</code> コマンドを使ってこのファイルの
 実行可能フラグを立てる:
+</p>
 <blockquote><pre>
 $ <strong>chmod +x foobar</strong>  <em>(ファイル foobar を実行可能にする)</em>
 </pre></blockquote>
 <p>
 このファイルをシェルから実行すると、以下のように表示される:
+</p>
 <blockquote><pre>
 $ <strong>./foobar</strong>
 <mark>#!/bin/cat</mark>
@@ -1980,6 +2042,7 @@ bar
 一体、何が起こっているのか?
 実は <code>foobar</code> をシェルから「実行」すると、
 UNIX 内部では以下のコマンドが実行されている:
+</p>
 <blockquote><pre>
 /bin/cat foobar
 </pre></blockquote>
@@ -1989,11 +2052,12 @@ UNIX 内部では以下のコマンドが実行されている:
 またその第1引数としてファイル自体へのパス名 <code>foobar</code> が渡される。
 つまり <code>cat</code> に対して自分自身を表示するような
 プログラムになっているのである。
-<p>
+</p><p>
 この機能を使うと、シェルスクリプトを (わざわざ <code>sh</code> を使って実行しなくても)
 通常のコマンドと同じように使うことができる。
 たとえば、先ほどの <code>hello.sh</code> を以下のように変更してみよう
 (拡張子は <code>.sh</code> でなくてもかまわない):
+</p>
 <div class=file>
 <div class=header>hello</div>
 <pre>
@@ -2005,6 +2069,7 @@ ls /etc
 </div>
 <p>
 これを通常のコマンドとして実行するには、以下のようにする:
+</p>
 <blockquote><pre>
 $ <strong>chmod +x hello</strong>
 $ <strong>./hello</strong>     <em>(/bin/sh hello と同様の結果が得られる)</em>
@@ -2016,6 +2081,7 @@ Sun Nov 13 14:48:02 JST 2022
 このファイルを環境変数 <code>PATH</code> で
 指定したディレクトリ内に置いておけば、いまやこのシェルスクリプトは
 通常のコマンドと同じように使えるわけである。
+</p>
 
 <div class=note>
 <strong>注意:</strong>
@@ -2066,6 +2132,7 @@ UNIXの慣例では、正常終了した（成功した）プロセスは
 終了状態を返すことになっている。
 あるコマンドの終了状態を見るには、コマンド実行直後に
 シェル変数 <code>$?</code> を表示すればよい:
+</p>
 <blockquote><pre>
 $ <strong>ls /etc</strong>
 ImageMagick-7         logrotate.d           screenrc
@@ -2082,6 +2149,7 @@ $ <strong>echo $?</strong>
 <p>
 さらに、シェルではコマンドの終了状態に応じて
 ふるまいを変更できる:
+</p>
 <ul>
   <li> <code>a &amp;&amp; b</code> … コマンド <code>a</code> が正常終了した (成功) 時にコマンド <code>b</code> を実行する。
     <pre>cd /etc &amp;&amp; ls &ast;.conf    <em>(/etcディレクトリにcdできたら、その中の .conf ファイル一覧を表示する)</em></pre>
@@ -2092,6 +2160,7 @@ $ <strong>echo $?</strong>
 さらにこれらの条件式は、他のプログラミング言語と同様に <code>(</code> … <code>)</code> を使ってグループ化できる。
 グループ化されたコマンド列の終了状態は、最後に実行されたコマンドの終了状態となる。
 したがって、次のような例も可能:
+</p>
 <blockquote><pre>
 <em># /fooディレクトリにcdできれば &ast;.conf一覧を表示し、そうでなければエラーを表示する。</em>
 ( cd /foo && ls &ast;.conf ) || echo "/foo does not exist"
@@ -2101,6 +2170,7 @@ $ <strong>echo $?</strong>
 <p>
 シェルでは文字列処理をおこなうための展開がいくつか用意されている。
 代表的なものを以下にあげる:
+</p>
 <dl>
 <dt> コマンド展開を使った置換
 <dd> <a href="#command-exp">コマンド出力の展開</a> を参照。
@@ -2131,6 +2201,7 @@ path=${FILENAME:-default.txt}
 さて、シェルスクリプトの真のうまみは条件分岐や繰り返しを使って
 コマンドを実行させることである。シェルでは、条件分岐や繰り返しをするときも
 上で述べたコマンドの終了状態を使う。
+</p>
 <ul>
 <li> 終了状態が <code>0</code> … そのコマンドの返り値は「真」として扱われる。
 <li> 終了状態が <code>0</code> 以外 … そのコマンドの返り値は「偽」として扱われる。
@@ -2138,10 +2209,12 @@ path=${FILENAME:-default.txt}
 <p>
 このため UNIX では、ある条件に応じて終了状態を変化させるため<strong>だけ</strong>のコマンド
 <code>test</code> が存在する。
+</p>
 
 <h3 id="control-test">9.1. testコマンド</h3>
 <p>
 <code>test</code> コマンドは与えられた条件に応じて真偽値に対応する終了状態を返す:
+</p>
 <ul>
   <li> <code>test -f <mark>パス名</mark></code>: 与えられた <mark>パス名</mark> にファイルが存在したら真。
   <li> <code>test -d <mark>パス名</mark></code>: 与えられた <mark>パス名</mark> にディレクトリが存在したら真。
@@ -2155,6 +2228,7 @@ path=${FILENAME:-default.txt}
 なお、見やすさのため、<code>test</code>コマンドと同様の機能をもつ
 <code>&lbrack;</code> というコマンドが用意されている。
 この場合は、以下のように記述する:
+</p>
 <ul>
   <li> <code>[ -f <mark>パス名</mark> ]</code>: 与えられた <mark>パス名</mark> にファイルが存在したら真。
   <li> <code>[ -d <mark>パス名</mark> ]</code>: 与えられた <mark>パス名</mark> にディレクトリが存在したら真。
@@ -2167,10 +2241,12 @@ path=${FILENAME:-default.txt}
 <p>
 <code>test</code>コマンドはこれ以外にも多くの演算や条件式の組み合わせが可能である。
 詳しくは <code>man test</code> を参照のこと。
+</p>
 
 <h3 id="control-if">9.2. if … then 〜 fi文</h3>
 <p>
 if文の使い方は、通常のプログラミング言語とほとんど同じである。
+</p>
 <dl>
 <dt> 書式:
 <dd> <pre>
@@ -2207,6 +2283,7 @@ fi
 それがファイルであれば <code>cat</code> を実行し、
 ディレクトリであれば <code>ls</code> を実行するコマンド
 <code>dog</code> を作りたい。以下のシェルスクリプトを完成させよ:
+</p>
 <div class=file>
 <div class=header>dog</div>
 <pre>
@@ -2223,6 +2300,7 @@ fi
 <h3 id="control-while">9.3. while … do 〜 done文</h3>
 <p>
 これも通常のプログラミング言語におけるwhile文とほとんど同じである。
+</p>
 <dl>
 <dt> 書式:
 <dd> <pre>
@@ -2250,6 +2328,7 @@ done
 繰り返し処理を実行する。
 Python における <code>for</code>文、
 あるいは JavaScript における <code>for … of</code>構文に似ている。
+</p>
 <dl>
 <dt> 書式:
 <dd> <pre>
@@ -2297,6 +2376,7 @@ done
 各ディレクトリ中の <code>list.txt</code> を
 <code><em>ディレクトリ名</em>_list.txt</code> という名前に変更したい。
 そのため、以下のようなスクリプトを書いた:
+</p>
 <blockquote><pre>
 #!/bin/sh
 for name in $*; do
@@ -2324,6 +2404,7 @@ done
 <p>
 このような場合は、ファイルを一度別の名前に移してから処理をおこなう。
 (あるいは一時ファイルを作成し、それを元のファイルに上書きする。)
+</p>
 <pre>
   for file in &ast;.txt; do
     <em># まず ${file} を ${file}.orig に名前変更する。</em>
@@ -2340,7 +2421,7 @@ done
 UNIXでは、ちょっとした作業をするために１行のシェルスクリプト (ワンライナー) を
 即席で書いて実行することがある。よくあるのが各ファイルについて何らかの
 処理をおこなうというものである:
-
+</p>
 <blockquote><pre>
 for file in myfiles/&ast;; do
     <em># ...${file}に対してなんらかの処理をおこなう...</em>
@@ -2349,7 +2430,7 @@ done
 <p>
 しかしこのような処理は多くのファイルを一度に変更することが多く、危険である。
 このようなとき、おすすめの安全策がある。
-
+</p>
 <ol>
   <li> 危険なコマンドを <code>echo</code> で表示するだけにしておく。
 <pre>
