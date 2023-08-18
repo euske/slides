@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>セキュリティ対策ワークショップ / Security Engineering Workshop</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000088; }
+h2 { border-bottom: solid 2px #000088; }
+table { border-collapse: collapse; margin: 1em; }
+td { padding: 4px; }
+kbd { outline: 1px solid black; padding: 2px; }
+blockquote { outline: 1px solid black; padding: 4px; }
+pre { overflow: auto; margin: 0; }
+pre em { color: #008800; }
+code em { color: #000088; }
+pre, code { background: #ddd; font-size: 150%; font-family: courier; }
+img { max-width: 80vw; height: auto; }
+u { color: #880000; font-weight: bold; }
+mark { font-weight: bold; }
+.author { text-align: right; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
+.notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
+
+.exercise { outline: 1px solid black; padding: 0.5em; margin: 1em; }
+.bl { outline: 1px solid black; padding: 2px; font-size: 120%; color: transparent; }
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>セキュリティ対策ワークショップ (仮称)</h1>
+
+<div class=author>
+Yusuke Shinyama, Aug. 2023
+</div>
+
+<h4>本ワークショップの目標</h4>
+<ul>
+<li> Point A: セキュリティ対策に興味をもっている開発者。
+<li> Point B: セキュリティ対策の業務内容と、そのために必要な知識・スキルを大まかに理解している。
+</ul>
+
+<h2 id="seceng-what">0. セキュリティ対策とは何か?</h2>
+
+<h3 id="security-safety">「セーフティ」と「セキュリティ」の違い</h3>
+<ul>
+<li> セーフティ (safety、安全) … 自然災害や事故から守ること。
+<li> セキュリティ (security、保安) … 悪い人間から守ること。
+</ul>
+
+<div class=exercise>
+<div class=header>問題. セーフティかセキュリティか?</div>
+<ol type=a>
+<li> 信号機
+<li> <a target="_blank" href="https://www.google.co.jp/search?q=%E3%81%AF%E3%81%84%E3%81%A3%E3%81%A6%E3%81%AF%E3%81%84%E3%81%91%E3%81%BE%E3%81%9B%E3%82%93&source=lnms&tbm=isch">「はいってはいけません」の看板</a>
+<li> 金庫
+<li> <a target="_blank" href="https://www.amazon.co.jp/s?k=%E7%9B%A3%E8%A6%96%E3%82%AB%E3%83%A1%E3%83%A9+%E3%83%80%E3%83%9F%E3%83%BC">ダミー監視カメラ</a>
+</ol>
+</div>
+
+<h3 id="seceng-mission">「セキュリティ対策」という業務</h3>
+
+<ol>
+  <li> 守るべきものを決める。
+  <li> 「もしこれが起こったらどうなる?」を想像する (リスクアセスメント)。
+  <li> リスクを減らす対策をおこなう。
+  <li> 2. に戻る。
+</ol>
+
+<p>
+おまけ: <a target="_blank" href="https://i.imgur.com/Yffu60C.gifv">アホな錠前</a>
+</p>
+
+
+<h2 id="defend-what">1. 守るべきものを決める</h2>
+
+<p>
+  一般的に「情報セキュリティ」は以下の 3つのものからなる:
+</p>
+
+<ol type=i>
+<li> <strong>秘匿性</strong> (秘密を守れる) … 知られたくないことを知られたら ×。
+<li> <strong>完全性</strong> (内容が正しい) … 勝手にデータを改竄・なりすまされたら ×。
+<li> <strong>可用性</strong> (必要なときに使える) … いざ必要なときに動かなかったら ×。
+</ol>
+
+<h3 id="defend-system">どこまでが「システム」なのか?</h3>
+
+<ol>
+  <li> 自分たちが開発した部分のみ
+  <li> 1. + 依存するライブラリ
+  <li> 2. + デプロイした実行環境
+  <li> 3. + それを表示するブラウザ
+  <li> 4. + ユーザのPCにインストールされているそれ以外のソフトウェアすべて
+  <li> 5. + それを利用するユーザ
+</ol>
+
+<p>
+  セキュリティ対策における「システム」の定義は最大限にとっておく。
+</p>
+
+
+<h2 id="imagine-how">2. 「もしこれが起こったらどうなる?」を想像する</h2>
+
+<ol>
+  <li> システムの動作をなるべく正確に理解する。</li>
+    <ul>
+      <li> 例: <a target="_blank" href="https://www.youtube.com/watch?v=dh406O2v_1c">ブラウザにgoogleとタイプしたときに何が起こるか?</a></li>
+    </ul>
+  <li> ユーザの行動をなるべく正確に理解する。</li>
+    <ul>
+      <li> User journey</li>
+      <li> 1日の業務フロー</li>
+    </ul>
+  <li> 隙がありそうなところを片っ端から列挙していく。</li>
+    <ol type=i>
+    <li> 機械が悪い場合:
+    <ul>
+      <li> 物理的な問題: 停電・故障・災害・ケーブル断線。
+      <li> ソフトウェア的な問題: 欠陥・誤動作。
+    </ul>
+    <li> 人間が悪い場合:
+    <ul>
+      <li> まちがった操作をする: もの忘れ・うっかり・誤解・コミュニケーション齟齬。
+      <li> 「悪者」を許す: 秘密をもらす・推測される・騙される。
+      <li> 敵は誰なのか?: 外部者からの攻撃・内部者による不正</li>
+    </ul>
+    </ol>
+</ol>
+
+<p>
+  網羅性を確保するのがとにかく難しい。
+  このため、いくつかの「フレームワーク」が提唱されている。
+</p>
+
+<ul>
+  <li> <a target="_blank" href="https://www.nist.gov/cyberframework">NIST Cybersecurity Framework</a></li>
+</ul>
+
+<h3>「脅威」と「リスク」</h3>
+<ul>
+  <li> 脅威: 「起こりうること」
+  <li> リスク: 発生の可能性 × 発生したときの損害
+    <ul>
+      <li> 発生すると大ダメージだが、確率は非常に少ない: 低リスク</li>
+      <li> ダメージは少ないが、しょっちゅう起こっている: 高リスク</li>
+    </ul>
+</ul>
+
+
+<h2 id="prevention">3. リスクを減らす対策をおこなう</h2>
+
+<p>
+  結論からいうと、セキュリティ対策に関して完璧な方法というものはありえない。
+  すべての「対策」は、非常に狭い部分のリスクを減らすだけである。
+</p>
+
+<p>
+ひとつの方法として、三段階に分けて対策を考える。
+</p>
+
+<ol type=a>
+<li> <strong>予防</strong> (抑制) … 事件・事故が起こる原因を減らす。
+<li> <strong>強化</strong> (保護) … 対象を頑丈にする。
+<li> <strong>緩和</strong> (封鎖) … 万が一、事件・事故が起きた後のダメージを少なくする。
+</ol>
+
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="300" height="110"
+       transform="translate(5,5)">
+  <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="4" markerHeight="4" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g stroke="black" stroke-width="3" fill="none">
+    <rect x="100" y="10" width="40" height="80" />
+    <g stroke-width="8" marker-end="url(#arrow)">
+      <line x1="10" x2="80" y1="50" y2="50" />
+      <line x1="145" x2="220" y1="50" y2="50" />
+    </g>
+  </g>
+    <g text-anchor="middle">
+      <text x="40" y="35" dy="0.0em">予防</text>
+      <text x="120" y="35" dy="0.0em">強化</text>
+      <text x="180" y="35" dy="0.0em">緩和</text>
+    </g>
+  </svg>
+</div>
+
+<ol type=i>
+<li> 火事の場合 …
+  <ol type=a>
+    <li> <strong>予防</strong> … 火をなるべく使わない。
+    <li> <strong>強化</strong> … 燃えにくい素材を使う。
+    <li> <strong>緩和</strong> … 消火器を用意する。避難訓練をする。
+  </ol>
+<li> 自動車事故 (運転者) の場合 …
+  <ol type=a>
+    <li> <strong>予防</strong> … なるべく車に乗らない。安全運転を心がける。
+    <li> <strong>強化</strong> … 頑丈なクルマに乗る。
+    <li> <strong>緩和</strong> … シートベルト・エアバッグ等の装備。自動車保険。
+  </ol>
+<li> 外出時の盗難の場合 …
+  <ol type=a>
+    <li> <strong>予防</strong> … 貴重品はなるべく持ち歩かない。
+    <li> <strong>強化</strong> … 出しにくい所に入れる。
+    <li> <strong>緩和</strong> … 現金を小分けにして複数箇所に入れておく。
+  </ol>
+</ol>
+
+<div class=exercise>
+<div class=header>問題. 対策の種類</div>
+<ol>
+<li> コロナウイルス感染症について、
+  <strong>予防</strong>・<strong>強化</strong>・<strong>緩和</strong>の手段を答えよ。
+<li> パスワード漏洩について、
+  <strong>予防</strong>・<strong>強化</strong>・<strong>緩和</strong>の手段を答えよ。
+</ol>
+</div>
+
+
+<h2 id="zerotrust">4. 「ゼロトラスト」の考え方</h2>
+<ul>
+  <li> 従来のセキュリティは「柵の中にいる人は信頼する」という考え方で設計されていた。</li>
+  <ul>
+    <li> セキュリティチェックは、柵の入り口でだけ行えばよかった。</li>
+  </ul>
+  <li> しかし携帯デバイス・リモートワークの普及により、柵の入り口が増え、ミスが多くなった。</li>
+  <li> ゼロトラストモデルでは信頼しない。利用者はつねにチェックされる。</li>
+</ul>
+
+
+<h2 id="examples">5. 具体的な脅威と対策</h2>
+
+<p>
+  SQL injection
+</p>
+
+<p>
+  CSRF
+</p>
+
+<p>
+  Spring Security
+</p>
+
+<p>
+  OAuth
+</p>
+
+<hr>
+<address>Yusuke Shinyama</address>
