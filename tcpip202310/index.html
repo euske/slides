@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Yusuke Shinyama">
+<meta name="keywords" content="HTTP, HTTPS, DNS, ネットワーク, IP, TCP, UDP, クライアント, サーバ, TLS/SSL, SSH, NAT, VPN, ファイヤウォール, 暗号, セキュリティ">
+<meta name="description" content="アプリ開発者の役に立ちそうなTCP/IPネットワークに関する知識まとめ。">
+<meta name="twitter:card" content="summary" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="アプリ開発者のための TCP/IP ネットワーク入門 (反転バージョン)" />
+<meta property="og:url" content="https://euske.github.io/slides/tcpip202301/index.html" />
+<meta property="og:description" content="アプリ開発者の役に立ちそうなTCP/IPネットワークに関する知識まとめ。高水準プロトコルから下に向かって説明。" />
+<title>アプリ開発者のための TCP/IP ネットワーク入門 (反転バージョン)
+/ 新山 祐介</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000088; }
+h2 { border-bottom: solid 2px #000088; }
+h3 { border-bottom: solid 1px #000088; }
+table { border-collapse: collapse; margin: 1em; }
+td { padding: 4px; }
+kbd { outline: 1px solid black; padding: 2px; }
+blockquote { outline: 1px solid black; padding: 4px; }
+pre { overflow: auto; margin: 0; }
+mark { font-weight: bold; }
+pre, code { background: #ddd; font-size: 150%; font-family: courier; }
+img { max-width: 80vw; height: auto; }
+dt { text-decoration: underline; font-weight: bold; }
+u { color: #880000; font-weight: bold; }
+.author { text-align: right; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; }
+.figure .caption { font-size: 80%; font-weight: bold; }
+.notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
+.formula { background: #dddddd; outline: 2px solid black; padding: 1em; margin: 1em; }
+.note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+pre em { color: #008800; }
+code em { color: #000088; }
+.exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
+.exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.bl { outline: 1px solid black; padding: 2px; font-size: 120%; color: transparent; }
+.file { outline: 2px solid black; padding: 1em; margin: 1em; }
+.file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
+.file pre { margin: 0; }
+
+.g { background: #eeeeee; }
+.bgr { background: #ffbbff; }
+.bgg { background: #88ff88; }
+.bgb { background: #88ffff; }
+.bgy { background: #ffff88; }
+
+.wip { color: gray; }
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+<h1>アプリ開発者のための<br>
+TCP/IP ネットワーク入門 (反転バージョン)</h1>
+
+<div class=author>
+Yusuke Shinyama, Oct. 2023
+</div>
+
+<p>
+<strong>概要:</strong>
+この記事では、アプリ開発者の役に立ちそうな
+TCP/IPネットワークに関する最低限の知識をまとめた。
+あくまで視点は「アプリ開発者」なので、
+現在の家庭・企業における一般的なネットワーク環境しか想定していないし、
+セキュリティに関しても基本的なことしかカバーしていない。
+ネットワーク機器の具体的な設定方法や診断については、より専門的な資料を参照のこと。
+</p>
+
+<p>
+  <strong>オリジナル版との違い:</strong>
+  オリジナル版では、ネットワークの低水準な層 (データリンク層など) から「上に向かって」説明していた。
+  反転バージョンでは、アプリケーション層 (HTTP) から「下に向かって」説明する。
+</p>
+
+
+<h2 id="app-http">1. HTTP の仕組み</h2>
+
+<h3 id="app-http-browser">1.1. ブラウザとHTTP</h3>
+<p>
+ウェブはもっとも有名なインターネットの使い方 (アプリケーション) である。
+これは <u>HTML</u> (Hyper Text Markup Language) 型式で
+書かれたデータ (ようするに、Webページ) を、<u>HTTP</u> (Hyper Text Ternsfer Protocol) と
+呼ばれる方式によってブラウザに転送する。
+</p>
+
+<div class=exercise id="ex-http-inspect">
+<div class=header>演習. ブラウザでHTTPリクエストとレスポンスを見る</div>
+<ol>
+  <li> ブラウザで <kbd>F12</kbd>キーを押して開発用コンソールを開き、"Network" タブをクリック。</li>
+  <li> タブ内で <a href="http://www.example.com/">http://www.example.com/</a> を開く。</li>
+  <li> 右側にリクエスト一覧が表示される。</li>
+  <li> <code>www.example.com</code> を選択し、その横の "Headers" タブをクリック。</li>
+  <li> "Response Headers" および "Request Headers" が表示される。</li>
+</ol>
+<div class="figure">
+<div>
+  <img src="http.png" width="1325" height="953">
+</div>
+</div>
+</div>
+
+<ol>
+<li> <u>ウェブブラウザ</u> (HTTPクライアント) がコンテンツを要求 (<u>リクエスト</u>) する。
+  <ul>
+  <li> 各リクエストには、"Host" や "User-Agent" などの付随的な情報 (ヘッダ) がついている。</li>
+  </ul>
+<li> <u>ウェブサーバ</u>が応答 (<u>レスポンス</u>) し、コンテンツを送る。
+  <ul>
+  <li> 各レスポンスにも、"Content-Type" や "Date" などの付随的な情報 (ヘッダ) がついている。</li>
+  </ul>
+<li> 読み込むページ・画像の数だけ 1., 2. を繰り返す。
+</ol>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="400" height="70">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <defs>
+    <g id="computer" fill="white" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use x="20" y="0" xlink:href="#computer" />
+      <use x="320" y="0" xlink:href="#computer" />
+      <path d="M70,20 l240,0" marker-end="url(#arrow)" />
+      <path d="M310,30 l-240,0" marker-end="url(#arrow)" />
+    </g>
+    <g text-anchor="middle" style="font-size:80%;">
+      <text x="45" y="60">クライアント (ブラウザ)</text>
+      <text x="345" y="60">サーバ</text>
+      <text x="110" y="12">リクエスト</text>
+      <text x="270" y="48">レスポンス</text>
+    </g>
+  </svg>
+  <div class="caption">HTTPにおけるリクエストとレスポンス</div>
+  </div>
+</div>
+
+<div class="formula">
+  <strong>結論:</strong>
+  HTTP = リクエストとレスポンス (の繰り返し)
+</div>
+
+<h3 id="app-http-curl">1.2. curlコマンドとHTTP</h3>
+<p>
+  では、HTTPリクエストとHTTPレスポンスの正体は何か?
+  実はこれは<u>文字列</u>である。
+  これは <code>curl</code>コマンドを使うと明らかになる。
+</p>
+
+<div class=exercise id="ex-http-curl">
+<div class=header>演習. curlコマンドを使ってHTTPリクエストとレスポンスを見る</div>
+<ol>
+  <li> ターミナルを開く。</li>
+  <li> 以下のコマンドを実行する:
+<blockquote><pre>
+$ <strong>curl -v http://www.example.com</strong>
+* Trying 93.184.216.34:80...
+* Connected to www.example.com (93.184.216.34) port 80 (#0)
+<div class=bgg>&gt; GET / HTTP/1.1
+&gt; Host: www.example.com
+&gt; User-Agent: curl/8.1.2
+&gt; Accept: &#42;/&#42;
+&gt; 
+</div><div class=bgy>&lt; HTTP/1.1 200 OK
+&lt; Accept-Ranges: bytes
+&lt; Age: 31773
+&lt; Cache-Control: max-age=604800
+&lt; Content-Type: text/html; charset=UTF-8
+&lt; Date: Tue, 10 Oct 2023 09:11:50 GMT
+&lt; Etag: "3147526947"
+&lt; Expires: Tue, 17 Oct 2023 09:11:50 GMT
+&lt; Last-Modified: Thu, 17 Oct 2019 07:18:26 GMT
+&lt; Server: ECS (laa/7B10)
+&lt; Vary: Accept-Encoding
+&lt; X-Cache: HIT
+&lt; Content-Length: 1256
+&lt; 
+</div><div class=bgb>&lt;!doctype html&gt; 
+&lt;html&gt; 
+&lt;head&gt; 
+    &lt;title&gt; Example Domain&lt;/title&gt; 
+
+    &lt;meta charset="utf-8" /&gt;
+    ...
+</div></pre></blockquote>
+<li> 出力から以下の各部分を確認する:
+  <ul>
+    <li><span class="bgg"> リクエスト</span>
+    <li><span class="bgy"> レスポンス</span>
+    <li><span class="bgb"> ボディ (ペイロード)</span>
+  </ul>
+</div>
+</ol>
+
+<p>
+たとえばブラウザ (あるいはcurlコマンド) で
+<div class=figure>
+<code>http://<span class=bgy>www.example.com</span>:<span class=bgg>/news/</span></code>
+</div>
+というURL を開くと、以下のような<u>リクエスト</u>文字列が送信される:
+</p>
+<blockquote><pre>
+GET <span class=bgg>/news/</span> HTTP/1.1
+Host: <span class=bgy>www.example.com</span>
+User-Agent: Mozilla/5.0 (Windows NT 6.1;) Gecko/20100101
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,&#48;/&#48;;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+<em>(空行)</em>
+</pre></blockquote>
+<p>
+これに対してサーバは以下のような<u>レスポンス</u>文字列を返す:
+</p>
+<blockquote><pre>
+HTTP/1.1 200 OK
+Connection: close
+Date: Fri, 20 Feb 2023 08:27:28 GMT
+Content-Type: text/html
+Content-Length: 9022
+<em>(空行)</em>
+&lt;html&gt;
+...
+</pre></blockquote>
+
+<h4>HTTPリクエスト</h4>
+<p>
+HTTP リクエストには GET, POST などいくつかの種類がある。
+リクエストはさらに <u>ヘッダ</u> (header) と
+<u>ボディ (ペイロード)</u> (body, payload) に分かれている。
+これらは<em>空行</em>で分けられている。
+</p>
+
+<blockquote>
+リクエストヘッダ:<br>
+<pre>
+GET /news/ HTTP/1.1
+Host: www.example.com
+User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:35.0) Gecko/20100101 Firefox/35.0
+…
+<em>(空行)</em>
+</pre>
+リクエストボディ (ペイロード):<br>
+</blockquote>
+
+<p>
+ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
+</p>
+<ul>
+<li> <code><u>Host:</u></code> 相手のサーバの名前
+<li> <code><u>User-Agent:</u></code> ブラウザの種類
+<li> その他 (<A target="_blank" href="https://tools.ietf.org/html/rfc2616">RFC 2616</a> 参照)
+</ul>
+<p>
+ボディは、GETリクエストの場合は空である (つまり何も含まれていない)。
+</p>
+
+<h4>HTTPレスポンス</h4>
+<p>
+HTTP レスポンスもまた、
+<u>ヘッダ</u> (header) と
+<u>ボディ (ペイロード)</u> (body, payload) に分かれている。
+これらは<em>空行</em>で分けられている。
+</p>
+
+<blockquote>
+レスポンスヘッダ:<br>
+<pre>
+HTTP/1.1 200 OK
+Connection: close
+Date: Fri, 20 Feb 2015 08:27:28 GMT
+Content-Type: text/html
+Content-Length: 9022
+…
+<em>(空行)</em>
+</pre>
+レスポンスボディ (ペイロード):<Br>
+<pre>
+&lt;html&gt;&lt;body&gt;
+…
+</pre></blockquote>
+
+<p>
+ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
+</p>
+<ul>
+<li> <code><u>Date:</u></code> サーバの応答時刻。
+<li> <code><u>Content-Type:</u></code> そのコンテンツの種類 (HTMLファイルか画像か)。
+<li> <code><u>Content-Length:</u></code> そのコンテンツの大きさ (バイト数)。
+</ul>
+<p>
+レスポンス内のペイロードには、通常 HTML ファイル
+(または画像ファイルなど) の内容がそのまま含まれている。
+ブラウザはこの内容を解析して表示すると、ページが表示されたことになる。
+</p>
+
+<h4>いろいろな HTTP レスポンス</h4>
+<p>
+正常なレスポンスの場合、最初の一行は必ず
+<blockquote><pre>
+HTTP/1.1 <u>200</u> OK
+</pre></blockquote>
+となっているが、これ以外のレスポンスが返ってくる場合もある。
+</p>
+<ul>
+<li> 指定されたファイルが存在しない。いわゆる「ページが見つかりません」エラー。
+    この場合、サーバはペイロードとして HTML を返すこともある。
+  <blockquote><pre>HTTP/1.1 <u>404</u> Not Found</pre></blockquote>
+  <p> 例: <a target="_blank" href="https://www.google.com/nonexistent">https://www.google.com/nonexistent</a>
+<li> 別の場所を参照せよ。これが返されると、ブラウザのアドレスバーが変化する。
+  <blockquote><pre>HTTP/1.1 <u>301</u> Moved</pre></blockquote>
+  <p> 例: <a target="_blank" href="https://ja.wikipedia.org/">https://ja.wikipedia.org/</a>
+</ul>
+
+<h3 id="app-http-human">1.3. 人間とHTTP</h3>
+
+<div class=exercise id="ex-human-http-client">
+<div class=header>演習. 人間HTTPクライアント</div>
+<p>
+<code>nc</code> コマンドを使って、
+<a target="_blank" href="https://www.example.com/">www.example.com</a> サーバに
+「人間HTTPクライアント」としてリクエストを送り、
+サーバ側のレスポンスを確認せよ。
+</p>
+<blockquote><pre>
+$ <strong>nc www.example.com 80</strong>
+<strong>GET / HTTP/1.0</strong>
+<strong>Host: www.example.com</strong>
+
+<em>(サーバからのレスポンス)</em>
+HTTP/1.0 200 OK
+Content-Type: text/html; charset=UTF-8
+Date: Mon, 23 Jan 2023 13:39:22 GMT
+…
+
+&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+…
+</pre></blockquote>
+</div>
+
+<div class=exercise id="ex-human-http-server">
+<div class=header>演習. 人間HTTPサーバ</div>
+<p>
+<code>nc</code> コマンドを使って、
+「人間HTTPサーバ」としてブラウザからの
+リクエストに返答せよ。
+まず <code>nc</code> をサーバとして起動し、
+ブラウザから <a href="http://localhost:8080/"><code>http://localhost:8080/</code></a>
+という URLに接続してリクエストが送られるのを確認してから、
+応答を入力せよ。
+</p>
+<blockquote><pre>
+$ <strong>nc -l 8080</strong>
+<em>(クライアントからのリクエスト)</em>
+GET / HTTP/1.1
+User-Agent: Mozilla/5.0
+…
+
+<strong>HTTP/1.0 200 OK</strong>
+<strong>Content-Type: text/plain</strong>
+
+<strong>Hello.</strong>
+
+^C
+</pre></blockquote>
+</div>
+
+<h3 id="app-http-nodejs">1.4. プログラミングで HTTP を使う</h3>
+<p>
+たとえば Node.js なら、すぐに HTTP のサーバ-クライアント間で通信ができる:
+</p>
+
+<div class=file>
+server.js (サーバ側)
+<pre>
+let http = require('http');
+let server = http.createServer((request, response) => {
+  response.writeHead(200, {'Content-Type': 'text/html'}); 
+  response.end('<h1>Hello world</h1>'); 
+});
+server.listen(8080);
+<pre>
+</div>
+
+<div class=file>
+client.js (クライアント側):
+<pre>
+let response = await fetch('http://127.0.0.1:8080/');
+let text = await response.text();
+console.log(text);
+</pre>
+</div>
+
+<div class=exercise id="ex-http-nodejs">
+<div class=header>演習. Node.js を使った HTTPプログラミング</div>
+<p>
+上の 2つの Node.jsスクリプト
+<code>server.js</code>、<code>client.js</code> を
+同一のホスト上で同時に動かし、通信ができていることを確認せよ。
+</p>
+</div>
+
+
+<h1 id="app-dns">2. ホスト名とIPアドレス</h1>
+<p>
+IP アドレスはそのままでは人間にとって覚えにくい。
+そこで <u>DNS</u> (Domain Name System) という仕組みが用意されている。
+</p>
+<ul>
+<li> DNS を使うと、各ホストに名前 (<u>ホスト名</u>) をつけて、
+  IPアドレスの代わりに使うことができる。
+<li> ほとんどのプログラム
+(<code>ping</code>, <code>traceroute</code>, <code>nc</code> など) は
+  デフォルトで DNS に対応しており、これらのコマンドには
+  <strong>IPアドレスの代わりにホスト名を指定してもよい</strong>。
+<li> たとえば、以下の2つは同じ意味である:
+<blockquote><pre>
+$ <strong>ping 166.84.7.55</strong>
+$ <strong>ping www.tabesugi.net</strong>
+$ <strong>ping vc55.tabesugi.net</strong>
+</pre></blockquote>
+<li> DNS を使って、(上のように) ホスト名から IPアドレスを得ることを
+「ホスト名の<u>解決</u> (resolution)」という。
+<li> ひとつの IPアドレスに複数の名前がついていることもある。
+<li> DNS は
+「ホスト名 → IPアドレス」の解決 (<u>正引き</u>) だけでなく、
+「IPアドレス → ホスト名」の解決 (<u>逆引き</u>) もサポートしている:
+<blockquote><pre>
+$ <strong>host 166.84.7.55</strong>
+55.7.84.166.in-addr.arpa domain name pointer vc55.tabesugi.net.
+</pre></blockquote>
+</ul>
+
+<h4>DNSのしくみ</h4>
+<p>
+DNS は TCP/IP の機能を使って作られている。
+</p>
+<ul>
+<li> まず、インターネット上のすべてのホストを<u>ドメイン</u> (domain) という区切りに分ける。<br>
+  例: <code>www.example.com</code> というホスト名は
+  <code>www</code>、<code>.example</code>、<code>.com</code> という 3つの部分に分割される。
+<li> 各ドメインについて、そのドメイン内のホスト名について責任を負う
+  <u>ネームサーバ</u> (name server) を用意する。
+<li> 世界 13箇所に<a target="_blank" href="https://ja.wikipedia.org/wiki/%E3%83%AB%E3%83%BC%E3%83%88%E3%82%B5%E3%83%BC%E3%83%90">ルートネームサーバ</a> (root name server) を用意する。
+</ul>
+<p>
+このようなサーバを用意したあとで、
+<code>www.example.com</code> の IPアドレスを求めるには:
+</p>
+<ol>
+<li> ルートサーバ (<code>198.41.0.4</code>) に
+  <code>.com</code> ネームサーバのIPアドレスを問い合わせる →
+  <code>192.5.6.30</code>
+<li> <code>.com</code> ネームサーバに
+  <code>.example.com</code> ネームサーバのIPアドレスを問い合わせる →
+  <code>199.43.133.54</code>
+<li> <code>.example.com</code> ネームサーバに
+  <code>www.example.com</code> のIPアドレスを問い合わせる →
+  <code>93.184.216.34</code>
+<li> 完了。
+</ol>
+
+<h4>localhost</h4>
+<p>
+<code>127.0.0.1</code> は
+特別な IPアドレスであり、これはつねに「自分自身のホスト」をあらわす。
+これをループバックアドレスという。
+なお、ホスト名 <code>localhost</code> は
+つねにループバックアドレスに解決される。
+</p>
+
+<blockquote><pre>
+$ <strong>ping localhost</strong>
+PING localhost (127.0.0.1) 56(84) bytes of data.
+64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.029 ms
+64 bytes from localhost (127.0.0.1): icmp_seq=2 ttl=64 time=0.085 ms
+64 bytes from localhost (127.0.0.1): icmp_seq=3 ttl=64 time=0.084 ms
+...
+</pre></blockquote>
+
+<h4>DNSの欠点</h4>
+
+<p>
+DNS はインターネットの基幹をなすサービスであり、
+ほとんどの API やアプリ、サービスなどが DNS に依存している。
+DNS が使えなければ、相手の IPアドレスがわからないので、
+そもそも通信ができないことが多い。
+そのため <strong>DNS がうまく動かない場合、
+多くのサービスやサイトで大規模な障害が発生する</strong>。
+これを防ぐため、ネームサーバは多重化されていることが多い。
+</p>
+
+<blockquote><pre>
+$ <strong>ping www.tabenasugi.com</strong>
+ping: www.tabenasugi.com: Name or service not known
+</pre></blockquote>
+
+<div class=exercise id="ex-nslookup">
+<div class=header>演習. ホスト名から IP アドレスを求める</div>
+<p>
+<code>host</code> コマンドを使って、
+自分がよく知っているホスト名の IPアドレスを求めよ。
+(<code>ping</code> でもよい)
+</p>
+<blockquote><pre>
+$ <strong>host <em>ホスト名</em></strong>
+</pre></blockquote>
+</div>
+
+
+
+<hr>
+<address>Yusuke Shinyama</address>
