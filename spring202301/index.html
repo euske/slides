@@ -67,6 +67,7 @@ Yusuke Shinyama, Jan. 2023
 
 <p>
 つまり…
+</p>
 <div style="display: flex; justify-content: center; align-items: flex-end;">
 <div class=figure>
     <img width="243" height="275" src="bad.svg">
@@ -117,7 +118,7 @@ Yusuke Shinyama, Jan. 2023
 <h2>2. Spring Boot とは</h2>
 
 <p>
-Spring Framework および Spring Boot は、
+Spring Framework (および Spring Boot) は、
 その名のとおり「<u>フレームワーク</u>」の一種である。
 </p>
 <ul>
@@ -151,12 +152,11 @@ Spring を使う理由で一番多いのは
 Springには多くの機能が搭載されているが、それらの根幹となっているのは以下の2つの機能である:
 </p>
 <ol type="a">
-<li> <strong>くれくれ宣言</strong> (Autowired) …
+<li> <u>くれくれ宣言</u> (Autowired) …
     「これこれのオブジェクトが欲しい」と書いておけば、その要件を満たすオブジェクトを自動的にゲットしてくれる。
-<li> <strong>あるある宣言</strong> (Component) …
+<li> <u>あるある宣言</u> (Component) …
     「この要件を満たすオブジェクトがここだ」と書いておけば、そのオブジェクトを自動的に他で使ってもらえる。
 </ol>
-
 
 <h4>重要なコンセプト</h4>
 <p>
@@ -166,7 +166,7 @@ Springを使うにあたって知っておきたい重要なコンセプトは�
   <dt> Dependency Injection (依存性注入、DI)</dt>
   <dt> Dependency Inversion Principle (依存性逆転の法則、DIP)</dt>
   <dt> Inversion of Control (制御の反転、IoC)</dt>
-</dt>
+</dl>
 
 <div class=exercise>
 <div class=header>演習. 制御の反転</div>
@@ -183,13 +183,13 @@ Springを使うにあたって知っておきたい重要なコンセプトは�
 <li> <code>java -version</code> でバージョン確認。
 <li> <a href="https://start.spring.io/">spring initializr</a> で以下を選択:
 <ul>
-<li> Project: Gradle - Kotlin
-<li> Language: Kotlin
-<li> Spring Boot: (デフォルト)
-<li> Project Metadata: (デフォルト)
+<li> Project: <strong>Gradle - Kotlin</strong>
+<li> Language: <strong>Kotlin</strong>
+<li> Spring Boot: (デフォルトのまま)
+<li> Project Metadata: (デフォルトのまま)
 <li> Dependencies:
 <ul>
-  <li> Spring Web
+  <li> <strong>Spring Web</strong>
 </ul>
 </ul>
 <li> <code>demo.zip</code> を展開する。
@@ -206,7 +206,7 @@ package com.example.demo
 
 import org.springframework.stereotype.Component
 
-@Component
+<mark>@Component</mark>
 class MyComponent {
     init {
         println("this is my component.")
@@ -215,6 +215,13 @@ class MyComponent {
 </pre>
 </div>
 
+<p>
+上の例における <code><mark>@Component</mark></code> は「あるある宣言」の一種である。
+これを実行すると "<code>this is my component.</code>" と表示される。
+これは Spring が <code>MyComponent</code> クラスの「あるある宣言」を検知し、
+そのインスタンスを自動的に作成してくれるからである。
+</p>
+
 <div class=file>
 MyController.kt:
 <pre>
@@ -222,7 +229,7 @@ package com.example.demo
 
 import org.springframework.stereotype.Controller
 
-@Controller
+<mark>@Controller</mark>
 class MyController {
 
     init {
@@ -232,6 +239,12 @@ class MyController {
 </pre>
 </div>
 
+<p>
+上の例における <code><mark>@Controller</mark></code> も「あるある宣言」の一種である。
+これを実行すると "<code>this is my controller.</code>" と表示される。
+このように「あるある宣言」には複数の種類が存在する。
+</p>
+
 <h4>「くれくれ宣言」を書いてみる</h4>
 
 <div class=file>
@@ -239,8 +252,8 @@ MyController.kt:
 <pre>
 package com.example.demo
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
+import org.springframework.beans.factory.annotation.Autowired
 
 @Controller
 class MyController(<mark>@Autowired val component: MyComponent</mark>) {
@@ -252,8 +265,24 @@ class MyController(<mark>@Autowired val component: MyComponent</mark>) {
 </pre>
 </div>
 
+<p>
+この例では、<code>MyController</code> インスタンスを作成するにはまず 
+<code>MyComponent</code> インスタンスが必要である。
+このときコンストラクタの引数に <code><mark>@Autowired </mark></code> と書かれているのが
+「くれくれ宣言」である。Spring はこのような宣言を検知すると、
+そこで要求されている型のオブジェクト (<code>MyComponent</code> インスタンス) を自動的に探し出し、
+必要とあれば作成して、引数として渡してくれる。
+</p>
 
 <h2>4. 応用例</h2>
+<p>
+Spring では以上のような「くれくれ宣言」「あるある宣言」を応用することにより
+複雑な機能をもったプログラムを簡単に実装できる。
+</p>
+
+<h4>あるある宣言の応用例</h4>
+
+<h4>くれくれ宣言の応用例</h4>
 
 <pre>
 dependencies {
