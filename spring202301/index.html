@@ -58,37 +58,11 @@ Yusuke Shinyama, Jan. 2023
 
 <h2>1. ソフトウェア開発において重要なこと</h2>
 
-<p>開発者はみな、以下のようなソフトウェアを開発したい:</p>
-<ul>
-<li>高速で、効率的で</li>
-<li>安全で、信頼性があって</li>
-<li>保守しやすく、拡張性にも優れている</li>
-</ul>
-
 <p>
-つまり…
-</p>
-<div style="display: flex; justify-content: center; align-items: flex-end;">
-<div class=figure>
-    <img width="243" height="275" src="bad.svg">
-    <div class=caption>こんなのは嫌だ</div>
-</div>
-<div class=figure>
-    <img width="266" height="237" src="good.svg">
-    <div class=caption>こんなのを作りたい</div>
-</div>
-</div>
-
-<p>
-しかし、これはとてつもなく難しい。
-</p>
-<ul>
-<li> なぜなら、ソフトウェアというものが非常に複雑だから。
-<li> この複雑さは、そもそもソフトウェアが扱っている問題（社会）の複雑さに起因するから。
-</ul>
-<p>
-過去数十年、ソフトウェアの先人達はこの複雑なシステムを分解
-(<a href="https://ja.wikipedia.org/wiki/%E9%96%A2%E5%BF%83%E3%81%AE%E5%88%86%E9%9B%A2">separation of concerns</a>) し、
+ソフトウェアというものが非常に複雑であり、
+そもそもこの複雑さは、ソフトウェアが扱っている問題（社会）の複雑さに起因する。
+過去数十年、ソフトウェアの先人達はこの複雑なシステムを
+分解 (<a href="https://ja.wikipedia.org/wiki/%E9%96%A2%E5%BF%83%E3%81%AE%E5%88%86%E9%9B%A2">separation of concerns</a>) し、
 人間の小さい脳が扱えるようにするために、さまざまな技法をあみだしてきた:
 </p>
 
@@ -123,7 +97,7 @@ Spring Framework (および Spring Boot) は、
 </p>
 <ul>
 <li> Java/Kotlin を使ったアプリケーション開発に使われている。
-<li> ソフトウェアにおける「フレームワーク」 = 
+<li> ソフトウェアにおける「フレームワーク」 =
 プログラム (アプリケーション) の設計方法を規定する枠組み。
 </ul>
 
@@ -137,6 +111,70 @@ Spring Framework (および Spring Boot) は、
 <div class="formula">
 <strong>ハリウッドの原則:</strong>
 "Don't call us. We call you." (我々を呼ぶな。必要なときは、我々が呼ぶ。)
+</div>
+
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="160" height="220">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="10" y="10" width="140" height="60" fill="#ccc" />
+      <rect x="10" y="100" width="140" height="60" fill="#ccc" />
+    </g>
+    <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
+      <path d="M80,70 l0,25" />
+      <path d="M80,160 l0,25" />
+      <path d="M80,195 l0,20" marker-end="none" stroke-dasharray="4,4" />
+    </g>
+    <g text-anchor="middle" style="font-weight: bold;">
+      <text x="80" y="45">処理1</text>
+      <text x="80" y="135">処理2</text>
+    </g>
+  </svg>
+  <div class="caption">通常のプログラム</div>
+</div>
+</div>
+
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="320" height="320">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="10" y="10" width="300" height="300" fill="#8ff" stroke-width="2" />
+      <rect x="70" y="70" width="160" height="80" fill="white" />
+      <rect x="90" y="190" width="160" height="80" fill="white" />
+      <rect x="80" y="80" width="140" height="60" fill="#ccc" />
+      <rect x="100" y="200" width="140" height="60" fill="#ccc" />
+    </g>
+    <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
+      <path d="M150,60 l0,20" />
+      <path d="M150,130 l0,20" />
+      <path d="M170,180 l0,20" />
+      <path d="M170,250 l0,20" />
+    </g>
+    <g text-anchor="middle" style="font-weight: bold;">
+      <text x="160" y="40">Spring Framework</text>
+      <text x="150" y="115">処理1</text>
+      <text x="170" y="235">処理2</text>
+    </g>
+  </svg>
+  <div class="caption">Spring による呼び出し</div>
+</div>
+</div>
+
+<div class=exercise>
+<div class=header>演習. 制御の反転</div>
+<p>
+自分が知っている「制御の反転」をおこなっているフレームワークを書き出してみよう。
+</p>
 </div>
 
 <h4>何に使うのか</h4>
@@ -167,13 +205,6 @@ Springを使うにあたって知っておきたい重要なコンセプトは�
   <dt> Dependency Inversion Principle (依存性逆転の法則、DIP)</dt>
   <dt> Inversion of Control (制御の反転、IoC)</dt>
 </dl>
-
-<div class=exercise>
-<div class=header>演習. 制御の反転</div>
-<p>
-自分が知っている「制御の反転」をおこなっているフレームワークを書き出してみよう。
-</p>
-</div>
 
 
 <h2>3. 実際に使ってみる</h2>
@@ -266,7 +297,7 @@ class MyController(<mark>@Autowired val component: MyComponent</mark>) {
 </div>
 
 <p>
-この例では、<code>MyController</code> インスタンスを作成するにはまず 
+この例では、<code>MyController</code> インスタンスを作成するにはまず
 <code>MyComponent</code> インスタンスが必要である。
 このときコンストラクタの引数に <code><mark>@Autowired </mark></code> と書かれているのが
 「くれくれ宣言」である。Spring はこのような宣言を検知すると、
