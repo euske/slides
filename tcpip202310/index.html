@@ -94,7 +94,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 <div class=header>演習. ブラウザでHTTPリクエストとレスポンスを見る</div>
 <ol>
   <li> ブラウザで <kbd>F12</kbd>キーを押して開発用コンソールを開き、"Network" タブをクリック。</li>
-  <li> タブ内で <a href="http://www.example.com/">http://www.example.com/</a> を開く。</li>
+  <li> タブ内で <a href="http://www.example.com/index.html">http://www.example.com/index.html</a> を開く。</li>
   <li> 右側にリクエスト一覧が表示される。</li>
   <li> <code>www.example.com</code> を選択し、その横の "Headers" タブをクリック。</li>
   <li> "Response Headers" および "Request Headers" が表示される。</li>
@@ -167,10 +167,10 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <li> ターミナルを開く。</li>
   <li> 以下のコマンドを実行する:
 <blockquote><pre>
-$ <strong>curl -v http://www.example.com</strong>
+$ <strong>curl -v http://www.example.com/index.html</strong>
 * Trying 93.184.216.34:80...
 * Connected to www.example.com (93.184.216.34) port 80 (#0)
-<div class=bgg>&gt; GET / HTTP/1.1
+<div class=bgg>&gt; GET /index.html HTTP/1.1
 &gt; Host: www.example.com
 &gt; User-Agent: curl/8.1.2
 &gt; Accept: &#42;/&#42;
@@ -206,23 +206,32 @@ $ <strong>curl -v http://www.example.com</strong>
 </div>
 </ol>
 
+<h4>HTTPリクエスト</h4>
+
 <p>
-たとえばブラウザ (あるいはcurlコマンド) で
+ブラウザ (あるいはcurlコマンド) で
 <div class=figure>
-<code>http://<span class=bgy>www.example.com</span>:<span class=bgg>/news/</span></code>
+<code>http://<span class=bgy>www.example.com</span><span class=bgg>/index.html</span></code>
 </div>
 というURL を開くと、以下のような<u>リクエスト</u>文字列が送信される:
 </p>
 <blockquote><pre>
-GET <span class=bgg>/news/</span> HTTP/1.1
+GET <span class=bgg>/index.html</span> HTTP/1.1
 Host: <span class=bgy>www.example.com</span>
 User-Agent: Mozilla/5.0 (Windows NT 6.1;) Gecko/20100101
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,&#48;/&#48;;q=0.8
-Accept-Language: en-US,en;q=0.5
-Accept-Encoding: gzip, deflate
-Connection: keep-alive
-<em>(空行)</em>
+...
 </pre></blockquote>
+<p>
+ここで、Host や User-Agent: などの行は<u>ヘッダ</u>と呼ばれる。
+ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
+</p>
+<ul>
+<li> <code><u>Host:</u></code> 相手のサーバの名前
+<li> <code><u>User-Agent:</u></code> ブラウザの種類
+<li> その他 (<A target="_blank" href="https://tools.ietf.org/html/rfc2616">RFC 2616</a> 参照)
+</ul>
+
+<h4>HTTPレスポンス</h4>
 <p>
 これに対してサーバは以下のような<u>レスポンス</u>文字列を返す:
 </p>
@@ -237,62 +246,13 @@ Content-Length: 9022
 ...
 </pre></blockquote>
 
-<h4>HTTPリクエスト</h4>
-<p>
-HTTP リクエストには GET, POST などいくつかの種類がある。
-リクエストはさらに <u>ヘッダ</u> (header) と
-<u>ボディ (ペイロード)</u> (body, payload) に分かれている。
-これらは<em>空行</em>で分けられている。
-</p>
-
-<blockquote>
-リクエストヘッダ:<br>
-<pre>
-GET /news/ HTTP/1.1
-Host: www.example.com
-User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:35.0) Gecko/20100101 Firefox/35.0
-…
-<em>(空行)</em>
-</pre>
-リクエストボディ (ペイロード):<br>
-</blockquote>
 
 <p>
-ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
-</p>
-<ul>
-<li> <code><u>Host:</u></code> 相手のサーバの名前
-<li> <code><u>User-Agent:</u></code> ブラウザの種類
-<li> その他 (<A target="_blank" href="https://tools.ietf.org/html/rfc2616">RFC 2616</a> 参照)
-</ul>
-<p>
-ボディは、GETリクエストの場合は空である (つまり何も含まれていない)。
-</p>
-
-<h4>HTTPレスポンス</h4>
-<p>
-HTTP レスポンスもまた、
+HTTP レスポンスは、
 <u>ヘッダ</u> (header) と
 <u>ボディ (ペイロード)</u> (body, payload) に分かれている。
 これらは<em>空行</em>で分けられている。
 </p>
-
-<blockquote>
-レスポンスヘッダ:<br>
-<pre>
-HTTP/1.1 200 OK
-Connection: close
-Date: Fri, 20 Feb 2015 08:27:28 GMT
-Content-Type: text/html
-Content-Length: 9022
-…
-<em>(空行)</em>
-</pre>
-レスポンスボディ (ペイロード):<Br>
-<pre>
-&lt;html&gt;&lt;body&gt;
-…
-</pre></blockquote>
 
 <p>
 ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
@@ -332,13 +292,13 @@ HTTP/1.1 <u>200</u> OK
 <div class=header>演習. 人間HTTPクライアント</div>
 <p>
 <code>nc</code> コマンドを使って、
-<a target="_blank" href="https://www.example.com/">www.example.com</a> サーバに
+<a target="_blank" href="https://www.example.com/index.html">www.example.com</a> サーバに
 「人間HTTPクライアント」としてリクエストを送り、
 サーバ側のレスポンスを確認せよ。
 </p>
 <blockquote><pre>
 $ <strong>nc www.example.com 80</strong>
-<strong>GET / HTTP/1.0</strong>
+<strong>GET /index.html HTTP/1.0</strong>
 <strong>Host: www.example.com</strong>
 
 <em>(サーバからのレスポンス)</em>
@@ -361,14 +321,14 @@ Date: Mon, 23 Jan 2023 13:39:22 GMT
 「人間HTTPサーバ」としてブラウザからの
 リクエストに返答せよ。
 まず <code>nc</code> をサーバとして起動し、
-ブラウザから <a href="http://localhost:8080/"><code>http://localhost:8080/</code></a>
+ブラウザから <a href="http://localhost:8080/index.html"><code>http://localhost:8080/index.html</code></a>
 という URLに接続してリクエストが送られるのを確認してから、
 応答を入力せよ。
 </p>
 <blockquote><pre>
 $ <strong>nc -l 8080</strong>
 <em>(クライアントからのリクエスト)</em>
-GET / HTTP/1.1
+GET /index.html HTTP/1.1
 User-Agent: Mozilla/5.0
 …
 
@@ -383,6 +343,8 @@ User-Agent: Mozilla/5.0
 
 <h3 id="app-http-nodejs">1.4. プログラミングで HTTP を使う</h3>
 <p>
+ほとんどのプログラミング言語では HTTP のリクエストやレスポンスを
+処理する機能が標準で含まれている。
 たとえば Node.js なら、すぐに HTTP のサーバ-クライアント間で通信ができる:
 </p>
 
@@ -390,9 +352,9 @@ User-Agent: Mozilla/5.0
 server.js (サーバ側)
 <pre>
 let http = require('http');
-let server = http.createServer((request, response) => {
+let server = http.createServer((request, response) =&gt; {
   response.writeHead(200, {'Content-Type': 'text/html'}); 
-  response.end('<h1>Hello world</h1>'); 
+  response.end('&lt;h1&gt;Hello world&lt;/h1&gt;'); 
 });
 server.listen(8080);
 <pre>
