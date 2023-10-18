@@ -46,7 +46,10 @@ code em { color: #000088; }
 <a href="../index.html">&lt; もどる</a>
 </div>
 
-<h1>Spring (Boot) 超入門</h1>
+<h1>Spring Boot 超入門</h1>
+<div>
+なぜ Spring Boot はクールなのか?
+</div>
 
 <div class=author>
 Yusuke Shinyama, Jan. 2023
@@ -56,14 +59,14 @@ Yusuke Shinyama, Jan. 2023
 </ol>
 
 
-<h2>1. ソフトウェア開発において重要なこと</h2>
+<h2>1. ソフトウェア技術の歴史</h2>
 
 <p>
-ソフトウェアというものが非常に複雑であり、
-そもそもこの複雑さは、ソフトウェアが扱っている問題（社会）の複雑さに起因する。
+ソフトウェアというものは非常に複雑であり、
+この複雑さは、ソフトウェアが扱っている問題（社会）の複雑さに起因する。
 過去数十年、ソフトウェアの先人達はこの複雑なシステムを
 分解 (<a href="https://ja.wikipedia.org/wiki/%E9%96%A2%E5%BF%83%E3%81%AE%E5%88%86%E9%9B%A2">separation of concerns</a>) し、
-人間の小さい脳が扱えるようにするために、さまざまな技法をあみだしてきた:
+人間の非力な脳が扱えるようにするために、さまざまな技法をあみだしてきた:
 </p>
 
 <ul>
@@ -94,24 +97,14 @@ Yusuke Shinyama, Jan. 2023
 <p>
 Spring Framework (および Spring Boot) は、
 その名のとおり「<u>フレームワーク</u>」の一種である。
+Spring は Java/Kotlin を使ったアプリケーション開発に使われている。
 </p>
-<ul>
-<li> Java/Kotlin を使ったアプリケーション開発に使われている。
-<li> ソフトウェアにおける「フレームワーク」 =
-プログラム (アプリケーション) の設計方法を規定する枠組み。
-</ul>
 
+<h4>フレームワークとは何か?</h4>
 <p>
-一般的なフレームワークでは、プログラマはアプリケーション全体の流れを
-直接指定せず、フレームワークが制御する。
-これを<u>制御の反転</u> (<a href="https://www.martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>)
-という。別名「ハリウッドの原則 (the Hollywoord Principle)」とも呼ばれる。
+伝統的な (フレームワークを使わない) プログラミングでは、
+各処理の流れはプログラマが決定する:
 </p>
-
-<div class="formula">
-<strong>ハリウッドの原則:</strong>
-"Don't call us. We call you." (我々を呼ぶな。必要なときは、我々が呼ぶ。)
-</div>
 
 <div class=figure>
 <div>
@@ -138,6 +131,24 @@ Spring Framework (および Spring Boot) は、
   <div class="caption">通常のプログラム</div>
 </div>
 </div>
+
+<p>
+ところがソフトウェアにおける「フレームワーク」では、
+プログラマはアプリケーション全体の流れを直接指定せず、
+フレームワークが必要に応じてプログラマが書いた処理を呼びだす。
+これを<u>制御の反転</u> (<a href="https://www.martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>)
+という。これは「ハリウッドの原則 (the Hollywoord Principle)」とも呼ばれる。
+</p>
+
+<div class="formula">
+<strong>ハリウッドの原則:</strong>
+"Don't call us. We call you." (我々を呼ぶな。必要なときは、我々が呼ぶ。)
+</div>
+
+<p>
+したがって、Spring フレームワークにおける処理の
+イメージは以下のようになる:
+</p>
 
 <div class=figure>
 <div>
@@ -177,34 +188,32 @@ Spring Framework (および Spring Boot) は、
 </p>
 </div>
 
-<h4>何に使うのか</h4>
+<h4>何がうれしいのか?</h4>
 <p>
 <a href="https://blogs.vmware.com/vmware-japan/2023/03/state-of-spring-2022.html">この調査</a>によれば、
 Spring を使う理由で一番多いのは
 「データベースを使ったバックエンドが簡単に書けるから」
 である。
 </p>
-
-<h4>Springの主要な機能</h4>
 <p>
-Springには多くの機能が搭載されているが、それらの根幹となっているのは以下の2つの機能である:
+また、Spring はテスト駆動開発 (TDD) に向いている。
+各コードが全体的な処理の流れから分離されているので、
+各部分を個別にテストしたり、全体をつなげてテストするといった作業が
+非常に簡単にできるようになっている。
+このための枠組みが Spring にはあらかじめ組み込まれている。
+</p>
+
+<h4>Springで重要な概念</h4>
+<p>
+Springには非常に多くの機能が搭載されているが、
+それらの根幹となっているのは以下の2つのアイデアである:
 </p>
 <ol type="a">
 <li> <u>くれくれ宣言</u> (Autowired) …
-    「これこれのオブジェクトが欲しい」と書いておけば、その要件を満たすオブジェクトを自動的にゲットしてくれる。
+    「これこれのオブジェクトが必要だ」と書いておけば、その要件を満たすオブジェクトを自動的にゲットしてくれる。
 <li> <u>あるある宣言</u> (Component) …
     「この要件を満たすオブジェクトがここだ」と書いておけば、そのオブジェクトを自動的に他で使ってもらえる。
 </ol>
-
-<h4>重要なコンセプト</h4>
-<p>
-Springを使うにあたって知っておきたい重要なコンセプトは以下のとおりである:
-</p>
-<dl>
-  <dt> Dependency Injection (依存性注入、DI)</dt>
-  <dt> Dependency Inversion Principle (依存性逆転の法則、DIP)</dt>
-  <dt> Inversion of Control (制御の反転、IoC)</dt>
-</dl>
 
 
 <h2>3. 実際に使ってみる</h2>
@@ -304,10 +313,15 @@ class MyController(<mark>@Autowired val component: MyComponent</mark>) {
 そこで要求されている型のオブジェクト (<code>MyComponent</code> インスタンス) を自動的に探し出し、
 必要とあれば作成して、引数として渡してくれる。
 </p>
+<p>
+このように、あるコードに必要なモノ (= 依存, dependency) を記述しておき、
+実行時に注入させることを「依存注入 (Dependency Injection, DI)」という。
+上の例では「MyComponent が MyController に DI される」などと言う。
+</p>
 
 <h2>4. 応用例</h2>
 <p>
-Spring では以上のような「くれくれ宣言」「あるある宣言」を応用することにより
+Spring では以上のような「くれくれ宣言」「あるある宣言」を応用することにより、
 複雑な機能をもったプログラムを簡単に実装できる。
 </p>
 
@@ -323,10 +337,29 @@ dependencies {
 </pre>
 
 
-<h2>5. Springのデメリット</h2>
+<h2>5. Springの短所</h2>
+
+<h4>Spring の動作原理</h4>
+<ol>
+  <li> アプリが起動する。
+  <li> Spring が、アプリ中で使われているすべての
+    クラス、メソッド、変数をスキャンし、各部分の
+    「くれくれ宣言」「あるある宣言」を洗い出す。
+  <li> Spring が一致する「くれくれ宣言」「あるある宣言」を探し、
+    それらのオブジェクトを自動作成し、DI する。
+  <li> 実際の処理が開始する。
+</ol>
 
 <p>
 制御フロー・データフローの一部が「ぶった切られている」。
+</p>
+<p>
+アノテーションが非常に多い。
+</p>
+<p>
+「くれくれ宣言」と「あるある宣言」がお互いに噛み合わない場合、
+実行時にエラーが発生する。ときにこのエラーの原因を解明するのは骨が折れることがある。
+また、このようなエラーはコンパイル時にはわからない。
 </p>
 
 <hr>
