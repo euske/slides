@@ -19,7 +19,8 @@ img { max-width: 80vw; height: auto; }
 dt { text-decoration: underline; font-weight: bold; }
 u { color: #880000; font-weight: bold; }
 .author { text-align: right; }
-.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; text-align: center; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; }
+.figure .caption { font-size: 80%; font-weight: bold; }
 .notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
@@ -62,11 +63,10 @@ Yusuke Shinyama, Jan. 2023
 <h2>1. ソフトウェア技術の歴史</h2>
 
 <p>
-ソフトウェアというものは非常に複雑であり、
-この複雑さは、ソフトウェアが扱っている問題（社会）の複雑さに起因する。
-過去数十年、ソフトウェアの先人達はこの複雑なシステムを
-分解 (<a href="https://ja.wikipedia.org/wiki/%E9%96%A2%E5%BF%83%E3%81%AE%E5%88%86%E9%9B%A2">separation of concerns</a>) し、
-人間の非力な脳が扱えるようにするために、さまざまな技法をあみだしてきた:
+ソフトウェアというものは非常に複雑である。
+先人達はこの複雑なシステムを分解 
+(<a href="https://ja.wikipedia.org/wiki/%E9%96%A2%E5%BF%83%E3%81%AE%E5%88%86%E9%9B%A2">separation of concerns</a>) し、
+人間が扱えるようにするために、さまざまな技法をあみだしてきた:
 </p>
 
 <ul>
@@ -81,13 +81,14 @@ Yusuke Shinyama, Jan. 2023
 </ul>
 
 <p>
-ソフトウェア技術の歴史とは、ほとんど「複雑さを分解する技術の歴史」といってもいい。
+ソフトウェア技術の歴史とは、ほとんど「複雑さを分解する技術の歴史」といってもよい。
 </p>
 
 <div class=exercise>
 <div class=header>演習. 分解する技術</div>
 <p>
-自分が思いつく「複雑さを分解する技術」を書き出してみよう。
+自分が思いつく「複雑さを分解する技術」を書き出してみよう
+(ソフトウェアでなくてもかまわない)。
 </p>
 </div>
 
@@ -103,7 +104,7 @@ Spring は Java/Kotlin を使ったアプリケーション開発に使われて
 <h4>フレームワークとは何か?</h4>
 <p>
 伝統的な (フレームワークを使わない) プログラミングでは、
-各処理の流れはプログラマが決定する:
+アプリケーションの全体的な流れはプログラマが決定する:
 </p>
 
 <div class=figure>
@@ -114,9 +115,9 @@ Spring は Java/Kotlin を使ったアプリケーション開発に使われて
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
       <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
     </marker>
-    <g stroke="black" stroke-width="1" fill="none">
-      <rect x="10" y="10" width="140" height="60" fill="#ccc" />
-      <rect x="10" y="100" width="140" height="60" fill="#ccc" />
+    <g stroke="black" stroke-width="1" fill="#ccc">
+      <rect x="10" y="10" width="140" height="60" />
+      <rect x="10" y="100" width="140" height="60" />
     </g>
     <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
       <path d="M80,70 l0,25" />
@@ -133,21 +134,20 @@ Spring は Java/Kotlin を使ったアプリケーション開発に使われて
 </div>
 
 <p>
-ところがソフトウェアにおける「フレームワーク」では、
-プログラマはアプリケーション全体の流れを直接指定せず、
-フレームワークが必要に応じてプログラマが書いた処理を呼びだす。
+これに対して、フレームワークを使ったソフトウェアでは、
+プログラマがアプリケーション全体の流れを直接指定しない。
+かわりに、フレームワークがプログラマが書いた処理を必要に応じて呼びだす。
 これを<u>制御の反転</u> (<a href="https://www.martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>)
-という。これは「ハリウッドの原則 (the Hollywoord Principle)」とも呼ばれる。
+という。あるいは「ハリウッドの原則 (the Hollywoord Principle)」とも呼ばれる。
 </p>
 
-<div class="formula">
+<div>
 <strong>ハリウッドの原則:</strong>
 "Don't call us. We call you." (我々を呼ぶな。必要なときは、我々が呼ぶ。)
 </div>
 
 <p>
-したがって、Spring フレームワークにおける処理の
-イメージは以下のようになる:
+Spring フレームワークにおける処理の流れは以下のようになる:
 </p>
 
 <div class=figure>
@@ -185,18 +185,19 @@ Spring は Java/Kotlin を使ったアプリケーション開発に使われて
 <div class=header>演習. 制御の反転</div>
 <p>
 自分が知っている「制御の反転」をおこなっているフレームワークを書き出してみよう。
+<!-- HTML frontend, Express.js, AWS Lambda -->
 </p>
 </div>
 
-<h4>何がうれしいのか?</h4>
+<h4>Spring を使うことのメリット</h4>
 <p>
 <a href="https://blogs.vmware.com/vmware-japan/2023/03/state-of-spring-2022.html">この調査</a>によれば、
 Spring を使う理由で一番多いのは
 「データベースを使ったバックエンドが簡単に書けるから」
-である。
+である。つまり、Spring は迅速な開発に向いている。
 </p>
 <p>
-また、Spring はテスト駆動開発 (TDD) に向いている。
+また、Spring はテスト駆動開発 (TDD) にも向いている。
 各コードが全体的な処理の流れから分離されているので、
 各部分を個別にテストしたり、全体をつなげてテストするといった作業が
 非常に簡単にできるようになっている。
@@ -205,42 +206,67 @@ Spring を使う理由で一番多いのは
 
 <h4>Springで重要な概念</h4>
 <p>
-Springには非常に多くの機能が搭載されているが、
-それらの根幹となっているのは以下の2つのアイデアである:
+Springでは非常に多くの機能が利用可能だが、
+それらの根幹となっているのは
+「<u>依存注入</u> (Dependency Injection, DI)」
+および
+「<u>アスペクト指向プログラミング</u> (Aspect-Oriented Programming, AOP)」
+という 2つのアイデアである (AOP についての説明は今回は省略する)。
 </p>
-<ol type="a">
-<li> <u>くれくれ宣言</u> (Autowired) …
+<p>
+Spring における DI を理解するには、以下の2つの機能を考えればよい:
+</p>
+<ul>
+<li> <strong>くれくれ宣言</strong> (Autowired) …
     「これこれのオブジェクトが必要だ」と書いておけば、その要件を満たすオブジェクトを自動的にゲットしてくれる。
-<li> <u>あるある宣言</u> (Component) …
+<li> <strong>あるある宣言</strong> (Component) …
     「この要件を満たすオブジェクトがここだ」と書いておけば、そのオブジェクトを自動的に他で使ってもらえる。
-</ol>
+</ul>
 
 
 <h2>3. 実際に使ってみる</h2>
 
 <h4>準備</h4>
 <ol>
-<li> <code>java -version</code> でバージョン確認。
 <li> <a href="https://start.spring.io/">spring initializr</a> で以下を選択:
 <ul>
 <li> Project: <strong>Gradle - Kotlin</strong>
 <li> Language: <strong>Kotlin</strong>
-<li> Spring Boot: (デフォルトのまま)
-<li> Project Metadata: (デフォルトのまま)
-<li> Dependencies:
-<ul>
-  <li> <strong>Spring Web</strong>
+<li> Dependencies: <strong>Spring Web</strong>
+<li> それ以外のすべて: デフォルトのまま
+<div class="figure">
+  <img src="initializr.png">
+</div>
 </ul>
-</ul>
-<li> <code>demo.zip</code> を展開する。
-<li> <code>./gradlew bootrun</code> を実行。
-<li> <code>http://localhost:8080/</code> にアクセス。
+<li> ターミナルで以下を実行:
+<pre>
+$ <strong>java -version</strong>  <em>(バージョン確認)</em>
+...
+$ <strong>unzip demo.zip</strong>  <em>(zipを展開)</em>
+Archive:  demo.zip
+   creating: demo/
+...
+$ <strong>cd demo</strong>
+$ <strong>./gradlew bootrun</strong>   <em>(ビルドおよび実行)</em>
+...
+.   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \ 
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \ 
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+...
+</pre>
+<li> <a href=""><code>http://localhost:8080/</code></a> にアクセス。
+<li> "Whitelabel Error Page" なるものが表示されることを確認。
 </ol>
 
 <h4>「あるある宣言」を書いてみる</h4>
-
+<p>
+まず、以下のファイルを新しく作成する。
+</p>
 <div class=file>
-MyComponent.kt:
+src/main/kotlin/com/example/demo/MyComponent.kt:
 <pre>
 package com.example.demo
 
@@ -249,7 +275,7 @@ import org.springframework.stereotype.Component
 <mark>@Component</mark>
 class MyComponent {
     init {
-        println("this is my component.")
+        println("*** this is my component ***")
     }
 }
 </pre>
@@ -257,13 +283,21 @@ class MyComponent {
 
 <p>
 上の例における <code><mark>@Component</mark></code> は「あるある宣言」の一種である。
-これを実行すると "<code>this is my component.</code>" と表示される。
+この後もう一度 <code>./gradle bootrun</code> を実行すると
+<blockquote><pre>
+*** this is my component ***
+</pre></blockquote>
+と表示される。
 これは Spring が <code>MyComponent</code> クラスの「あるある宣言」を検知し、
-そのインスタンスを自動的に作成してくれるからである。
+そのインスタンスを自動的に作成したことを意味する。
+</p>
+
+<p>
+では次に、新しいファイルを追加する:
 </p>
 
 <div class=file>
-MyController.kt:
+src/main/kotlin/com/example/demo/MyController.kt:
 <pre>
 package com.example.demo
 
@@ -273,7 +307,7 @@ import org.springframework.stereotype.Controller
 class MyController {
 
     init {
-        println("this is my controller.")
+        println("+++ this is my controller +++")
     }
 }
 </pre>
@@ -281,14 +315,22 @@ class MyController {
 
 <p>
 上の例における <code><mark>@Controller</mark></code> も「あるある宣言」の一種である。
-これを実行すると "<code>this is my controller.</code>" と表示される。
+これを実行すると 
+<blockquote><pre>
++++ this is my controller +++
+</pre></blockquote>
+と表示される。
 このように「あるある宣言」には複数の種類が存在する。
 </p>
 
 <h4>「くれくれ宣言」を書いてみる</h4>
 
+<p>
+いま作成した MyController.kt を以下のように修正する:
+</p>
+
 <div class=file>
-MyController.kt:
+src/main/kotlin/com/example/demo/MyController.kt:
 <pre>
 package com.example.demo
 
@@ -299,45 +341,204 @@ import org.springframework.beans.factory.annotation.Autowired
 class MyController(<mark>@Autowired val component: MyComponent</mark>) {
 
     init {
-        println("this is my controller: mycomponent=$component")
+        println("+++ this is my controller: mycomponent=$component +++")
     }
 }
 </pre>
 </div>
 
 <p>
+これを実行すると
+<blockquote><pre>
++++ this is my controller: mycomponent=com.example.demo.MyComponent@72d0f2b4 +++
+</pre></blockquote>
+のように表示される。
+</p>
+
+<p>
 この例では、<code>MyController</code> インスタンスを作成するにはまず
 <code>MyComponent</code> インスタンスが必要である。
-このときコンストラクタの引数に <code><mark>@Autowired </mark></code> と書かれているのが
-「くれくれ宣言」である。Spring はこのような宣言を検知すると、
+ここでコンストラクタの引数に <code><mark>@Autowired </mark></code> と書かれているのが
+「くれくれ宣言」である。Spring はこのような<u>依存</u> (Dependency) を検知すると、
 そこで要求されている型のオブジェクト (<code>MyComponent</code> インスタンス) を自動的に探し出し、
-必要とあれば作成して、引数として渡してくれる。
+必要とあれば作成して、引数として<u>注入</u> (Injection) してくれる。
+これが Spring における依存注入 (Dependency Injection, DI) の要となる部分である。
+この例では「MyComponent が MyController に DI される」などと言う。
 </p>
-<p>
-このように、あるコードに必要なモノ (= 依存, dependency) を記述しておき、
-実行時に注入させることを「依存注入 (Dependency Injection, DI)」という。
-上の例では「MyComponent が MyController に DI される」などと言う。
-</p>
+
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="180" height="170">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="#8f8">
+      <rect x="10" y="10" width="140" height="60" />
+      <rect x="30" y="100" width="140" height="60" />
+    </g>
+    <g stroke="black" fill="none" marker-end="url(#arrow)">
+      <path d="M95,100 q-20,-5,-20,-25" stroke-width="2" stroke-dasharray="4,4" />
+      <path d="M85,70 q20,5,20,25" stroke-width="4" />
+    </g>
+    <g text-anchor="middle" style="font-weight: bold;">
+      <text x="80" y="45">MyComponent</text>
+      <text x="100" y="135">MyController</text>
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="55" y="90">依存</text>
+      <text x="125" y="90">注入</text>
+    </g>
+  </svg>
+  <div class="caption">Spring における依存注入 (DI)</div>
+</div>
+</div>
 
 <h2>4. 応用例</h2>
 <p>
-Spring では以上のような「くれくれ宣言」「あるある宣言」を応用することにより、
-複雑な機能をもったプログラムを簡単に実装できる。
+Spring では、
+以上のような「くれくれ宣言」「あるある宣言」を応用することにより、
+さまざまな機能を簡単に組み合わせられるようになっている。
 </p>
 
 <h4>あるある宣言の応用例</h4>
 
+<div class=file>
+src/main/kotlin/com/example/demo/HelloController.kt:
+<pre>
+package com.example.demo
+
+import org.springframework.stereotype.Controller
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ResponseBody
+
+@Controller
+class HelloController {
+
+    <mark>@GetMapping("/hello")</mark>
+    @ResponseBody
+    fun hello(): String {
+        return "Hello, World!"
+    }
+
+}
+</pre>
+</div>
+
+<a href="http://localhost:8080/hello"><code>http://localhost:8080/hello</code></a>
+
+
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="320" height="200">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="70" y="10" width="240" height="180" fill="#8ff" stroke-width="2" />
+      <rect x="110" y="70" width="160" height="80" fill="white" />
+      <rect x="120" y="80" width="140" height="60" fill="#ccc" />
+    </g>
+    <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
+      <path d="M40,60 l150,0 l0,20" />
+      <path d="M190,130 l0,30 l-145,0" />
+    </g>
+    <g text-anchor="middle" style="font-weight: bold;">
+      <text x="190" y="40">Spring Web</text>
+      <text x="190" y="115">hello()</text>
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="40" y="50">リクエスト</text>
+      <text x="40" y="150">レスポンス</text>
+    </g>
+  </svg>
+  <div class="caption">Spring Web による APIエンドポイントの作成</div>
+</div>
+</div>
+
 <h4>くれくれ宣言の応用例</h4>
 
+<div class=file>
+build.gradle.kts:
 <pre>
 dependencies {
         ...
-        implementation("org.springframework.boot:spring-boot-starter-jdbc")
+        <mark>implementation("org.springframework.boot:spring-boot-starter-jdbc")</mark>
+        <mark>runtimeOnly("com.h2database:h2")</mark>
 }
 </pre>
+</div>
+
+<div class=file>
+src/main/kotlin/com/example/demo/MyComponent.kt:
+<pre>
+package com.example.demo
+
+import org.springframework.stereotype.Component
+import org.springframework.jdbc.core.JdbcTemplate
+
+@Component
+class MyComponent(<mark>@Autowired val jdbcTemplate: JdbcTemplate</mark>) {
+    init {
+        println("*** this is my component ***")
+        jdbcTemplate.execute("CREATE TABLE USERS (NAME TEXT)")
+        jdbcTemplate.execute("INSERT INTO USERS VALUES ('JOHN')")
+        val users = jdbcTemplate.queryForList("SELECT * FROM USERS")
+        println(users)
+    }
+
+}
+</pre>
+</div>
+
+<blockquote><pre>
+[{NAME=JOHN}]
+</pre></blockquote>
+
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="320" height="320">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="10" y="10" width="300" height="300" fill="#8ff" stroke-width="2" />
+      <rect x="70" y="70" width="160" height="80" fill="white" />
+      <rect x="90" y="190" width="160" height="80" fill="white" />
+    </g>
+    <g stroke="black" stroke-width="1" fill="#8f8">
+      <rect x="80" y="80" width="140" height="60" />
+      <rect x="100" y="200" width="140" height="60" />
+    </g>
+    <g stroke="black" fill="none" marker-end="url(#arrow)">
+      <path d="M95,100 q-20,-5,-20,-25" stroke-width="2" stroke-dasharray="4,4" />
+      <path d="M85,70 q20,5,20,25" stroke-width="4" />
+    </g>
+    <g text-anchor="middle" style="font-weight: bold;">
+      <text x="160" y="40">Spring Framework</text>
+      <text x="150" y="105">H2</text>
+      <text x="150" y="130">(JdbcTemplate)</text>
+      <text x="170" y="235">MyComponent</text>
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="55" y="90">依存</text>
+      <text x="125" y="90">注入</text>
+    </g>
+  </svg>
+  <div class="caption">H2 データベースを MyComponent に DI する</div>
+</div>
+</div>
 
 
-<h2>5. Springの短所</h2>
+<h2>5. Spring を使う上での注意点</h2>
+<p>
+Spring Boot は便利な反面、使い方を学ぶのに時間がかかるというデメリットがある。
+</p>
 
 <h4>Spring の動作原理</h4>
 <ol>
@@ -350,17 +551,14 @@ dependencies {
   <li> 実際の処理が開始する。
 </ol>
 
-<p>
-制御フロー・データフローの一部が「ぶった切られている」。
-</p>
-<p>
-アノテーションが非常に多い。
-</p>
-<p>
-「くれくれ宣言」と「あるある宣言」がお互いに噛み合わない場合、
-実行時にエラーが発生する。ときにこのエラーの原因を解明するのは骨が折れることがある。
-また、このようなエラーはコンパイル時にはわからない。
-</p>
+<h4>Spring を学ぶ上で気をつけること</h4>
+<ul>
+  <li> プログラマの想定する制御の流れ・データの流れが部分的なため、全体的な動きを理解しにくい。
+  <li> 多くの種類のアノテーションがあり、どれをどのような場合に使うのか覚えにくい。
+  <li>「くれくれ宣言」と「あるある宣言」がお互いに噛み合わない場合、
+  実行時にエラーが発生する。ときにこのエラーの原因を解明するのは骨が折れることがある。
+  また、このようなエラーはコンパイル時にはわからない。
+</ul>
 
 <hr>
 <address>Yusuke Shinyama</address>
