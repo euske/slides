@@ -48,23 +48,28 @@ code em { color: #000088; }
 </div>
 
 <h1>Spring Boot 超入門</h1>
-<div>
-なぜ Spring Boot はクールなのか?
-</div>
-
 <div class=author>
 Yusuke Shinyama, Jan. 2023
 </div>
 
+<div>
+なぜ Spring Boot はクールなのか?
+</div>
+
 <ol>
+<li> <a href="#history">ソフトウェア技術の歴史</a></li>
+<li> <a href="#springboot">Spring Boot とは</a></li>
+<li> <a href="#howtouse">実際に使ってみる</a></li>
+<li> <a href="#applications">応用例</a></li>
+<li> <a href="#gotchas">Spring Boot を使う上での注意点</a></li>
 </ol>
 
 
-<h2>1. ソフトウェア技術の歴史</h2>
+<h2 id="history">1. ソフトウェア技術の歴史</h2>
 
 <p>
 ソフトウェアというものは非常に複雑である。
-先人達はこの複雑なシステムを分解 
+先人達はこの複雑なシステムを分解
 (<a href="https://ja.wikipedia.org/wiki/%E9%96%A2%E5%BF%83%E3%81%AE%E5%88%86%E9%9B%A2">separation of concerns</a>) し、
 人間が扱えるようにするために、さまざまな技法をあみだしてきた:
 </p>
@@ -93,10 +98,10 @@ Yusuke Shinyama, Jan. 2023
 </div>
 
 
-<h2>2. Spring Boot とは</h2>
+<h2 id="springboot">2. Spring Boot とは</h2>
 
 <p>
-Spring Framework (および Spring Boot) は、
+Spring Framework および Spring Boot (以下まとめて Spring と呼ぶ) は、
 その名のとおり「<u>フレームワーク</u>」の一種である。
 Spring は Java/Kotlin を使ったアプリケーション開発に使われている。
 </p>
@@ -172,7 +177,7 @@ Spring フレームワークにおける処理の流れは以下のようにな�
       <path d="M170,250 l0,20" />
     </g>
     <g text-anchor="middle" style="font-weight: bold;">
-      <text x="160" y="40">Spring Framework</text>
+      <text x="160" y="40">Spring Boot</text>
       <text x="150" y="115">処理1</text>
       <text x="170" y="235">処理2</text>
     </g>
@@ -224,7 +229,7 @@ Spring における DI を理解するには、以下の2つの機能を考え�
 </ul>
 
 
-<h2>3. 実際に使ってみる</h2>
+<h2 id="howtouse">3. 実際に使ってみる</h2>
 
 <h4>準備</h4>
 <ol>
@@ -250,8 +255,8 @@ $ <strong>cd demo</strong>
 $ <strong>./gradlew bootrun</strong>   <em>(ビルドおよび実行)</em>
 ...
 .   ____          _            __ _ _
- /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \ 
-( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \ 
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
   '  |____| .__|_| |_|_| |_\__, | / / / /
  =========|_|==============|___/=/_/_/_/
@@ -315,7 +320,7 @@ class MyController {
 
 <p>
 上の例における <code><mark>@Controller</mark></code> も「あるある宣言」の一種である。
-これを実行すると 
+これを実行すると
 <blockquote><pre>
 +++ this is my controller +++
 </pre></blockquote>
@@ -363,7 +368,6 @@ class MyController(<mark>@Autowired val component: MyComponent</mark>) {
 そこで要求されている型のオブジェクト (<code>MyComponent</code> インスタンス) を自動的に探し出し、
 必要とあれば作成して、引数として<u>注入</u> (Injection) してくれる。
 これが Spring における依存注入 (Dependency Injection, DI) の要となる部分である。
-この例では「MyComponent が MyController に DI される」などと言う。
 </p>
 
 <div class=figure>
@@ -395,7 +399,8 @@ class MyController(<mark>@Autowired val component: MyComponent</mark>) {
 </div>
 </div>
 
-<h2>4. 応用例</h2>
+
+<h2 id="applications">4. 応用例</h2>
 <p>
 Spring では、
 以上のような「くれくれ宣言」「あるある宣言」を応用することにより、
@@ -403,6 +408,12 @@ Spring では、
 </p>
 
 <h4>あるある宣言の応用例</h4>
+
+<p>
+たとえば「あるある宣言」の応用例として、
+簡単な web サービス (API エンドポイント) を作成してみる。
+以下のような新しいファイル HelloController.kt を作成すればよい。
+</p>
 
 <div class=file>
 src/main/kotlin/com/example/demo/HelloController.kt:
@@ -426,8 +437,25 @@ class HelloController {
 </pre>
 </div>
 
+<p>
+これを実行し、
 <a href="http://localhost:8080/hello"><code>http://localhost:8080/hello</code></a>
+にアクセスすると、ブラウザに
+<blockquote><pre>
+Hello, World!
+</pre></blockquote>
+と表示されるのがわかる。
+</p>
 
+<p>
+上の
+<code><mark>@GetMapping</mark></code> は
+メソッドに対する「あるある宣言」で、
+Spring Web は <code>hello()</code> メソッドの周囲に
+HTTP リクエスト・レスポンスを処理する機構をくっつけて
+全体を Webサーバとして動作させるため、
+実質わずか 5行で新しい API を作成することができた。
+</p>
 
 <div class=figure>
 <div>
@@ -461,6 +489,13 @@ class HelloController {
 
 <h4>くれくれ宣言の応用例</h4>
 
+<p>
+次に、「くれくれ宣言」の応用例として
+<code>MyComponent</code> にSQLデータベースを接続してみる。
+まず、トップレベルにある build.gradle.kts ファイルに
+以下の2行を追加する:
+</p>
+
 <div class=file>
 build.gradle.kts:
 <pre>
@@ -471,6 +506,12 @@ dependencies {
 }
 </pre>
 </div>
+
+<p>
+次に、さきほどの
+MyComponent.kt に新しい「くれくれ宣言」を追加し、
+さらに SQL文を実行する部分を付け足す:
+</p>
 
 <div class=file>
 src/main/kotlin/com/example/demo/MyComponent.kt:
@@ -494,9 +535,21 @@ class MyComponent(<mark>@Autowired val jdbcTemplate: JdbcTemplate</mark>) {
 </pre>
 </div>
 
+<p>
+これを実行すると、
 <blockquote><pre>
 [{NAME=JOHN}]
 </pre></blockquote>
+のような行が現れているのがわかる。
+たったこれだけの追加で、すでにデータベースとの連携が実現できた。
+ここではオンメモリの簡易な組み込みデータベースである
+<a href="https://h2database.com/">H2</a> を使っているが、
+くれくれ宣言では
+「<code>JdbcTemplate</code> (のインターフェイス) として使えるものであれば何でもよい」
+と書かれている。
+Spring はたまたま利用可能だった H2 データベースを DI したが、
+同様の設定をすることで PostgreSQL などのデータベースを使うこともできる。
+</p>
 
 <div class=figure>
 <div>
@@ -516,18 +569,18 @@ class MyComponent(<mark>@Autowired val jdbcTemplate: JdbcTemplate</mark>) {
       <rect x="100" y="200" width="140" height="60" />
     </g>
     <g stroke="black" fill="none" marker-end="url(#arrow)">
-      <path d="M95,100 q-20,-5,-20,-25" stroke-width="2" stroke-dasharray="4,4" />
-      <path d="M85,70 q20,5,20,25" stroke-width="4" />
+      <path d="M155,190 q-20,-5,-20,-35" stroke-width="2" stroke-dasharray="4,4" />
+      <path d="M155,150 q20,5,20,35" stroke-width="4" />
     </g>
     <g text-anchor="middle" style="font-weight: bold;">
-      <text x="160" y="40">Spring Framework</text>
+      <text x="160" y="40">Spring Boot</text>
       <text x="150" y="105">H2</text>
       <text x="150" y="130">(JdbcTemplate)</text>
       <text x="170" y="235">MyComponent</text>
     </g>
     <g text-anchor="middle" style="font-size: 75%;">
-      <text x="55" y="90">依存</text>
-      <text x="125" y="90">注入</text>
+      <text x="120" y="175">依存</text>
+      <text x="190" y="175">注入</text>
     </g>
   </svg>
   <div class="caption">H2 データベースを MyComponent に DI する</div>
@@ -535,7 +588,7 @@ class MyComponent(<mark>@Autowired val jdbcTemplate: JdbcTemplate</mark>) {
 </div>
 
 
-<h2>5. Spring を使う上での注意点</h2>
+<h2 id="gotchas">5. Spring Boot を使う上での注意点</h2>
 <p>
 Spring Boot は便利な反面、使い方を学ぶのに時間がかかるというデメリットがある。
 </p>
@@ -546,8 +599,8 @@ Spring Boot は便利な反面、使い方を学ぶのに時間がかかると�
   <li> Spring が、アプリ中で使われているすべての
     クラス、メソッド、変数をスキャンし、各部分の
     「くれくれ宣言」「あるある宣言」を洗い出す。
-  <li> Spring が一致する「くれくれ宣言」「あるある宣言」を探し、
-    それらのオブジェクトを自動作成し、DI する。
+  <li> 一致する「くれくれ宣言」「あるある宣言」に対して、
+    それらのオブジェクトを自動的に作成され、DI される。
   <li> 実際の処理が開始する。
 </ol>
 
