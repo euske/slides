@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spring (Boot) 超入門</title>
+<meta name="author" content="Yusuke Shinyama">
+<meta name="keywords" content="Spring Framework, Spring Boot, フレームワーク, 制御の反転, Inversion of Control, DI, 依存注入, Dependency Injection">
+<meta name="description" content="Spring Boot を使ううえで欠かせない基本的な概念の解説。">
+<meta name="twitter:card" content="summary" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Spring Boot 超入門" />
+<meta property="og:url" content="https://euske.github.io/slides/spring202301/index.html" />
+<meta property="og:description" content="Spring Boot を使ううえで欠かせない基本的な概念の解説。" />
+<title>Spring Boot 超入門</title>
 <style><!--
 body { line-height: 1.5; }
 h1 { border-bottom: solid 4px #000088; }
@@ -21,7 +29,7 @@ u { color: #880000; font-weight: bold; }
 .author { text-align: right; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; }
 .figure .caption { font-size: 80%; font-weight: bold; }
-.notice { font-size: 100%; font-weight: bold; background: #ffff88; outline: 2px solid black; padding: 0.5em; margin: 0.5em; }
+.notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em 4em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 pre em { color: #0000dd; }
@@ -297,6 +305,15 @@ class MyComponent {
 そのインスタンスを自動的に作成したことを意味する。
 </p>
 
+<div class=notice>
+Spring では
+「あるある宣言」によって作成されるオブジェクトを
+"bean" と呼ぶが、これは <strong>Java Bean の "bean" とは異なる概念である</strong>
+ことに注意。<Br>
+Java Bean とは違って、Spring における bean は
+setter/getter の存在などを規定しない。
+</div>
+
 <p>
 では次に、新しいファイルを追加する:
 </p>
@@ -451,10 +468,11 @@ Hello, World!
 上の
 <code><mark>@GetMapping</mark></code> は
 メソッドに対する「あるある宣言」で、
-Spring Web は <code>hello()</code> メソッドの周囲に
+「<strong>GETリクエストに応答するメソッドがここにあるよ</strong>」ということを示している。
+これを検知すると、Spring Web は <code>hello()</code> メソッドの周囲に
 HTTP リクエスト・レスポンスを処理する機構をくっつけて
-全体を Webサーバとして動作させるため、
-実質わずか 5行で新しい API を作成することができた。
+全体を Webサーバとして動作させる。
+この仕組みを使って、実質わずか 5行で新しい API を作成することができた。
 </p>
 
 <div class=figure>
@@ -490,7 +508,7 @@ HTTP リクエスト・レスポンスを処理する機構をくっつけて
 <h4>くれくれ宣言の応用例</h4>
 
 <p>
-次に、「くれくれ宣言」の応用例として
+次に「くれくれ宣言」の応用例として
 <code>MyComponent</code> にSQLデータベースを接続してみる。
 まず、トップレベルにある build.gradle.kts ファイルに
 以下の2行を追加する:
@@ -545,7 +563,7 @@ class MyComponent(<mark>@Autowired val jdbcTemplate: JdbcTemplate</mark>) {
 ここではオンメモリの簡易な組み込みデータベースである
 <a href="https://h2database.com/">H2</a> を使っているが、
 くれくれ宣言では
-「<code>JdbcTemplate</code> (のインターフェイス) として使えるものであれば何でもよい」
+「<strong><code>JdbcTemplate</code> (のインターフェイス) として使えるものであれば何でもよい</strong>」
 と書かれている。
 Spring はたまたま利用可能だった H2 データベースを DI したが、
 同様の設定をすることで PostgreSQL などのデータベースを使うこともできる。
@@ -607,10 +625,15 @@ Spring Boot は便利な反面、使い方を学ぶのに時間がかかると�
 <h4>Spring を学ぶ上で気をつけること</h4>
 <ul>
   <li> プログラマの想定する制御の流れ・データの流れが部分的なため、全体的な動きを理解しにくい。
-  <li> 多くの種類のアノテーションがあり、どれをどのような場合に使うのか覚えにくい。
   <li>「くれくれ宣言」と「あるある宣言」がお互いに噛み合わない場合、
   実行時にエラーが発生する。ときにこのエラーの原因を解明するのは骨が折れることがある。
   また、このようなエラーはコンパイル時にはわからない。
+  <li> 多くの種類のアノテーションがあり、どれをどのような場合に使うのか覚えにくい。
+    <ul>
+      <li> くれくれ宣言: @Required, @Value, @PathVariable, @PropertySource, ...
+      <li> あるある宣言: @Bean, @RestController, @ExceptionHandler, @Scheduled, @Id, ...
+      <li> その他: @ComponentScan, @SpringBootTest, ...
+    </ul>
 </ul>
 
 <hr>
