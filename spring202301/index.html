@@ -308,10 +308,10 @@ class MyComponent {
 <div class=notice>
 Spring では
 「あるある宣言」によって作成されるオブジェクトを
-"bean" と呼ぶが、これは <strong>Java Bean の "bean" とは異なる概念である</strong>
-ことに注意。<Br>
-Java Bean とは違って、Spring における bean は
-setter/getter の存在などを規定しない。
+"bean" と呼ぶが、Java の世界にはこれとは別の
+"Java Bean" という用語がある。
+<strong>Spring における Bean と Java Bean は異なる概念である</strong>
+ことに注意。
 </div>
 
 <p>
@@ -381,9 +381,11 @@ class MyController(<mark>@Autowired val component: MyComponent</mark>) {
 この例では、<code>MyController</code> インスタンスを作成するにはまず
 <code>MyComponent</code> インスタンスが必要である。
 ここでコンストラクタの引数に <code><mark>@Autowired </mark></code> と書かれているのが
-「くれくれ宣言」である。Spring はこのような<u>依存</u> (Dependency) を検知すると、
-そこで要求されている型のオブジェクト (<code>MyComponent</code> インスタンス) を自動的に探し出し、
-必要とあれば作成して、引数として<u>注入</u> (Injection) してくれる。
+「くれくれ宣言」である。
+これは「MyController が MyComponent に<strong>依存</strong>している」ことを示す。
+Spring はこのような<u>依存</u> (Dependency) を検知すると、
+そこで要求されている型のオブジェクト (<code>MyComponent</code> インスタンス) を自動的に探し出し
+(必要とあれば作成して)、引数として<u>注入</u> (Injection) してくれる。
 これが Spring における依存注入 (Dependency Injection, DI) の要となる部分である。
 </p>
 
@@ -560,13 +562,13 @@ class MyComponent(<mark>@Autowired val jdbcTemplate: JdbcTemplate</mark>) {
 </pre></blockquote>
 のような行が現れているのがわかる。
 たったこれだけの追加で、すでにデータベースとの連携が実現できた。
-ここではオンメモリの簡易な組み込みデータベースである
-<a href="https://h2database.com/">H2</a> を使っているが、
-くれくれ宣言では
-「<strong><code>JdbcTemplate</code> (のインターフェイス) として使えるものであれば何でもよい</strong>」
+この例のくれくれ宣言では
+「<strong><code>JdbcTemplate</code> (インターフェイス) として使えるものがほしい</strong>」
 と書かれている。
-Spring はたまたま利用可能だった H2 データベースを DI したが、
-同様の設定をすることで PostgreSQL などのデータベースを使うこともできる。
+すると Spring は <code>JdbcTemplate</code> インターフェイスとして
+たまたま利用可能だった H2 データベースを DI する。
+<a href="https://h2database.com/">H2</a> はオンメモリの簡易な組み込みデータベースだが、
+設定を変えることで PostgreSQL などのデータベースも同様に使うことができる。
 </p>
 
 <div class=figure>
