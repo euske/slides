@@ -57,7 +57,7 @@ code em { color: #000088; }
 
 <h1>Spring Boot 超入門</h1>
 <div class=author>
-Yusuke Shinyama, Jan. 2023
+Yusuke Shinyama, Nov. 2023
 </div>
 
 <div>
@@ -102,6 +102,7 @@ Yusuke Shinyama, Jan. 2023
 <p>
 自分が思いつく「複雑さを分解する技術」を書き出してみよう
 (ソフトウェアでなくてもかまわない)。
+<!-- Repository pattern, 住宅の設計, 責任分担 -->
 </p>
 </div>
 
@@ -270,7 +271,7 @@ $ <strong>./gradlew bootrun</strong>   <em>(ビルドおよび実行)</em>
  =========|_|==============|___/=/_/_/_/
 ...
 </pre>
-<li> <a href=""><code>http://localhost:8080/</code></a> にアクセス。
+<li> <a href="http://localhost:8080/"><code>http://localhost:8080/</code></a> にアクセス。
 <li> "Whitelabel Error Page" なるものが表示されることを確認。
 </ol>
 
@@ -417,6 +418,25 @@ Spring はこのような<u>依存</u> (Dependency) を検知すると、
   <div class="caption">Spring における依存注入 (DI)</div>
 </div>
 </div>
+
+<p>
+Spring における DI は慣れると便利だが、一番とっつきにくい部分でもある。
+通常のプログラムであれば、
+<blockquote><pre>
+mycomponent = MyComponent()
+mycontroller = MyController(mycomponent)
+</pre></blockquote>
+のように書くところを、
+Spring ではこの部分すら自分では書かず、
+フレームワークに処理させているのである。
+</p>
+
+<div class=notice>
+上の例では、
+実は <code>@Autowired</code> が省略されていても、
+文脈から自動的に「くれくれ宣言」とみなされる。
+</div>
+
 
 
 <h2 id="applications">4. 応用例</h2>
@@ -626,16 +646,21 @@ Spring Boot は便利な反面、使い方を学ぶのに時間がかかると�
 
 <h4>Spring を学ぶ上で気をつけること</h4>
 <ul>
-  <li> プログラマの想定する制御の流れ・データの流れが部分的なため、全体的な動きを理解しにくい。
   <li>「くれくれ宣言」と「あるある宣言」がお互いに噛み合わない場合、
   実行時にエラーが発生する。ときにこのエラーの原因を解明するのは骨が折れることがある。
   また、このようなエラーはコンパイル時にはわからない。
-  <li> 多くの種類のアノテーションがあり、どれをどのような場合に使うのか覚えにくい。
+  <li> 多くの種類のアノテーション (<code>@なんとか</code>) があり、
+    どのような場合にどれを使うのか覚えにくい。
     <ul>
-      <li> くれくれ宣言: @Required, @Value, @PathVariable, @PropertySource, ...
-      <li> あるある宣言: @Bean, @RestController, @ExceptionHandler, @Scheduled, @Id, ...
-      <li> その他: @ComponentScan, @SpringBootTest, ...
+      <li> くれくれ宣言: <code>@Required</code>, <code>@PathVariable</code>, <code>@PropertySource</code>, ...
+      <li> あるある宣言: <code>@Bean</code>, <code>@ExceptionHandler</code>, <code>@Scheduled</code>, ...
+      <li> どちらでもないもの: <code>@ComponentScan</code>, <code>@SpringBootTest</code>, ...
     </ul>
+<div class=notice>
+<code>@</code>がついているからといって、
+必ず「くれくれ宣言」「あるある宣言」のどちらかであるとは限らない。
+</div>
+  <li> コードで書かれている制御の流れ・データの流れが部分的なため、全体的な動きを理解しにくい。
 </ul>
 
 <hr>
