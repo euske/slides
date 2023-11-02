@@ -94,7 +94,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 <div class=header>演習. ブラウザでHTTPリクエストとレスポンスを見る</div>
 <ol>
   <li> ブラウザで <kbd>F12</kbd>キーを押して開発用コンソールを開き、"Network" タブをクリック。</li>
-  <li> タブ内で <a href="http://www.example.com/index.html">http://www.example.com/index.html</a> を開く。</li>
+  <li> タブ内で <a target="_blank" href="http://www.example.com/index.html">http://www.example.com/index.html</a> を開く。</li>
   <li> 右側にリクエスト一覧が表示される。</li>
   <li> <strong>index.html</strong> を選択し、その横の <strong>Headers</strong> タブをクリック。</li>
   <li> "Response Headers" および "Request Headers" が表示される。</li>
@@ -122,7 +122,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="400" height="70">
+       version="1.1" width="400" height="90">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
       <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
     </marker>
@@ -139,7 +139,8 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
       <path d="M310,30 l-240,0" marker-end="url(#arrow)" />
     </g>
     <g text-anchor="middle" style="font-size:80%;">
-      <text x="45" y="60">クライアント (ブラウザ)</text>
+      <text x="45" y="60">クライアント</text>
+      <text x="45" y="75">(ブラウザ)</text>
       <text x="345" y="60">サーバ</text>
       <text x="110" y="12">リクエスト</text>
       <text x="270" y="48">レスポンス</text>
@@ -213,7 +214,7 @@ $ <strong>curl -v http://www.example.com/index.html</strong>
 <div class=figure>
 <code>http://<span class=bgy>www.example.com</span><span class=bgg>/index.html</span></code>
 </div>
-というURL を開くと、以下のような<u>リクエスト</u>文字列が送信される:
+というURL を開くと、サーバに以下のような<u>リクエスト</u>文字列が送信される:
 </p>
 <blockquote><pre>
 GET <span class=bgg>/index.html</span> HTTP/1.1
@@ -222,49 +223,49 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1;) Gecko/20100101
 ...
 </pre></blockquote>
 <p>
-ここで、Host や User-Agent: などの行は<u>ヘッダ</u>と呼ばれる。
-ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
+<code>GET</code> で始まる最初の行がリクエストの本体を表す。
+続く <code>Host:</code> や <code>User-Agent:</code> などの行は
+付随情報で、<u>リクエストヘッダ</u>と呼ばれる:
 </p>
 <ul>
-<li> <code><u>Host:</u></code> 相手のサーバの名前
-<li> <code><u>User-Agent:</u></code> ブラウザの種類
+<li> <code>Host:</code> サーバの名前
+<li> <code>User-Agent:</code> ブラウザの種類
 <li> その他 (<A target="_blank" href="https://tools.ietf.org/html/rfc2616">RFC 2616</a> 参照)
 </ul>
 
 <h4>HTTPレスポンス</h4>
 <p>
-これに対してサーバは以下のような<u>レスポンス</u>文字列を返す:
+サーバはHTTPリクエストを受け取ると、
+以下のような<u>レスポンス</u>文字列を返す:
 </p>
 <blockquote><pre>
-HTTP/1.1 200 OK
-Connection: close
-Date: Fri, 20 Feb 2023 08:27:28 GMT
-Content-Type: text/html
-Content-Length: 9022
-<em>(空行)</em>
-&lt;html&gt;
+HTTP/1.1 <mark>200</mark> OK
+Accept-Ranges: bytes
+Age: 31773
+Cache-Control: max-age=604800
+Content-Type: text/html; charset=UTF-8
+Date: Tue, 10 Oct 2023 09:11:50 GMT
 ...
 </pre></blockquote>
 
-
 <p>
-HTTP レスポンスは、
-<u>ヘッダ</u> (header) と
-<u>ボディ (ペイロード)</u> (body, payload) に分かれている。
-これらは<em>空行</em>で分けられている。
-</p>
-
-<p>
-ヘッダは <u>項目名</u>: <u>値</u> の形をとる。
+<code>HTTP/1.1</code> で始まる最初の行にある
+<code><mark>200</mark></code> という数字が<u>ステータスコード</u>と呼ばれる重要な部分で、
+続く <code>Accept-Ranges:</code> や <code>Content-Type:</code> などの行は
+付随情報 (<u>レスポンスヘッダ</u>) と呼ばれる:
 </p>
 <ul>
-<li> <code><u>Date:</u></code> サーバの応答時刻。
-<li> <code><u>Content-Type:</u></code> そのコンテンツの種類 (HTMLファイルか画像か)。
-<li> <code><u>Content-Length:</u></code> そのコンテンツの大きさ (バイト数)。
+<li> <code>Date:</code> サーバの応答時刻。
+<li> <code>Content-Type:</code> コンテンツの種類 (HTMLファイルか画像か)。
+<li> <code>Content-Length:</code> コンテンツの大きさ (バイト数)。
+<li> その他 (<A target="_blank" href="https://tools.ietf.org/html/rfc2616">RFC 2616</a> 参照)
 </ul>
+
 <p>
-レスポンス内のペイロードには、通常 HTML ファイル
-(または画像ファイルなど) の内容がそのまま含まれている。
+ヘッダの後には、
+<u>ボディ</u> (body) あるいは <u>ペイロード</u> (payload) と
+呼ばれるコンテンツ本体のデータが続く。
+これは通常 HTML ファイルや画像ファイルの内容そのものである。
 ブラウザはこの内容を解析して表示すると、ページが表示されたことになる。
 </p>
 
@@ -272,21 +273,50 @@ HTTP レスポンスは、
 <p>
 正常なレスポンスの場合、最初の一行は必ず
 <blockquote><pre>
-HTTP/1.1 <u>200</u> OK
+HTTP/1.1 <mark>200</mark> OK
 </pre></blockquote>
 となっているが、これ以外のレスポンスが返ってくる場合もある。
 </p>
+<p>
+たとえば、指定されたファイルが存在しない (いわゆる「ページが見つかりません」エラー)
+場合はステータスコードとして <code>404</code> が返される。
+<blockquote><pre>HTTP/1.1 <mark>404</mark> Not Found</pre></blockquote>
+</p>
+<p>
+あるいは「別の場所を参照せよ」という意味の <code>302</code> が返されることもある。
+これが返されると、ブラウザのアドレスバーが変化する。
+</p>
+<blockquote><pre>HTTP/1.1 <mark>301</mark> Moved</pre></blockquote>
+
+<div class=exercise id="ex-http-status-code">
+<div class=header>演習. HTTPステータスコードを観察する</div>
+<p>
+  curlを使って以下のURLにリクエストを送り、どのようなステータスコードが返されるのか確認しよう。
+</p>
 <ul>
-<li> 指定されたファイルが存在しない。いわゆる「ページが見つかりません」エラー。
-    この場合、サーバはペイロードとして HTML を返すこともある。
-  <blockquote><pre>HTTP/1.1 <u>404</u> Not Found</pre></blockquote>
-  <p> 例: <a target="_blank" href="https://www.google.com/nonexistent">https://www.google.com/nonexistent</a>
-<li> 別の場所を参照せよ。これが返されると、ブラウザのアドレスバーが変化する。
-  <blockquote><pre>HTTP/1.1 <u>301</u> Moved</pre></blockquote>
-  <p> 例: <a target="_blank" href="https://ja.wikipedia.org/">https://ja.wikipedia.org/</a>
+  <li> <code>curl -v https://ja.wikipedia.org/</code>
+  <li> <code>curl -v https://www.google.com/nonexistent</code>
 </ul>
+</div>
 
 <h3 id="app-http-human">1.3. 人間とHTTP</h3>
+
+<div class=exercise id="ex-tcp-connection">
+<div class=header>演習. TCP 接続を使って通信してみる</div>
+<ol>
+<li> まず、ターミナルウインドウを2つ開く。
+<li> ひとつのウインドウで、以下のコマンドを実行する:
+<blockquote><pre>
+$ <strong>nc -l 10000</strong>
+</pre></blockquote>
+<li> もうひとつのウインドウで、以下のコマンドを実行する:
+<blockquote><pre>
+$ <strong>nc localhost 10000</strong>
+</pre></blockquote>
+<li> ふたつのウインドウで何らかのテキストを入力し、
+相手のウインドウにそれが送信されていることを確認せよ。
+</ol>
+</div>
 
 <div class=exercise id="ex-human-http-client">
 <div class=header>演習. 人間HTTPクライアント</div>
@@ -321,7 +351,7 @@ Date: Mon, 23 Jan 2023 13:39:22 GMT
 「人間HTTPサーバ」としてブラウザからの
 リクエストに返答せよ。
 まず <code>nc</code> をサーバとして起動し、
-ブラウザから <a href="http://localhost:8080/index.html"><code>http://localhost:8080/index.html</code></a>
+ブラウザから <a target="_blank" href="http://localhost:8080/index.html"><code>http://localhost:8080/index.html</code></a>
 という URLに接続してリクエストが送られるのを確認してから、
 応答を入力せよ。
 </p>
@@ -391,7 +421,7 @@ IP アドレスはそのままでは人間にとって覚えにくい。
 (<code>ping</code>, <code>traceroute</code>, <code>nc</code> など) は
   デフォルトで DNS に対応しており、これらのコマンドには
   <strong>IPアドレスの代わりにホスト名を指定してもよい</strong>。
-<li> たとえば、以下の2つは同じ意味である:
+<li> たとえば、以下の3つは同じ意味である:
 <blockquote><pre>
 $ <strong>ping 166.84.7.55</strong>
 $ <strong>ping www.tabesugi.net</strong>
