@@ -299,7 +299,14 @@ HTTP/1.1 <mark>200</mark> OK
 </ul>
 </div>
 
-<h3 id="app-http-human">1.3. 人間とHTTP</h3>
+<h3 id="tcp-ip">1.3. Intermezzo: TCP/IP</h3>
+<p>
+では、curlコマンドはいったいどうやってHTTPリクエストを送っているのか?
+答えは <u>TCP/IP</u> である。TCP/IP はインターネット上の
+コンピュータが通信するための汎用的な規格で、
+現在はほとんどのPC/スマートフォン/ゲーム機等で利用可能である。
+<code>nc</code>コマンドは、TCP/IPを使った原始的な通信プログラムである。
+</p>
 
 <div class=exercise id="ex-tcp-connection">
 <div class=header>演習. TCP 接続を使って通信してみる</div>
@@ -317,6 +324,85 @@ $ <strong>nc localhost 10000</strong>
 相手のウインドウにそれが送信されていることを確認せよ。
 </ol>
 </div>
+
+<p>
+TCP/IP では、インターネット上の各機器 (ホスト) は
+最大 65,536個の仮想的な <u>ポート</u>を持っている。
+TCPを使って通信するときは、通信相手のホスト名
+(例: <code>localhost</code>) と
+ポート番号 (例: <code>10000</code>) を指定する。
+</p>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="250" height="140">
+    <defs>
+    <symbol id="computer" fill="none" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </symbol>
+    </defs>
+    <g transform="translate(5,15)">
+      <g stroke="black" stroke-width="2" fill="none">
+      <use xlink:href="#computer" x="0" y="40" />
+      <use xlink:href="#computer" x="190" y="40" />
+      <path d="M40,60 L60,10"/>
+      <path d="M40,60 L60,30"/>
+      <path d="M40,60 L60,50"/>
+      <path d="M40,60 L60,70"/>
+      <path d="M40,60 L60,90"/>
+      <path d="M40,60 L60,110"/>
+      <path d="M200,60 L180,10"/>
+      <path d="M200,60 L180,30"/>
+      <path d="M200,60 L180,50"/>
+      <path d="M200,60 L180,70"/>
+      <path d="M200,60 L180,90"/>
+      <path d="M200,60 L180,110"/>
+      <circle cx="60" cy="10" r="4" />
+      <circle cx="60" cy="30" r="4" />
+      <circle cx="60" cy="50" r="4" />
+      <circle cx="60" cy="70" r="4" />
+      <circle cx="60" cy="90" r="4" />
+      <circle cx="60" cy="110" r="4" />
+      <circle cx="180" cy="10" r="4" />
+      <circle cx="180" cy="30" r="4" />
+      <circle cx="180" cy="50" r="4" />
+      <circle cx="180" cy="70" r="4" />
+      <circle cx="180" cy="90" r="4" />
+      <circle cx="180" cy="110" r="4" />
+    </g>
+    <g stroke-width="2" fill="none" stroke-dasharray="4,4">
+      <path d="M60,30 L180,70" stroke="red" />
+      <path d="M60,110 L180,30" stroke="blue" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="25" y="90" dy="0.5em">ホスト</text>
+      <text x="60" y="-5" dy="0.5em">ポート</text>
+      <text x="215" y="90" dy="0.5em">ホスト</text>
+      <text x="180" y="-5" dy="0.5em">ポート</text>
+    </g>
+    <g fill="red" style="font-size: 75%;">
+      <text x="65" y="20" dy="0.5em">134</text>
+      <text x="175" y="75" dy="0.5em" text-anchor="end">10000</text>
+    </g>
+    <g fill="blue" style="font-size: 75%;">
+      <text x="65" y="115" dy="0.5em">65535</text>
+      <text x="175" y="20" dy="0.5em" text-anchor="end">134</text>
+    </g>
+    </g>
+  </svg>
+  <div class=caption>TCP層におけるホストとポート</div>
+  </div>
+</div>
+
+<h3 id="app-http-human">1.4. 人間とHTTP</h3>
+
+<p>
+<code>nc</code>コマンドを使うと、<code>curl</code> を使わなくても
+人間が手動でHTTPリクエストを送ることができる。
+</p>
 
 <div class=exercise id="ex-human-http-client">
 <div class=header>演習. 人間HTTPクライアント</div>
