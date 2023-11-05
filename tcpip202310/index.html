@@ -75,8 +75,8 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 
 <p>
   <strong>オリジナル版との違い:</strong>
-  オリジナル版では、ネットワークの低水準な層 (データリンク層など) から「上に向かって」説明していた。
-  反転バージョンでは、アプリケーション層 (HTTP) から「下に向かって」説明する。
+  オリジナル版では、ネットワークの低水準な層 (データリンク層など) から説明していた。
+  反転バージョンでは高水準な層 (HTTP) から先に説明する。
 </p>
 
 
@@ -123,10 +123,10 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="400" height="90">
+    <defs>
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
       <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
     </marker>
-    <defs>
     <g id="computer" fill="white" stroke="black" stroke-width="2">
       <rect x="10" y="10" width="30" height="20" />
       <polygon points="10,32 0,40 50,40 40,32" />
@@ -139,9 +139,9 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
       <path d="M310,30 l-240,0" marker-end="url(#arrow)" />
     </g>
     <g text-anchor="middle" style="font-size:80%;">
-      <text x="45" y="60">クライアント</text>
-      <text x="45" y="75">(ブラウザ)</text>
-      <text x="345" y="60">サーバ</text>
+      <text x="45" y="60">ウェブブラウザ</text>
+      <text x="45" y="75">(クライアント)</text>
+      <text x="345" y="60">ウェブサーバ</text>
       <text x="110" y="12">リクエスト</text>
       <text x="270" y="48">レスポンス</text>
     </g>
@@ -158,7 +158,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 <h3 id="app-http-curl">1.2. curlコマンドとHTTP</h3>
 <p>
   では、HTTPリクエストとHTTPレスポンスの正体は何か?
-  実はこれは<u>文字列</u>である。
+  実はただの文字列である。
   これは <code>curl</code>コマンドを使うと明らかになる。
 </p>
 
@@ -175,7 +175,7 @@ $ <strong>curl -v http://www.example.com/index.html</strong>
 &gt; Host: www.example.com
 &gt; User-Agent: curl/8.1.2
 &gt; Accept: &#42;/&#42;
-&gt; 
+&gt;
 </div><div class=bgy>&lt; HTTP/1.1 200 OK
 &lt; Accept-Ranges: bytes
 &lt; Age: 31773
@@ -189,11 +189,11 @@ $ <strong>curl -v http://www.example.com/index.html</strong>
 &lt; Vary: Accept-Encoding
 &lt; X-Cache: HIT
 &lt; Content-Length: 1256
-&lt; 
-</div><div class=bgb>&lt;!doctype html&gt; 
-&lt;html&gt; 
-&lt;head&gt; 
-    &lt;title&gt; Example Domain&lt;/title&gt; 
+&lt;
+</div><div class=bgb>&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt; Example Domain&lt;/title&gt;
 
     &lt;meta charset="utf-8" /&gt;
     ...
@@ -302,107 +302,128 @@ HTTP/1.1 <mark>200</mark> OK
 <h3 id="tcp-ip">1.3. Intermezzo: TCP/IP</h3>
 <p>
 では、curlコマンドはいったいどうやってHTTPリクエストを送っているのか?
-答えは <u>TCP/IP</u> である。TCP/IP はインターネット上の
-コンピュータが通信するための汎用的な規格で、
+答えは <u>TCP</u> である。TCP (一般的には関連規格を含めて <u>TCP/IP</u> と呼ぶ) は
+インターネット上のコンピュータが通信するための汎用的な規格で、
 現在はほとんどのPC/スマートフォン/ゲーム機等で利用可能である。
-<code>nc</code>コマンドは、TCP/IPを使った原始的な通信プログラムである。
+<code>nc</code>コマンドは、TCP/IP を使った原始的な通信プログラムである。
 </p>
 
 <div class=exercise id="ex-tcp-connection">
-<div class=header>演習. TCP 接続を使って通信してみる</div>
+<div class=header>演習. TCP を使って通信してみる</div>
 <ol>
-<li> まず、ターミナルウインドウを2つ開く。
-<li> ひとつのウインドウで、以下のコマンドを実行する:
+<li> まず、ターミナルを2つ開く。
+<li> ひとつのターミナルで、以下のコマンドを実行する:
 <blockquote><pre>
 $ <strong>nc -l 10000</strong>
 </pre></blockquote>
-<li> もうひとつのウインドウで、以下のコマンドを実行する:
+<li> もうひとつのターミナルで、以下のコマンドを実行する:
 <blockquote><pre>
 $ <strong>nc localhost 10000</strong>
 </pre></blockquote>
-<li> ふたつのウインドウで何らかのテキストを入力し、
-相手のウインドウにそれが送信されていることを確認せよ。
+<li> ふたつのターミナルで何らかのテキストを入力し、
+お互いのターミナルで双方向に通信が可能なことを確認せよ。
 </ol>
 </div>
 
 <p>
-TCP/IP では、インターネット上の各機器 (ホスト) は
-最大 65,536個の仮想的な <u>ポート</u>を持っている。
-TCPを使って通信するときは、通信相手のホスト名
-(例: <code>localhost</code>) と
-ポート番号 (例: <code>10000</code>) を指定する。
+何が起こっているかというと、
+ここでは localhost (自分のPC) 上の
+2つのプロセス (<code>nc</code>) が互いに TCP の
+10000番ポートを使って通信している。
 </p>
 
 <div class=figure>
   <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="250" height="140">
+       version="1.1" width="240" height="170">
     <defs>
-    <symbol id="computer" fill="none" stroke="black" stroke-width="2">
-      <rect x="10" y="10" width="30" height="20" />
-      <polygon points="10,32 0,40 50,40 40,32" />
-    </symbol>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
     </defs>
-    <g transform="translate(5,15)">
-      <g stroke="black" stroke-width="2" fill="none">
-      <use xlink:href="#computer" x="0" y="40" />
-      <use xlink:href="#computer" x="190" y="40" />
-      <path d="M40,60 L60,10"/>
-      <path d="M40,60 L60,30"/>
-      <path d="M40,60 L60,50"/>
-      <path d="M40,60 L60,70"/>
-      <path d="M40,60 L60,90"/>
-      <path d="M40,60 L60,110"/>
-      <path d="M200,60 L180,10"/>
-      <path d="M200,60 L180,30"/>
-      <path d="M200,60 L180,50"/>
-      <path d="M200,60 L180,70"/>
-      <path d="M200,60 L180,90"/>
-      <path d="M200,60 L180,110"/>
-      <circle cx="60" cy="10" r="4" />
-      <circle cx="60" cy="30" r="4" />
-      <circle cx="60" cy="50" r="4" />
-      <circle cx="60" cy="70" r="4" />
-      <circle cx="60" cy="90" r="4" />
-      <circle cx="60" cy="110" r="4" />
-      <circle cx="180" cy="10" r="4" />
-      <circle cx="180" cy="30" r="4" />
-      <circle cx="180" cy="50" r="4" />
-      <circle cx="180" cy="70" r="4" />
-      <circle cx="180" cy="90" r="4" />
-      <circle cx="180" cy="110" r="4" />
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="10" y="15" width="220" height="150" />
+      <rect x="30" y="30" width="80" height="50" />
+      <rect x="60" y="100" width="100" height="50" />
+      <path d="M100,60 l15,0 l10,-10 l0,20 l-10,-10" />
+      <path d="M155,130 l15,0 l0,-70 l-35,0"
+            marker-end="url(#arrow)" stroke-width="3"/>
     </g>
-    <g stroke-width="2" fill="none" stroke-dasharray="4,4">
-      <path d="M60,30 L180,70" stroke="red" />
-      <path d="M60,110 L180,30" stroke="blue" />
+    <g text-anchor="middle" style="font-size:80%;">
+      <text x="120" y="10">localhost</text>
+      <text x="70" y="50">プロセス1</text>
+      <text x="70" y="65">(サーバ)</text>
+      <text x="110" y="120">プロセス2</text>
+      <text x="110" y="135">(クライアント)</text>
     </g>
-    <g text-anchor="middle" style="font-size: 80%;">
-      <text x="25" y="90" dy="0.5em">ホスト</text>
-      <text x="60" y="-5" dy="0.5em">ポート</text>
-      <text x="215" y="90" dy="0.5em">ホスト</text>
-      <text x="180" y="-5" dy="0.5em">ポート</text>
-    </g>
-    <g fill="red" style="font-size: 75%;">
-      <text x="65" y="20" dy="0.5em">134</text>
-      <text x="175" y="75" dy="0.5em" text-anchor="end">10000</text>
-    </g>
-    <g fill="blue" style="font-size: 75%;">
-      <text x="65" y="115" dy="0.5em">65535</text>
-      <text x="175" y="20" dy="0.5em" text-anchor="end">134</text>
-    </g>
+    <g style="font-size:75%;">
+      <text x="115" y="30">10000番で</text>
+      <text x="115" y="45">待ち受け</text>
+      <text x="165" y="145">10000番に</text>
+      <text x="165" y="160">接続</text>
     </g>
   </svg>
-  <div class=caption>TCP層におけるホストとポート</div>
+  <div class="caption">TCP/IPを使って2つのプロセス間で通信する</div>
   </div>
 </div>
+
+<ul>
+<li> 1番目のプロセスが、TCP の 10000番ポートで <u>待ち受ける</u> (listen)。
+<li> 2番目のプロセスが、TCP の 10000番ポートに <u>接続する</u> (connect)。
+<li> TCP の世界では、待ち受けているプロセスを<u>サーバ</u> (server) という。
+<li> 接続するほうのプロセスを<u>クライアント</u> (client) という。
+<li> このときに使われる <u>ポート番号</u>は、サーバ側とクライアント側で
+  一致してさえいれば、1〜65535 の範囲のどれでもよい。
+<li> ひとたびクライアント-サーバ間の接続が確立されると、
+  どちらかが終了するまで<u>双方向</u>で通信がおこなわれる。
+</ul>
 
 <h3 id="app-http-human">1.4. 人間とHTTP</h3>
 
 <p>
-<code>nc</code>コマンドを使うと、<code>curl</code> を使わなくても
-人間が手動でHTTPリクエストを送ることができる。
+実は <code>curl</code> を使わなくても、
+人間が <code>nc</code>コマンドを使って
+手動でHTTPリクエストを送ることができる。
+ただ www.example.com の 80番に接続し、
+文字列を入力すればよいのである。
 </p>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="350" height="120">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="10" y="15" width="120" height="100" />
+      <rect x="20" y="30" width="100" height="50" />
+      <rect x="190" y="15" width="150" height="100" />
+      <rect x="240" y="50" width="90" height="50" />
+      <path d="M245,80 l-15,0 l-10,-10 l0,20 l10,-10" />
+      <path d="M115,60 l45,0 l0,20 l50,0"
+            marker-end="url(#arrow)" stroke-width="3"/>
+    </g>
+    <g text-anchor="middle" style="font-size:80%;">
+      <text x="70" y="10">localhost</text>
+      <text x="265" y="10">www.example.com</text>
+      <text x="70" y="60">クライアント</text>
+      <text x="285" y="80">サーバ</text>
+    </g>
+    <g style="font-size:75%;">
+      <text text-anchor="end" x="240" y="50">80番で</text>
+      <text text-anchor="end" x="240" y="65">待ち受け</text>
+      <text x="135" y="35">80番に</text>
+      <text x="135" y="50">接続</text>
+    </g>
+  </svg>
+  <div class="caption">ncコマンドを使って手動で HTTP リクエストを送る</div>
+  </div>
+</div>
 
 <div class=exercise id="ex-human-http-client">
 <div class=header>演習. 人間HTTPクライアント</div>
@@ -414,21 +435,95 @@ TCPを使って通信するときは、通信相手のホスト名
 </p>
 <blockquote><pre>
 $ <strong>nc www.example.com 80</strong>
-<strong>GET /index.html HTTP/1.0</strong>
+<div class=bgg><strong>GET /index.html HTTP/1.0</strong>
 <strong>Host: www.example.com</strong>
-
-<em>(サーバからのレスポンス)</em>
-HTTP/1.0 200 OK
+<em>(空行)</em>
+</div><div class=bgy>HTTP/1.0 200 OK
 Content-Type: text/html; charset=UTF-8
-Date: Mon, 23 Jan 2023 13:39:22 GMT
-…
+Date: Tue, 10 Oct 2023 10:31:27 GMT
+...
 
-&lt;!doctype html&gt;
+</div><div class=bgb>&lt;!doctype html&gt;
 &lt;html&gt;
 &lt;head&gt;
-…
-</pre></blockquote>
+    &lt;title&gt; Example Domain&lt;/title&gt;
+...
+</div></pre></blockquote>
 </div>
+
+<p>
+80番は、HTTP で使われる「お約束の」ポート番号として
+国際的に定められている。
+よく知られている標準のポート番号として、以下のようなものがある:
+</p>
+<ul>
+  <li> 80 … HTTP
+  <li> 25 … SMTP (電子メールに使用)
+  <li> 443 … HTTPS
+  <li> 22 … SSH
+  <li> 5432 … PostgreSQL
+</ul>
+
+<p>
+なお、これらのポート番号はあくまで慣例であり、
+別のポートを使ってもかまわない。
+たとえば、開発環境用の webサーバは、
+通常 80番ポートではなく、8080番ポート (や 5132番ポート) で動いている。
+</p>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="240" height="170">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="10" y="15" width="220" height="150" />
+      <rect x="30" y="30" width="80" height="50" />
+      <rect x="60" y="100" width="100" height="50" />
+      <path d="M100,60 l15,0 l10,-10 l0,20 l-10,-10" />
+      <path d="M155,130 l15,0 l0,-70 l-35,0"
+            marker-end="url(#arrow)" stroke-width="3"/>
+    </g>
+    <g text-anchor="middle" style="font-size:80%;">
+      <text x="120" y="10">localhost</text>
+      <text x="70" y="50">開発用</text>
+      <text x="70" y="65">webサーバ</text>
+      <text x="110" y="120">ブラウザ</text>
+      <text x="110" y="135">(クライアント)</text>
+    </g>
+    <g style="font-size:75%;">
+      <text x="115" y="30">8080番で</text>
+      <text x="115" y="45">待ち受け</text>
+      <text x="165" y="145">8080番に</text>
+      <text x="165" y="160">接続</text>
+    </g>
+  </svg>
+  <div class="caption">開発環境におけるweblサーバとクライアント</div>
+  </div>
+</div>
+
+<p>
+そのため、このようなサーバにアクセスするときには
+以下の URL がよく使われる。
+<div class=figure>
+<code>http://localhost<mark>:8080</mark>/</code>
+</div>
+これは「(80番のかわりに) localhost の 8080番ポートに接続せよ」
+という意味である。
+</p>
+
+<h3 id="app-human-server">1.5. 人間HTTPサーバ</h3>
+
+<p>
+nc コマンドを使えば人間が手動で HTTP リクエストを送れるのだから、
+同様に ncコマンドを使って、人間が web サーバの「ふり」をすることもできるのでは?
+と思うかもしれない。そのとおりである。
+</p>
 
 <div class=exercise id="ex-human-http-server">
 <div class=header>演習. 人間HTTPサーバ</div>
@@ -443,18 +538,16 @@ Date: Mon, 23 Jan 2023 13:39:22 GMT
 </p>
 <blockquote><pre>
 $ <strong>nc -l 8080</strong>
-<em>(クライアントからのリクエスト)</em>
-GET /index.html HTTP/1.1
+<div class=bgg>GET /index.html HTTP/1.1
 User-Agent: Mozilla/5.0
-…
+...
 
-<strong>HTTP/1.0 200 OK</strong>
-<strong>Content-Type: text/plain</strong>
+</div><div class=bgy><strong>HTTP/1.0 200 OK</strong>
+<strong>Content-Type: text/html</strong>
 
-<strong>Hello.</strong>
-
-^C
-</pre></blockquote>
+</div><div class=bgb><strong>&lt;div&gt;Hello.&lt;/div&gt;</strong>
+<em>(Control-D を押して終了)</em>
+</div></pre></blockquote>
 </div>
 
 <h3 id="app-http-nodejs">1.4. プログラミングで HTTP を使う</h3>
@@ -469,8 +562,8 @@ server.js (サーバ側)
 <pre>
 let http = require('http');
 let server = http.createServer((request, response) =&gt; {
-  response.writeHead(200, {'Content-Type': 'text/html'}); 
-  response.end('&lt;h1&gt;Hello world&lt;/h1&gt;'); 
+  response.writeHead(200, {'Content-Type': 'text/html'});
+  response.end('&lt;h1&gt;Hello world&lt;/h1&gt;');
 });
 server.listen(8080);
 <pre>
