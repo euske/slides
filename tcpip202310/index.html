@@ -557,6 +557,14 @@ User-Agent: Mozilla/5.0
 たとえば Node.js なら、すぐに HTTP のサーバ-クライアント間で通信ができる:
 </p>
 
+<div class=exercise id="ex-http-nodejs">
+<div class=header>演習. Node.js を使った HTTPプログラミング</div>
+<p>
+以下の 2つの Node.jsスクリプト
+<code>server.js</code>、<code>client.js</code> を
+同一のホスト上で同時に動かし、通信ができていることを確認せよ。
+</p>
+
 <div class=file>
 server.js (サーバ側)
 <pre>
@@ -572,89 +580,64 @@ server.listen(8080);
 <div class=file>
 client.js (クライアント側):
 <pre>
-let response = await fetch('http://127.0.0.1:8080/');
+let response = await fetch('http://localhost:8080/');
 let text = await response.text();
 console.log(text);
 </pre>
 </div>
-
-<div class=exercise id="ex-http-nodejs">
-<div class=header>演習. Node.js を使った HTTPプログラミング</div>
-<p>
-上の 2つの Node.jsスクリプト
-<code>server.js</code>、<code>client.js</code> を
-同一のホスト上で同時に動かし、通信ができていることを確認せよ。
-</p>
 </div>
 
 
-<h1 id="app-dns">2. ホスト名とIPアドレス</h1>
+<h1 id="tcp-ip">2. TCPの内部</h1>
 <p>
-IP アドレスはそのままでは人間にとって覚えにくい。
-そこで <u>DNS</u> (Domain Name System) という仕組みが用意されている。
+現在のシステムでは HTTP や TCP による通信は簡単に扱えるが、
+実際の仕組みは非常に複雑である。
+ここでは
+いくつか重要なものを以下に説明する。
+
+<h2 id="tcp-connection-refused">TCP接続できない場合</h2>
+
+<h2 id="ip-ping-command">pingコマンド</h2>
+
+<h2 id="ip-dns">DNS (Domain Name System) と IPアドレス</h2>
+<p>
+これまで PC の名前 (<u>ホスト名</u>) として
+"www.example.com" とか "localhost" という名前を使ってきたが、
+実はインターネット上に接続されているコンピュータはすべて
+<u>IPアドレス</u> によって指定する必要がある。
+</p>
+<p>
+つまり、本当は
+<blockquote><pre>
+nc www.example.com 80
+ではなく
+nc 93.184.216.34 80
+</pre></blockquote>
+<blockquote><pre>
+nc localhost 10000
+ではなく
+nc 127.0.0.1 10000
+</pre></blockquote>
+</p>
+
+<p>
+ではなぜ www.example.com や localhost といった名前が使えるのか?
+というと、それは <u>DNS</u> (Domain Name System) という仕組みのためである。
 </p>
 <ul>
 <li> DNS を使うと、各ホストに名前 (<u>ホスト名</u>) をつけて、
   IPアドレスの代わりに使うことができる。
 <li> ほとんどのプログラム
-(<code>ping</code>, <code>traceroute</code>, <code>nc</code> など) は
+(<code>ping</code> や <code>nc</code> など) は
   デフォルトで DNS に対応しており、これらのコマンドには
   <strong>IPアドレスの代わりにホスト名を指定してもよい</strong>。
-<li> たとえば、以下の3つは同じ意味である:
-<blockquote><pre>
-$ <strong>ping 166.84.7.55</strong>
-$ <strong>ping www.tabesugi.net</strong>
-$ <strong>ping vc55.tabesugi.net</strong>
-</pre></blockquote>
 <li> DNS を使って、(上のように) ホスト名から IPアドレスを得ることを
 「ホスト名の<u>解決</u> (resolution)」という。
 <li> ひとつの IPアドレスに複数の名前がついていることもある。
-<li> DNS は
-「ホスト名 → IPアドレス」の解決 (<u>正引き</u>) だけでなく、
-「IPアドレス → ホスト名」の解決 (<u>逆引き</u>) もサポートしている:
-<blockquote><pre>
-$ <strong>host 166.84.7.55</strong>
-55.7.84.166.in-addr.arpa domain name pointer vc55.tabesugi.net.
-</pre></blockquote>
+<li> 「localhost」という名前は特別で、
+これはつねに「自分自身のホスト」をあらわす 127.0.0.1 という
+IPアドレスに解決される。
 </ul>
-
-<h4>DNSのしくみ</h4>
-<p>
-DNS は TCP/IP の機能を使って作られている。
-</p>
-<ul>
-<li> まず、インターネット上のすべてのホストを<u>ドメイン</u> (domain) という区切りに分ける。<br>
-  例: <code>www.example.com</code> というホスト名は
-  <code>www</code>、<code>.example</code>、<code>.com</code> という 3つの部分に分割される。
-<li> 各ドメインについて、そのドメイン内のホスト名について責任を負う
-  <u>ネームサーバ</u> (name server) を用意する。
-<li> 世界 13箇所に<a target="_blank" href="https://ja.wikipedia.org/wiki/%E3%83%AB%E3%83%BC%E3%83%88%E3%82%B5%E3%83%BC%E3%83%90">ルートネームサーバ</a> (root name server) を用意する。
-</ul>
-<p>
-このようなサーバを用意したあとで、
-<code>www.example.com</code> の IPアドレスを求めるには:
-</p>
-<ol>
-<li> ルートサーバ (<code>198.41.0.4</code>) に
-  <code>.com</code> ネームサーバのIPアドレスを問い合わせる →
-  <code>192.5.6.30</code>
-<li> <code>.com</code> ネームサーバに
-  <code>.example.com</code> ネームサーバのIPアドレスを問い合わせる →
-  <code>199.43.133.54</code>
-<li> <code>.example.com</code> ネームサーバに
-  <code>www.example.com</code> のIPアドレスを問い合わせる →
-  <code>93.184.216.34</code>
-<li> 完了。
-</ol>
-
-<h4>localhost</h4>
-<p>
-<code>127.0.0.1</code> は
-特別な IPアドレスであり、これはつねに「自分自身のホスト」をあらわす。
-これをループバックアドレスという。
-なお、ホスト名 <code>localhost</code> は
-つねにループバックアドレスに解決される。
-</p>
 
 <blockquote><pre>
 $ <strong>ping localhost</strong>
@@ -665,7 +648,7 @@ PING localhost (127.0.0.1) 56(84) bytes of data.
 ...
 </pre></blockquote>
 
-<h4>DNSの欠点</h4>
+<h4>注意点</h4>
 
 <p>
 DNS はインターネットの基幹をなすサービスであり、
@@ -676,11 +659,6 @@ DNS が使えなければ、相手の IPアドレスがわからないので、
 多くのサービスやサイトで大規模な障害が発生する</strong>。
 これを防ぐため、ネームサーバは多重化されていることが多い。
 </p>
-
-<blockquote><pre>
-$ <strong>ping www.tabenasugi.com</strong>
-ping: www.tabenasugi.com: Name or service not known
-</pre></blockquote>
 
 <div class=exercise id="ex-nslookup">
 <div class=header>演習. ホスト名から IP アドレスを求める</div>
