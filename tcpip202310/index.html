@@ -80,9 +80,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 </p>
 
 
-<h2 id="app-http">1. HTTP の仕組み</h2>
-
-<h3 id="app-http-browser">1.1. ブラウザとHTTP</h3>
+<h2 id="http">1. HTTP の仕組み</h2>
 <p>
 ウェブはもっとも有名なインターネットの使い方 (アプリケーション) である。
 これは <u>HTML</u> (Hyper Text Markup Language) 型式で
@@ -91,7 +89,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 </p>
 
 <div class=exercise id="ex-http-inspect">
-<div class=header>演習. ブラウザでHTTPリクエストとレスポンスを見る</div>
+<div class=header>演習. ブラウザを使って「リクエスト」と「レスポンス」を観察する</div>
 <ol>
   <li> ブラウザで <kbd>F12</kbd>キーを押して開発用コンソールを開き、"Network" タブをクリック。</li>
   <li> タブ内で <a target="_blank" href="http://www.example.com/index.html">http://www.example.com/index.html</a> を開く。</li>
@@ -99,6 +97,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   <li> <strong>index.html</strong> を選択し、その横の <strong>Headers</strong> タブをクリック。</li>
   <li> "Response Headers" および "Request Headers" が表示される。</li>
 </ol>
+
 <div class="figure">
 <div>
   <img src="http.png" width="1334" height="837">
@@ -107,15 +106,15 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 </div>
 
 <ol>
-<li> <u>ウェブブラウザ</u> (HTTPクライアント) がコンテンツを要求 (<u>リクエスト</u>) する。
+<li> <u>webブラウザ</u> (クライアント) がコンテンツ要求 (<u>リクエスト</u>) を送信する。
   <ul>
   <li> 各リクエストには、"Host" や "User-Agent" などの付随的な情報 (ヘッダ) がついている。</li>
   </ul>
-<li> <u>ウェブサーバ</u>が応答 (<u>レスポンス</u>) し、コンテンツを送る。
+<li> <u>webサーバ</u>が応答 (<u>レスポンス</u>) を送信し、つづいてコンテンツのデータを送る。
   <ul>
   <li> 各レスポンスにも、"Content-Type" や "Date" などの付随的な情報 (ヘッダ) がついている。</li>
   </ul>
-<li> 読み込むページ・画像の数だけ 1., 2. を繰り返す。
+<li> 読み込むページや画像の数だけ 1., 2. を繰り返す。
 </ol>
 
 <div class=figure>
@@ -139,9 +138,9 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
       <path d="M310,30 l-240,0" marker-end="url(#arrow)" />
     </g>
     <g text-anchor="middle" style="font-size:80%;">
-      <text x="45" y="60">ウェブブラウザ</text>
+      <text x="45" y="60">webブラウザ</text>
       <text x="45" y="75">(クライアント)</text>
-      <text x="345" y="60">ウェブサーバ</text>
+      <text x="345" y="60">webサーバ</text>
       <text x="110" y="12">リクエスト</text>
       <text x="270" y="48">レスポンス</text>
     </g>
@@ -155,15 +154,15 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   HTTP = リクエストとレスポンス (の繰り返し)
 </div>
 
-<h3 id="app-http-curl">1.2. curlコマンドとHTTP</h3>
+<h2 id="curl">2. curl コマンドの使い方</h2>
 <p>
-  では、HTTPリクエストとHTTPレスポンスの正体は何か?
-  実はただの文字列である。
+  では、HTTPにおけるリクエストとレスポンスの正体は何か?
+  実は<strong>ただの文字列</strong>である。
   これは <code>curl</code>コマンドを使うと明らかになる。
 </p>
 
 <div class=exercise id="ex-http-curl">
-<div class=header>演習. curlコマンドを使ってHTTPリクエストとレスポンスを見る</div>
+<div class=header>演習. curlコマンドを使ってリクエストとレスポンスを観察する</div>
 <ol>
   <li> ターミナルを開く。</li>
   <li> 以下のコマンドを実行する:
@@ -207,7 +206,7 @@ $ <strong>curl -v http://www.example.com/index.html</strong>
 </div>
 </ol>
 
-<h4>HTTPリクエスト</h4>
+<h3>2.1. HTTPリクエストの正体</h3>
 
 <p>
 ブラウザ (あるいはcurlコマンド) で
@@ -233,7 +232,8 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1;) Gecko/20100101
 <li> その他 (<A target="_blank" href="https://tools.ietf.org/html/rfc2616">RFC 2616</a> 参照)
 </ul>
 
-<h4>HTTPレスポンス</h4>
+<h3>2.2. HTTPレスポンスの正体</h3>
+
 <p>
 サーバはHTTPリクエストを受け取ると、
 以下のような<u>レスポンス</u>文字列を返す:
@@ -269,13 +269,13 @@ Date: Tue, 10 Oct 2023 09:11:50 GMT
 ブラウザはこの内容を解析して表示すると、ページが表示されたことになる。
 </p>
 
-<h4>いろいろな HTTP レスポンス</h4>
+<h4>いろいろな HTTP ステータスコード</h4>
 <p>
 正常なレスポンスの場合、最初の一行は必ず
 <blockquote><pre>
 HTTP/1.1 <mark>200</mark> OK
 </pre></blockquote>
-となっているが、これ以外のレスポンスが返ってくる場合もある。
+となっているが、これ以外のステータスコードが返ってくる場合もある。
 </p>
 <p>
 たとえば、指定されたファイルが存在しない (いわゆる「ページが見つかりません」エラー)
@@ -299,13 +299,13 @@ HTTP/1.1 <mark>200</mark> OK
 </ul>
 </div>
 
-<h3 id="tcp-ip">1.3. Intermezzo: TCP/IP</h3>
+<h2 id="tcp-ip">3. 実際の通信</h2>
 <p>
 では、curlコマンドはいったいどうやってHTTPリクエストを送っているのか?
 答えは <u>TCP</u> である。TCP (一般的には関連規格を含めて <u>TCP/IP</u> と呼ぶ) は
 インターネット上のコンピュータが通信するための汎用的な規格で、
 現在はほとんどのPC/スマートフォン/ゲーム機等で利用可能である。
-<code>nc</code>コマンドは、TCP/IP を使った原始的な通信プログラムである。
+<code>nc</code>コマンドは、TCP/IP を使って原始的な通信をおこなうプログラムである。
 </p>
 
 <div class=exercise id="ex-tcp-connection">
@@ -379,13 +379,13 @@ $ <strong>nc localhost 10000</strong>
   どちらかが終了するまで<u>双方向</u>で通信がおこなわれる。
 </ul>
 
-<h3 id="app-http-human">1.4. 人間とHTTP</h3>
+<h2 id="human-client">4. 人間HTTPクライアント</h2>
 
 <p>
-実は <code>curl</code> を使わなくても、
-人間が <code>nc</code>コマンドを使って
-手動でHTTPリクエストを送ることができる。
-ただ www.example.com の 80番に接続し、
+上で見たように、HTTPリクエストやレスポンスの本質はテキストである。
+実は curl を使わなくても、人間が ncコマンドを使って
+人手で HTTPリクエストを送ることができる。
+つまり www.example.com の 80番に接続し、
 文字列を入力すればよいのである。
 </p>
 
@@ -428,8 +428,8 @@ $ <strong>nc localhost 10000</strong>
 <div class=exercise id="ex-human-http-client">
 <div class=header>演習. 人間HTTPクライアント</div>
 <p>
-<code>nc</code> コマンドを使って、
-<a target="_blank" href="https://www.example.com/index.html">www.example.com</a> サーバに
+nc コマンドを使って、
+www.example.com サーバに
 「人間HTTPクライアント」としてリクエストを送り、
 サーバ側のレスポンスを確認せよ。
 </p>
@@ -454,7 +454,8 @@ Date: Tue, 10 Oct 2023 10:31:27 GMT
 <p>
 80番は、HTTP で使われる「お約束の」ポート番号として
 国際的に定められている。
-よく知られている標準のポート番号として、以下のようなものがある:
+よく知られている標準のポート番号として、以下のようなものがある
+(cf. <a target="_blank" href="https://ja.wikipedia.org/wiki/TCP%E3%82%84UDP%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8B%E3%83%9D%E3%83%BC%E3%83%88%E7%95%AA%E5%8F%B7%E3%81%AE%E4%B8%80%E8%A6%A7">TCPやUDPにおけるポート番号の一覧</a>):
 </p>
 <ul>
   <li> 80 … HTTP
@@ -517,18 +518,18 @@ Date: Tue, 10 Oct 2023 10:31:27 GMT
 という意味である。
 </p>
 
-<h3 id="app-human-server">1.5. 人間HTTPサーバ</h3>
+<h2 id="human-server">5. 人間HTTPサーバ</h2>
 
 <p>
-nc コマンドを使えば人間が手動で HTTP リクエストを送れるのだから、
-同様に ncコマンドを使って、人間が web サーバの「ふり」をすることもできるのでは?
-と思うかもしれない。そのとおりである。
+人間が手動で HTTP リクエストを送れるのだから、
+同様に ncコマンドを使って、人間が web サーバの「ふり」をすることもできるのではないか?
+実際にやってみよう。
 </p>
 
 <div class=exercise id="ex-human-http-server">
 <div class=header>演習. 人間HTTPサーバ</div>
 <p>
-<code>nc</code> コマンドを使って、
+nc コマンドを使って、
 「人間HTTPサーバ」としてブラウザからの
 リクエストに返答せよ。
 まず <code>nc</code> をサーバとして起動し、
@@ -550,56 +551,92 @@ User-Agent: Mozilla/5.0
 </div></pre></blockquote>
 </div>
 
-<h3 id="app-http-nodejs">1.4. プログラミングで HTTP を使う</h3>
+<p>
+以上のように、難しく見える HTTPの仕組みも、
+実はただのテキスト処理だということがわかる。
+</p>
+
+<h4>おまけ: プログラムから HTTP を使う</h4>
+
 <p>
 ほとんどのプログラミング言語では HTTP のリクエストやレスポンスを
 処理する機能が標準で含まれている。
-たとえば Node.js なら、すぐに HTTP のサーバ-クライアント間で通信ができる:
 </p>
 
 <div class=exercise id="ex-http-nodejs">
-<div class=header>演習. Node.js を使った HTTPプログラミング</div>
-<p>
-以下の 2つの Node.jsスクリプト
-<code>server.js</code>、<code>client.js</code> を
-同一のホスト上で同時に動かし、通信ができていることを確認せよ。
-</p>
-
+<div class=header>演習. Node.js を使った HTTP クライアントとサーバ</div>
+<ol>
+  <li> ターミナルを 2つ開く。</li>
+  <li> ひとつのターミナルで、以下のコードを実行する:</li>
+<pre>$ <strong>node server.js</strong></pre>
 <div class=file>
 server.js (サーバ側)
 <pre>
 let http = require('http');
 let server = http.createServer((request, response) =&gt; {
+  console.log("connected!");
   response.writeHead(200, {'Content-Type': 'text/html'});
   response.end('&lt;h1&gt;Hello world&lt;/h1&gt;');
 });
 server.listen(8080);
 <pre>
 </div>
-
+<li> もうひとつのターミナルで、以下のコードを実行する:</li>
+<pre>$ <strong>node client.js</strong></pre>
 <div class=file>
 client.js (クライアント側):
 <pre>
-let response = await fetch('http://localhost:8080/');
-let text = await response.text();
-console.log(text);
+(async () => { 
+  let response = await fetch('http://localhost:8080/');
+  let text = await response.text();
+  console.log(text); 
+})();
 </pre>
 </div>
+</ol>
+
 </div>
 
+<h2 id="not-working">6. うまく動かないときは</h2>
 
-<h1 id="tcp-ip">2. TCPの内部</h1>
 <p>
-現在のシステムでは HTTP や TCP による通信は簡単に扱えるが、
-実際の仕組みは非常に複雑である。
-ここでは
-いくつか重要なものを以下に説明する。
+HTTP や TCP による通信は現代のシステムでは非常に簡単に扱えるが、
+実はその仕組みは非常に複雑である。
+したがって、うまく動かない時のために、
+ある程度の内部的な原理を知っておくことは重要である。
+</p>
 
-<h2 id="tcp-connection-refused">TCP接続できない場合</h2>
+<h3 id="server-error">HTTP上のエラー</h3>
 
-<h2 id="ip-ping-command">pingコマンド</h2>
+<div class="figure">
+<div>
+  <img src="notfound.png" width="936" height="634">
+</div>
+</div>
 
-<h2 id="ip-dns">DNS (Domain Name System) と IPアドレス</h2>
+<h3 id="tcp-connection-refused">TCP接続ができない場合</h3>
+
+<div class="figure">
+<div>
+  <img src="refused.png" width="936" height="634">
+</div>
+</div>
+
+<h3 id="ip-unreachable">そもそもサーバに到達できない場合</h3>
+
+<div class="figure">
+<div>
+  <img src="unreachable.png" width="892" height="590">
+</div>
+</div>
+
+<h3 id="dns-issues">サーバのIPアドレスが不明な場合</h3>
+<div class="figure">
+<div>
+  <img src="unresolved.png" width="936" height="634">
+</div>
+</div>
+
 <p>
 これまで PC の名前 (<u>ホスト名</u>) として
 "www.example.com" とか "localhost" という名前を使ってきたが、
@@ -609,14 +646,19 @@ console.log(text);
 <p>
 つまり、本当は
 <blockquote><pre>
-nc www.example.com 80
-ではなく
-nc 93.184.216.34 80
+$ <strong>nc www.example.com 80</strong>
 </pre></blockquote>
-<blockquote><pre>
-nc localhost 10000
 ではなく
-nc 127.0.0.1 10000
+<blockquote><pre>
+$ <strong>nc 93.184.216.34 80</strong>
+</pre></blockquote>
+
+<blockquote><pre>
+$ <strong>nc localhost 10000</strong>
+</pre></blockquote>
+ではなく
+<blockquote><pre>
+$ <strong>nc 127.0.0.1 10000</strong>
 </pre></blockquote>
 </p>
 
@@ -625,30 +667,21 @@ nc 127.0.0.1 10000
 というと、それは <u>DNS</u> (Domain Name System) という仕組みのためである。
 </p>
 <ul>
-<li> DNS を使うと、各ホストに名前 (<u>ホスト名</u>) をつけて、
+<li> DNS を使うと、各ホストに名前をつけて、
   IPアドレスの代わりに使うことができる。
 <li> ほとんどのプログラム
-(<code>ping</code> や <code>nc</code> など) は
+(ブラウザや <code>curl</code> や <code>nc</code> など) は
   デフォルトで DNS に対応しており、これらのコマンドには
   <strong>IPアドレスの代わりにホスト名を指定してもよい</strong>。
 <li> DNS を使って、(上のように) ホスト名から IPアドレスを得ることを
 「ホスト名の<u>解決</u> (resolution)」という。
-<li> ひとつの IPアドレスに複数の名前がついていることもある。
 <li> 「localhost」という名前は特別で、
 これはつねに「自分自身のホスト」をあらわす 127.0.0.1 という
 IPアドレスに解決される。
+<li> <strong>注意: ひとつの IPアドレスに複数の名前がついていることもある。</strong>
 </ul>
 
-<blockquote><pre>
-$ <strong>ping localhost</strong>
-PING localhost (127.0.0.1) 56(84) bytes of data.
-64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.029 ms
-64 bytes from localhost (127.0.0.1): icmp_seq=2 ttl=64 time=0.085 ms
-64 bytes from localhost (127.0.0.1): icmp_seq=3 ttl=64 time=0.084 ms
-...
-</pre></blockquote>
-
-<h4>注意点</h4>
+<h4>DNSを使う上での注意点</h4>
 
 <p>
 DNS はインターネットの基幹をなすサービスであり、
@@ -657,7 +690,6 @@ DNS が使えなければ、相手の IPアドレスがわからないので、
 そもそも通信ができないことが多い。
 そのため <strong>DNS がうまく動かない場合、
 多くのサービスやサイトで大規模な障害が発生する</strong>。
-これを防ぐため、ネームサーバは多重化されていることが多い。
 </p>
 
 <div class=exercise id="ex-nslookup">
