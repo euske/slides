@@ -60,7 +60,7 @@ code em { color: #000088; }
 TCP/IP ネットワーク入門 (反転バージョン)</h1>
 
 <div class=author>
-Yusuke Shinyama, Oct. 2023
+Yusuke Shinyama, Nov. 2023
 </div>
 
 <p>
@@ -94,8 +94,8 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 
 <p>
 ウェブはもっとも有名なインターネットの使い方 (アプリケーション) である。
-これは <u>HTML</u> (Hyper Text Markup Language) 型式で
-書かれたデータ (ようするに、Webページ) を、<u>HTTP</u> (Hyper Text Ternsfer Protocol) と
+これは HTML型式で書かれたデータ (ようするに、Webページ) を、
+<u id="term-http">HTTP</u> (Hyper Text Ternsfer Protocol) と
 呼ばれる方式によってブラウザに転送する。
 </p>
 
@@ -117,11 +117,11 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 </div>
 
 <ol>
-<li> <u>webブラウザ</u> (クライアント) がコンテンツ要求 (<u>リクエスト</u>) を送信する。
+<li> <u id="term-web-browser">webブラウザ</u> (クライアント) がコンテンツ要求 (<u id="term-http-request">リクエスト</u>) を送信する。
   <ul>
   <li> 各リクエストには、"Host" や "User-Agent" などの付随的な情報 (ヘッダ) がついている。</li>
   </ul>
-<li> <u>webサーバ</u>が応答 (<u>レスポンス</u>) を送信し、つづいてコンテンツのデータを送る。
+<li> <u id="term-web-server">webサーバ</u>が応答 (<u id="term-http-response">レスポンス</u>) を送信し、つづいてコンテンツのデータを送る。
   <ul>
   <li> 各レスポンスにも、"Content-Type" や "Date" などの付随的な情報 (ヘッダ) がついている。</li>
   </ul>
@@ -171,7 +171,7 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
 <p>
   では、HTTPにおけるリクエストとレスポンスの正体は何か?
   実は<strong>ただの文字列</strong>である。
-  これは <code>curl</code>コマンドを使うと明らかになる。
+  これは <code id="term-curl">curl</code>コマンドを使うと明らかになる。
 </p>
 
 <div class=exercise id="ex-http-curl">
@@ -226,7 +226,7 @@ $ <strong>curl -v http://www.example.com/index.html</strong>
 <div class=figure>
 <code>http://<span class=bgy>www.example.com</span><span class=bgg>/index.html</span></code>
 </div>
-というURL を開くと、サーバに以下のような<u>リクエスト</u>文字列が送信される:
+というURL を開くと、サーバに以下のような<u id="term-request">リクエスト</u>文字列が送信される:
 </p>
 <blockquote><pre>
 GET <span class=bgg>/index.html</span> HTTP/1.1
@@ -237,7 +237,7 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1;) Gecko/20100101
 <p>
 <code>GET</code> で始まる最初の行がリクエストの本体を表す。
 続く <code>Host:</code> や <code>User-Agent:</code> などの行は
-付随情報で、<u>リクエストヘッダ</u>と呼ばれる:
+付随情報で、<u id="term-request-header">リクエストヘッダ</u>と呼ばれる:
 </p>
 <ul>
 <li> <code>Host:</code> サーバの名前
@@ -249,7 +249,7 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1;) Gecko/20100101
 
 <p>
 サーバはHTTPリクエストを受け取ると、
-以下のような<u>レスポンス</u>文字列を返す:
+以下のような<u id="term-response">レスポンス</u>文字列を返す:
 </p>
 <blockquote><pre>
 HTTP/1.1 <mark>200</mark> OK
@@ -263,9 +263,9 @@ Date: Tue, 10 Oct 2023 09:11:50 GMT
 
 <p>
 <code>HTTP/1.1</code> で始まる最初の行にある
-<code><mark>200</mark></code> という数字が<u>ステータスコード</u>と呼ばれる重要な部分で、
+<code><mark>200</mark></code> という数字が<u id="term-status-code">ステータスコード</u>と呼ばれる重要な部分で、
 続く <code>Accept-Ranges:</code> や <code>Content-Type:</code> などの行は
-付随情報 (<u>レスポンスヘッダ</u>) と呼ばれる:
+付随情報 (<u id="term-response-header">レスポンスヘッダ</u>) と呼ばれる:
 </p>
 <ul>
 <li> <code>Date:</code> サーバの応答時刻。
@@ -276,7 +276,7 @@ Date: Tue, 10 Oct 2023 09:11:50 GMT
 
 <p>
 ヘッダの後には、
-<u>ボディ</u> (body) あるいは <u>ペイロード</u> (payload) と
+<u id="term-body">ボディ</u> (body) あるいは <u id="term-payload">ペイロード</u> (payload) と
 呼ばれるコンテンツ本体のデータが続く。
 これは通常 HTML ファイルや画像ファイルの内容そのものである。
 ブラウザはこの内容を解析して表示すると、ページが表示されたことになる。
@@ -317,7 +317,7 @@ HTTP/1.1 <mark>200</mark> OK
 
 <p>
 では、curlコマンドはいったいどうやってHTTPリクエストを送っているのか?
-答えは <u>TCP</u> である。TCP (一般的には関連規格を含めて <u>TCP/IP</u> と呼ぶ) は
+答えは <u id="term-tcp">TCP</u> である。TCP (一般的には関連規格を含めて <u id="term-tcp-ip">TCP/IP</u> と呼ぶ) は
 インターネット上のコンピュータが通信するための汎用的な規格で、
 現在はほとんどのPC/スマートフォン/ゲーム機等で利用可能である。
 <code>nc</code>コマンドは、TCP/IP を使って原始的な通信をおこなうプログラムである。
@@ -384,11 +384,11 @@ $ <strong>nc localhost 10000</strong>
 </div>
 
 <ul>
-<li> 1番目のプロセスが、TCP の 10000番ポートで <u>待ち受ける</u> (listen)。
-<li> 2番目のプロセスが、TCP の 10000番ポートに <u>接続する</u> (connect)。
-<li> TCP の世界では、待ち受けているプロセスを<u>サーバ</u> (server) という。
-<li> 接続するほうのプロセスを<u>クライアント</u> (client) という。
-<li> このときに使われる <u>ポート番号</u>は、サーバ側とクライアント側で
+<li> 1番目のプロセスが、TCP の 10000番ポートで <u id="term-listen">待ち受ける</u> (listen)。
+<li> 2番目のプロセスが、TCP の 10000番ポートに <u id="term-connect">接続する</u> (connect)。
+<li> TCP の世界では、待ち受けているプロセスを<u id="term-tcp-server">サーバ</u> (server) という。
+<li> 接続するほうのプロセスを<u id="term-tcp-client">クライアント</u> (client) という。
+<li> このときに使われる <u id="term-port-number">ポート番号</u>は、サーバ側とクライアント側で
   一致してさえいれば、1〜65535 の範囲のどれでもよい。
 <li> ひとたびクライアント-サーバ間の接続が確立されると、
   どちらかが終了するまで<strong>双方向</strong>で通信がおこなわれる。
@@ -749,12 +749,12 @@ TCPの通信は、IPパケットというより細かい単位に分割されて
   <li> サーバの電源が切れている。
   <li> ケーブルが切断されている。
   <li> 自分あるいは相手がそもそもインターネットに接続されていない。
-  <li> 通信が途中で遮断されている (<u>ファイヤーウォール</u>など)。
+  <li> 通信が途中で遮断されている (<u id="term-firewall">ファイヤーウォール</u>など)。
 </ul>
 
 <p>
 このような場合「IPパケットが相手に正しく到達しているか?」を知るために
-<code>ping</code>コマンドが使える。
+<code id="term-ping">ping</code>コマンドが使える。
 </p>
 
 <div class=exercise id="ex-ip-ping">
@@ -810,10 +810,10 @@ rtt min/avg/max/mdev = 0.062/0.088/0.124/0.023 ms
 </div>
 
 <p>
-これまで PC の名前 (<u>ホスト名</u>) として
+これまで PC の名前 (<u id="term-host-name">ホスト名</u>) として
 "www.example.com" とか "localhost" という名前を使ってきたが、
 実はインターネット上に接続されているコンピュータはすべて
-<u>IPアドレス</u> によって指定する必要がある。
+<u id="term-ip-address">IPアドレス</u> によって指定する必要がある。
 </p>
 <p>
 つまり本当は
@@ -829,7 +829,7 @@ $ <strong>nc 93.184.216.34 80</strong>
 
 <p>
 ではなぜ www.example.com や localhost といった名前が使えるのか?
-というと、それは <u>DNS</u> (Domain Name System) という仕組みのおかげである。
+というと、それは <u id="term-dns">DNS</u> (Domain Name System) という仕組みのおかげである。
 </p>
 <ul>
 <li> DNS を使うと、各ホストに名前をつけて、
@@ -839,7 +839,7 @@ $ <strong>nc 93.184.216.34 80</strong>
   デフォルトで DNS に対応しており、これらのコマンドには
   <strong>IPアドレスの代わりにホスト名を指定してもよい</strong>。
 <li> DNS を使って、(上のように) ホスト名から IPアドレスを得ることを
-「ホスト名の<u>解決</u> (resolution)」という。
+「ホスト名の<u id="term-name-resolution">解決</u> (resolution)」という。
 <li> 「localhost」という名前は特別で、
 これはつねに「自分自身のホスト」をあらわす 127.0.0.1 という
 IPアドレスに解決される。
@@ -909,29 +909,28 @@ example.com.            86400   IN      NS      b.iana-servers.net.
 </p>
 
 <ul>
-<li> HTML
-<li> HTTP
-<li> webブラウザ
-<li> webサーバ
-<li> HTTPリクエスト
-<li> HTTPレスポンス
-<li> curlコマンド
-<li> リクエストヘッダ
-<li> レスポンスヘッダ
-<li> ステータスコード
-<li> ボディ (ペイロード)
-<li> TCP/IP
-<li> ポート番号
-<li> TCPサーバ
-<li> TCPクライアント
-<li> 待ち受ける (listen)
-<li> 接続する
-<li> pingコマンド
-<li> ファイヤウォール
-<li> ホスト名
-<li> IPアドレス
-<li> DNS
-<li> 名前の解決
+<li> <a href="#term-http">HTTP</a>
+<li> <a href="#term-web-browser">webブラウザ</a>
+<li> <a href="#term-web-server">webサーバ</a>
+<li> <a href="#term-request">リクエスト</a>
+<li> <a href="#term-response">レスポンス</a>
+<li> <a href="#term-curl">curlコマンド</a>
+<li> <a href="#term-request-header">リクエストヘッダ</a>
+<li> <a href="#term-response-header">レスポンスヘッダ</a>
+<li> <a href="#term-status-code">ステータスコード</a>
+<li> <a href="#term-body">ボディ (ペイロード)</a>
+<li> <a href="#term-tcp-ip">TCP/IP</a>
+<li> <a href="#term-port-number">ポート番号</a>
+<li> <a href="#term-tcp-server">TCPサーバ</a>
+<li> <a href="#term-tcp-client">TCPクライアント</a>
+<li> <a href="#term-listen">待ち受ける (listen)</a>
+<li> <a href="#term-connect">接続する</a>
+<li> <a href="#term-ping">pingコマンド</a>
+<li> <a href="#term-firewall">ファイヤウォール</a>
+<li> <a href="#term-host-name">ホスト名</a>
+<li> <a href="#term-ip-address">IPアドレス</a>
+<li> <a href="#term-dns">DNS</a>
+<li> <a href="#term-name-resolution">名前の解決</a>
 </ul>
 
 
