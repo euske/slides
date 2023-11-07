@@ -79,8 +79,19 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   反転バージョンでは高水準な層 (HTTP) から先に説明する。
 </p>
 
+<ol>
+<li> <a href="#http">HTTP の仕組み</a></li>
+<li> <a href="#curl">curl コマンドの使い方</a></li>
+<li> <a href="#tcpip">実際の通信</a></li>
+<li> <a href="#human-client">人間HTTPクライアント</a></li>
+<li> <a href="#human-server">人間HTTPサーバ</a></li>
+<li> <a href="#troubleshooting">うまく動かないときは</a></li>
+<li> <a href="#glossary">用語一覧</a></li>
+</ol>
+
 
 <h2 id="http">1. HTTP の仕組み</h2>
+
 <p>
 ウェブはもっとも有名なインターネットの使い方 (アプリケーション) である。
 これは <u>HTML</u> (Hyper Text Markup Language) 型式で
@@ -154,7 +165,9 @@ TCP/IPネットワークに関する最低限の知識をまとめた。
   HTTP = リクエストとレスポンス (の繰り返し)
 </div>
 
+
 <h2 id="curl">2. curl コマンドの使い方</h2>
+
 <p>
   では、HTTPにおけるリクエストとレスポンスの正体は何か?
   実は<strong>ただの文字列</strong>である。
@@ -206,7 +219,7 @@ $ <strong>curl -v http://www.example.com/index.html</strong>
 </div>
 </ol>
 
-<h3>2.1. HTTPリクエストの正体</h3>
+<h3 id="http-request">2.1. HTTPリクエストの正体</h3>
 
 <p>
 ブラウザ (あるいはcurlコマンド) で
@@ -232,7 +245,7 @@ User-Agent: Mozilla/5.0 (Windows NT 6.1;) Gecko/20100101
 <li> その他 (<A target="_blank" href="https://tools.ietf.org/html/rfc2616">RFC 2616</a> 参照)
 </ul>
 
-<h3>2.2. HTTPレスポンスの正体</h3>
+<h3 id="http-response">2.2. HTTPレスポンスの正体</h3>
 
 <p>
 サーバはHTTPリクエストを受け取ると、
@@ -283,7 +296,7 @@ HTTP/1.1 <mark>200</mark> OK
 <blockquote><pre>HTTP/1.1 <mark>404</mark> Not Found</pre></blockquote>
 </p>
 <p>
-あるいは「別の場所を参照せよ」という意味の <code>302</code> が返されることもある。
+あるいは「別の場所を参照せよ」という意味の <code>301</code> が返されることもある。
 これが返されると、ブラウザのアドレスバーが変化する。
 </p>
 <blockquote><pre>HTTP/1.1 <mark>301</mark> Moved</pre></blockquote>
@@ -294,12 +307,14 @@ HTTP/1.1 <mark>200</mark> OK
   curlを使って以下のURLにリクエストを送り、どのようなステータスコードが返されるのか確認しよう。
 </p>
 <ul>
-  <li> <code>curl -v https://ja.wikipedia.org/</code>
-  <li> <code>curl -v https://www.google.com/nonexistent</code>
+  <li> <code>curl -v http://ja.wikipedia.org/</code>
+  <li> <code>curl -v http://www.example.com/notfound</code>
 </ul>
 </div>
 
-<h2 id="tcp-ip">3. 実際の通信</h2>
+
+<h2 id="tcpip">3. 実際の通信</h2>
+
 <p>
 では、curlコマンドはいったいどうやってHTTPリクエストを送っているのか?
 答えは <u>TCP</u> である。TCP (一般的には関連規格を含めて <u>TCP/IP</u> と呼ぶ) は
@@ -376,8 +391,9 @@ $ <strong>nc localhost 10000</strong>
 <li> このときに使われる <u>ポート番号</u>は、サーバ側とクライアント側で
   一致してさえいれば、1〜65535 の範囲のどれでもよい。
 <li> ひとたびクライアント-サーバ間の接続が確立されると、
-  どちらかが終了するまで<u>双方向</u>で通信がおこなわれる。
+  どちらかが終了するまで<strong>双方向</strong>で通信がおこなわれる。
 </ul>
+
 
 <h2 id="human-client">4. 人間HTTPクライアント</h2>
 
@@ -518,6 +534,7 @@ Date: Tue, 10 Oct 2023 10:31:27 GMT
 という意味である。
 </p>
 
+
 <h2 id="human-server">5. 人間HTTPサーバ</h2>
 
 <p>
@@ -586,10 +603,10 @@ server.listen(8080);
 <div class=file>
 client.js (クライアント側):
 <pre>
-(async () => { 
+(async () => {
   let response = await fetch('http://localhost:8080/');
   let text = await response.text();
-  console.log(text); 
+  console.log(text);
 })();
 </pre>
 </div>
@@ -597,7 +614,8 @@ client.js (クライアント側):
 
 </div>
 
-<h2 id="not-working">6. うまく動かないときは</h2>
+
+<h2 id="troubleshooting">6. うまく動かないときは</h2>
 
 <p>
 HTTP や TCP による通信は現代のシステムでは非常に簡単に扱えるが、
@@ -606,7 +624,30 @@ HTTP や TCP による通信は現代のシステムでは非常に簡単に扱�
 ある程度の内部的な原理を知っておくことは重要である。
 </p>
 
-<h3 id="server-error">HTTP上のエラー</h3>
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="280" height="150">
+    <g transform="translate(55,5)">
+    <g stroke="black" stroke-width="2" fill="none">
+      <rect x="0" y="0" width="120" height="30" />
+      <rect x="0" y="30" width="120" height="30" />
+      <rect x="0" y="60" width="120" height="30" />
+      <rect x="0" y="90" width="120" height="30" />
+      <line x1="60" y1="120" x2="60" y2="140" />
+      <line x1="-50" y1="140" x2="170" y2="140" />
+    </g>
+    <g text-anchor="middle" style="font-size: 80%;">
+      <text x="60" y="15" dy="0.5em">HTTP</text>
+      <text x="60" y="45" dy="0.5em">TCP層</text>
+      <text x="60" y="75" dy="0.5em">IP層</text>
+      <text x="60" y="105" dy="0.5em">データリンク層</text>
+      <text x="170" y="128" dy="0.5em">ケーブル・WiFi</text>
+    </g></g>
+  </svg>
+</div>
+
+<h3 id="http-error">HTTPのエラー</h3>
 
 <div class="figure">
 <div>
@@ -614,7 +655,26 @@ HTTP や TCP による通信は現代のシステムでは非常に簡単に扱�
 </div>
 </div>
 
-<h3 id="tcp-connection-refused">TCP接続ができない場合</h3>
+<p>
+HTTP のエラーは、サーバが (一応) 動いてはいるが、
+クライアントのリクエストを正しく処理できなかったときに起こる。
+多くの場合、HTTP ステータスコードとして以下のような値を返す:
+</p>
+<ul>
+<li> 4xx番台 … クライアント側に原因がある場合。
+  <ul>
+    <li> 400 … APIの使い方が悪い (bad request)。
+    <li> 401, 403 … 権限がない (unauthorized, forbidden)。
+    <li> 404 … 「ファイルが見つかりません」 (not found)。
+  </ul>
+<li> 5xx番台 … サーバ側に原因がある場合。
+  <ul>
+    <li> 502, 503 … サーバの設定が悪い (bad gateway, service unavailable)。
+    <li> 500 … 内部でクラッシュした (internal server error)。
+  </ul>
+</ul>
+
+<h3 id="tcp-error">TCP層のエラー</h3>
 
 <div class="figure">
 <div>
@@ -622,7 +682,55 @@ HTTP や TCP による通信は現代のシステムでは非常に簡単に扱�
 </div>
 </div>
 
-<h3 id="ip-unreachable">そもそもサーバに到達できない場合</h3>
+<p>
+TCPのエラーでよくあるのは「接続先のサーバが起動していない」場合である。
+たとえ PC の電源が入っていても、指定されたポート番号でサーバが
+待ち受けていない (listenしていない) 場合は、接続は失敗する。
+</p>
+
+<div class=exercise id="ex-tcp-connection-refused">
+<div class=header>演習. TCPのエラーを体験する</div>
+<p>
+サーバが起動してない状態で以下のコマンドを実行し、
+TCP接続に失敗することを確認せよ。
+</p>
+<blockquote><pre>
+$ <strong>nc -v localhost 8080</strong>
+</pre></blockquote>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="240" height="170">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <ellipse cx="80" cy="55" rx="40" ry="25" stroke-dasharray="4,4" />
+      <rect x="10" y="15" width="220" height="150" />
+      <rect x="60" y="100" width="100" height="50" />
+      <path d="M155,130 l15,0 l0,-70 l-35,0"
+            marker-end="url(#arrow)" stroke-width="3"/>
+    </g>
+    <g text-anchor="middle" style="font-size:80%;">
+      <text x="120" y="10">localhost</text>
+      <text x="110" y="130">クライアント</text>
+      <text x="80" y="60">???</text>
+    </g>
+    <g style="font-size:75%;">
+      <text x="165" y="145">8080番に</text>
+      <text x="165" y="160">接続</text>
+    </g>
+  </svg>
+  <div class="caption">サーバが待ち受けしていない場合、接続はできない!</div>
+  </div>
+</div>
+</div>
+
+<h3 id="ip-error">IP層のエラー</h3>
 
 <div class="figure">
 <div>
@@ -630,7 +738,71 @@ HTTP や TCP による通信は現代のシステムでは非常に簡単に扱�
 </div>
 </div>
 
-<h3 id="dns-issues">サーバのIPアドレスが不明な場合</h3>
+<p>
+TCPの通信は、IPパケットというより細かい単位に分割されて
+相手のコンピュータに送信されている。
+しかし、そもそもこの IPパケットが送れない (到達できない) 場合がある。
+このような場合は、以下のような原因が考えられる:
+</p>
+
+<ul>
+  <li> サーバの電源が切れている。
+  <li> ケーブルが切断されている。
+  <li> 自分あるいは相手がそもそもインターネットに接続されていない。
+  <li> 通信が途中で遮断されている (<u>ファイヤーウォール</u>など)。
+</ul>
+
+<p>
+このような場合「IPパケットが相手に正しく到達しているか?」を知るために
+<code>ping</code>コマンドが使える。
+</p>
+
+<div class=exercise id="ex-ip-ping">
+<div class=header>演習. pingコマンドでネットワークの導通を確認する</div>
+<p>
+ping コマンドを使って、ネットワークの導通を確認してみよう。
+(pingコマンドは永久に終わらないので、途中で <kbd>Control</kbd> + <kbd>C</kbd>
+を押して止める)
+</p>
+<ol>
+<li> まず、インターネットに接続されていれば www.example.com から応答が返ってくるはずである:
+<blockquote><pre>
+$ <strong>ping www.example.com</strong>
+PING www.example.com (93.184.216.34) 56(84) bytes of data.
+64 bytes from 93.184.216.34 (93.184.216.34): icmp_seq=1 ttl=51 time=104 ms
+64 bytes from 93.184.216.34 (93.184.216.34): icmp_seq=2 ttl=51 time=104 ms
+64 bytes from 93.184.216.34 (93.184.216.34): icmp_seq=3 ttl=51 time=104 ms
+^C
+--- www.example.com ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3004ms
+rtt min/avg/max/mdev = 103.890/103.906/103.935/0.016 ms
+</pre></blockquote>
+<li> いっぽうで、たいていの環境ではアドレス 10.10.10.10 にはコンピュータが
+つながっておらず、応答は返ってこない:
+<blockquote><pre>
+$ <strong>ping 10.10.10.10</strong>
+PING 10.10.10.10 (10.10.10.10) 56(84) bytes of data.
+^C
+--- 10.10.10.10 ping statistics ---
+2 packets transmitted, 0 received, 100% packet loss, time 1017ms
+</pre></blockquote>
+<li> "localhost" という名前はつねに自分自身の PC を表すので、つねに応答する
+(応答時間の短さに注目):
+<blockquote><pre>
+$ <strong>ping localhost</strong>
+PING localhost (127.0.0.1) 56(84) bytes of data.
+64 bytes from localhost (127.0.0.1): icmp_seq=1 ttl=64 time=0.124 ms
+64 bytes from localhost (127.0.0.1): icmp_seq=2 ttl=64 time=0.062 ms
+64 bytes from localhost (127.0.0.1): icmp_seq=3 ttl=64 time=0.076 ms
+^C
+--- localhost ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3017ms
+rtt min/avg/max/mdev = 0.062/0.088/0.124/0.023 ms
+</pre></blockquote>
+</ol>
+</div>
+
+<h3 id="dns-error">DNSのエラー</h3>
 <div class="figure">
 <div>
   <img src="unresolved.png" width="936" height="634">
@@ -644,7 +816,7 @@ HTTP や TCP による通信は現代のシステムでは非常に簡単に扱�
 <u>IPアドレス</u> によって指定する必要がある。
 </p>
 <p>
-つまり、本当は
+つまり本当は
 <blockquote><pre>
 $ <strong>nc www.example.com 80</strong>
 </pre></blockquote>
@@ -652,19 +824,12 @@ $ <strong>nc www.example.com 80</strong>
 <blockquote><pre>
 $ <strong>nc 93.184.216.34 80</strong>
 </pre></blockquote>
-
-<blockquote><pre>
-$ <strong>nc localhost 10000</strong>
-</pre></blockquote>
-ではなく
-<blockquote><pre>
-$ <strong>nc 127.0.0.1 10000</strong>
-</pre></blockquote>
+のようにする必要がある。
 </p>
 
 <p>
 ではなぜ www.example.com や localhost といった名前が使えるのか?
-というと、それは <u>DNS</u> (Domain Name System) という仕組みのためである。
+というと、それは <u>DNS</u> (Domain Name System) という仕組みのおかげである。
 </p>
 <ul>
 <li> DNS を使うと、各ホストに名前をつけて、
@@ -678,32 +843,96 @@ $ <strong>nc 127.0.0.1 10000</strong>
 <li> 「localhost」という名前は特別で、
 これはつねに「自分自身のホスト」をあらわす 127.0.0.1 という
 IPアドレスに解決される。
-<li> <strong>注意: ひとつの IPアドレスに複数の名前がついていることもある。</strong>
 </ul>
 
-<h4>DNSを使う上での注意点</h4>
-
 <p>
-DNS はインターネットの基幹をなすサービスであり、
-ほとんどの API やアプリ、サービスなどが DNS に依存している。
+このように DNS はインターネットの基幹をなす仕組みであり、
+ほとんどの API やアプリやサービスは DNS に依存している。
 DNS が使えなければ、相手の IPアドレスがわからないので、
-そもそも通信ができないことが多い。
-そのため <strong>DNS がうまく動かない場合、
-多くのサービスやサイトで大規模な障害が発生する</strong>。
+(たとえケーブルがつながっていたとしても) 通信ができないことが多い。
+そのため DNS がうまく動かない場合、
+多くのサービスやサイトで大規模な障害が発生する。
 </p>
 
-<div class=exercise id="ex-nslookup">
+<div class=exercise id="ex-host">
 <div class=header>演習. ホスト名から IP アドレスを求める</div>
 <p>
 <code>host</code> コマンドを使って、
-自分がよく知っているホスト名の IPアドレスを求めよ。
-(<code>ping</code> でもよい)
+自分が知っているホスト名の IPアドレスを求めてみよう。
+</p>
+<ol>
+<li> まず、うまくアドレスが返ってくる場合:
+<blockquote><pre>
+$ <strong>host www.example.com</strong>
+www.example.com has address 93.184.216.34
+www.example.com has IPv6 address 2606:2800:220:1:248:1893:25c8:1946
+</pre></blockquote>
+<li> 次に「アドレスが存在しない」エラー (NXDOMAIN) が返される場合。
+これは DNSがうまく設定されていないか、
+あるいはそのような名前が本当に存在しないケースが考えられる:
 </p>
 <blockquote><pre>
-$ <strong>host <em>ホスト名</em></strong>
+$ <strong>host ojaflekf.aeiorfja.asldkfj</strong>
+Host ojaflekf.aeiorfja.asldkfj not found: 3(NXDOMAIN)
 </pre></blockquote>
 </div>
 
+<p>
+DNS の仕組みは複雑なので、ここでの解説は省略する。
+万が一 DNS の設定に問題がある場合は、たとえば <code>dig</code> コマンドを使って
+原因を調査することができる:
+</p>
+
+<div class=exercise id="dig">
+<div class=header>演習. DNSの名前解決プロセスを表示する</div>
+<blockquote><pre>
+$ <strong>dig +trace www.example.com</strong>
+; &lt;&lt;&gt;&gt; DiG 9.18.19 &lt;&lt;&gt;&gt; +trace www.example.com
+;; global options: +cmd
+.                       27273   IN      NS      j.root-servers.net.
+.                       27273   IN      NS      k.root-servers.net.
+.                       27273   IN      NS      b.root-servers.net.
+...
+www.example.com.        86400   IN      A       93.184.216.34
+www.example.com.        86400   IN      RRSIG   A 13 3 86400 20231124112747 20231103152748 2182 example.com. ...
+example.com.            86400   IN      NS      a.iana-servers.net.
+example.com.            86400   IN      NS      b.iana-servers.net.
+;; Received 322 bytes from 199.43.133.53#53(b.iana-servers.net) in 106 ms
+</pre></blockquote>
+
+</div>
+
+
+<h2 id="glossary">7. 用語一覧</h2>
+<p>
+本講座で出てきた重要な用語一覧。
+</p>
+
+<ul>
+<li> HTML
+<li> HTTP
+<li> webブラウザ
+<li> webサーバ
+<li> HTTPリクエスト
+<li> HTTPレスポンス
+<li> curlコマンド
+<li> リクエストヘッダ
+<li> レスポンスヘッダ
+<li> ステータスコード
+<li> ボディ (ペイロード)
+<li> TCP/IP
+<li> ポート番号
+<li> TCPサーバ
+<li> TCPクライアント
+<li> 待ち受ける (listen)
+<li> 接続する
+<li> pingコマンド
+<li> ファイヤウォール
+<li> ホスト名
+<li> IPアドレス
+<li> DNS
+<li> 名前の解決
+</ul>
 
 
 <hr>
