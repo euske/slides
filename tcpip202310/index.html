@@ -739,8 +739,46 @@ $ <strong>nc -v localhost 8080</strong>
 </div>
 
 <p>
-TCPの通信は、IPパケットというより細かい単位に分割されて
+TCPの通信は、IPパケットという細かい単位に分割されて
 相手のコンピュータに送信されている。
+</p>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="600" height="200">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="3" fill="none">
+      <rect x="60" y="10" width="500" height="180" />
+      <ellipse cx="60" cy="100" rx="50" ry="90" fill="white" />
+      <rect x="180" y="25" width="80" height="40" />
+      <rect x="405" y="65" width="80" height="40" />
+      <rect x="330" y="130" width="100" height="40" />
+      <rect x="160" y="100" width="80" height="40" />
+      <line x1="180" y1="40" x2="140" y2="40" marker-end="url(#arrow)" />
+      <line x1="240" y1="120" x2="290" y2="120" marker-end="url(#arrow)" />
+      <line x1="485" y1="80" x2="510" y2="80" marker-end="url(#arrow)" />
+      <line x1="330" y1="150" x2="290" y2="150" marker-end="url(#arrow)" />
+    </g>
+    <g text-anchor="middle">
+      <text x="220" y="40" dy="0.5em">ウェブ</text>
+      <text x="445" y="80" dy="0.5em">LINE</text>
+      <text x="200" y="120" dy="0.5em">メール</text>
+      <text x="380" y="145" dy="0.5em">動画配信</text>
+    </g>
+    <g>
+      <text x="170" y="60" dy="0.5em" text-anchor="end">11.22.33.44</text>
+      <text x="490" y="100" dy="0.5em" text-anchor="begin">55.66.77.88</text>
+      <text x="245" y="130" dy="0.5em" text-anchor="begin">123.45.200.10</text>
+      <text x="320" y="165" dy="0.5em" text-anchor="end">20.10.8.5</text>
+    </g>
+  </svg>
+<div class="caption">IPパケット (想像図)</div>
+</div>
+</div>
+
+<p>
 しかし、そもそもこの IPパケットが送れない (到達できない) 場合がある。
 このような場合は、以下のような原因が考えられる:
 </p>
