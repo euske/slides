@@ -313,6 +313,93 @@ HTTP/1.1 <mark>200</mark> OK
 </div>
 
 
+<h3 id="cookies">補足. クッキーとは</h2>
+<p>
+  通常、ひとつのページを表示するために、ブラウザが同一のサーバに複数のリクエストを送ることは多い。
+  HTTPの各リクエスト・レスポンスは、多くの場合、単体で完結しており、
+  各リクエスト・レスポンスの間に直接の関連はない。
+  しかし <u id="term-cookie">クッキー</u> (cookie) という仕組みを使うことで、
+  一連のリクエストに「文脈」を追加することができる。
+  クッキーは実際にはブラウザ内に保存される文字列で、
+  HTTP のリクエストとレスポンス内のヘッダを使ってやりとりされる。
+</p>
+
+<ol>
+  <li> ブラウザがサーバにリクエストを送る。
+  <li> サーバが、レスポンス中の <code>Set-Cookie:</code> ヘッダを使ってクッキーをブラウザに送る。
+  <li> ブラウザはクッキーを受け取り、それを記録しておく。
+  <li> 次回リクエスト時に、ブラウザは <code>Cookie:</code> ヘッダを使ってクッキーをサーバに送る。
+  <li> サーバはクッキーを受け取り、以前の文脈を知る。
+  <li> 2. に戻る。
+</ol>
+
+<div class=figure>
+  <div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="400" height="240">
+    <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g id="computer" fill="white" stroke="black" stroke-width="2">
+      <rect x="10" y="10" width="30" height="20" />
+      <polygon points="10,32 0,40 50,40 40,32" />
+    </g>
+    </defs>
+    <g stroke="black" stroke-width="2" fill="none">
+      <use x="20" y="10" xlink:href="#computer" />
+      <use x="320" y="10" xlink:href="#computer" />
+      <g marker-end="url(#arrow)">
+      <path d="M70,30 l240,0" />
+      <path d="M310,40 l-240,50" />
+      <path d="M70,100 l240,0" />
+      <path d="M310,110 l-240,50" />
+      <path d="M70,170 l240,0" />
+      <path d="M310,180 l-240,50" />
+      <path d="M45,60 l0,160" stroke-dasharray="2,2" />
+      <path d="M345,60 l0,160" stroke-dasharray="2,2" />
+      </g>
+      <circle r="8" cx="110" cy="70" fill="#fcf" />
+      <circle r="8" cx="280" cy="90" fill="#fcf" />
+      <circle r="8" cx="110" cy="140" fill="#cfc" />
+      <circle r="8" cx="280" cy="160" fill="#cfc" />
+      <circle r="8" cx="110" cy="210" fill="#ff8" />
+    </g>
+    <g text-anchor="middle" style="font-size:80%;">
+      <text x="45" y="10">webブラウザ</text>
+      <text x="345" y="10">webサーバ</text>
+      <text x="150" y="25">リクエスト</text>
+      <text x="220" y="50">レスポンス</text>
+    </g>
+    <g text-anchor="middle" style="font-family: monospace; font-size:75%;">
+      <text x="110" y="60">Set-Cookie:</text>
+      <text x="280" y="80">Cookie:</text>
+      <text x="110" y="130">Set-Cookie:</text>
+      <text x="280" y="150">Cookie:</text>
+      <text x="110" y="200">Set-Cookie:</text>
+    </g>
+  </svg>
+  <div class="caption">HTTPクッキーのやりとり</div>
+  </div>
+</div>
+
+<p>
+  実際のクッキーにはそれを受け取ったサーバ名（正確にはドメイン名）や有効期限といった情報が
+  付属しており、クライアントは特定のサーバに対して有効なクッキーだけを送るようになっている。
+</p>
+
+<div class=exercise id="ex-http-cookie">
+<div class=header>演習. HTTPクッキーを観察する</div>
+<p>
+  curlを使って以下のURLにリクエストを送って <code>Set-Cookie:</code> ヘッダを確認してみよう。
+</p>
+<ul>
+  <li> <code>curl -v https://www.google.com/</code>
+  <li> <code>curl -v https://www.yahoo.co.jp/</code>
+</ul>
+</div>
+
 <h2 id="tcpip">3. 実際の通信</h2>
 
 <p>
@@ -618,7 +705,7 @@ client.js (クライアント側):
 <h2 id="troubleshooting">6. うまく動かないときは</h2>
 
 <p>
-HTTP や TCP による通信は現代のシステムでは非常に簡単に扱えるが、
+HTTP や TCP による通信は現代のシステムでは簡単に扱えるが、
 実はその仕組みは非常に複雑である。
 したがって、うまく動かない時のために、
 ある程度の内部的な原理を知っておくことは重要である。
@@ -967,6 +1054,7 @@ example.com.            86400   IN      NS      b.iana-servers.net.
 <li> <a href="#term-response-header">レスポンスヘッダ</a>
 <li> <a href="#term-status-code">ステータスコード</a>
 <li> <a href="#term-body">ボディ (ペイロード)</a>
+<li> <a href="#term-cookie">クッキー</a>
 <li> <a href="#term-tcp-ip">TCP/IP</a>
 <li> <a href="#term-port-number">ポート番号</a>
 <li> <a href="#term-tcp-server">TCPサーバ</a>
