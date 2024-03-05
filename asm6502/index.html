@@ -293,12 +293,10 @@ while (true) {
 </div>
 
 <h2 id="6502emu">2. 6502エミュレータを使う</h2>
-<ol>
-<li> <a target="_blank" href="http://visual6502.org/JSSim/expert.html">http://visual6502.org/</a> を開く。
-<li> "Visual Sim / 6502" の "Advanced" リンクをクリックする。
-</ol>
+
 <p>
-これは本物の 6502 の電子回路の動きをブラウザ上で仮想的に再現するエミュレータである。
+  <a target="_blank" href="http://visual6502.org/JSSim/expert.html">http://visual6502.org/</a>
+  は本物の 6502 の電子回路の動きをブラウザ上で仮想的に再現するエミュレータである。
 </p>
 
 <ul>
@@ -452,7 +450,7 @@ Aレジスタの値が <span class=hex>FF</span> を超えるとどうなるか?
 <h3 id="firstasm">3.1. 最初のプログラム (改良版)</h3>
 
 <ol>
-<li> 別のサイト <a target="_blank" href="http://6502asm.com/">http://6502asm.com</a> を開く。
+<li> 別のサイト <a target="_blank" href="https://web.archive.org/web/20221221025712/http://6502asm.com/">http://6502asm.com</a> を開く。
 <li> 以下のプログラムを入力する。
 <li> <kbd>Compile</kbd> ボタンを押して、機械語に変換する。
 <li> <kbd>Run</kbd> ボタンを押して実行する。
@@ -825,10 +823,22 @@ loop:
 </p>
 </div>
 
+<div class=exercise id="ex-run-adventure">
+<div class=header>おまけ演習. いろいろなプログラムを試してみる</div>
+<p>
+以下のいろいろなプログラムを試してみよう:
+</p>
+<ul>
+  <li> <a href="disco.asm">disco.asm</a></li>
+  <li> <a href="demoscene.asm">demoscene.asm</a></li>
+  <li> <a href="adventure.asm">adventure.asm</a></li>
+</ul>
+</div>
+
 
 <h2 id="famicom">5. ファミコン (NES) と 6502</h2>
 <p>
-<a href="https://ja.wikipedia.org/wiki/%E3%83%95%E3%82%A1%E3%83%9F%E3%83%AA%E3%83%BC%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF">ファミリーコンピュータ</a>
+<a target="_blank" href="https://ja.wikipedia.org/wiki/%E3%83%95%E3%82%A1%E3%83%9F%E3%83%AA%E3%83%BC%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF">ファミリーコンピュータ</a>
 (Nintendo Entertainment System、ファミコン) は
 1983年に任天堂から発売されたゲーム機である。
 </p>
@@ -847,7 +857,7 @@ loop:
 グラフィックス・音楽等込みで32KB の領域に収まっている。
 </p>
 <ul>
-<li> <a href="https://gist.github.com/1wErt3r/4048722">「スーパーマリオブラザーズ」の機械語を解析 (逆アセンブル) したソースコード</a>
+<li> <a target="_blank" href="https://gist.github.com/1wErt3r/4048722">「スーパーマリオブラザーズ」の機械語を解析 (逆アセンブル) したソースコード</a>
 </ul>
 
 <h4>ファミコンのアドレス構造</h4>
