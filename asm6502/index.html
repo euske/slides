@@ -829,9 +829,9 @@ loop:
 以下のいろいろなプログラムを試してみよう:
 </p>
 <ul>
-  <li> <a href="disco.asm">disco.asm</a></li>
-  <li> <a href="demoscene.asm">demoscene.asm</a></li>
-  <li> <a href="adventure.asm">adventure.asm</a></li>
+  <li> <a target="_blank" href="disco.asm">disco.asm</a></li>
+  <li> <a target="_blank" href="demoscene.asm">demoscene.asm</a></li>
+  <li> <a target="_blank" href="adventure.asm">adventure.asm</a></li>
 </ul>
 </div>
 
@@ -894,7 +894,7 @@ loop:
 <h2 id="modern">6. 現代のコンピュータとの違い</h2>
 <p>
 現代の <a target="_blank" href="https://en.wikipedia.org/wiki/X86">最新鋭の演算装置</a>でも、
-基本的にやっていることは変わらない。ただ量が増えているだけである。
+基本的にやっていることは変わらない。ただ量は増えている。
 </p>
 
 <table border>
@@ -905,6 +905,19 @@ loop:
 <tr><td>1秒間の命令実行数</td><td align=right>1,000,000</td><td align=right>1,000,000,000</td></tr>
 <tr><td>プログラムの大きさ</td><td align=right>10,000</td><td align=right>10,000,000,000</td></tr>
 </table>
+
+<p>
+  他にも、現代のPC (サーバ、スマートフォン等) は以下のような違いがある:
+</p>
+<ul>
+  <li> もはや6502はCPUとして使われておらず、おもに以下の2種類のCPUが使われている:</li>
+  <ul>
+    <li> x64 (amd64)</li>
+    <li> arm64</li>
+  </ul>
+  <li> 「むきだしの」ハードウェアにプログラムが直接アクセスすることはほとんどなく、ほぼすべてオペレーティングシステムを介している。</li>
+  <li> 入出力装置として「ネットワーク」が大きな位置を占めている。(デバイスによっては、それが唯一の入出力装置の場合もある)</li>
+</ul>
 
 <h3 id="os">6.1. オペレーティングシステム (OS) とは何か?</h3>
 <p>
