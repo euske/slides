@@ -78,7 +78,7 @@ Yusuke Shinyama, Nov. 2023
 <p>
 ソフトウェアというものは非常に複雑である。
 先人達はこの複雑なシステムを分解
-(<a href="https://ja.wikipedia.org/wiki/%E9%96%A2%E5%BF%83%E3%81%AE%E5%88%86%E9%9B%A2">separation of concerns</a>) し、
+(<a target="_blank" href="https://ja.wikipedia.org/wiki/%E9%96%A2%E5%BF%83%E3%81%AE%E5%88%86%E9%9B%A2">separation of concerns</a>) し、
 人間が扱えるようにするために、さまざまな技法をあみだしてきた:
 </p>
 
@@ -151,7 +151,7 @@ Spring は Java/Kotlin を使ったアプリケーション開発に使われて
 これに対して、フレームワークを使ったソフトウェアでは、
 プログラマがアプリケーション全体の流れを直接指定しない。
 かわりに、フレームワークがプログラマが書いた処理を必要に応じて呼びだす。
-これを<u>制御の反転</u> (<a href="https://www.martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>)
+これを<u>制御の反転</u> (<a target="_blank" href="https://www.martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>)
 という。あるいは「ハリウッドの原則 (the Hollywoord Principle)」とも呼ばれる。
 </p>
 
@@ -212,7 +212,7 @@ React はライブラリであり、フレームワークではないと明言�
 
 <h4>Spring を使うことのメリット</h4>
 <p>
-<a href="https://blogs.vmware.com/vmware-japan/2023/03/state-of-spring-2022.html">この調査</a>によれば、
+<a target="_blank" href="https://blogs.vmware.com/vmware-japan/2023/03/state-of-spring-2022.html">この調査</a>によれば、
 Spring を使う理由で一番多いのは
 「データベースを使ったバックエンドが簡単に書けるから」
 である。つまり、Spring は迅速な開発に向いている。
@@ -249,7 +249,7 @@ Spring における DI を理解するには、以下の2つの機能を考え�
 
 <h4>準備</h4>
 <ol>
-<li> <a href="https://start.spring.io/">spring initializr</a> で以下を選択:
+<li> <a target="_blank" href="https://start.spring.io/#!type=gradle-project-kotlin&language=kotlin&packaging=jar&jvmVersion=17&dependencies=web">spring initializr</a> で以下を選択:
 <ul>
 <li> Project: <strong>Gradle - Kotlin</strong>
 <li> Language: <strong>Kotlin</strong>
@@ -595,7 +595,7 @@ class MyComponent(<mark>@Autowired val jdbcTemplate: JdbcTemplate</mark>) {
 と書かれている。
 すると Spring は <code>JdbcTemplate</code> インターフェイスとして
 たまたま利用可能だった H2 データベースを DI する。
-<a href="https://h2database.com/">H2</a> はオンメモリの簡易な組み込みデータベースだが、
+<a target="_blank" href="https://h2database.com/">H2</a> はオンメモリの簡易な組み込みデータベースだが、
 設定を変えることで PostgreSQL などのデータベースも同様に使うことができる。
 </p>
 
