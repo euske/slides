@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "Your name?"
+read name
+echo "Greetings, $name."
