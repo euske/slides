@@ -55,22 +55,30 @@ Yusuke Shinyama, Apr. 2024
 
 <p>
 <strong>概要:</strong>
-この記事では、アプリ開発者の役に立ちそうな
-UNIX/Linux の使い方に関する基本的な知識をまとめた。
+UNIXは現在のほとんどのサーバおよび macOSの基盤となるオペレーティングシステムであり、
+UNIXのスキルは Webアプリケーション開発やシステム管理、ネットワーク管理などに欠かせないものとなっている。
+この記事では、おもにアプリ開発者の役に立ちそうな
+UNIX/Linux に関する基礎知識を紹介する。
+最終的な目標はシェルスクリプトを使った自動処理が書けることである。
+記事は３部に分かれており、
+1. UNIXの基本的な概念 (ファイル、プロセス、標準入出力)、
+2. シェルおよび各種コマンドの使い方
+および
+3. 環境変数およびシェルスクリプトの基礎
+となっている。
 </p>
 
-<p>
-<strong>目的:</strong>
-この記事を理解すると、<a href="#ex15">まとめ問題</a>に答えることができる。
-(逆に、現時点でこれができる人には本記事は不要。)
-</p>
+<div class="note">
+  <strong>注意:</strong>
+  まだ作成中の資料です。内容は変わる可能性があります。
+</div>
 
 <h4>目次</h4>
 <ol start="0">
 <li> <a href="#unix">UNIXとは</a>
 <ul>
   <li> <a href="#unix-os">オペレーティングシステム (OS) とは?</a>
-  <li> <a href="#linux-distro">Linuxディストリビューションとは?</a>
+  <li> <a href="#linux-distro">Linux「ディストリビューション」とは?</a>
 </ul>
 <li> <a href="#filesystem">ファイルシステム</a>
 <ul>
@@ -124,6 +132,7 @@ UNIX/Linux の使い方に関する基本的な知識をまとめた。
 <li> <a href="#books">おすすめの書籍</a></li>
 </ol>
 
+<h1 id="part-1">第1部 - UNIXの基本的な概念</h1>
 
 <h2 id="unix">1. UNIXとは</h2>
 <p>
@@ -204,7 +213,7 @@ UNIX/Linux の使い方に関する基本的な知識をまとめた。
 </div>
 
 <p>
-アプリが入出力装置に直接アクセスすることはほとんどなく、
+現代のアプリが入出力装置に直接アクセスすることはほとんどなく、
 ほぼすべてオペレーティングシステム (OS) を介している。
 また、OS は多くの仮想化処理 (ファイルシステム、遠隔操作、同時並列処理)
 を実現している。
@@ -243,7 +252,7 @@ UNIX/Linux の使い方に関する基本的な知識をまとめた。
 </svg>
 </div>
 
-<h3 id="linux-distro">1.2. Linuxディストリビューションとは?</h3>
+<h3 id="linux-distro">1.2. Linux「ディストリビューション」とは?</h3>
 <p>
 Linuxの世界では、実際には "RedHat", "Ubuntu", "Debian" といった
 複数の異なる "Linux" が存在している。<strong>これらは厳密には Linux ではなく、
@@ -252,9 +261,16 @@ Linuxの世界では、実際には "RedHat", "Ubuntu", "Debian" といった
 ということはあり得ない。核となる Linux カーネルにさまざまな部品
  (ファイルシステム、パッケージ管理など) を追加して一般的な OS として
  使えるようにしたものが「ディストリビューション」である。
-</p><p>
+</p>
+<ul>
+  <li> <a href="https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux">Red Hat Enterprise Linux (RHEL)</a></li>
+  <li> <a href="https://ubuntu.com/">Ubuntu</a></li>
+  <li> <a href="https://www.debian.org/">Debian GNU/Linux</a></li>
+  <li> <a href="https://fedoraproject.org/">Fedora Linux</a></li>
+</ul>
+<p>
 Linuxの各ディストリビューションのおもな違いはファイルシステムの構造の差異
-(/etc以下にある設定ファイルの違いなど) およびシステム管理の方法の差異である。
+(<code>/etc</code>以下にある設定ファイルの違いなど) および、システム管理の方法の差異である。
 とくに、パッケージ管理方式は各ディストリビューションによって大きく違っている。
 しかしこの記事では UNIXのシステム管理の方法までは扱わないので、
 内容の大部分はどのディストリビューションにもあてはまる。
@@ -265,8 +281,8 @@ Linuxの各ディストリビューションのおもな違いはファイルシ
 UNIXは<u>階層型ファイルシステム</u> (hierarchical filesystem) という概念を導入している。
 これはすべてのファイル・フォルダはひとつの巨大な<u>木構造</u> (tree) をなしている。
 また、UNIXでは「すべてはファイルである」という考え方をおしすすめている。
-そのため、メモリや画面 (端末) も <code>mem</code> や <code>tty</code> といった
-特殊ファイルとして表現されている。
+そのため、入出力装置である画面 (端末) やメモリすらも <code>/dev/tty</code> や <code>/dev/mem</code> といった
+特殊なファイルとして表現されている。
 なお、 UNIXではフォルダのことを <u>ディレクトリ</u> (directory) と呼ぶ。
 </p>
 
@@ -926,7 +942,7 @@ $ <strong>kill 12345</strong>
 </div>
 
 
-<h2 id="stdio">4. 標準入力・標準出力・標準エラー出力</h2>
+<h3 id="stdio">3.1. 標準入力・標準出力・標準エラー出力</h3>
 
 <p>
 UNIX の各プロセスには
