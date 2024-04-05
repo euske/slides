@@ -93,7 +93,7 @@ UNIX/Linux に関する基礎知識を紹介する。
   <li> <a href="#ps-signal">シグナル</a>
   <li> <a href="#ps-stdio">標準入力・標準出力・標準エラー出力</a>
 </ul>
-<li> <a href="#exercise-1">まとめ問題</a>
+<li> <a href="#summary-1">第1部のまとめ</a>
 <!--
 <li> <a href="#shell">シェル</a>
 <ul>
@@ -1011,7 +1011,8 @@ $ <strong>ps ax</strong>
   PID   TT  STAT      TIME COMMAND
     1   ??  Ss    50:47.04 /sbin/launchd
   661   ??  Ss    25:50.01 /usr/libexec/logd
-  663   ??  Ss     1:51.71 /usr/libexec/UserEventAgent (System)
+  673   ??  Ss    16:53.34 /usr/libexec/configd
+  698   ??  Ss     0:58.62 /usr/sbin/syslogd
 …
 79138 s002  R+     0:00.00 ps ax
 </pre></blockquote>
@@ -1107,7 +1108,7 @@ $ <strong>sleep 60</strong>
 $ <strong>find / </strong>
 …
 
-(別のウィンドウで)
+<em>(別のウィンドウで)</em>
 $ <strong>ps x</strong>
 $ <strong>kill 12345</strong>
 </pre></blockquote>
@@ -1127,7 +1128,7 @@ $ <strong>kill 12345</strong>
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
-     version="1.1" width="300" height="200">
+     version="1.1" width="310" height="200">
   <defs>
   <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
     <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
@@ -1136,8 +1137,8 @@ $ <strong>kill 12345</strong>
   <g fill="white" stroke="black" stroke-width="2">
     <circle cx="150" cy="100" r="80" fill="#ddd" />
     <circle cx="150" cy="100" r="50" />
-    <circle cx="150" cy="100" r="30" fill="#fff" />
-    <rect x="230" y="10" width="60" height="40"/>
+    <circle cx="150" cy="100" r="30" stroke-width="1" />
+    <rect x="220" y="10" width="80" height="40"/>
     <rect x="2" y="110" width="60" height="40"/>
     <rect x="220" y="150" width="60" height="40"/>
     <g marker-end="url(#arrow)" stroke-dasharray="4,4">
@@ -1146,12 +1147,12 @@ $ <strong>kill 12345</strong>
       <path d="M150,100 m20,20 l45,40" />
     </g>
   </g>
-  <g text-anchor="middle">
+  <g text-anchor="middle" style="font-size:75%;">
     <text x="150" y="35" dy="0.5em">OS</text>
     <text x="150" y="100" dy="0.5em">プロセス</text>
-    <text x="260" y="30" dy="0.5em">画面</text>
-    <text x="32" y="130" dy="0.5em">ティスク</text>
-    <text x="250" y="170" dy="0.5em">ネットワーク</text>
+    <text x="32" y="130" dy="0.5em">ディスク</text>
+    <text x="260" y="30" dy="0.5em">ネットワーク</text>
+    <text x="250" y="170" dy="0.5em">端末</text>
   </g>
 </svg>
 </div>
@@ -1164,6 +1165,7 @@ UNIX の各プロセスは、つねに
 という 3つの入出力装置にアクセス可能である。
 これらはプロセスが画面に文字を表示したり、
 キーボードから文字を入力するために使用する。
+これらをまとめて <u>標準入出力</u> (Standard I/O)」と呼ぶ。
 </p>
 
 <h4>端末とは?</h4>
@@ -1183,6 +1185,27 @@ UNIX の各プロセスは、つねに
 </div>
 </div>
 
+<p>
+標準出力 (および標準エラー出力) は、プロセスからの出力を表示するのに使われる:
+</p>
+<blockquote><pre>
+$ <strong>./hello</strong>
+hello, world.
+</pre></blockquote>
+
+<p>
+いっぽう標準入力は、ユーザが文字を入力するのに使われる:
+</p>
+<blockquote><pre>
+$ <strong>./greet</strong>
+your name?
+<strong>euske</strong>
+greetings, euske
+</pre></blockquote>
+
+<p>
+UNIXにおける標準入出力の最大の特徴は、これが<strong>切り替え可能</strong>だということである。
+</p>
 <p>
 通常の状態では、プロセスの
 標準入力・標準出力・標準エラー出力は、
@@ -1220,31 +1243,13 @@ UNIX の各プロセスは、つねに
 </div>
 
 <p>
-標準出力は、プロセスからの出力を表示するのに使われる:
-</p>
-<blockquote><pre>
-$ <strong>./hello</strong>
-hello, world.
-</pre></blockquote>
-
-<p>
-いっぽう標準入力は、ユーザが文字を入力するのに使われる:
-</p>
-<blockquote><pre>
-$ <strong>./greet</strong>
-your name?
-<strong>euske</strong>
-greetings, euske
-</pre></blockquote>
-
-<p>
-さて UNIX では、後述するシェルの機能を使うと、
+(後述する) シェルの機能を使うと、
 標準出力を端末ではなくファイルに切り替える (<u>リダイレクト</u>する)
 ことができる:
 </p>
 <blockquote><pre>
 $ <strong>./hello &gt; output.txt</strong>
-(テキストファイル output.txt が生成される)
+<em>(テキストファイル output.txt が生成される)</em>
 </pre></blockquote>
 
 <div class=figure>
@@ -1277,12 +1282,21 @@ $ <strong>./hello &gt; output.txt</strong>
 </svg>
 </div>
 
+<div class=note>
+<strong>注意:</strong>
+UNIX は無愛想な OS なので、
+<code>&gt;</code> の出力先として
+うっかり存在するファイル名を指定してしまうと、
+そのファイルは<strong>何の警告もなく</strong>上書きされ、
+空のファイルされる。
+</div>
+
 <p>
 また、標準<strong>入力</strong>を端末ではなくファイルにリダイレクトすることも
 可能である:
 </p>
 <blockquote><pre>
-(テキストファイル input.txt を作成する)
+<em>(テキストファイル input.txt を作成する)</em>
 $ <strong>./greet &lt; input.txt</strong>
 your name?
 greetings, test
@@ -1372,43 +1386,6 @@ greetings, hello, world.
 </svg>
 </div>
 
-<div class=exercise id="ex7">
-<div class=header>演習 7. やってみよう</div>
-<ul>
-<li> 以下のコマンドを実行し、ls の出力がテキストファイルになっていることを確認せよ。
-<blockquote><pre>
-$ <strong>ls -l > output.txt</strong>
-</pre></blockquote>
-<li> <code>grep</code>コマンドを使うと、
-標準入力から特定のパターンが含まれる行だけを表示できる:
-<blockquote><pre>
-$ <strong>ls -l | grep .conf</strong>
--rw-r--r--    1 root     root          5613 Jun 18  2020 ca-certificates.conf
-drwxr-xr-x    2 root     root           520 Jul  5  2020 conf.d
--rw-r--r--    1 root     root          1102 Jul  6  2020 dhcpcd.conf
-…
-</pre></blockquote>
-<li> <code>sort</code>コマンドを使うと、
-標準入力の各行を昇順あるいは降順に並べ替え (ソート) できる:
-<blockquote><pre>
-$ <strong>ls -l | sort</strong> (各列の行頭からアルファベット順にソート)
-…
-$ <strong>ls -l | sort +2</strong> (空白で区切られた 2番目の列を基準にソート)
-…
-$ <strong>ls -l | sort -n +4</strong> (数値としてソート)
-…
-$ <strong>ls -l | sort -n -r +4</strong> (reverse, 逆順に表示)
-…
-</pre></blockquote>
-<p>
-このように、UNIX のコマンドは "<code>-</code>" や "<code>+</code>" で始まる
-文字列を与えることにより異なった動きをするものが多い。
-(これは何か規則があるわけではなく、ただの慣例である。)
-このような文字列を一般にコマンドの「<u>オプション</u> (option)」と呼ぶ。
-</p>
-</ul>
-</div>
-
 <p>
 パイプによる複数プロセスの接続は UNIX (シェル) の特徴的な機能のひとつである。
 これをうまく使うと、複雑な処理をいくつかのコマンドの組み合わせによって
@@ -1421,37 +1398,141 @@ $ <strong>ls -l | grep euske | sort | head -n10</strong>
 
 <div class=note>
 <strong>注意:</strong>
-<code>&lt;</code> や <code>&gt;</code> による
+<code>&lt;</code>, <code>&gt;</code>, <code>|</code> による
 標準入力・標準出力の切り替えは、
 プロセスを<strong>起動する瞬間</strong>にしか指定できない。
 いちどプロセスが起動してしまうと、あとから
 切り替えることはできないので注意。
 </div>
 
-<div class=note>
-<strong>注意:</strong>
-UNIX は無愛想な OS なので、
-<code>&gt;</code> の出力先として
-うっかり存在するファイル名を指定してしまうと、
-そのファイルは<strong>何の警告もなく</strong>上書きされ、
-空のファイルされる。
+<div class=exercise id="ex7">
+<div class=header>演習 7. やってみよう</div>
+<ul>
+<li> 以下のコマンドを実行し、ls の出力がテキストファイルになっていることを確認せよ。
+<blockquote><pre>
+$ <strong>ls -l > output.txt</strong>
+</pre></blockquote>
+<li> <code>grep</code>コマンドを使うと、
+標準入力から特定のパターンが含まれる行だけを表示できる:
+<blockquote><pre>
+$ <strong>ls -l | grep .conf</strong>
+-rw-r--r--   1 root  wheel    1051 Mar 21 15:13 asl.conf
+-rw-r--r--   1 root  wheel    1935 Mar 21 15:13 autofs.conf
+-rw-r--r--   1 root  wheel       0 Mar 21 15:13 kern_loader.conf
+-r--r--r--   1 root  wheel    2451 Mar 21 15:13 man.conf
+…
+</pre></blockquote>
+<li> <code>sort</code>コマンドを使うと、
+標準入力の各行を昇順あるいは降順に並べ替え (ソート) できる:
+<blockquote><pre>
+$ <strong>ls -l | sort</strong> <em>(各列の行頭からアルファベット順にソート)</em>
+…
+$ <strong>ls -l | sort +2</strong> <em>(空白で区切られた 2番目の列を基準にソート)</em>
+…
+$ <strong>ls -l | sort -n +4</strong> <em>(数値としてソート)</em>
+…
+$ <strong>ls -l | sort -n -r +4</strong> <em>(reverse, 逆順に表示)</em>
+…
+</pre></blockquote>
+<p>
+このように、UNIX のコマンドは "<code>-</code>" や "<code>+</code>" で始まる
+文字列を与えることにより異なった動きをするものが多い。
+(これは何か規則があるわけではなく、ただの慣例である。)
+このような文字列を一般にコマンドの「<u>オプション</u> (option)」と呼ぶ。
+</p>
+</ul>
 </div>
 
 <h4>サーバにおける標準入出力</h4>
 <p>
 標準入出力は UNIXの入出力装置のうちもっとも基本的なもので、
 どんなプロセスでも使用可能である。
-サーバ上のプロセスの標準出力は、
-ふつうは syslog などのログ収集プロセスか、
+PCの場合、これはデフォルトでは端末エミュレータアプリだが、
+サーバには通常端末が存在しないので、サーバ上のプロセスの標準出力は、
+ふつうはログファイルか、ネットワークを介した syslog などのログ収集プロセス、
 あるいは (AWSのようなクラウド環境の場合) CloudWatch などのログ収集サービスに
 接続されている。
 </p>
 
+<div class=figure>
+<div>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="310" height="200">
+  <defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  </defs>
+  <g fill="white" stroke="black" stroke-width="2">
+    <circle cx="150" cy="100" r="80" fill="#ddd" />
+    <circle cx="150" cy="100" r="50" />
+    <circle cx="150" cy="100" r="30" stroke-width="1" />
+    <rect x="220" y="10" width="80" height="40"/>
+    <rect x="2" y="110" width="60" height="40"/>
+    <rect x="220" y="150" width="60" height="40"/>
+    <g marker-end="url(#arrow)">
+      <path d="M150,100 m20,20 l45,40" />
+    </g>
+  </g>
+  <g text-anchor="middle" style="font-size:75%;">
+    <text x="150" y="35" dy="0.5em">OS</text>
+    <text x="150" y="100" dy="0.5em">プロセス</text>
+    <text x="32" y="130" dy="0.5em">ディスク</text>
+    <text x="260" y="30" dy="0.5em">ネットワーク</text>
+    <text x="250" y="170" dy="0.5em">端末</text>
+    <text x="210" y="120" dy="0.5em">標準出力</text>
+  </g>
+</svg>
+<div class=caption>PC上のプロセス</div>
+</div>
 
-<h2 id="exercise-1">まとめ問題</h2>
+<div>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="310" height="200">
+  <defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+  </defs>
+  <g fill="white" stroke="black" stroke-width="2">
+    <circle cx="150" cy="100" r="80" fill="#ddd" />
+    <circle cx="150" cy="100" r="50" />
+    <circle cx="150" cy="100" r="30" stroke-width="1" />
+    <rect x="220" y="10" width="80" height="40"/>
+    <rect x="2" y="110" width="60" height="40"/>
+    <rect x="220" y="150" width="60" height="40"/>
+    <g marker-end="url(#arrow)">
+      <path d="M150,100 m20,-20 l50,-40" />
+    </g>
+  </g>
+  <g text-anchor="middle" style="font-size:75%;">
+    <text x="150" y="35" dy="0.5em">OS</text>
+    <text x="150" y="100" dy="0.5em">プロセス</text>
+    <text x="32" y="130" dy="0.5em">ディスク</text>
+    <text x="260" y="30" dy="0.0em">ネットワーク</text>
+    <text x="260" y="30" dy="1.0em">(syslog等)</text>
+    <text x="250" y="170" dy="0.5em">端末</text>
+    <text x="210" y="80" dy="0.5em">標準出力</text>
+  </g>
+</svg>
+<div class=caption>サーバ上のプロセス</div>
+</div>
+</div>
+
+
+<h2 id="summary-1">第1部のまとめ</h2>
+<ul>
+  <li> Linux, macOS は、どちらも UNIX系の OSであり、共通点がある。
+  <li> UNIXでは、ディスク上の各ファイルの位置はパス名によって指定できる。
+  <li> プロセスはUNIXにおける処理の基本単位であり、PC上の「アプリ」もサーバ上の「サービス」もプロセスである。
+  <li> 各プロセスには文字情報の入出力をおこなう「標準入力」「標準出力」「標準エラー出力」の3つが、つねに付属している。
+  <li> 標準入出力は、端末だけでなくディスクやネットワークなどに切り替え可能である。
+</ul>
 
 <div class=exercise id="ex8">
-<div class=header>第1部 まとめ問題</div>
+<div class=header>まとめ問題</div>
 <p> 以下の用語の違いを説明せよ:
 <ul>
 <li> プログラム
