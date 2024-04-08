@@ -39,6 +39,7 @@ code em { color: #000088; }
 .file { outline: 2px solid black; padding: 1em; margin: 1em; }
 .file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
 .file pre { margin: 0; }
+.bl { border: 1px solid black; padding: 2px; color: transparent; }
 --></style>
 </head>
 <body>
@@ -1524,22 +1525,13 @@ PCの場合、これはデフォルトでは端末エミュレータアプリだ
 
 <h2 id="summary-1">第1部のまとめ</h2>
 <ul>
-  <li> Linux, macOS は、どちらも UNIX系の OSであり、共通点がある。
-  <li> UNIXでは、ディスク上の各ファイルの位置はパス名によって指定できる。
-  <li> プロセスはUNIXにおける処理の基本単位であり、PC上の「アプリ」もサーバ上の「サービス」もプロセスである。
-  <li> 各プロセスには文字情報の入出力をおこなう「標準入力」「標準出力」「標準エラー出力」の3つが、つねに付属している。
-  <li> 標準入出力は、端末だけでなくディスクやネットワークなどに切り替え可能である。
+  <li> Linux および macOS は、どちらも <nobr><span class=bl>UNIX</span></nobr>系の OSであり、共通点がある。
+  <li> UNIXでは、ディスク上の各ファイルの位置は<nobr><span class=bl>パス名</span></nobr>によって指定できる。
+  <li> <nobr><span class=bl>プロセス</span></nobr>はUNIXにおける処理の基本単位であり、PC上のアプリやサーバ上の Node, Spring などもその一種である。
+  <li> プロセスには、<nobr><span class=bl>シグナル</span></nobr>を送ることによって停止・強制終了することができる。
+  <li> 各プロセスには文字情報の入出力をおこなう「<nobr><span class=bl>標準入力</span></nobr>」「<nobr><span class=bl>標準出力</span></nobr>」「<nobr><span class=bl>標準エラー出力</span></nobr>」の3つが付属している。
+  <li> 標準入出力は、端末だけでなく<nobr><span class=bl>ファイル</span></nobr>や<nobr><span class=bl>ネットワーク</span></nobr>などに切り替え可能である。
 </ul>
-
-<div class=exercise id="ex8">
-<div class=header>まとめ問題</div>
-<p> 以下の用語の違いを説明せよ:
-<ul>
-<li> プログラム
-<li> プロセス
-<li> コマンド
-</ul>
-</div>
 
 
 <!--
