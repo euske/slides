@@ -29,9 +29,9 @@ u { color: #880000; font-weight: bold; }
 .author { text-align: right; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; }
 .figure .caption { font-size: 80%; font-weight: bold; }
-.notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em 4em; }
+.note { background: #ccffcc; outline: 2px solid black; padding: 1em; margin: 1em 4em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
-.note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+.caution { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 pre em { color: #008800; }
 code em { color: #000088; }
 .exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
@@ -69,7 +69,7 @@ UNIX/Linux に関する基礎知識を紹介する。
 となっている。
 </p>
 
-<div class="note">
+<div class="caution">
   <strong>注意:</strong>
   まだ作成中の資料です。内容は変わる可能性があります。
 </div>
@@ -113,6 +113,7 @@ UNIX/Linux に関する基礎知識を紹介する。
   <li> <a href="#cmd-rm">rm</a>
   <li> <a href="#cmd-du">du</a>
 </ul>
+<li> <a href="#summary-2">第2部のまとめ</a>
 <!--
 <li> <a href="#env">環境変数</a>
 <ul>
@@ -1283,7 +1284,7 @@ $ <strong>./hello &gt; output.txt</strong>
 </svg>
 </div>
 
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 UNIX は無愛想な OS なので、
 <code>&gt;</code> の出力先として
@@ -1397,7 +1398,7 @@ greetings, hello, world.
 $ <strong>ls -l | grep euske | sort | head -n10</strong>
 </pre></blockquote>
 
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 <code>&lt;</code>, <code>&gt;</code>, <code>|</code> による
 標準入力・標準出力の切り替えは、
@@ -1524,43 +1525,118 @@ PCの場合、これはデフォルトでは端末エミュレータアプリだ
 
 
 <h2 id="summary-1">第1部のまとめ</h2>
-<ul>
-  <li> Linux および macOS は、どちらも <nobr><span class=bl>UNIX</span></nobr>系の OSであり、共通点がある。
-  <li> UNIXでは、ディスク上の各ファイルの位置は<nobr><span class=bl>パス名</span></nobr>によって指定できる。
-  <li> <nobr><span class=bl>プロセス</span></nobr>はUNIXにおける処理の基本単位であり、PC上のアプリやサーバ上の Node, Spring などもその一種である。
-  <li> プロセスには、<nobr><span class=bl>シグナル</span></nobr>を送ることによって停止・強制終了することができる。
-  <li> 各プロセスには文字情報の入出力をおこなう「<nobr><span class=bl>標準入力</span></nobr>」「<nobr><span class=bl>標準出力</span></nobr>」「<nobr><span class=bl>標準エラー出力</span></nobr>」の3つが付属している。
-  <li> 標準入出力は、端末だけでなく<nobr><span class=bl>ファイル</span></nobr>や<nobr><span class=bl>ネットワーク</span></nobr>などに切り替え可能である。
-</ul>
-<p>
-  (以下の穴埋め問題の中には透明なテキストが書かれており、コピー・ペーストすれば正解が見れるようになっている)
-</p>
+<ol>
+  <li> 以下の穴埋め問題の中には透明なテキストが書かれており、コピー・ペーストすれば正解が見れるようになっている:
+  <ul>
+    <li> Linux および macOS は、どちらも <nobr><span class=bl>UNIX</span></nobr>系の OSであり、共通点がある。
+    <li> UNIXでは、ディスク上の各ファイルの位置は<nobr><span class=bl>パス名</span></nobr>によって指定できる。
+    <li> <nobr><span class=bl>プロセス</span></nobr>はUNIXにおける処理の基本単位であり、PC上のアプリやサーバ上の Node, Spring などもその一種である。
+    <li> プロセスには、<nobr><span class=bl>シグナル</span></nobr>を送ることによって停止・強制終了することができる。
+    <li> 各プロセスには文字情報の入出力をおこなう「<nobr><span class=bl>標準入力</span></nobr>」「<nobr><span class=bl>標準出力</span></nobr>」「<nobr><span class=bl>標準エラー出力</span></nobr>」の3つが付属している。
+    <li> 標準入出力は、端末だけでなく<nobr><span class=bl>ファイル</span></nobr>や<nobr><span class=bl>ネットワーク</span></nobr>などに切り替え可能である。
+  </ul>
+  <li> ターミナルを開いて <code>ls | sort</code> を実行したとき...
+  <ul>
+    <li> <code>ls</code> の標準入力および標準出力はそれぞれ何か?
+    <li> <code>sort</code> の標準入力および標準出力はそれぞれ何か?
+  </ul>
+</ol>
 
 
 <h1 id="part-2">第2部 - シェルの使い方</h1>
+
+<div class=note>
+<strong>ソフトウェア開発における4S</strong>
+<p>
+よく整理整頓された環境は日々のストレスを減らし、ミスを減らし、思考を明晰にする助けとなる。
+なお、調理の世界にも<a target="_blank" href="https://en.wikipedia.org/wiki/Mise_en_place">同様の規範がある</a>。 
+</p>
+<ul>
+<li> 整理
+  <ul> 
+    <li> 不要なファイル、ショートカット、ブックマークはないか?
+    <li> ふだん使わないプロセス、ブラウザのタブ、dockerコンテナが走っていないか?
+    <li> インストールしただけで使っていないアプリはないか?
+    <li> 不要になったgitブランチ、AWSリソース、ssh/configの項目はないか?
+    <li> ...
+  </ul>
+<li> 整頓
+  <ul>
+    <li> いつも使っているフォルダのパス名はすぐに言えるか?
+    <li> ときどき使う文書は目的ごとにまとめてあるか?
+    <li> 同じ内容が複数個所に分散してないか?
+    <li> ...
+  </ul>
+<li> 清潔
+  <ul>
+    <li> 使っているOS・アプリ・ライブラリは最新状態か?
+    <li> 自分の書いた文章はわかりやすく校正されているか?
+  </ul>
+<li> 清掃
+  <ul>
+    <li> 定期的 (たとえば1日の終わり) にこれらを巡回し、整理するくせをつける。
+  </ul>
+</ul>
+</div>
 
 <h2 id="shell">5. シェルとは</h2>
 <p>
 UNIX を使ううえで中心的な役割を果たしているのが
 <u>シェル</u> (shell) と呼ばれるプログラムである。
-シェルは複数のプロセス全体を統括する殻 (shell) となる、
-以下のような機能をもつ:
 </p>
-<ul>
-<li> プロセスの起動
-<li> プロセスの終了 (シグナルの送信)
-<li> プロセス起動時の標準入力・標準出力・標準エラー出力の切り替え
-<li> プロセス起動時の環境変数 (後述) の設定
-<li> カレント・ディレクトリの切り替え
-<li> 条件分岐、繰り返しなどを使って上記の処理を実行する (シェルスクリプト)
-</ul>
+<p>
+シェルの基本動作:
+</p>
+<ol>
+<li> 端末 (標準入力) からコマンド文字列が入力されるのを待つ。
+<li> コマンド文字列を解析し、スペースで区切られた引数のリストを作成する (<u>引数展開</u>)。
+<li> 必要に応じて標準入力・標準出力・標準エラー出力を切り替えて、子プロセスを起動する。
+<li> 子プロセスが終わるまで待機し、その終了状態を受けとる。
+<li> 1. に戻る。
+</ol>
+
+<div class=figure>
+<div>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="520" height="80">
+  <defs>
+    <marker id="arrow" viewBox="-5 -5 10 10" markerWidth="8" markerHeight="8" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+  </defs>
+  <g stroke="black" stroke-width="1" fill="none">
+    <rect x="20" y="30" width="80" height="40" />
+    <rect x="150" y="30" width="80" height="40" />
+    <rect x="280" y="30" width="80" height="40" />
+    <rect x="410" y="30" width="80" height="40" />
+    <g marker-end="url(#arrow)">
+      <path d="M100,50 l45,0" />
+      <path d="M230,50 l45,0" />
+      <path d="M360,50 l45,0" />
+      <path d="M490,50 c20,0,20,-40,0,-40 l-475,0 c-20,0,-20,40,0,40" />
+    </g>
+  </g>
+  <g text-anchor="middle" style="font-size: 80%;">
+    <text x="60" y="50">コマンド</text>
+    <text x="60" y="65">入力</text>
+    <text x="190" y="50">コマンド</text>
+    <text x="190" y="65">解析</text>
+    <text x="320" y="50">子プロセス</text>
+    <text x="320" y="65">起動</text>
+    <text x="450" y="50">子プロセス</text>
+    <text x="450" y="65">待機</text>
+  </g>
+</svg>
+<div class=caption>シェルの基本動作</div>
+</div>
+</div>
+
 <p>
 UNIX 上で「<u>コマンド</u> (command)」と呼ばれるものは、
 実はほとんどシェルによって起動されるプロセスである。
-通常の PC では、アプリ (これもプロセス) は一度起動したら
-長時間走らせておくのが普通だが、たいていのコマンドは
-数ミリ秒〜数秒しか生存しない。
-UNIX は「湯水のようにプロセスを消費する」OSである。
+たいていのコマンドは数ミリ秒〜数秒しか生存しない。
+(UNIX は「湯水のようにプロセスを消費する」)
 </p>
 <ul>
   <li> lsなどのコマンド: 数ミリ秒〜数秒
@@ -1569,31 +1645,48 @@ UNIX は「湯水のようにプロセスを消費する」OSである。
 </ul>
 
 <p>
-とはいえ、UNIX的にみれば、シェルも他のコマンドと同じく、ひとつのプロセスにすぎない。
-現在では <code>sh</code>, <code>csh</code>, <code>bash</code>, <code>zsh</code> など
-いろいろなシェルが開発されている。
-ほとんどの場合、シェルは以下の動作を繰り返しているだけである:
+しかし UNIX的にみれば、シェルもまたひとつのプロセスにすぎず、特別な存在ではない。
+その証拠に、シェルには複数の種類が存在する。
 </p>
-<ol>
-<li> 端末 (標準入力) からコマンド文字列が入力されるのを待つ。
-<li> 文字列を解析し、スペースで区切られた引数のリストを作成する (<u>引数展開</u>)。
-<li> 必要に応じて標準入力・標準出力・標準エラー出力を切り替えて、子プロセスを起動する。
-<li> 子プロセスが終了するのを待ち、終了状態を受けとる。
-<li> 1. に戻る。
-</ol>
+<ul>
+  <li> macOSでは zshが標準となっており、ターミナルを起動すると zsh が起動する。
+  <li> いっぽう、Linuxでは bashが標準である。
+  <li> それぞれのシェルで、キーの使い方やシェルスクリプト (後述) の挙動が若干異なる。
+</ul>
+
+<div class=exercise id="ex8">
+<div class=header>演習 8. いろいろなシェル (bash, tcsh, ksh) を体験する</div>
+<blockquote><pre>
+(ターミナルを開く)
+% <strong>bash</strong> <em>(bashを起動する)</em>
+$ <strong>tcsh</strong> <em>(tcshを起動する)</em>
+% <strong>ksh</strong> <em>(kshを起動する)</em>
+$ <strong>ls</strong> <em>(lsを実行する)</em>
+...
+$ <strong>exit</strong> <em>(kshを終了する)</em>
+% <strong>exit</strong> <em>(tcshを終了する)</em>
+$ <strong>exit</strong> <em>(bashを終了する)</em>
+% <strong>exit</strong> (ターミナルを閉じる)
+</pre></blockquote>
+<p>
+</p>
+</div>
 
 <h3 id="shell-exp">5.1. コマンド引数の展開</h3>
 <p>
-先に述べたように、UNIX コマンドのほとんどは実はプロセスであり (例外も存在する)、
-シェルの主な機能はコマンド文字列を解析し、プロセスを起動することである。
-たとえば
+先に述べたように、シェルの主な機能はコマンド文字列を解析し、プロセスを起動することである。
+たとえば:
 </p>
 <blockquote><pre>
-$ <strong>ls -l /etc</strong>
+$ <strong>ls -a /etc</strong>
 </pre></blockquote>
 という行は、以下の行と同じである:
 <blockquote><pre>
-$ <strong>/bin/ls -l /etc</strong>
+$ <strong>/bin/ls -a /etc</strong>
+</pre></blockquote>
+さらにこれは、プログラミング的には、関数呼び出しの一種と考えることができる:
+<blockquote><pre>
+<strong>ls</strong>("<strong>-a</strong>", "<strong>/etc</strong>")
 </pre></blockquote>
 <p>
 この行が入力されたとき、シェルは以下のことをおこなう:
@@ -1603,17 +1696,17 @@ $ <strong>/bin/ls -l /etc</strong>
 <li> このとき、各引数を文字列としてプロセスに渡す:
 <ul>
 <li> <code>ls</code> … 0番目の引数 (コマンド名あるいはプログラムのパス名)
-<li> <code>-l</code> … 1番目の引数
+<li> <code>-a</code> … 1番目の引数
 <li> <code>/etc</code> … 2番目の引数
 </ul>
 <li> 子プロセスが終了するまで待つ。
 </ol>
 <p>
 ここで注意したいのは、引数である
-「<code>-l</code>」や「<code>/etc</code>」をどのように利用するかは
+「<code>-a</code>」や「<code>/etc</code>」をどのように利用するかは
 <strong>各コマンド次第</strong>ということである。
 すべてのコマンドにおいて
-「<code>-l</code>」がオプションであると決まっているわけではないし
+「<code>-a</code>」がオプションであると決まっているわけではないし
 「<code>/etc</code>」がパス名として解釈されるとも限らない。
 この意味で、UNIX の使い方を学ぶことは
 API の使い方を学ぶのに似ている。
@@ -1621,12 +1714,12 @@ API の使い方を学ぶのに似ている。
 それらを組み合わせて必要な処理を実現する。
 </p>
 
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 もし実際に
-「<code>-l</code>」という名前のディレクトリがあったとすると、
+「<code>-a</code>」という名前のディレクトリがあったとすると、
 そのままでは <code>ls</code> のパス名として指定できない。
-だが <code>ls ./-l</code> というトリックを使えば指定できる。)
+だが <code>ls ./-a</code> というトリックを使えば指定できる。)
 </div>
 
 <p>
@@ -1636,8 +1729,8 @@ API の使い方を学ぶのに似ている。
 <blockquote><pre>
 $ <strong>echo abc 1234</strong>
 abc 1234
-$ <strong>echo -l /etc</strong>
--l /etc
+$ <strong>echo -a /etc</strong>
+-a /etc
 </pre></blockquote>
 
 <p>
@@ -1646,16 +1739,16 @@ $ <strong>echo -l /etc</strong>
 スペースが入っている文字列を「ひとつの引数」として認識させることができる:
 </p>
 <blockquote><pre>
-$ <strong>ls -l /etc</strong>
+$ <strong>ls -a /etc</strong>
 …
-$ <strong>ls "-l /etc"</strong>
+$ <strong>ls "-a /etc"</strong>
 ls: invalid option -- ' '
-$ <strong>"ls -l" /etc</strong>
-ls -l: command not found
+$ <strong>"ls -a" /etc</strong>
+ls -a: command not found
 </pre></blockquote>
 
-<div class=exercise id="ex8">
-<div class=header>演習 8. シェルの引数展開</div>
+<div class=exercise id="ex9">
+<div class=header>演習 9. シェルの引数展開</div>
 <p>
 以下のコマンドラインの引数を 0番目からすべて挙げよ:
 </p>
@@ -1694,18 +1787,17 @@ $ <strong>cat a bb ccc</strong>
 たとえば <code>/etc</code> 内に多くの「<code>.conf</code>」で終わるファイルがあるとき…
 <blockquote><pre>
 $ <strong>ls -l | grep .conf</strong>
--rw-r--r--    1 root     root          5613 Jun 18  2020 ca-certificates.conf
-drwxr-xr-x    2 root     root           520 Jul  5  2020 conf.d
--rw-r--r--    1 root     root          1102 Jul  6  2020 dhcpcd.conf
+-rw-r--r--   1 root  wheel    1051 Mar 21 15:13 asl.conf
+-rw-r--r--   1 root  wheel    1935 Mar 21 15:13 autofs.conf
 …
 </pre></blockquote>
 以下のパターンは
 <blockquote><pre>
-$ <strong>cat /etc/&ast;.conf</strong>
+$ <strong>cat &ast;.conf</strong>
 </pre></blockquote>
 以下のような引数に展開される:
 <blockquote><pre>
-$ <strong>cat /etc/ca-certificates<mark>.conf</mark> /etc/dhcpcd<mark>.conf</mark> …</strong>
+$ <strong>cat asl<mark>.conf</mark> autofs<mark>.conf</mark> …</strong>
 </pre></blockquote>
 </p><p>
 繰り返すが、ここで展開されたパス名をどのように扱うかは
@@ -1718,11 +1810,11 @@ $ <strong>cat /etc/ca-certificates<mark>.conf</mark> /etc/dhcpcd<mark>.conf</mar
 </p>
 <blockquote><pre>
 $ <strong>echo /etc/&ast;.conf</strong>
-/etc/ca-certificates.conf /etc/dhcpcd.conf …
+/etc/asl.conf /etc/autofs.conf …
 </pre></blockquote>
 
-<div class=exercise id="ex9">
-<div class=header>演習 9. ファイル名展開</div>
+<div class=exercise id="ex10">
+<div class=header>演習 10. ファイル名展開</div>
 <p>
 <code>/etc</code> 以下に次のようなファイルがあるとする:
 </p>
@@ -1862,7 +1954,7 @@ $ <strong>cp &ast;.txt dest/</strong>
 $ <strong>cp -r foo dest/</strong>
 <em>(foo ディレクトリ内とその中のファイルをすべて dest/ 内に複製する)</em>
 </pre>
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 UNIX は無愛想な OS なので、
 コピー先としてうっかり存在するファイル名を指定してしまうと、
@@ -1887,7 +1979,7 @@ $ <strong>mv a.txt b.txt c.txt dest/</strong>
 $ <strong>mv &ast;.txt dest/</strong>
 <em>(〜.txt で終わるすべてのファイルを dest/ 内に移動する)</em>
 </pre>
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 UNIX は無愛想な OS なので、
 移動先としてうっかり存在するファイル名を指定してしまうと、
@@ -1917,7 +2009,7 @@ $ <strong>rm &ast;.txt</strong>
 $ <strong>rm -r dest/</strong>
 <em>(dest/ ディレクトリ内とその中のファイルをすべて削除する)</em>
 </pre>
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 UNIX は無愛想な OS なので、
 <code>rm</code> コマンドは削除が成功しても何も表示しない。
@@ -1973,9 +2065,43 @@ $ <strong>cp -- -i a.txt</strong>
 </pre></blockquote>
 </ol>
 
+
+<h2 id="summary-2">第2部のまとめ</h2>
+
+<ol>
+<li> 以下の用語の違いを説明せよ:
+<ul>
+<li> プログラム
+<li> プロセス
+<li> コマンド
+</ul>
+<li> 以下のコマンドがそれぞれ何をするか簡単に説明せよ:
+<ul>
+<li> <code>less</code>
+<li> <code>pwd</code>
+<li> <code>ps</code>
+<li> <code>kill</code>
+<li> <code>grep</code>
+<li> <code>echo</code>
+<li> <code>export</code>
+<li> <code>mv</code>
+<li> <code>rm</code>
+<li> <code>chmod</code>
+</ul>
+<li> <strong>空のディレクトリ</strong>内で、
+以下のコマンド列を実行すると何が表示されるか答えよ:
+<blockquote><pre>
+$ <strong>echo &gt; hello</strong>
+$ <strong>echo &gt; world</strong>
+$ <strong>echo &ast;</strong>
+</pre></blockquote>
+</div>
+</ol>
+
+
 <!--
 
-<h2 id="env">7. 環境変数</h2>
+<h2 id="env">6. 環境変数</h2>
 <p>
 UNIX では、各プロセスに<u>環境変数</u> (environment variable) というものが
 付属している。これは各種の設定を保持しておくための文字列型の変数で、
@@ -2001,7 +2127,7 @@ PAGER=less
 …
 </pre></blockquote>
 
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
 <strong>UNIXにおける環境変数は各プロセスごとに独立している</strong>。
@@ -2460,7 +2586,7 @@ Sun Nov 13 14:48:02 JST 2022
 通常のコマンドと同じように使えるわけである。
 </p>
 
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 シェルスクリプトは子プロセスとして実行される。UNIX では、
 子プロセスは親プロセスの環境変数やカレントディレクトリを
@@ -2633,7 +2759,7 @@ fi
 </pre>
 ここでいう<code>条件式</code>とは、
 実際にはひとつのコマンドのことである。
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 条件式の最後の <code>;</code> を忘れないように!
 </div>
@@ -2685,7 +2811,7 @@ while <mark>条件式</mark>; do
     <mark>処理</mark>
 done
 </pre>
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 条件式の最後の <code>;</code> を忘れないように!
 </div>
@@ -2713,7 +2839,7 @@ for <mark>変数名</mark> in <mark>引数1 引数2 …</mark>; do
     <mark>処理</mark>
 done
 </pre>
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 引数の最後の <code>;</code> を忘れないように!
 </div>
@@ -2768,7 +2894,7 @@ done
 </ul>
 </div>
 
-<div class=note>
+<div class=caution>
 <strong>注意:</strong>
 複数のファイルを一括変更するような処理の場合、
 <strong>入力ファイルと出力ファイルを同じにしない</strong>こと!
@@ -2843,7 +2969,7 @@ for file in dir1/&ast;.txt; do echo "cat ${file} footer.txt &gt; dir2/${file}"; 
 <li> <code>rm</code>
 <li> <code>chmod</code>
 </ul>
-<li> 空のディレクトリで、
+<li> <strong>空のディレクトリ</strong>内で、
 以下のコマンド列を実行すると何が表示されるか答えよ:
 <blockquote><pre>
 $ <strong>echo &gt; hello</strong>
