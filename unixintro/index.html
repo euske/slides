@@ -51,7 +51,7 @@ code em { color: #000088; }
 UNIX/Linux入門</h1>
 
 <div class=author>
-Yusuke Shinyama, Apr. 2024
+Yusuke Shinyama, May. 2024
 </div>
 
 <p>
@@ -94,7 +94,7 @@ UNIX/Linux に関する基礎知識を紹介する。
   <li> <a href="#ps-signal">シグナル</a>
   <li> <a href="#ps-stdio">標準入力・標準出力・標準エラー出力</a>
 </ul>
-<li> <a href="#summary-1">第1部のまとめ</a>
+<li> <a href="#summary-1">第1部のおさらい</a>
 <li> <a href="#shell">シェル</a>
 <ul>
   <li> <a href="#shell-exp">コマンド引数の展開</a>
@@ -113,7 +113,8 @@ UNIX/Linux に関する基礎知識を紹介する。
   <li> <a href="#cmd-rm">rm</a>
   <li> <a href="#cmd-du">du</a>
 </ul>
-<li> <a href="#summary-2">第2部のまとめ</a>
+<li> <a href="#summary-2">第2部のおさらい</a>
+
 <!--
 <li> <a href="#env">環境変数</a>
 <ul>
@@ -396,7 +397,7 @@ UNIXでは、すべてのファイル・フォルダはひとつの巨大な<u>�
 パス名は、ディスク上におけるファイルの「住所」である。
 </p>
 
-<div class=exercise id="ex1">
+<div class=exercise id="ex-1">
 <div class=header>演習 1. パス名の練習</div>
 <ol class=spacy>
 <li> <mark>ディレクトリ <code>X</code></mark> のパス名を書け。
@@ -418,7 +419,7 @@ UNIX では、いくつかのパス名は
   <li> …</li>
 </ul>
 
-<div class=exercise id="ex2">
+<div class=exercise id="ex-2">
 <div class=header>演習 2. やってみよう</div>
 <ul>
 <li> <code>ls <em>パス名</em></code> … <em>パス名</em>に含まれているファイル一覧を表示する。
@@ -743,7 +744,7 @@ lessでは以下のキー操作が使える:
 </div>
 </ul>
 
-<div class=exercise id="ex3">
+<div class=exercise id="ex-3">
 <div class=header>演習 3. 相対パスの練習</div>
 <p>
 カレント・ディレクトリが <code>E</code> のとき…
@@ -829,7 +830,7 @@ lessでは以下のキー操作が使える:
 </ol>
 </div>
 
-<div class=exercise id="ex4">
+<div class=exercise id="ex-4">
 <div class=header>演習 4. やってみよう</div>
 <ul>
 <li> <code>cd パス名</code> … カレント・ディレクトリを指定されたパス名に変更する。
@@ -994,7 +995,7 @@ UNIXはマルチタスクOSなので、通常は複数のプロセスが並列�
 macOSでは <code>launchd</code> が使われている。)
 </p>
 
-<div class=exercise id="ex5">
+<div class=exercise id="ex-5">
 <div class=header>演習 5. やってみよう</div>
 <ul>
 <li> <code>ps x</code> … 自分が所有するプロセス一覧を表示する。
@@ -1100,7 +1101,7 @@ UNIX のプロセスには、<u>シグナル</u> (signal) を送って制御す�
   いわゆる「クラッシュした」状態。
 </ul>
 
-<div class=exercise id="ex6">
+<div class=exercise id="ex-6">
 <div class=header>演習 6. やってみよう</div>
 <ul>
 <li> <code>kill <em>プロセスID</em></code> … 指定したプロセスに <code>SIGTERM</code> を送る。
@@ -1407,10 +1408,10 @@ $ <strong>ls -l | grep euske | sort | head -n10</strong>
 切り替えることはできないので注意。
 </div>
 
-<div class=exercise id="ex7">
+<div class=exercise id="ex-7">
 <div class=header>演習 7. やってみよう</div>
 <ul>
-<li> 以下のコマンドを実行し、ls の出力がテキストファイルになっていることを確認せよ。
+<li> 以下のコマンドを実行し、ls の出力がテキストファイルになっていることを確認する。
 <blockquote><pre>
 $ <strong>ls -l > output.txt</strong>
 </pre></blockquote>
@@ -1524,7 +1525,7 @@ PCの場合、これはデフォルトでは端末エミュレータアプリだ
 </div>
 
 
-<h2 id="summary-1">第1部のまとめ</h2>
+<h2 id="summary-1">第1部のおさらい</h2>
 <ol>
   <li> 以下の穴埋め問題の中には透明なテキストが書かれており、コピー・ペーストすれば正解が見れるようになっている:
   <ul>
@@ -1654,7 +1655,7 @@ UNIX 上で「<u>コマンド</u> (command)」と呼ばれるものは、
   <li> それぞれのシェルで、キーの使い方やシェルスクリプト (後述) の挙動が若干異なる。
 </ul>
 
-<div class=exercise id="ex8">
+<div class=exercise id="ex-8">
 <div class=header>演習 8. いろいろなシェル (bash, tcsh, ksh) を体験する</div>
 <blockquote><pre>
 (ターミナルを開く)
@@ -1747,10 +1748,10 @@ $ <strong>"ls -a" /etc</strong>
 ls -a: command not found
 </pre></blockquote>
 
-<div class=exercise id="ex9">
+<div class=exercise id="ex-9">
 <div class=header>演習 9. シェルの引数展開</div>
 <p>
-以下のコマンドラインの引数を 0番目からすべて挙げよ:
+以下のコマンドラインの引数を 0番目からすべて挙げてみよう:
 </p>
 <ol class=spacy>
 <li> <code>ls /etc /bin</code>
@@ -1813,7 +1814,7 @@ $ <strong>echo /etc/&ast;.conf</strong>
 /etc/asl.conf /etc/autofs.conf …
 </pre></blockquote>
 
-<div class=exercise id="ex10">
+<div class=exercise id="ex-10">
 <div class=header>演習 10. ファイル名展開</div>
 <p>
 <code>/etc</code> 以下に次のようなファイルがあるとする:
@@ -1824,7 +1825,7 @@ $ <strong>echo /etc/&ast;.conf</strong>
 <li> <code>issue</code>
 </ul>
 カレント・ディレクトリも <code>/etc</code> であるとして、
-以下のコマンドラインの出力を答えよ:
+以下のコマンドラインの出力を予想してみよう:
 <ol class=spacy>
 <li> <code>echo &ast;</code>
 <li> <code>echo &ast;.conf</code>
@@ -1884,6 +1885,16 @@ a
 bb
 ccc
 </pre></blockquote>
+
+<div class=exercise id="ex-11">
+<div class=header>演習 11. コマンド出力展開</div>
+<p>
+以下のコマンドの出力結果を予想してみよう:
+</p>
+<blockquote><pre>
+$ <strong>echo "$(echo foo) bar"</strong>
+</pre></blockquote>
+</div>
 
 <h2 id="fileops">6. ファイル操作コマンド</h2>
 <p>
@@ -2065,17 +2076,30 @@ $ <strong>cp -- -i a.txt</strong>
 </pre></blockquote>
 </ol>
 
+<div class=exercise id="ex-12">
+<div class=header>演習 12. シェルの挙動を予測する</div>
+<p>
+とある<strong>空のディレクトリ</strong>内で、
+以下のコマンド列を実行すると何が表示されるか予想してみよう:
+</p>
+<blockquote><pre>
+$ <strong>echo &gt; hello</strong>
+$ <strong>echo &gt; world</strong>
+$ <strong>echo &ast;</strong>
+</pre></blockquote>
+</div>
 
-<h2 id="summary-2">第2部のまとめ</h2>
+
+<h2 id="summary-2">第2部のおさらい</h2>
 
 <ol>
-<li> 以下の用語の違いを説明せよ:
+<li> 以下の用語の違いを説明できる?
 <ul>
 <li> プログラム
 <li> プロセス
 <li> コマンド
 </ul>
-<li> 以下のコマンドがそれぞれ何をするか簡単に説明せよ:
+<li> 以下のコマンドがそれぞれ何をするか簡単に説明すると?
 <ul>
 <li> <code>less</code>
 <li> <code>pwd</code>
@@ -2088,14 +2112,6 @@ $ <strong>cp -- -i a.txt</strong>
 <li> <code>rm</code>
 <li> <code>chmod</code>
 </ul>
-<li> <strong>空のディレクトリ</strong>内で、
-以下のコマンド列を実行すると何が表示されるか答えよ:
-<blockquote><pre>
-$ <strong>echo &gt; hello</strong>
-$ <strong>echo &gt; world</strong>
-$ <strong>echo &ast;</strong>
-</pre></blockquote>
-</div>
 </ol>
 
 
@@ -2238,12 +2254,12 @@ $ <strong>echo ${USER/xxx/yyy}</strong>  <em>(USER中の xxx を yyyに置換し
 $ <strong>echo ${LANG:-ja}</strong>      <em>(LANGが定義されていない場合、デフォルト値としてjaに展開される)</em>
 </pre></blockquote>
 
-<div class=exercise id="ex10">
-<div class=header>演習 10. 環境変数の展開</div>
+<div class=exercise id="ex-12">
+<div class=header>演習 12. 環境変数の展開</div>
 <p>
 環境変数 <code>USER</code> に <code>jon</code> という文字列が、
 環境変数 <code>FILE</code> に <code>athan</code> という文字列が、
-入っているとき、以下のコマンドの出力を答えよ:
+入っているとき、以下のコマンドの出力を予想してみよう:
 </p>
 <ol>
 <li> <code>echo /home/${USER}/${FILE}</code>
@@ -2492,10 +2508,10 @@ Arg1: foo          <em>(第1引数が表示される)</em>
 Arg2: bar          <em>(第2引数が表示される)</em>
 </pre></blockquote>
 
-<div class=exercise id="ex11">
-<div class=header>演習 11. シェルスクリプトの説明</div>
+<div class=exercise id="ex-13">
+<div class=header>演習 13. シェルスクリプトの説明</div>
 <p>
-以下のシェルスクリプトが何をするか推測せよ。
+以下のシェルスクリプトが何をするか予想してみよう。
 </p>
 <pre>
 # showhome.sh
@@ -2608,8 +2624,8 @@ $ <strong>pwd</strong>         <em>(カレントディレクトリは依然と�
 プロセスを起動しない。そのためシェルのカレントディレクトリの変更が可能なのである。)
 </div>
 
-<div class=exercise id="ex12">
-<div class=header>演習 12. スクリプトファイル</div>
+<div class=exercise id="ex-14">
+<div class=header>演習 14. スクリプトファイル</div>
 <p>
 以下のスクリプトファイル <code>greet</code> が実行可能であるとする。
 <code>./greet</code> を実行すると何が起きるか?
@@ -2779,13 +2795,13 @@ fi
 </pre>
 </dl>
 
-<div class=exercise id="ex13">
-<div class=header>演習 13. dog</div>
+<div class=exercise id="ex-15">
+<div class=header>演習 15. dogコマンド</div>
 <p>
 与えられたパス名に対して、
 それがファイルであれば <code>cat</code> を実行し、
 ディレクトリであれば <code>ls</code> を実行するコマンド
-<code>dog</code> を作りたい。以下のシェルスクリプトを完成させよ:
+<code>dog</code> を作りたい。以下のシェルスクリプトを完成させよう:
 </p>
 <div class=file>
 <div class=header>dog</div>
@@ -2871,8 +2887,8 @@ done
 </pre>
 </dl>
 
-<div class=exercise id="ex14">
-<div class=header>演習 14. for文の演習</div>
+<div class=exercise id="ex-16">
+<div class=header>演習 16. for文の演習</div>
 <p>
 いくつかのディレクトリの中に、
 <code>list.txt</code> というファイルが入っているとする。
@@ -2921,7 +2937,7 @@ done
 
 <h2 id="oneliner">10. ワンライナー (one-liner) を書く時の注意点</h2>
 <p>
-UNIXでは、ちょっとした作業をするために１行のシェルスクリプト (ワンライナー) を
+UNIXでは、ちょっとした作業をするために1行のシェルスクリプト (ワンライナー) を
 即席で書いて実行することがある。よくあるのが各ファイルについて何らかの
 処理をおこなうというものである:
 </p>
@@ -2947,35 +2963,9 @@ for file in dir1/&ast;.txt; do echo "cat ${file} footer.txt &gt; dir2/${file}"; 
 </pre>
 </ol>
 
-<div class=exercise id="ex15">
-<div class=header>演習 15. まとめ問題</div>
+<div class=exercise id="summary-3">
+<div class=header>まとめ問題</div>
 <ol>
-<li> 以下の用語の違いを説明せよ:
-<ul>
-<li> プログラム
-<li> プロセス
-<li> コマンド
-</ul>
-<li> 以下のコマンドがそれぞれ何をするか簡単に説明せよ:
-<ul>
-<li> <code>less</code>
-<li> <code>pwd</code>
-<li> <code>ps</code>
-<li> <code>kill</code>
-<li> <code>grep</code>
-<li> <code>echo</code>
-<li> <code>export</code>
-<li> <code>mv</code>
-<li> <code>rm</code>
-<li> <code>chmod</code>
-</ul>
-<li> <strong>空のディレクトリ</strong>内で、
-以下のコマンド列を実行すると何が表示されるか答えよ:
-<blockquote><pre>
-$ <strong>echo &gt; hello</strong>
-$ <strong>echo &gt; world</strong>
-$ <strong>echo &ast;</strong>
-</pre></blockquote>
 <li> TODO リストを管理するための簡単なスクリプト todo を作りたい。
 これは特定のテキストファイルに「やることの一覧」を記録する。<br>
 このスクリプトは、以下のように使うものとする:
@@ -3008,7 +2998,7 @@ fi
 </ol>
 </div>
 
-<h2 id="books">11. おすすめの書籍</h2>
+<h2 id="books">おすすめの書籍</h2>
 <ul>
 <li> <a target="_blank" href="https://www.amazon.co.jp/dp/429713148X/">［試して理解］Linuxのしくみ　―実験と図解で学ぶOS、仮想マシン、コンテナの基礎知識【増補改訂版】</a>
 - 最近評判のよい本。OS の内部まで学習したい人向け。
