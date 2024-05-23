@@ -114,8 +114,6 @@ UNIX/Linux に関する基礎知識を紹介する。
   <li> <a href="#cmd-du">du</a>
 </ul>
 <li> <a href="#summary-2">第2部のおさらい</a>
-
-<!--
 <li> <a href="#env">環境変数</a>
 <ul>
   <li> <a href="#env-use">環境変数を使う</a>
@@ -138,8 +136,8 @@ UNIX/Linux に関する基礎知識を紹介する。
   <li> <a href="#control-args">$* 引数</a>
 </ul>
 <li> <a href="#oneliner">ワンライナー (one-liner) を書く時の注意点</a>
+<li> <a href="#summary-3">第3部のおさらい</a>
 <li> <a href="#books">おすすめの書籍</a></li>
--->
 </ol>
 
 <h1 id="part-1">第1部 - UNIXの基本的な概念</h1>
@@ -1526,6 +1524,7 @@ PCの場合、これはデフォルトでは端末エミュレータアプリだ
 
 
 <h2 id="summary-1">第1部のおさらい</h2>
+
 <ol>
   <li> 以下の穴埋め問題の中には透明なテキストが書かれており、コピー・ペーストすれば正解が見れるようになっている:
   <ul>
@@ -2037,7 +2036,7 @@ $ <strong>rm -i &ast;.txt</strong>
 <pre>
 $ <strong>du ~</strong>
 <em>(ホームディレクトリの使用量を各ディレクトリごとに表示する)</em>
-$ <strong>du -s .</strong>
+$ <strong>du -sh .</strong>
 <em>(カレントディレクトリの総使用量のみを表示する)</em>
 </pre>
 
@@ -2115,9 +2114,7 @@ $ <strong>echo &ast;</strong>
 </ol>
 
 
-<!--
-
-<h2 id="env">6. 環境変数</h2>
+<h2 id="env">8. 環境変数</h2>
 <p>
 UNIX では、各プロセスに<u>環境変数</u> (environment variable) というものが
 付属している。これは各種の設定を保持しておくための文字列型の変数で、
@@ -2182,7 +2179,7 @@ Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
 </div>
 </div>
 
-<h3 id="env-use">6.1. 環境変数を使う</h3>
+<h3 id="env-use">8.1. 環境変数を使う</h3>
 <p>
 各プロセスにおける環境変数は、
 プログラム中のどこからでも文字列値として
@@ -2254,8 +2251,8 @@ $ <strong>echo ${USER/xxx/yyy}</strong>  <em>(USER中の xxx を yyyに置換し
 $ <strong>echo ${LANG:-ja}</strong>      <em>(LANGが定義されていない場合、デフォルト値としてjaに展開される)</em>
 </pre></blockquote>
 
-<div class=exercise id="ex-12">
-<div class=header>演習 12. 環境変数の展開</div>
+<div class=exercise id="ex-13">
+<div class=header>演習 13. 環境変数の展開</div>
 <p>
 環境変数 <code>USER</code> に <code>jon</code> という文字列が、
 環境変数 <code>FILE</code> に <code>athan</code> という文字列が、
@@ -2269,7 +2266,7 @@ $ <strong>echo ${LANG:-ja}</strong>      <em>(LANGが定義されていない場
 </ol>
 </div>
 
-<h3 id="env-set">6.2. 環境変数を設定する</h3>
+<h3 id="env-set">8.2. 環境変数を設定する</h3>
 <p>
 各プロセスの環境変数は、一般にそのプロセスの<strong>起動時にだけ</strong>設定できる。
 プロセスの起動時に環境変数を設定するには、実行したいコマンド引数の前に
@@ -2357,7 +2354,7 @@ XYZ=abc123
 </svg>
 </div>
 
-<h3 id="env-path">6.3. 重要な環境変数: PATHとHOME</h3>
+<h3 id="env-path">8.3. 重要な環境変数: PATHとHOME</h3>
 <p>
 UNIX の環境変数のなかでも <code>PATH</code> と <code>HOME</code> は
 とくに重要である。
@@ -2451,7 +2448,7 @@ UNIX におけるホームディレクトリとは、つまるところ:
 だけのものなのである。
 
 
-<h2 id="scripting">8. シェルスクリプトの基礎</h2>
+<h2 id="scripting">9. シェルスクリプトの基礎</h2>
 <p>
 <u>シェルスクリプト</u>とは、シェルによって実行される簡単なプログラムである。
 もっとも基本的なシェルスクリプトは、単に実行するコマンド列を1行にひとつずつ
@@ -2482,7 +2479,7 @@ alpine-release        lynx.lss              services
 …
 </pre></blockquote>
 
-<h3 id="script-args">8.1. シェルスクリプトに与えられた引数を利用する</h3>
+<h3 id="script-args">9.1. シェルスクリプトに与えられた引数を利用する</h3>
 <p>
 シェルスクリプトには、通常のコマンドと同様に引数を渡すことができる。
 プロセス起動時に与えられた引数は、
@@ -2508,8 +2505,8 @@ Arg1: foo          <em>(第1引数が表示される)</em>
 Arg2: bar          <em>(第2引数が表示される)</em>
 </pre></blockquote>
 
-<div class=exercise id="ex-13">
-<div class=header>演習 13. シェルスクリプトの説明</div>
+<div class=exercise id="ex-14">
+<div class=header>演習 14. シェルスクリプトの説明</div>
 <p>
 以下のシェルスクリプトが何をするか予想してみよう。
 </p>
@@ -2519,7 +2516,7 @@ ls -l "/home/$1"
 </pre>
 </div>
 
-<h3 id="script-chmod">8.2. 通常のコマンドとして使う</h3>
+<h3 id="script-chmod">9.2. 通常のコマンドとして使う</h3>
 <p>
 UNIX では、通常実行するプログラムはその CPU 用にコンパイルされた
 命令列が含まれる<u>バイナリファイル</u>である。
@@ -2624,8 +2621,8 @@ $ <strong>pwd</strong>         <em>(カレントディレクトリは依然と�
 プロセスを起動しない。そのためシェルのカレントディレクトリの変更が可能なのである。)
 </div>
 
-<div class=exercise id="ex-14">
-<div class=header>演習 14. スクリプトファイル</div>
+<div class=exercise id="ex-15">
+<div class=header>演習 15. スクリプトファイル</div>
 <p>
 以下のスクリプトファイル <code>greet</code> が実行可能であるとする。
 <code>./greet</code> を実行すると何が起きるか?
@@ -2642,7 +2639,7 @@ else:
 </div>
 </div>
 
-<h3 id="script-exitcode">8.3. 終了状態による分岐</h3>
+<h3 id="script-exitcode">9.3. 終了状態による分岐</h3>
 <p>
 すべてのプロセスは、終了時に<u>終了状態</u>を返す。
 これは、関数の返り値のようなものである。
@@ -2685,7 +2682,7 @@ $ <strong>echo $?</strong>
 ( cd /foo && ls &ast;.conf ) || echo "/foo does not exist"
 </pre></blockquote>
 
-<h3 id="script-subst">8.4. 文字列の操作</h3>
+<h3 id="script-subst">9.4. 文字列の操作</h3>
 <p>
 シェルでは文字列処理をおこなうための展開がいくつか用意されている。
 代表的なものを以下にあげる:
@@ -2715,7 +2712,7 @@ path=${FILENAME:-default.txt}
 </dl>
 
 
-<h2 id="controls">9. 条件分岐・繰り返し</h2>
+<h2 id="controls">10. 条件分岐・繰り返し</h2>
 <p>
 さて、シェルスクリプトの真のうまみは条件分岐や繰り返しを使って
 コマンドを実行させることである。シェルでは、条件分岐や繰り返しをするときも
@@ -2730,7 +2727,7 @@ path=${FILENAME:-default.txt}
 <code>test</code> が存在する。
 </p>
 
-<h3 id="control-test">9.1. testコマンド</h3>
+<h3 id="control-test">10.1. testコマンド</h3>
 <p>
 <code>test</code> コマンドは与えられた条件に応じて真偽値に対応する終了状態を返す:
 </p>
@@ -2762,7 +2759,7 @@ path=${FILENAME:-default.txt}
 詳しくは <code>man test</code> を参照のこと。
 </p>
 
-<h3 id="control-if">9.2. if … then 〜 fi文</h3>
+<h3 id="control-if">10.2. if … then 〜 fi文</h3>
 <p>
 if文の使い方は、通常のプログラミング言語とほとんど同じである。
 </p>
@@ -2795,8 +2792,8 @@ fi
 </pre>
 </dl>
 
-<div class=exercise id="ex-15">
-<div class=header>演習 15. dogコマンド</div>
+<div class=exercise id="ex-16">
+<div class=header>演習 16. dogコマンド</div>
 <p>
 与えられたパス名に対して、
 それがファイルであれば <code>cat</code> を実行し、
@@ -2816,7 +2813,7 @@ fi
 </div>
 </div>
 
-<h3 id="control-while">9.3. while … do 〜 done文</h3>
+<h3 id="control-while">10.3. while … do 〜 done文</h3>
 <p>
 これも通常のプログラミング言語におけるwhile文とほとんど同じである。
 </p>
@@ -2841,7 +2838,7 @@ done
 </pre>
 </dl>
 
-<h3 id="control-for">9.4. for … do 〜 done文</h3>
+<h3 id="control-for">10.4. for … do 〜 done文</h3>
 <p>
 シェルスクリプトの for文は、与えられた各引数を指定された変数に代入しながら
 繰り返し処理を実行する。
@@ -2887,8 +2884,8 @@ done
 </pre>
 </dl>
 
-<div class=exercise id="ex-16">
-<div class=header>演習 16. for文の演習</div>
+<div class=exercise id="ex-17">
+<div class=header>演習 17. for文の演習</div>
 <p>
 いくつかのディレクトリの中に、
 <code>list.txt</code> というファイルが入っているとする。
@@ -2935,7 +2932,7 @@ done
 </div>
 
 
-<h2 id="oneliner">10. ワンライナー (one-liner) を書く時の注意点</h2>
+<h2 id="oneliner">11. ワンライナー (one-liner) を書く時の注意点</h2>
 <p>
 UNIXでは、ちょっとした作業をするために1行のシェルスクリプト (ワンライナー) を
 即席で書いて実行することがある。よくあるのが各ファイルについて何らかの
@@ -2963,10 +2960,11 @@ for file in dir1/&ast;.txt; do echo "cat ${file} footer.txt &gt; dir2/${file}"; 
 </pre>
 </ol>
 
-<div class=exercise id="summary-3">
-<div class=header>まとめ問題</div>
-<ol>
-<li> TODO リストを管理するための簡単なスクリプト todo を作りたい。
+
+<h2 id="summary-3">第3部のおさらい</h2>
+
+<p> 
+TODO リストを管理するための簡単なスクリプト todo を作りたい。
 これは特定のテキストファイルに「やることの一覧」を記録する。<br>
 このスクリプトは、以下のように使うものとする:
 <ul>
@@ -2978,6 +2976,7 @@ for file in dir1/&ast;.txt; do echo "cat ${file} footer.txt &gt; dir2/${file}"; 
 <li> そのテキストファイルの位置は、環境変数 <code>TODOFILE</code> によって
 決まるものとする。
 </ul>
+</p>
 <p>以下の空欄を埋めよ:</p>
 <div class=file>
 <div class=header>todo</div>
@@ -2998,7 +2997,7 @@ fi
 </ol>
 </div>
 
-<h2 id="books">おすすめの書籍</h2>
+<h2 id="books">13. おすすめの書籍</h2>
 <ul>
 <li> <a target="_blank" href="https://www.amazon.co.jp/dp/429713148X/">［試して理解］Linuxのしくみ　―実験と図解で学ぶOS、仮想マシン、コンテナの基礎知識【増補改訂版】</a>
 - 最近評判のよい本。OS の内部まで学習したい人向け。
@@ -3006,7 +3005,6 @@ fi
 - 通称「Stevensの本」と呼ばれる歴史的名著。
 </ul>
 
--->
 
 <hr>
 <address>Yusuke Shinyama</address>
