@@ -9,7 +9,7 @@
 <meta name="twitter:card" content="summary" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="アプリ開発者のための UNIX/Linux入門" />
-<meta property="og:url" content="https://euske.github.io/slides/bc20221024/index.html" />
+<meta property="og:url" content="https://euske.github.io/slides/unixintro/index.html" />
 <meta property="og:description" content="アプリ開発者の役に立ちそうなUNIX/Linuxに関する知識まとめ。" />
 <title>アプリ開発者のための UNIX/Linux入門</title>
 <style><!--
@@ -134,8 +134,8 @@ UNIX/Linux に関する基礎知識を紹介する。
   <li> <a href="#control-while">while … do 〜 done文</a>
   <li> <a href="#control-for">for … do 〜 done文</a>
   <li> <a href="#control-args">$* 引数</a>
+  <li> <a href="#control-oneliner">ワンライナー (one-liner) を書く時の注意点</a>
 </ul>
-<li> <a href="#oneliner">ワンライナー (one-liner) を書く時の注意点</a>
 <li> <a href="#summary-3">第3部のおさらい</a>
 <li> <a href="#books">おすすめの書籍</a></li>
 </ol>
@@ -2461,7 +2461,7 @@ UNIX におけるホームディレクトリとは、つまるところ:
 <em># 3つのコマンドを実行する。</em>
 echo Hello!
 date
-ls /etc
+ls /
 </pre>
 </div>
 <p>
@@ -2471,11 +2471,10 @@ ls /etc
 </p>
 <blockquote><pre>
 $ <strong>sh hello.sh</strong>
-Hello!                                                 <em>(echo が実行される)</em>
-Sun Nov 13 14:48:02 JST 2022                           <em>(date が実行される)</em>
-ImageMagick-7         logrotate.d           screenrc   <em>(ls /etc が実行される)</em>
-X11                   lynx.cfg              securetty
-alpine-release        lynx.lss              services
+Hello!                                        <em>(echo が実行される)</em>
+Sun Nov 13 14:48:02 JST 2023                  <em>(date が実行される)</em>
+Applications  Volumes      etc         sbin   <em>(ls / が実行される)</em>
+Library	      bin          home        tmp
 …
 </pre></blockquote>
 
@@ -2580,7 +2579,7 @@ UNIX 内部では以下のコマンドが実行されている:
 <em>#!/bin/sh</em>
 echo Hello!
 date
-ls /etc
+ls /
 </pre>
 </div>
 <p>
@@ -2591,6 +2590,8 @@ $ <strong>chmod +x hello</strong>
 $ <strong>./hello</strong>     <em>(/bin/sh hello と同様の結果が得られる)</em>
 Hello!
 Sun Nov 13 14:48:02 JST 2022
+Applications  Volumes      etc         sbin
+Library	      bin          home        tmp
 ...
 </pre></blockquote>
 <p>
@@ -2650,10 +2651,9 @@ UNIXの慣例では、正常終了した（成功した）プロセスは
 シェル変数 <code>$?</code> を表示すればよい:
 </p>
 <blockquote><pre>
-$ <strong>ls /etc</strong>
-ImageMagick-7         logrotate.d           screenrc
-X11                   lynx.cfg              securetty
-alpine-release        lynx.lss              services
+$ <strong>ls /</strong>
+Applications  Volumes      etc         sbin
+Library	      bin          home        tmp
 …
 $ <strong>echo $?</strong>
 0          <em>(コマンドは成功したので終了状態は0)</em>
@@ -2932,7 +2932,7 @@ done
 </div>
 
 
-<h2 id="oneliner">11. ワンライナー (one-liner) を書く時の注意点</h2>
+<h3 id="control-oneliner">10.5. ワンライナー (one-liner) を書く時の注意点</h3>
 <p>
 UNIXでは、ちょっとした作業をするために1行のシェルスクリプト (ワンライナー) を
 即席で書いて実行することがある。よくあるのが各ファイルについて何らかの
@@ -2997,7 +2997,8 @@ fi
 </ol>
 </div>
 
-<h2 id="books">13. おすすめの書籍</h2>
+
+<h2 id="books">12. おすすめの書籍</h2>
 <ul>
 <li> <a target="_blank" href="https://www.amazon.co.jp/dp/429713148X/">［試して理解］Linuxのしくみ　―実験と図解で学ぶOS、仮想マシン、コンテナの基礎知識【増補改訂版】</a>
 - 最近評判のよい本。OS の内部まで学習したい人向け。
