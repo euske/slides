@@ -30,11 +30,11 @@ u { color: #880000; font-weight: bold; }
 .author { text-align: right; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; background: white; }
 .figure .caption { font-size: 80%; font-weight: bold; }
-.notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em 4em; }
+.notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .title { display: flex; justify-content: center; font-size: 120%; font-weight: bold; border-bottom: 1px solid black; }
 .note { background: #88ffff; outline: 2px solid black; padding: 1em; margin: 1em; }
-pre em { color: #0000dd; }
+pre em { color: #008800; }
 code em { color: #000088; }
 .error { color: red; font-weight: bold; }
 .exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
@@ -68,8 +68,32 @@ Yusuke Shinyama, May. 2024
   <li> <a href="#initializr">Spring Initializr による雛形アプリ生成</a>
   <li> <a href="#controller">最初のTDD - TodoControllerの作成</a>
   <li> <a href="#repository">TodoRepositoryの作成</a>
+  <li> <a href="#post">POSTエンドポイントの作成</a>
   <li> <a href="#references">参考文献</a>
 </ol>
+
+<div class=exercise>
+<div class=header>今回作りたいもの:</div>
+<p>
+  PostgreSQL + Spring Boot を使った Todo アプリのバックエンド。
+  以下のAPIエンドポイントを提供する:
+<ol type=a>
+  <li> <code>GET /todos</code> を実行すると、データベースにある Todo 項目すべてを JSON形式で返す。
+<pre>
+[{"id":2, "text":"Buy milk."}, {"id":5, "text":"Clean up."}]
+</pre>
+  <li> <code>POST /todos</code> を実行すると、与えられた Todo をデータベースに追加する。
+    このとき、新しく追加された Todo ID を返す。
+<pre>
+{"text": "Hello!"}
+</pre>
+  <li> <code>GET /todos/2</code> を実行すると、与えられた IDをもつ Todo 項目ひとつをJSON形式で返す。
+<pre>
+{"id":2, "text":"Buy milk."}
+</pre>
+  <li> <code>DELETE /todos/2</code> を実行すると、与えられた IDをもつ Todo 項目をデータベースから削除する。
+</ol>
+</div>
 
 
 <h2 id="setup">1. はじめの準備</h2>
@@ -84,7 +108,7 @@ Yusuke Shinyama, May. 2024
   <li> Java SDK をダウンロード・インストールする。
   <ul>
     <li> <kbd>Project Structure...</kbd> → <kbd>SDKs</kbd> で <kbd>+</kbd> をクリックし、<kbd>Download JDK...</kbd> を選択。
-    <li> Version: <kbd>21</kbd>, Vendor: <kbd>Amazon Colletto 21.0<kbd> を選択。
+    <li> Version: <kbd>21</kbd>, Vendor: <kbd>Amazon Colletto 21.0</kbd> を選択。
     <li> 一般に、最新バージョンよりも少し「枯れた」バージョンのほうが問題が少ない。
   </ul>
 
@@ -120,7 +144,7 @@ $ <strong>createdb tododb</strong>
 
   <li> application.properties を変更:
 <div class=file>
-<div>application.properties:</div>
+<div>src/main/resources/application.properties:</div>
 <pre>
 spring.application.name=todoApp
 spring.datasource.url=jdbc:postgresql://localhost/tododb
@@ -130,9 +154,9 @@ spring.datasource.driverClassName=org.postgresql.Driver
 </pre>
 </div>
 
-  <li> static/index.html を新規作成:
+  <li> index.html を新規作成する (staticフォルダで <kbd>Command &#x2318;</kbd> + <kbd>N</kbd>):
 <div class=file>
-<div>static/index.html:</div>
+<div>src/main/resources/static/index.html:</div>
 <pre>
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
@@ -143,7 +167,14 @@ Welcome!
 </pre>
 </div>
 
-  <li> アプリを起動し、<a target="_blank" href="http://localhost:8080/">http://localhost:8080/</a> にアクセス。
+  <li> IntelliJ の画面右上のメニューから
+    <kbd>todoApp [bootRun]</kbd> を選択すると、アプリが起動する。
+<div class=figure>
+  <img src="bootrun.png">
+</div>
+
+  <li> <a target="_blank" href="http://localhost:8080/">http://localhost:8080/</a> にアクセスし、
+    "Welcome!" テキストが見えることを確認する。
 
 <div class=formula>
 <div class=title>Javaの基本概念</div>
@@ -236,6 +267,31 @@ class MyClass {
 
 </ol>
 
+<h3 id="gradle">コマンドラインを使ったビルドと起動</h3>
+<p>
+  IntelliJ を使わず、コマンドラインからアプリのビルド・起動をする場合は、
+  以下のようにする:
+</p>
+<blockquote><pre>
+$ <strong>./gradlew build</strong>  <em>(アプリのビルドおよびテスト)</em>
+Starting a Gradle Daemon, 1 stopped Daemon could not be reused, use --status for details
+...
+
+BUILD SUCCESSFUL in 11s
+9 actionable tasks: 5 executed, 4 up-to-date
+
+$ <strong>./gradlew bootrun</strong>  <em>(アプリの実行)</em>
+&gt; Task :bootRun
+  .   ____          _            __ _ _
+ /&Backslash;&Backslash; / ___'_ __ _ _(_)_ __  __ _ &Backslash; &Backslash; &Backslash; &Backslash;
+( ( )&Backslash;___ | '_ | '_| | '_ &Backslash;/ _` | &Backslash; &Backslash; &Backslash; &Backslash;
+ &Backslash;&Backslash;/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_&Backslash;__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.0)
+...
+</pre></blockquote>
 
 <h2 id="controller">3. 最初のテスト駆動開発 - TodoControllerの作成</h2>
 
@@ -294,9 +350,9 @@ class TodoAppApplicationTests(
 
 <div class=bgy>    @Test
     fun `GETリクエストはOKステータスを返す`() {
-        // localhost/todos に GETリクエストを発行する。
+        <em>// localhost/todos に GETリクエストを発行する。</em>
         val response = restTemplate.getForEntity("http://localhost:$port/todos", Any::class.java)
-        // レスポンスのステータスコードは OK である。
+        <em>// レスポンスのステータスコードは OK である。</em>
         assertThat(response.statusCode, equalTo(HttpStatus.OK))
     }
 </div>
@@ -340,7 +396,7 @@ DI を使って作成させる (ビジネスロジックに関連するオブジ
       <rect x="90" y="145" width="170" height="40" />
     </g>
     <g text-anchor="middle" style="font-size: 75%;">
-      <text x="170" y="30">Spring Boot</text>
+      <text x="170" y="30">Application Context</text>
       <text x="100" y="80">TestRestTemplate</text>
       <text x="250" y="80">LocalServerPort</text>
       <text x="175" y="170">TodoAppApplicationTests</text>
@@ -396,7 +452,6 @@ class TodoController {
 
 <div class=formula>
 <div class=title>Spring における「依存注入 (DI)」の考え方 - その2</div>
-
 <p>
 Springにおける
 <code>@RestController</code> や <code>@GetMapping</code> のようなアノテーションは、
@@ -426,14 +481,14 @@ HTTP リクエスト・レスポンスを処理する機構をくっつけ全体
     <g stroke="black" stroke-width="1" fill="none">
       <rect x="70" y="10" width="240" height="180" stroke-width="2" />
       <rect x="110" y="70" width="160" height="80" />
-      <rect x="120" y="80" width="140" height="60" />
+      <rect x="115" y="75" width="150" height="70" />
     </g>
     <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
-      <path d="M40,60 l150,0 l0,20" />
+      <path d="M40,60 l150,0 l0,25" />
       <path d="M190,130 l0,30 l-145,0" />
     </g>
     <g text-anchor="middle" style="font-size: 75%;">
-      <text x="190" y="30">Spring Boot</text>
+      <text x="190" y="30">Application Context</text>
       <text x="190" y="105">TodoController</text>
       <text x="190" y="125">hello()</text>
       <text x="40" y="50">リクエスト</text>
@@ -452,19 +507,247 @@ HTTP リクエスト・レスポンスを処理する機構をくっつけ全体
 <h2 id="repository">4. TodoRepositoryの作成</h2>
 
 <ol class=spacy>
-  <li> マイグレーションを作成
+  <li> マイグレーションファイルを作成する。
+    <code>resources</code> フォルダの下に <code>db/migration</code> というフォルダを作成し、
+    ここにファイルを新規作成する:
+<div class=file>
+<div>src/main/resources/db/migration/V1__create_todos_table.sql:</div>
+<pre>
+CREATE TABLE todos (
+    id SERIAL PRIMARY KEY,
+    text TEXT
+);
+</pre>
+</div>
+
+<div class=formula>
+<div class=title>データベースマイグレーションとは何か?</div>
+<p>
+一般に、アプリのビジネスロジックはデータベースの構造に依存する。
+さらに、アプリを開発するにつれてデータベース構造は変化していく。
+このため、データベースの変更履歴を管理する「マイグレーションツール」を使って
+開発するのが一般的である。ここでは Spring との統合が容易な
+<a href="https://flywaydb.org/">Flyway</a> というツールを使っている。
+</p>
+</div>
+
+<div class=notice>
+<div class=title>マイグレーションファイルを書くときの注意</div>
+<ul>
+  <li> ファイル名は <code><strong>V</strong>xxx__yyy.sql</code> のような形式にすること (先頭の <code>V</code> は大文字)。
+  <li> 一度使われたマイグレーションファイルは内容を書き換えたり、ファイル名を変更したり、削除しないこと。
+  <li> マイグレーションファイルがうまくいかない場合は、データベースを一度削除し、再度作成する (重要なデータが入ってない場合に限る)。
+<pre>
+$ <strong>dropdb tododb</strong>
+$ <strong>createdb tododb</strong>
+</pre>
+</ul>
+</div>
+
+<li> PostgreSQLクライアントを起動し、"todos" テーブルができていることを確認する:
+<pre>
+$ <strong>psql tododb</strong>
+psql (14.12 (Homebrew))
+Type "help" for help.
+
+tododb=# <strong>\d</strong>
+                  List of relations
+ Schema |         Name          |   Type   |  Owner   
+--------+-----------------------+----------+----------
+ public | flyway_schema_history | table    | postgres
+ public | todos                 | table    | postgres
+ public | todos_id_seq          | sequence | postgres
+(3 rows)
+</pre>
+
+<li> テスト時に実行させる SQL ファイルを書く:
+<div class=file>
+<div>src/test/resources/insert_test_data.sql:</div>
+<pre>
+TRUNCATE TABLE todos;
+INSERT INTO todos VALUES (1, 'foo');
+INSERT INTO todos VALUES (2, 'bar');
+</pre>
+</div>
+
+<li> APIが返す JSON型である Todoクラスを作成する (これはテストを書く必要はない)。
+  Todo.kt ファイルを作成し、以下のように書く:
+<pre>
+package com.example.todoApp
+
+data class Todo(val id: Long, val text: String)
+</pre>
+
+<div class=formula>
+<div class=title>Kotlin の data class とは?</div>
+<p>
+</p>
+</div>
+
+<li> テストを TodoAppApplicationTests.kt に追加する:
+<pre>
+package com.example.todoApp
+...
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+<span class=bgy>@Sql("/insert_test_data.sql")</span>
+class TodoAppApplicationTests
+    ...
+<div class=bgy>    @Test
+    fun `GETリクエストはTodoオブジェクトのリストを返す`() {
+        <em>// localhost/todos に GETリクエストを送り、レスポンスを Todoオブジェクトの配列として解釈する。</em>
+        val response = restTemplate.getForEntity("http://localhost:$port/todos", Array&lt;Todo&gt;::class.java)
+        <em>// レスポンスの Content-Type は application/json であること。</em>
+        assertThat(response.headers.contentType, equalTo(MediaType.APPLICATION_JSON))
+        <em>// 配列は2つの要素をもつこと。</em>
+        val todos = response.body!!
+        assertThat(todos.size, equalTo(2))
+        <em>// 最初の要素は id=1 であり、text が "foo" であること。</em>
+        assertThat(todos[0].id, equalTo(1))
+        assertThat(todos[0].text, equalTo("foo"))
+        <em>// 次の要素は id=2 であり、text が "bar" であること。</em>
+        assertThat(todos[1].id, equalTo(2))
+        assertThat(todos[1].text, equalTo("bar"))
+    }
+</div>    ...
+</pre>
+<p>
+<kbd><svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="10" height="10">
+       <polygon fill=green stroke=none points="0,0 10,5 0,10" />
+       </svg></kbd> ボタンを押してテストを実行し、失敗することを確認する。
+</p>
+
+<li> 最初に、データベースとの入出力をおこなうリポジトリ (Repository) オブジェクトを定義する。
+TodoRepository.kt ファイルを作成し、以下のように書く:
+<pre>
+package com.example.todoApp
+...
+
+@Component
+class TodoRowMapper : RowMapper<Todo> {
+    override fun mapRow(rs: ResultSet, rowNum: Int): Todo {
+        return Todo(rs.getLong(1), rs.getString(2))
+    }
+}
+
+@Repository
+class TodoRepository(
+    @Autowired val jdbcTemplate: JdbcTemplate,
+    @Autowired val todoRowMapper: TodoRowMapper
+) {
+    fun getTodos(): List&lt;Todo&gt; {
+        return jdbcTemplate.query("SELECT id, text FROM todos", todoRowMapper)
+    }
+}
+</pre>
+
+<div class=note>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その2</div>
+<p>
+コード中のクラス名・関数名・変数名などを
+<kbd>Command &#x2318;</kbd> キーを押しながらクリックすると、
+そのクラスや関数の定義箇所に移動する。
+</p>
+</div>
+
+<li> つぎに、TestController を変更してリポジトリを呼び出し、
+  GETメソッドの返り値を返すようなメソッドを追加する:
+<pre>
+package com.example.todoApp
+...
+
+@RestController
+class TodoController(<span class=bgy>val todoRepository: TodoRepository</span>) {
+    ...
+<div class=bgy>    @GetMapping("/todos")
+    fun getTodos(): List&lt;Todo&gt; {
+        return todoRepository.getTodos()
+    }
+</div>    ...
+</pre>
+
+<p> TodoAppApplicationTests に戻り、
+<kbd><svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="10" height="10">
+       <polygon fill=green stroke=none points="0,0 10,5 0,10" />
+       </svg></kbd> ボタンを押してテストを実行し、成功することを確認する。
+</p>
 
 </ol>
-  
+
+<p>
+  以上で Todoテーブルの内容を取得する GET エンドポイントができた。
+</p>
 
 
-<h2 id="references">参考文献</h2>
+<h2 id="post">5. POSTエンドポイントの作成</h2>
+
+<ol class=spacy>
+  <li> POSTリクエストで受け取る JSONの型を定義する:
+<pre>
+package com.example.todoApp
+
+data class TodoRequest(val text: String)
+</pre>
+
+<li> テストを書いて実装する:
+<pre>
+    @Test
+    fun `POSTリクエストはOKステータスを返す`() {
+        <em>// localhost/todos に POSTリクエストを送る。このときのボディは {"text": "hello"}</em>
+        val request = TodoRequest("hello")
+        val response = restTemplate.postForEntity("http://localhost:$port/todos", request, Any::class.java)
+        <em>// レスポンスのステータスコードは OK であること。</em>
+        assertThat(response.statusCode, equalTo(HttpStatus.OK))
+    }
+</pre>
+
+<li> テストを書いて実装する。
+  このとき「正しくデータベースに追加できているか」をテストで確認するためには、以下のようにする:
+<ol>
+  <li> 最初に <code>GET /todos</code> を実行し、得られた Todoのリストを記憶しておく。
+  <li> <code>POST /todos</code> でなにか適当な Todoをひとつ追加する。
+  <li> ふたたび <code>GET /todos</code> を実行し、得られた Todoリストに
+    新しい Todo項目が追加されているかどうかをチェックする。
+</ol>
+<pre>
+    @Test
+    fun `POSTリクエストはTodoオブジェクトを格納する`() {
+        <em>// localhost/todos に GETリクエストを送り、レスポンスを Todoオブジェクトの配列として解釈する。</em>
+        ...
+        <em>// このときのレスポンスを todos1 として記憶。</em>
+        ...
+
+        <em>// localhost/todos に POSTリクエストを送る。このときのボディは {"text": "hello"}</em>
+        ...
+
+        <em>// ふたたび localhost/todos に GETリクエストを送り、レスポンスを Todoオブジェクトの配列として解釈する。</em>
+        ...
+        <em>// このときのレスポンスを todos2 として記憶。</em>
+        ...
+
+        <em>// 配列 todos2 は、配列 todos1 よりも 1 要素だけ多い。</em>
+        assertThat(todos2.size, equalTo(todos1.size + 1))
+        <em>// 配列 todos2 には "hello" をもつTodoオブジェクトが含まれている。</em>
+        assertThat(todos2.map { todo: Todo -&gt; todo.text }, hasItem("hello"))
+    }
+</pre>
+
+</ol>
+
+
+<h2 id="references">6. 参考文献</h2>
 
 <ul>
+  <li> <a target="_blank" href="https://developer.mozilla.org/ja/docs/Web/HTTP/Status">HTTP レスポンスステータスコード</a>
   <li> <a target="_blank" href="https://www.tohoho-web.com/ex/kotlin.html">とほほのKotlin入門</a>
   <li> <a target="_blank" href="https://licensecounter.jp/devops-hub/blog/spring-boot1/">Spring Bootってなにがいいの</a>
   <li> <a target="_blank" href="https://spring.pleiades.io/spring-boot/">Spring Boot リファレンスマニュアル</a>
   <li> <a target="_blank" href="https://learning-collection.com/spring-boot%E3%81%A7%E3%82%88%E3%81%8F%E4%BD%BF%E3%81%86%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%B8%80%E8%A6%A7/">Spring Bootでよく使うアノテーション一覧</a>
+  <li> <a target="_blank" href="https://www.tohoho-web.com/ex/postgresql.html">とほほのPostgreSQL入門</a>
 </ul>
 
 <hr>
