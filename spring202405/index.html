@@ -36,6 +36,7 @@ u { color: #880000; font-weight: bold; }
 .note { background: #88ffff; outline: 2px solid black; padding: 1em; margin: 1em; }
 pre em { color: #008800; }
 code em { color: #000088; }
+pre.small { font-size: 75%; }
 .error { color: red; font-weight: bold; }
 .exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
 .exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
@@ -581,6 +582,29 @@ data class Todo(val id: Long, val text: String)
 <div class=formula>
 <div class=title>Kotlin の data class とは?</div>
 <p>
+Kotlin における data class は、データの格納に使うクラスを定義するためのショートカットである。
+通常であれば、以下のようなクラス定義を書く必要があるが、data class の定義は自動でこれらを追加してくれる。
+<pre class=small>
+class Todo {
+    val id: Long
+    val text: String
+
+    constructor(id: Long, text: String) {
+        this.id = id
+        this.text = text
+    }
+
+    getId(): Long { 
+        return id 
+    }
+
+    getText(): String {
+        return text
+    }
+
+    ...
+}
+</pre>
 </p>
 </div>
 
