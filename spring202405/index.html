@@ -352,7 +352,7 @@ class TodoAppApplicationTests(
 <div class=bgy>    @Test
     fun `GETリクエストはOKステータスを返す`() {
         <em>// localhost/todos に GETリクエストを発行する。</em>
-        val response = restTemplate.getForEntity("http://localhost:$port/todos", Any::class.java)
+        val response = restTemplate.getForEntity("http://localhost:$port/todos", String::class.java)
         <em>// レスポンスのステータスコードは OK である。</em>
         assertThat(response.statusCode, equalTo(HttpStatus.OK))
     }
@@ -431,7 +431,7 @@ class TodoController {
 
     @GetMapping("/todos")
     fun getTodos(): String {
-        return "Hello, World!"
+        return "Here are todos!"
     }
 
 }
@@ -723,7 +723,7 @@ data class TodoRequest(val text: String)
     fun `POSTリクエストはOKステータスを返す`() {
         <em>// localhost/todos に POSTリクエストを送る。このときのボディは {"text": "hello"}</em>
         val request = TodoRequest("hello")
-        val response = restTemplate.postForEntity("http://localhost:$port/todos", request, Any::class.java)
+        val response = restTemplate.postForEntity("http://localhost:$port/todos", request, String::class.java)
         <em>// レスポンスのステータスコードは OK であること。</em>
         assertThat(response.statusCode, equalTo(HttpStatus.OK))
     }
