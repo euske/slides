@@ -26,15 +26,17 @@ pre, code { background: #ddd; font-size: 120%; font-family: courier; }
 img { max-width: 80vw; height: auto; }
 dt { text-decoration: underline; font-weight: bold; }
 u { color: #880000; font-weight: bold; }
+.spacy > li { margin-top: 2em; }
 .author { text-align: right; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; background: white; }
 .figure .caption { font-size: 80%; font-weight: bold; }
 .notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em 4em; }
-.formula { background: #ccffcc; outline: 2px solid black; padding: 1em; margin: 1em; }
+.formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .title { display: flex; justify-content: center; font-size: 120%; font-weight: bold; border-bottom: 1px solid black; }
-.note { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+.note { background: #88ffff; outline: 2px solid black; padding: 1em; margin: 1em; }
 pre em { color: #0000dd; }
 code em { color: #000088; }
+.error { color: red; font-weight: bold; }
 .exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
 .exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
 .file { outline: 2px solid black; padding: 1em; margin: 1em; }
@@ -62,18 +64,30 @@ Yusuke Shinyama, May. 2024
 </div>
 
 <ol>
-  <li> IntelliJ IDEA Community Edition のインストールと設定
-  <li> Spring Initializr による雛形アプリ生成
-  <li> マイグレーションを作成
-  <li> 最初のTDD - TodoControllerを書く
-  <li> TodoRepositoryの作成
+  <li> <a href="#setup">はじめの準備</a>
+  <li> <a href="#initializr">Spring Initializr による雛形アプリ生成</a>
+  <li> <a href="#controller">最初のTDD - TodoControllerの作成</a>
+  <li> <a href="#repository">TodoRepositoryの作成</a>
+  <li> <a href="#references">参考文献</a>
 </ol>
 
-<h2 id="setup">1. IntelliJ IDEA Community Edition のインストールと設定</h2>
 
-<ol> 
-  <li> <a target="_blank" href="https://www.jetbrains.com/idea/download/">Download IntelliJ IDEA Community Edition</a> (Ultimateではない) をダウンロードし、インストールする。
-  <li> Java SDK (Amazon colletto) をダウンロード・インストールする。
+<h2 id="setup">1. はじめの準備</h2>
+
+<ol class=spacy>
+
+  <li> IntelliJ IDEA Community Edition <strong>(Ultimateではない)</strong> をダウンロードし、インストールする。
+  <ul>
+    <li> <a target="_blank" href="https://www.jetbrains.com/idea/download/">Download IntelliJ IDEA Community Edition</a>
+  </ul>
+
+  <li> Java SDK をダウンロード・インストールする。
+  <ul>
+    <li> <kbd>Project Structure...</kbd> → <kbd>SDKs</kbd> で <kbd>+</kbd> をクリックし、<kbd>Download JDK...</kbd> を選択。
+    <li> Version: <kbd>21</kbd>, Vendor: <kbd>Amazon Colletto 21.0<kbd> を選択。
+    <li> 一般に、最新バージョンよりも少し「枯れた」バージョンのほうが問題が少ない。
+  </ul>
+
   <li> PostgreSQL が起動していることを確認する:
 <pre>
 $ <strong>brew services info postgresql</strong>
@@ -82,15 +96,18 @@ Running: ✔
 Loaded: ✔
 Schedulable: ✘
 </pre>
+
   <li> データベース tododb を作成する:
 <pre>
 $ <strong>createdb tododb</strong>
 </pre>
 </ol>
 
+
 <h2 id="initializr">2. Spring Initializr による雛形アプリ生成</h2>
 
-<ol>
+<ol class=spacy>
+
   <li> <a target="_blank" href="https://start.spring.io/#!type=gradle-project-kotlin&amp;language=kotlin&amp;packaging=jar&amp;groupId=com.example&amp;artifactId=todoApp&amp;name=todoApp&amp;description=Sample%20Spring%20Boot%20Todo%20app&amp;packageName=com.example.todoApp&amp;dependencies=web,data-jdbc,flyway,postgresql">Spring Initializr</a> を使って雛形アプリを生成し、ダウンロードする。
     <ul>
       <li> Spring Web (Webアプリ)
@@ -98,7 +115,9 @@ $ <strong>createdb tododb</strong>
       <li> Flyway Migration (マイグレーションツール)
       <li> PostgreSQL Driver (PostgreSQL用ドライバ)
     </ul>
+
   <li> IntelliJ IDEA CE で開く。
+
   <li> application.properties を変更:
 <div class=file>
 <div>application.properties:</div>
@@ -110,6 +129,7 @@ spring.datasource.password=postgres
 spring.datasource.driverClassName=org.postgresql.Driver
 </pre>
 </div>
+
   <li> static/index.html を新規作成:
 <div class=file>
 <div>static/index.html:</div>
@@ -122,8 +142,8 @@ Welcome!
 &lt;/html&gt;
 </pre>
 </div>
+
   <li> アプリを起動し、<a target="_blank" href="http://localhost:8080/">http://localhost:8080/</a> にアクセス。
-</ol>
 
 <div class=formula>
 <div class=title>Javaの基本概念</div>
@@ -214,9 +234,12 @@ class MyClass {
 </dl>
 </div>
 
-<h2 id="controller">3. 最初のTDD - TodoControllerを書く</h2>
+</ol>
 
-<ol>
+
+<h2 id="controller">3. 最初のテスト駆動開発 - TodoControllerの作成</h2>
+
+<ol class=spacy>
 <li> まず TodoAppApplicationTests.kt に、以下のように書く:
 <pre>
 package com.example.todoApp
@@ -239,111 +262,210 @@ class TodoAppApplicationTests {
     }
 </div>}
 </pre>
+
 <ul>
   <li> <code>@Test</code> アノテーションがついているメソッドは、テストとして実行される。
   <li> <code>fun `~`</code> の部分には、テスト名を書く。
   <li> <code>assertThat(1+2, equalTo(3))</code> は「1+2 の結果が 3 に等しい」ことをチェックしている。
+  <li> <kbd><svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="10" height="10">
+       <polygon fill=green stroke=none points="0,0 10,5 0,10" />
+       </svg></kbd> ボタンを押してテストを実行し、成功していることを確認する。
 </ul>
+
+<div class=note>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その1</div>
+<p>
+コード中の<span class=error>赤色になっている部分</span>で
+<kbd>Option</kbd> + <kbd>Return</kbd> を押すと、
+その問題を解決するための手段を提案してくれる。
+</p>
+</div>
 
 <li> TodoAppApplicationTests を以下のように変更する:
 <pre>
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(<span class=bgy>webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT</span>)
 class TodoAppApplicationTests(
-    @Autowired val restTemplate: TestRestTemplate, 
+<div class=bgy>    @Autowired val restTemplate: TestRestTemplate, 
     @LocalServerPort val port: Int
-) {
+</div>) {
     ...
 
-    @Test
+<div class=bgy>    @Test
     fun `GETリクエストはOKステータスを返す`() {
+        // localhost/todos に GETリクエストを発行する。
         val response = restTemplate.getForEntity("http://localhost:$port/todos", Any::class.java)
+        // レスポンスのステータスコードは OK である。
         assertThat(response.statusCode, equalTo(HttpStatus.OK))
-        assertThat(response.headers.contentType, equalTo(MediaType.APPLICATION_JSON))
     }
+</div>
+    ...
 </pre>
-</ol>
+
+<ul>
+  <li> <kbd><svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="10" height="10">
+       <polygon fill=green stroke=none points="0,0 10,5 0,10" />
+       </svg></kbd> ボタンを押してテストを実行し、失敗していることを確認する。
+</ul>
 
 <div class=formula>
-<div class=title>Spring「フレームワーク」とは何か?</div>
+<div class=title>Spring における「依存注入 (DI)」の考え方 - その1</div>
 <p>
-伝統的な (フレームワークを使わない) プログラミングでは、
-アプリケーションの全体的な流れはプログラマが決定する:
+Springでは
+<code>@Autowired</code> や <code>@LocalServerPort</code> のようなアノテーションを書くことによって、
+実行時に必要な値やオブジェクトをフレームワークが自動的に作成・注入してくれるようになっている。
+この機能を「<u>依存注入 (Dependency Injection, DI)</u>」と呼ぶ。
+Spring では、コントローラーやデータベース接続など、アプリの動作に関連するほとんどのオブジェクトは
+DI を使って作成させる (ビジネスロジックに関連するオブジェクトを除く)。
 </p>
 
 <div class=figure>
 <div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="160" height="220">
-    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
-      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
-    </marker>
-    <g stroke="black" stroke-width="1" fill="#ccc">
-      <rect x="10" y="10" width="140" height="60" />
-      <rect x="10" y="100" width="140" height="60" />
-    </g>
-    <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
-      <path d="M80,70 l0,25" />
-      <path d="M80,160 l0,25" />
-      <path d="M80,195 l0,20" marker-end="none" stroke-dasharray="4,4" />
-    </g>
-    <g text-anchor="middle" style="font-weight: bold;">
-      <text x="80" y="45">処理1</text>
-      <text x="80" y="135">処理2</text>
-    </g>
-  </svg>
-</div>
-</div>
-
-<p>
-これに対して、フレームワークを使ったソフトウェアでは、
-プログラマがアプリケーション全体の流れを直接指定しない。
-かわりに、フレームワークがプログラマが書いた処理を必要に応じて呼びだす。
-(制御の反転, <a target="_blank" href="https://www.martinfowler.com/bliki/InversionOfControl.html">Inversion of Control</a>)
-</p>
-
-<p>
-Spring フレームワークにおける処理の流れは以下のようになる:
-</p>
-
-<div class=figure>
-<div>
-  <svg xmlns="http://www.w3.org/2000/svg"
-       xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="320" height="320">
+       version="1.1" width="340" height="220">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
       <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
     </marker>
     <g stroke="black" stroke-width="1" fill="none">
-      <rect x="10" y="10" width="300" height="300" fill="#8ff" stroke-width="2" />
-      <rect x="70" y="70" width="160" height="80" fill="white" />
-      <rect x="90" y="190" width="160" height="80" fill="white" />
-      <rect x="80" y="80" width="140" height="60" fill="#ccc" />
-      <rect x="100" y="200" width="140" height="60" fill="#ccc" />
+      <rect x="10" y="10" width="320" height="200" stroke-width="2" />
+      <rect x="30" y="50" width="140" height="50" />
+      <rect x="35" y="55" width="130" height="40" />
+      <rect x="190" y="50" width="120" height="50" />
+      <rect x="195" y="55" width="110" height="40" />
+      <rect x="85" y="140" width="180" height="50" />
+      <rect x="90" y="145" width="170" height="40" />
     </g>
-    <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
-      <path d="M150,60 l0,20" />
-      <path d="M150,130 l0,20" />
-      <path d="M170,180 l0,20" />
-      <path d="M170,250 l0,20" />
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="170" y="30">Spring Boot</text>
+      <text x="100" y="80">TestRestTemplate</text>
+      <text x="250" y="80">LocalServerPort</text>
+      <text x="175" y="170">TodoAppApplicationTests</text>
     </g>
-    <g text-anchor="middle" style="font-weight: bold;">
-      <text x="160" y="40">Spring Boot</text>
-      <text x="150" y="115">処理1</text>
-      <text x="170" y="235">処理2</text>
+    <g stroke="black" fill="none" marker-end="url(#arrow)">
+      <path d="M110,140 q-20,-5,-20,-35" stroke-width="2" stroke-dasharray="4,4" />
+      <path d="M110,100 q20,5,20,35" stroke-width="4" />
+      <path d="M230,140 q-20,-5,-20,-35" stroke-width="2" stroke-dasharray="4,4" />
+      <path d="M230,100 q20,5,20,35" stroke-width="4" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="75" y="125">依存</text>
+      <text x="145" y="125">注入</text>
+      <text x="195" y="125">依存</text>
+      <text x="265" y="125">注入</text>
     </g>
   </svg>
+  <div class="caption">TestRestTemplate と LocalServerPort を TodoAppApplicationTests に注入する</div>
 </div>
 </div>
+
+</div>
+
+<li> 新しいファイル TodoController.kt を作成し、以下のように書く:
+<pre>
+package com.example.todoApp
+...
+
+@RestController
+class TodoController {
+
+    @GetMapping("/todos")
+    fun getTodos(): String {
+        return "Hello, World!"
+    }
+
+}
+</pre>
+
+<ul>
+  <li> ふたたび <kbd><svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="10" height="10">
+       <polygon fill=green stroke=none points="0,0 10,5 0,10" />
+       </svg></kbd> ボタンを押してテストを実行し、成功していることを確認する。
+  <li> テスト駆動開発の3ステップ:
+    <ul>
+      <li> まず失敗するテストを書く (Red)。
+      <li> そのテストが成功するように、最小限のコードを書く (Green)。
+      <li> テストが成功したら、必要に応じてコードをリファクタリングする (Refactor)。
+    </ul>
+</ul>
+
+<div class=formula>
+<div class=title>Spring における「依存注入 (DI)」の考え方 - その2</div>
 
 <p>
-Spring では各コードが全体的な処理の流れから分離されているので、
-各部分を個別にテストしたり、全体をつなげてテストするといった作業が
-非常に簡単にできるようになっている。
-そのため Spring はテスト駆動開発 (TDD) に向いている。
+Springにおける
+<code>@RestController</code> や <code>@GetMapping</code> のようなアノテーションは、
+依存注入のもう一方の側面を表している。
+ここまでのコードでは明示的に <code>TodoController</code> を作成するロジックは存在していない。
+にもかかわらず、<code>TodoController</code> オブジェクトが作成され、動作しているように見える。
 </p>
+
+<p>
+ここでは、<code>@RestController</code> は、当該クラスが Spring Boot の DI候補として
+利用可能であることを示す。さらに <code>@GetMapping</code> は、当該メソッドが
+GET メソッドに対するハンドラとして利用可能であることを示す。
+この2つのアノテーションが存在することによって、
+Spring Boot は <code>hello()</code> メソッドの周囲に
+HTTP リクエスト・レスポンスを処理する機構をくっつけ全体を Webサーバとして動作させる。
+この仕組みを使って、数行で新しい Web API を作成することができる。
+</p>
+
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="320" height="200">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="70" y="10" width="240" height="180" stroke-width="2" />
+      <rect x="110" y="70" width="160" height="80" />
+      <rect x="120" y="80" width="140" height="60" />
+    </g>
+    <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
+      <path d="M40,60 l150,0 l0,20" />
+      <path d="M190,130 l0,30 l-145,0" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="190" y="30">Spring Boot</text>
+      <text x="190" y="105">TodoController</text>
+      <text x="190" y="125">hello()</text>
+      <text x="40" y="50">リクエスト</text>
+      <text x="40" y="150">レスポンス</text>
+    </g>
+  </svg>
+  <div class="caption">依存注入を使った APIエンドポイントの作成</div>
+</div>
 </div>
 
+</div>
+
+</ol>
+
+
+<h2 id="repository">4. TodoRepositoryの作成</h2>
+
+<ol class=spacy>
+  <li> マイグレーションを作成
+
+</ol>
+  
+
+
+<h2 id="references">参考文献</h2>
+
+<ul>
+  <li> <a target="_blank" href="https://www.tohoho-web.com/ex/kotlin.html">とほほのKotlin入門</a>
+  <li> <a target="_blank" href="https://licensecounter.jp/devops-hub/blog/spring-boot1/">Spring Bootってなにがいいの</a>
+  <li> <a target="_blank" href="https://spring.pleiades.io/spring-boot/">Spring Boot リファレンスマニュアル</a>
+  <li> <a target="_blank" href="https://learning-collection.com/spring-boot%E3%81%A7%E3%82%88%E3%81%8F%E4%BD%BF%E3%81%86%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%B8%80%E8%A6%A7/">Spring Bootでよく使うアノテーション一覧</a>
+</ul>
 
 <hr>
 <address>Yusuke Shinyama</address>
