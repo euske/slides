@@ -464,10 +464,10 @@ Springにおける
 
 <p>
 ここでは、<code>@RestController</code> は、当該クラスが Spring Boot の DI候補として
-利用可能であることを示す。さらに <code>@GetMapping</code> は、当該メソッドが
-GET メソッドに対するハンドラとして利用可能であることを示す。
+利用可能であることを示す。さらに <code>@GetMapping("/todos")</code> は、当該メソッドが
+<code>GET /todos</code> リクエストに対するハンドラとして利用可能であることを示す。
 この2つのアノテーションが存在することによって、
-Spring Boot は <code>hello()</code> メソッドの周囲に
+Spring Boot は <code>getTodos()</code> メソッドの周囲に
 HTTP リクエスト・レスポンスを処理する機構をくっつけ全体を Webサーバとして動作させる。
 この仕組みを使って、数行で新しい Web API を作成することができる。
 </p>
@@ -491,10 +491,11 @@ HTTP リクエスト・レスポンスを処理する機構をくっつけ全体
     </g>
     <g text-anchor="middle" style="font-size: 75%;">
       <text x="190" y="30">Application Context</text>
+      <text x="130" y="55" style="font-family: monospace;">GET /todos</text>
       <text x="190" y="105">TodoController</text>
-      <text x="190" y="125">hello()</text>
-      <text x="40" y="50">リクエスト</text>
-      <text x="40" y="150">レスポンス</text>
+      <text x="190" y="125">getTodos()</text>
+      <text x="65" y="50" text-anchor="end">リクエスト</text>
+      <text x="65" y="150" text-anchor="end">レスポンス</text>
     </g>
   </svg>
   <div class="caption">依存注入を使った APIエンドポイントの作成</div>
@@ -729,6 +730,18 @@ data class TodoRequest(val text: String)
         assertThat(response.statusCode, equalTo(HttpStatus.OK))
     }
 </pre>
+<p>
+<strong>ヒント:</strong>
+POSTリクエストを処理するためには <code>@GetMapping</code> ではなく <code>@PostMapping</code> を使う。
+また、このとき <code>@RequestBody</code> を使って
+ボディとして受け取った JSON を TodoRequestオブジェクトに変換できる。
+</p>
+<pre>
+    @PostMapping("/todos")
+    fun saveTodo(@RequestBody todoRequest: TodoRequest): String {
+        ...
+    }
+</pre>
 
 <li> テストを書いて実装する。
   このとき「正しくデータベースに追加できているか」をテストで確認するためには、以下のようにする:
@@ -759,6 +772,14 @@ data class TodoRequest(val text: String)
         <em>// 配列 todos2 には "hello" をもつTodoオブジェクトが含まれている。</em>
         assertThat(todos2.map { todo: Todo -&gt; todo.text }, hasItem("hello"))
     }
+</pre>
+<p>
+<strong>ヒント:</strong>
+データベースへの記録には <code>jdbcTemplate.update</code> メソッドを使う。
+このとき SQL文中における「<code>?</code>」の部分が引数の値に展開される。
+</p>
+<pre>
+    jdbcTemplate.update("INSERT INTO todos (text) VALUES (?)", todoRequest.text)
 </pre>
 
 <div class=formula>
