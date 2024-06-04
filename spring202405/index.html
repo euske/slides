@@ -32,6 +32,7 @@ u { color: #880000; font-weight: bold; }
 .figure .caption { font-size: 80%; font-weight: bold; }
 .notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+.formula dt { margin-top: 1em; }
 .title { display: flex; justify-content: center; font-size: 120%; font-weight: bold; border-bottom: 1px solid black; }
 .note { background: #88ffff; outline: 2px solid black; padding: 1em; margin: 1em; }
 pre em { color: #008800; }
@@ -70,7 +71,7 @@ Yusuke Shinyama, May. 2024
   <li> <a href="#controller">最初のTDD - TodoControllerの作成</a>
   <li> <a href="#repository">TodoRepositoryの作成</a>
   <li> <a href="#post">POSTエンドポイントの作成</a>
-  <li> <a href="#references">参考文献</a>
+  <li> <a href="#conclusion">おわりに・参考文献</a>
 </ol>
 
 <div class=exercise>
@@ -760,10 +761,88 @@ data class TodoRequest(val text: String)
     }
 </pre>
 
+<div class=formula>
+<div class=title>Spring 用語解説</div>
+<dl>
+  <dt> Bean と POJO
+  <dd> Spring Bean は、Springによって作成・管理されるオブジェクト。
+    これに対してコード上で作成する (newする) オブジェクトは POJO (Plain Old Java Object) と呼ばれる。
+    一般に、アプリの動作に必要なオブジェクトには Bean を使い、ビジネスロジックで使うオブジェクトは POJO を使う。
+    <p>
+      <u>注意:</u>
+      "Java Bean" という用語もあるが、
+      これは特定の規則に従って作られた Javaオブジェクトのことをさし、
+      <strong>Spring Beanとは別物</strong>。
+    </p>
+
+  <dt> Spring IoC コンテナと Application Context
+  <dd> Spring IoC (Inversion of Control) コンテナには、
+    Spring によって作成・管理される Bean が入っている。
+    Spring は必要に応じて Beanを作成し、依存注入をおこなう。
+    "Application Context" もほぼ同義。
+    <div class=figure><div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="340" height="130">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="10" y="10" width="320" height="110" stroke-width="2" />
+      <rect x="30" y="50" width="80" height="50" />
+      <rect x="35" y="55" width="70" height="40" />
+      <rect x="130" y="50" width="80" height="50" />
+      <rect x="135" y="55" width="70" height="40" />
+      <rect x="230" y="50" width="80" height="50" />
+      <rect x="235" y="55" width="70" height="40" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="170" y="30">Application Context</text>
+      <text x="70" y="80">Bean</text>
+      <text x="170" y="80">Bean</text>
+      <text x="270" y="80">...</text>
+    </g>
+  </svg>
+</div>
+</div>
+
+  <dt> @Controller, @Repository, @Service, @Component など
+  <dd> Spring Bean の候補となるクラスにつけられるアノテーション。
+    役割によって使い分ける。
+    Spring Boot では起動時にこれらのアノテーションが自動検出されるため、
+    何も設定もしなくても依存注入が可能になる。
+    <ul>
+      <li> <code>@Controller</code> … Web APIのエンドポイントを提供する。
+      <li> <code>@Repository</code> … データの保存・変更・削除等の機能を提供する。
+      <li> <code>@Service</code> … ビジネスロジックに関連した機能を提供する。
+      <li> <code>@Component</code> … 上記以外の目的で使われる。
+    </ul>
+    
+</dl>
+</div>
+
 </ol>
 
 
-<h2 id="references">6. 参考文献</h2>
+<h2 id="conclusion">6. おわりに</h2>
+
+<p>Spring Boot の長所:</p>
+<ul>
+  <li> 最小限のコードで信頼性のあるサービスを開発できる。
+  <li> データベースとの連携、クラウドサービスの利用、認証・認可の使用など、一般的なアプリで必要な機能がほぼ揃っている。
+  <li> テスト機能が充実しており、テスト駆動開発 (TDD) に向いている。
+  <li> 「エンタープライズ」アプリを設計・開発するためのノウハウが詰まっており、保守しやすいコードが書ける。
+</ul>
+
+<p>Spring Boot の短所:</p>
+<ul>
+  <li> アノテーションの使い方など、「Spring流」でやる方法を覚えるのに時間がかかる。
+  <li> 多くのオブジェクトが自動的に作成されるため、制御の流れがわかりにくい。
+  <li> エラー (データベース接続エラーなど) が発生した場合は「依存注入の失敗」として扱われるため、
+    原因を特定するまでに時間がかかる場合がある。
+</ul>
+
+<h3 id="references">参考文献</h3>
 
 <ul>
   <li> <a target="_blank" href="https://developer.mozilla.org/ja/docs/Web/HTTP/Status">HTTP レスポンスステータスコード</a>
