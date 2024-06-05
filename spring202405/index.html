@@ -704,10 +704,29 @@ class TodoController(<span class=bgy>val todoRepository: TodoRepository</span>) 
 
 </ol>
 
+<blockquote>
+<div class=formula>
+<div class=title>なぜ「依存注入」が必要なのか?</div>
 <p>
-  以上で Todoテーブルの内容を取得する GET エンドポイントができた。
+なぜ Spring が「依存注入」「IoCコンテナ」などという概念を使っているのかというと、
+それは<strong>コードを変えずにシステムのふるまいを変更する</strong>ためである。
+たとえば、以下のようなコードを考えてみよう:
 </p>
-
+<pre>
+name = "tododb"
+db = PostgreSQL(name)
+db.query("SELECT * FROM todos")
+</pre>
+<p>
+このコードでは、ふるまいは完全に固定されている。
+そのためデータベース名を変更したり、PostgreSQL 以外のデータベースを使ったりすることができない。
+テストの際には<strong>できるだけ本番コードそのものをテストしたほうがよい</strong>のだが、
+上のコードを変えずにテストするのは面倒である。
+そこで Spring を使ったプログラミングでは、上のコードの各部分を分解し、
+「配管作業」をフレームワークに担当させることでシステムの柔軟性を実現している。
+</p>
+</div>
+</blockquote>
 
 <h2 id="post">5. POSTエンドポイントの作成</h2>
 
@@ -872,6 +891,7 @@ POSTリクエストを処理するためには <code>@GetMapping</code> では�
   <li> <a target="_blank" href="https://spring.pleiades.io/spring-boot/">Spring Boot リファレンスマニュアル</a>
   <li> <a target="_blank" href="https://learning-collection.com/spring-boot%E3%81%A7%E3%82%88%E3%81%8F%E4%BD%BF%E3%81%86%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%B8%80%E8%A6%A7/">Spring Bootでよく使うアノテーション一覧</a>
   <li> <a target="_blank" href="https://www.tohoho-web.com/ex/postgresql.html">とほほのPostgreSQL入門</a>
+  <li> <a target="_blank" href="https://hamcrest.org/JavaHamcrest/tutorial">Hamcrestチュートリアル (英語)</a>
 </ul>
 
 <hr>
