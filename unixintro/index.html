@@ -140,6 +140,7 @@ UNIX/Linux に関する基礎知識を紹介する。
 <li> <a href="#books">おすすめの書籍</a></li>
 </ol>
 
+
 <h1 id="part-1">第1部 - UNIXの基本的な概念</h1>
 
 <h2 id="unix">1. UNIXとは</h2>
@@ -2114,6 +2115,8 @@ $ <strong>echo &ast;</strong>
 </ol>
 
 
+<h1 id="part-3">第3部 - シェルスクリプト入門</h1>
+
 <h2 id="env">8. 環境変数</h2>
 <p>
 UNIX では、各プロセスに<u>環境変数</u> (environment variable) というものが
@@ -2759,6 +2762,19 @@ path=${FILENAME:-default.txt}
 詳しくは <code>man test</code> を参照のこと。
 </p>
 
+<div class=exercise id="ex-16">
+<div class=header>演習 16. test コマンドの終了状態</div>
+<p>
+以下のコマンドの終了状態を予想してみよう。
+</p>
+<ol>
+  <li> <code>[ a = b ]</code>
+  <li> <code>[ $a != b ]</code> (変数 <code>a</code> の値が <code>123</code> のとき)
+  <li> <code>[ -f /etc/services ]</code>
+  <li> <code>[ ! -d $HOME ]</code>
+</ol>
+</div>
+
 <h3 id="control-if">10.2. if … then 〜 fi文</h3>
 <p>
 if文の使い方は、通常のプログラミング言語とほとんど同じである。
@@ -2792,8 +2808,8 @@ fi
 </pre>
 </dl>
 
-<div class=exercise id="ex-16">
-<div class=header>演習 16. dogコマンド</div>
+<div class=exercise id="ex-17">
+<div class=header>演習 17. dogコマンド</div>
 <p>
 与えられたパス名に対して、
 それがファイルであれば <code>cat</code> を実行し、
@@ -2884,8 +2900,8 @@ done
 </pre>
 </dl>
 
-<div class=exercise id="ex-17">
-<div class=header>演習 17. for文の演習</div>
+<div class=exercise id="ex-18">
+<div class=header>演習 18. for文の演習</div>
 <p>
 いくつかのディレクトリの中に、
 <code>list.txt</code> というファイルが入っているとする。
