@@ -33,6 +33,7 @@ u { color: #880000; font-weight: bold; }
 .notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
 .formula dt { margin-top: 1em; }
+.spacy dt { margin-top: 1em; }
 .title { display: flex; justify-content: center; font-size: 120%; font-weight: bold; border-bottom: 1px solid black; }
 .note { background: #88ffff; outline: 2px solid black; padding: 1em; margin: 1em; }
 pre em { color: #008800; }
@@ -71,13 +72,13 @@ Yusuke Shinyama, May. 2024
   <li> <a href="#controller">最初のTDD - TodoControllerの作成</a>
   <li> <a href="#repository">TodoRepositoryの作成</a>
   <li> <a href="#post">POSTエンドポイントの作成</a>
-  <li> <a href="#conclusion">おわりに・参考文献</a>
+  <li> <a href="#conclusion">おわりに・参考資料</a>
 </ol>
 
 <div class=exercise>
 <div class=header>今回作りたいもの:</div>
 <p>
-  PostgreSQL + Spring Boot を使った Todo アプリのバックエンド。
+  PostgreSQL + Spring Boot を使った To Do (やること管理) アプリのバックエンド。
   以下のAPIエンドポイントを提供する:
 <ol type=a>
   <li> <code>GET /todos</code> を実行すると、データベースにある Todo 項目すべてを JSON形式で返す。
@@ -89,12 +90,13 @@ Yusuke Shinyama, May. 2024
 <pre>
 {"text": "Hello!"}
 </pre>
-  <li> <code>GET /todos/2</code> を実行すると、与えられた IDをもつ Todo 項目ひとつをJSON形式で返す。
+  <li> <code>GET /todos/<u>ID</u></code> を実行すると、与えられた IDをもつ Todo 項目ひとつをJSON形式で返す。
 <pre>
 {"id":2, "text":"Buy milk."}
 </pre>
-  <li> <code>DELETE /todos/2</code> を実行すると、与えられた IDをもつ Todo 項目をデータベースから削除する。
-</ol>
+  <li> <code>DELETE /todos/<u>ID</u></code> を実行すると、与えられた IDをもつ Todo 項目をデータベースから削除する。
+  <li> 存在しないIDに対して GET や DELETE をおこなうと、ステータスコードとして 404 (Not Found) を返す。<br>
+  参考: <a target="_blank" href="https://developer.mozilla.org/ja/docs/Web/HTTP/Status">HTTP レスポンスステータスコード</a>
 </div>
 
 
@@ -298,7 +300,9 @@ $ <strong>./gradlew bootrun</strong>  <em>(アプリの実行)</em>
 <h2 id="controller">3. 最初のテスト駆動開発 - TodoControllerの作成</h2>
 
 <ol class=spacy>
-<li> まず TodoAppApplicationTests.kt に、以下のように書く:
+<li> まず TodoAppApplicationTests.kt (最初から存在している) に、以下のように書く:
+<div class=file>
+src/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
 <pre>
 package com.example.todoApp
 
@@ -320,6 +324,7 @@ class TodoAppApplicationTests {
     }
 </div>}
 </pre>
+</div>
 
 <ul>
   <li> <code>@Test</code> アノテーションがついているメソッドは、テストとして実行される。
@@ -342,6 +347,8 @@ class TodoAppApplicationTests {
 </div>
 
 <li> TodoAppApplicationTests を以下のように変更する:
+<div class=file>
+src/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
 <pre>
 @SpringBootTest(<span class=bgy>webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT</span>)
 class TodoAppApplicationTests(
@@ -360,6 +367,7 @@ class TodoAppApplicationTests(
 </div>
     ...
 </pre>
+</div>
 
 <ul>
   <li> <kbd><svg xmlns="http://www.w3.org/2000/svg"
@@ -423,6 +431,8 @@ DI を使って作成させる (ビジネスロジックに関連するオブジ
 </div>
 
 <li> 新しいファイル TodoController.kt を作成し、以下のように書く:
+<div class=file>
+src/main/kotlin/com/example/todoApp/TodoController.kt
 <pre>
 package com.example.todoApp
 ...
@@ -437,6 +447,7 @@ class TodoController {
 
 }
 </pre>
+</div>
 
 <ul>
   <li> ふたたび <kbd><svg xmlns="http://www.w3.org/2000/svg"
@@ -446,9 +457,9 @@ class TodoController {
        </svg></kbd> ボタンを押してテストを実行し、成功していることを確認する。
   <li> テスト駆動開発の3ステップ:
     <ul>
-      <li> まず失敗するテストを書く (Red)。
-      <li> そのテストが成功するように、最小限のコードを書く (Green)。
-      <li> テストが成功したら、必要に応じてコードをリファクタリングする (Refactor)。
+      <li> まず失敗するテストを書く (<strong>Red</strong>)。
+      <li> そのテストが成功するように、最小限のコードを書く (<strong>Green</strong>)。
+      <li> テストが成功したら、必要に応じてコードをリファクタリングする (<strong>Refactor</strong>)。
     </ul>
 </ul>
 
@@ -575,11 +586,14 @@ INSERT INTO todos VALUES (2, 'bar');
 
 <li> APIが返す JSON型である Todoクラスを作成する (これはテストを書く必要はない)。
   Todo.kt ファイルを作成し、以下のように書く:
+<div class=file>
+src/main/kotlin/com/example/todoApp/Todo.kt
 <pre>
 package com.example.todoApp
 
 data class Todo(val id: Long, val text: String)
 </pre>
+</div>
 
 <div class=formula>
 <div class=title>Kotlin の data class とは?</div>
@@ -611,6 +625,8 @@ class Todo {
 </div>
 
 <li> テストを TodoAppApplicationTests.kt に追加する:
+<div class=file>
+src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
 <pre>
 package com.example.todoApp
 ...
@@ -637,6 +653,7 @@ class TodoAppApplicationTests
     }
 </div>    ...
 </pre>
+</div>
 <p>
 <kbd><svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -645,8 +662,11 @@ class TodoAppApplicationTests
        </svg></kbd> ボタンを押してテストを実行し、失敗することを確認する。
 </p>
 
-<li> 最初に、データベースとの入出力をおこなうリポジトリ (Repository) オブジェクトを定義する。
+<li> テストを書いたので、実装を開始する。
+まず、データベースとの入出力をおこなうリポジトリ (Repository) オブジェクトを定義する。
 TodoRepository.kt ファイルを作成し、以下のように書く:
+<div class=file>
+src/main/kotlin/com/example/todoApp/TodoRepository.kt
 <pre>
 package com.example.todoApp
 ...
@@ -668,6 +688,7 @@ class TodoRepository(
     }
 }
 </pre>
+</div>
 
 <div class=note>
 <div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その2</div>
@@ -680,6 +701,8 @@ class TodoRepository(
 
 <li> つぎに、TestController を変更してリポジトリを呼び出し、
   GETメソッドの返り値を返すようなメソッドを追加する:
+<div class=file>
+src/main/kotlin/com/example/todoApp/TodoController.kt
 <pre>
 package com.example.todoApp
 ...
@@ -693,6 +716,7 @@ class TodoController(<span class=bgy>val todoRepository: TodoRepository</span>) 
     }
 </div>    ...
 </pre>
+</div>
 
 <p> TodoAppApplicationTests に戻り、
 <kbd><svg xmlns="http://www.w3.org/2000/svg"
@@ -706,7 +730,7 @@ class TodoController(<span class=bgy>val todoRepository: TodoRepository</span>) 
 
 <blockquote>
 <div class=formula>
-<div class=title>なぜ「依存注入」が必要なのか?</div>
+<div class=title>なぜ依存注入が必要なのか?</div>
 <p>
 なぜ Spring が「依存注入」「IoCコンテナ」などという概念を使っているのかというと、
 それは<strong>コードを変えずにシステムのふるまいを変更する</strong>ためである。
@@ -719,12 +743,56 @@ db.query("SELECT * FROM todos")
 </pre>
 <p>
 このコードでは、ふるまいは完全に固定されている。
-そのためデータベース名を変更したり、PostgreSQL 以外のデータベースを使ったりすることができない。
-テストの際には<strong>できるだけ本番コードそのものをテストしたほうがよい</strong>のだが、
-上のコードを変えずにテストするのは面倒である。
-そこで Spring を使ったプログラミングでは、上のコードの各部分を分解し、
-「配管作業」をフレームワークに担当させることでシステムの柔軟性を実現している。
+データベース名を変更したり、PostgreSQL 以外のデータベースを使うためには
+コードを変更する必要がある。しかしテストの際には
+<strong>できるだけ本番コードそのものをテストしたほうがよい</strong>。
+上のようなコードではテストが面倒である。
+そこで Spring を使ったプログラミングでは、コードの各部分を分解し、
+フレームワークに「配管作業」を任せている。そしてこの接続を
+切り替えられるようにしておくことで、システムの柔軟性を実現している。
+この配管作業が依存注入に相当する。
+<div class=figure><div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="300" height="130">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="35" y="5" width="50" height="20" />
+      <rect x="10" y="55" width="110" height="20" />
+      <rect x="50" y="105" width="200" height="20" />
+      <g stroke="gray">
+      <rect x="125" y="5" width="50" height="20" />
+      <rect x="230" y="5" width="60" height="20" />
+      <rect x="210" y="55" width="80" height="20" />
+      </g>
+    </g>
+    <g stroke="black" stroke-width="2" fill="none" marker-end="url(#arrow)">
+      <path d="M60,25 l0,15 l30,0 l0,15" />
+      <path d="M65,75 l0,30" />
+      <g stroke="gray" stroke-dasharray="2,2">
+      <path d="M260,25 l0,30" />
+      <path d="M150,25 l0,15 l-50,0 l0,15" />
+      <path d="M250,75 l0,15 l-175,0 l0,15" />
+      </g>
+    </g>
+    <g text-anchor="middle" style="font-size: 75%; font-family: monospace;">
+      <text x="60" y="20">"tododb"</text>
+      <text x="65" y="70">PostgreSQL(name)</text>
+      <text x="150" y="120">db.query("SELECT * FROM todos")</text>
+      <g fill="gray">
+      <text x="150" y="20">"tododb2"</text>
+      <text x="260" y="20">"otherdb"</text>
+      <text x="250" y="70">MySQL(name)</text>
+      </g>
+    </g>
+  </svg>
+<div class=caption>依存注入のイメージ (実線は有効な接続)</div>
+</div>
+</div>
 </p>
+
 </div>
 </blockquote>
 
@@ -732,13 +800,18 @@ db.query("SELECT * FROM todos")
 
 <ol class=spacy>
   <li> POSTリクエストで受け取る JSONの型を定義する:
+<div class=file>
+src/main/kotlin/com/example/todoApp/TodoRequest.kt
 <pre>
 package com.example.todoApp
 
 data class TodoRequest(val text: String)
 </pre>
+</div>
 
 <li> テストを書いて実装する:
+<div class=file>
+src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
 <pre>
     @Test
     fun `POSTリクエストはOKステータスを返す`() {
@@ -749,6 +822,7 @@ data class TodoRequest(val text: String)
         assertThat(response.statusCode, equalTo(HttpStatus.OK))
     }
 </pre>
+</div>
 <p>
 <strong>ヒント:</strong>
 POSTリクエストを処理するためには <code>@GetMapping</code> ではなく <code>@PostMapping</code> を使う。
@@ -770,6 +844,8 @@ POSTリクエストを処理するためには <code>@GetMapping</code> では�
   <li> ふたたび <code>GET /todos</code> を実行し、得られた Todoリストに
     新しい Todo項目が追加されているかどうかをチェックする。
 </ol>
+<div class=file>
+src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
 <pre>
     @Test
     fun `POSTリクエストはTodoオブジェクトを格納する`() {
@@ -792,6 +868,8 @@ POSTリクエストを処理するためには <code>@GetMapping</code> では�
         assertThat(todos2.map { todo: Todo -&gt; todo.text }, hasItem("hello"))
     }
 </pre>
+</div>
+
 <p>
 <strong>ヒント:</strong>
 データベースへの記録には <code>jdbcTemplate.update</code> メソッドを使う。
@@ -820,7 +898,7 @@ POSTリクエストを処理するためには <code>@GetMapping</code> では�
     Spring によって作成・管理される Bean が入っている。
     Spring は必要に応じて Beanを作成し、依存注入をおこなう。
     "Application Context" もほぼ同義。
-    <div class=figure><div>
+<div class=figure><div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="340" height="130">
@@ -882,17 +960,26 @@ POSTリクエストを処理するためには <code>@GetMapping</code> では�
     原因を特定するまでに時間がかかる場合がある。
 </ul>
 
-<h3 id="references">参考文献</h3>
+<h3 id="references">参考資料</h3>
 
-<ul>
-  <li> <a target="_blank" href="https://developer.mozilla.org/ja/docs/Web/HTTP/Status">HTTP レスポンスステータスコード</a>
-  <li> <a target="_blank" href="https://www.tohoho-web.com/ex/kotlin.html">とほほのKotlin入門</a>
-  <li> <a target="_blank" href="https://licensecounter.jp/devops-hub/blog/spring-boot1/">Spring Bootってなにがいいの</a>
-  <li> <a target="_blank" href="https://spring.pleiades.io/spring-boot/">Spring Boot リファレンスマニュアル</a>
-  <li> <a target="_blank" href="https://learning-collection.com/spring-boot%E3%81%A7%E3%82%88%E3%81%8F%E4%BD%BF%E3%81%86%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%B8%80%E8%A6%A7/">Spring Bootでよく使うアノテーション一覧</a>
-  <li> <a target="_blank" href="https://www.tohoho-web.com/ex/postgresql.html">とほほのPostgreSQL入門</a>
-  <li> <a target="_blank" href="https://hamcrest.org/JavaHamcrest/tutorial">Hamcrestチュートリアル (英語)</a>
-</ul>
+<dl class=spacy>
+  <dt> <a target="_blank" href="https://www.tohoho-web.com/ex/kotlin.html">とほほのKotlin入門</a>
+  <dd> Kotlinの文法まとめ。
+
+  <dt> <a target="_blank" href="https://www.tohoho-web.com/ex/postgresql.html">とほほのPostgreSQL入門</a>
+  <dd> PostgreSQLの文法まとめ。
+
+  <dt> <a target="_blank" href="https://spring.pleiades.io/spring-boot/">Spring Boot リファレンスマニュアル</a><br>
+    <a target="_blank" href="https://spring.pleiades.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html">RestTemplate</a><br>
+    <a target="_blank" href="https://spring.pleiades.io/spring-framework/docs/current/javadoc-api/org/springframework/jdbc/core/JdbcTemplate.html">JdbcTemplate</a><br>
+  <dd> Spring Boot 各種クラス・メソッドのリファレンス文書。
+
+  <dt> <a target="_blank" href="https://learning-collection.com/spring-boot%E3%81%A7%E3%82%88%E3%81%8F%E4%BD%BF%E3%81%86%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%B8%80%E8%A6%A7/">Spring Bootでよく使うアノテーション一覧</a>
+  <dd> Spring Boot でよく使うアノテーションまとめ。
+
+  <dt> <a target="_blank" href="https://hamcrest.org/JavaHamcrest/tutorial">Hamcrestチュートリアル</a> (英語)
+  <dd> テストで使う assertThat の書き方。
+</dl>
 
 <hr>
 <address>Yusuke Shinyama</address>
