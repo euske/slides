@@ -217,7 +217,9 @@ Welcome!
 </div>
 </div>
   <dt> Kotlin言語
-  <dd> Javaを改良したもの。Javaと同じく、classファイルにコンパイルされ、JVMで実行できる。
+  <dd> Javaを改良したもの。
+    Kotlinソースコード (<code>xxx.kt</code>) をclassファイルにコンパイルし、
+    Javaと同じく JVMで実行できる。
     <div class=figure>
 <div>
   <svg xmlns="http://www.w3.org/2000/svg"
@@ -302,7 +304,7 @@ $ <strong>./gradlew bootrun</strong>  <em>(アプリの実行)</em>
 <ol class=spacy>
 <li> まず TodoAppApplicationTests.kt (最初から存在している) に、以下のように書く:
 <div class=file>
-src/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
+src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
 <pre>
 package com.example.todoApp
 
@@ -348,7 +350,7 @@ class TodoAppApplicationTests {
 
 <li> TodoAppApplicationTests を以下のように変更する:
 <div class=file>
-src/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
+src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
 <pre>
 @SpringBootTest(<span class=bgy>webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT</span>)
 class TodoAppApplicationTests(
