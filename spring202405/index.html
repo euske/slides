@@ -932,7 +932,7 @@ src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
     Spring Boot では起動時にこれらのアノテーションが自動検出されるため、
     何も設定もしなくても依存注入が可能になる。
     <ul>
-      <li> <code>@Controller</code> … Web APIのエンドポイントを提供する。
+      <li> <code>@Controller</code> (または <code>@RestController</code>) … Web APIのエンドポイントを提供する。
       <li> <code>@Repository</code> … データの保存・変更・削除等の機能を提供する。
       <li> <code>@Service</code> … ビジネスロジックに関連した機能を提供する。
       <li> <code>@Component</code> … 上記以外の目的で使われる。
