@@ -1109,6 +1109,20 @@ logging.level.org.springframework.jdbc.core=DEBUG
     原因を特定するまでに時間がかかる場合がある。
 </ul>
 
+<h3 id="notice">今後の改良点</h3>
+<p>
+  このチュートリアルは簡単のため、本来であれば推奨されるいくつかのステップをとばしている。
+  この例を参考に本格的なアプリを作る場合は、以下の改良点を参考のこと:
+</p>
+<ul>
+  <li> 統合テスト時に本物の PostgreSQL を使わず、<a target="_blank" href="https://www.baeldung.com/spring-boot-h2-database">H2 データベース</a>で代用する。
+  <li> RestTemplate, JdbcTemplate はもう古いので、より新しいAPIである 
+    <a target="_blank" href="https://spring.pleiades.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestClient.html">RestClient</a>, 
+    <a target="_blank" href="https://spring.pleiades.io/spring-framework/docs/current/javadoc-api/org/springframework/jdbc/core/simple/JdbcClient.html">JdbcClient</a> 
+    を使う。
+  <li> <a target="_blank" href="https://www.baeldung.com/security-spring">Spring Security</a> を導入する。
+</ul>
+
 <h3 id="references">参考資料</h3>
 
 <dl class=spacy>
