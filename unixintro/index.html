@@ -2122,8 +2122,22 @@ $ <strong>echo &ast;</strong>
 UNIX では、各プロセスに<u>環境変数</u> (environment variable) というものが
 付属している。これは各種の設定を保持しておくための文字列型の変数で、
 プログラムの変数と同様に、好きな数だけ作成することができる。
-</p><p>
-現在の環境変数一覧を見るためには <code>env</code>コマンドを使う:
+</p>
+<div class=figure>
+  <div>
+  各プロセス
+  <div style="text-align: left; font-size: 75%; border: 2px solid black;">
+    <ul style="padding: 0 2em 0;">
+      <li> コマンドライン引数
+      <li> カレントディレクトリ
+      <li> 標準入力・標準出力・標準エラー出力
+      <li> 環境変数
+    </ul>
+  </div>
+  </div>
+</div>
+<p>
+現在のシェルに付属している環境変数一覧を見るためには <code>env</code>コマンドを使う:
 <blockquote><pre>
 $ <strong>env</strong>
 SHLVL=3
@@ -2143,6 +2157,16 @@ PAGER=less
 …
 </pre></blockquote>
 
+<div class=exercise id="ex-13">
+<div class=header>演習 13. やってみよう</div>
+<p>
+各プロセスに付属している環境変数の値を見るには、以下のコマンドを実行する:
+</p>
+<blockquote><pre>
+$ <strong>ps axeww</strong>
+</pre></blockquote>
+</div>
+
 <div class=caution>
 <strong>注意:</strong>
 Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
@@ -2151,7 +2175,6 @@ Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
 ただし、<strong>親プロセスの環境変数は、子プロセスに引きつがれる</strong>ため、
 最初に共通の環境変数を設定しておけば、以後すべての子プロセスで
 共通の設定を利用することができる。
-
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -2184,9 +2207,8 @@ Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
 
 <h3 id="env-use">8.1. 環境変数を使う</h3>
 <p>
-各プロセスにおける環境変数は、
-プログラム中のどこからでも文字列値として
-アクセス可能である。
+各プロセスに付属する環境変数は、
+プロセス中のどこからでも文字列値としてアクセス可能である。
 たとえば、環境変数 <code>USER</code> の値を取得したいとき:
 </p>
 
@@ -2254,8 +2276,8 @@ $ <strong>echo ${USER/xxx/yyy}</strong>  <em>(USER中の xxx を yyyに置換し
 $ <strong>echo ${LANG:-ja}</strong>      <em>(LANGが定義されていない場合、デフォルト値としてjaに展開される)</em>
 </pre></blockquote>
 
-<div class=exercise id="ex-13">
-<div class=header>演習 13. 環境変数の展開</div>
+<div class=exercise id="ex-14">
+<div class=header>演習 14. 環境変数の展開</div>
 <p>
 環境変数 <code>USER</code> に <code>jon</code> という文字列が、
 環境変数 <code>FILE</code> に <code>athan</code> という文字列が、
@@ -2507,8 +2529,8 @@ Arg1: foo          <em>(第1引数が表示される)</em>
 Arg2: bar          <em>(第2引数が表示される)</em>
 </pre></blockquote>
 
-<div class=exercise id="ex-14">
-<div class=header>演習 14. シェルスクリプトの説明</div>
+<div class=exercise id="ex-15">
+<div class=header>演習 15. シェルスクリプトの説明</div>
 <p>
 以下のシェルスクリプトが何をするか予想してみよう。
 </p>
@@ -2625,8 +2647,8 @@ $ <strong>pwd</strong>         <em>(カレントディレクトリは依然と�
 プロセスを起動しない。そのためシェルのカレントディレクトリの変更が可能なのである。)
 </div>
 
-<div class=exercise id="ex-15">
-<div class=header>演習 15. スクリプトファイル</div>
+<div class=exercise id="ex-16">
+<div class=header>演習 16. スクリプトファイル</div>
 <p>
 以下のスクリプトファイル <code>greet</code> が実行可能であるとする。
 <code>./greet</code> を実行すると何が起きるか?
@@ -2762,8 +2784,8 @@ path=${FILENAME:-default.txt}
 詳しくは <code>man test</code> を参照のこと。
 </p>
 
-<div class=exercise id="ex-16">
-<div class=header>演習 16. test コマンドの終了状態</div>
+<div class=exercise id="ex-17">
+<div class=header>演習 17. test コマンドの終了状態</div>
 <p>
 以下のコマンドの終了状態を予想してみよう。
 </p>
@@ -2808,8 +2830,8 @@ fi
 </pre>
 </dl>
 
-<div class=exercise id="ex-17">
-<div class=header>演習 17. dogコマンド</div>
+<div class=exercise id="ex-18">
+<div class=header>演習 18. dogコマンド</div>
 <p>
 与えられたパス名に対して、
 それがファイルであれば <code>cat</code> を実行し、
@@ -2900,8 +2922,8 @@ done
 </pre>
 </dl>
 
-<div class=exercise id="ex-18">
-<div class=header>演習 18. for文の演習</div>
+<div class=exercise id="ex-19">
+<div class=header>演習 19. for文の演習</div>
 <p>
 いくつかのディレクトリの中に、
 <code>list.txt</code> というファイルが入っているとする。
