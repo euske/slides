@@ -72,6 +72,9 @@ Yusuke Shinyama, May. 2024
   <li> <a href="#controller">最初のTDD - TodoControllerの作成</a>
   <li> <a href="#repository">TodoRepositoryの作成</a>
   <li> <a href="#post">POSTエンドポイントの作成</a>
+  <ul>
+    <li> <a href="#troubleshoot">うまく動かない場合は</a>
+  </ul>
   <li> <a href="#conclusion">おわりに・参考資料</a>
 </ol>
 
@@ -216,6 +219,7 @@ Welcome!
   </svg>
 </div>
 </div>
+
   <dt> Kotlin言語
   <dd> Javaを改良したもの。
     Kotlinソースコード (<code>xxx.kt</code>) をclassファイルにコンパイルし、
@@ -248,6 +252,7 @@ Welcome!
   </svg>
 </div>
 </div>
+
   <dt> アノテーション (annotation) 
   <dd> JavaおよびKotlinのコードには、アノテーションをつけることができる。
     アノテーションはコメントに似ているが、コメントは人間が読むのに対し、
@@ -264,10 +269,17 @@ class MyClass {
   }
 }
 </pre>
+
   <dt> JDBC (Java Database Connectivity)
   <dd> Java/KotlinでSQLデータベースにアクセスするための統一規格。
     MySQL, PostgreSQL, Oracleなどのドライバが用意されており、
     ドライバを切り替えることで多様なデータベースエンジンにアクセスできる。
+
+  <dt> JPA (Java Persistence API)
+  <dd> SQLを直接書かず、Java API を使ってデータベースにアクセスするための仕組み。
+    <a target="_blank" href="https://hibernate.org/orm/">Hibernate ORM</a> を使って実装されている。
+    今回は使わない。
+
 </dl>
 </div>
 
@@ -543,7 +555,7 @@ CREATE TABLE todos (
 さらに、アプリを開発するにつれてデータベース構造は変化していく。
 このため、データベースの変更履歴を管理する「マイグレーションツール」を使って
 開発するのが一般的である。ここでは Spring との統合が容易な
-<a href="https://flywaydb.org/">Flyway</a> というツールを使っている。
+<a target="_blank" href="https://flywaydb.org/">Flyway</a> というツールを使っている。
 </p>
 </div>
 
@@ -798,6 +810,7 @@ db.query("SELECT * FROM todos")
 </div>
 </blockquote>
 
+
 <h2 id="post">5. POSTエンドポイントの作成</h2>
 
 <ol class=spacy>
@@ -824,6 +837,19 @@ src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
         assertThat(response.statusCode, equalTo(HttpStatus.OK))
     }
 </pre>
+</div>
+<div class=note>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その3</div>
+<p>
+Kotlinファイル内で Java言語のコードをペーストすると、
+IntelliJ は自動的に Java → Kotlin に変換してくれる。
+これはJavaのサンプルコードをKotlinで使いたいときに役に立つ。
+たとえば、以下のJavaコードを上記のメソッド内にペーストしてみよう:
+</p>
+<blockquote><pre>
+TodoRequest request = new TodoRequest("hello");
+ResponseEntity&lt;String&gt; response = restTemplate.postForEntity("http://localhost:"+port+"/todos", request, String.class);
+</pre></blockquote>
 </div>
 <p>
 <strong>ヒント:</strong>
@@ -937,12 +963,133 @@ src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
       <li> <code>@Service</code> … ビジネスロジックに関連した機能を提供する。
       <li> <code>@Component</code> … 上記以外の目的で使われる。
     </ul>
-    
+
 </dl>
 </div>
 
 </ol>
 
+<h3 id="troubleshoot">うまく動かない場合は</h3>
+<p>
+コードがうまく動かない場合、以下の2つの方法で問題を特定する:
+</p>
+<ol type=a>
+  <li> ソースコード中で止めたい箇所にブレークポイントを設定し、デバッガで実行する。
+  <li> Spring Bootのログを調べる。
+    main あるいは test の application.properties に以下の行を追加して実行してみよう:
+<div class=file>
+application.properties:
+<pre>
+...
+logging.level.org.springframework.web=DEBUG
+logging.level.org.springframework.jdbc.core=DEBUG
+</pre>
+</div>
+</ol>
+
+<h4>Spring Bootのログの読み方</h4>
+<p>
+アプリの実行時にターミナルに現れる Spring Bootのログは、
+何かイベントが発生するたびに記録される。
+ログの各行は以下のような書式になっている。
+</p>
+<ol>
+  <li> タイムスタンプ: そのイベントが発生した日時。(+09:00 は日本時間を表す)
+  <li> ログレベル: イベントの種類。(上のものほど深刻)
+    <ol type=a>
+      <li> ERROR … 何らかのエラーが発生し、処理を完了できなかった場合。
+      <li> INFO … エラーではないが、ユーザに有用と思われる情報。
+      <li> DEBUG … 通常のユーザには必要ない、開発者がデバッグ用に使う情報。
+      <li> TRACE … 実行過程を詳細にトレースする場合の情報。<strong>(使用注意)</strong>
+    </ol>
+    <p>
+    <strong>注意:</strong> 通常は DEBUGレベルまたはTRACEレベルのログは出力すべきでない (出力量が膨大なため)。
+    </p>
+  <li> プロセスID: アプリが実行されているUNIXプロセスID。
+  <li> スレッド名: イベントが発生した JVMスレッドの名前。
+  <li> モジュール名: イベントが発生した Javaモジュール名。長い名前は省略される。<br>
+    例:
+    <ul>
+      <li> <code>c.e</code> = <code>com.example</code>
+      <li> <code>.s.d.r.c</code> = (org)<code>.spring.data.repository.config</code>
+      <li> <code>o.a.c.c</code> = <code>org.apache.catalina.core</code>
+      <li> ...
+    </ul>
+  <li> メッセージ: イベントの内容。
+</ol>
+
+<h4>ログ出力例 (WebおよびJDBCのレベルを DEBUGにした場合):</h4>
+<blockquote><pre>
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.0)
+
+2024-06-11T10:08:17.591+09:00  INFO 17122 --- [    Test worker] c.e.todoApp.TodoAppApplicationTests      : Starting TodoAppApplicationTests using Java 21.0.3 with PID 17122
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^ ^^^^^      ^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  タイムスタンプ                  ログ プロセス          スレッド名     モジュール名 (省略されている)                   メッセージ
+                              レベル   ID                          (c.e = com.example)
+2024-06-11T10:08:17.591+09:00  INFO 17122 --- [    Test worker] c.e.todoApp.TodoAppApplicationTests      : No active profile set, falling back to 1 default profile: "default"
+2024-06-11T10:08:17.868+09:00  INFO 17122 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JDBC repositories in DEFAULT mode.
+2024-06-11T10:08:17.879+09:00  INFO 17122 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 8 ms. Found 0 JDBC repository interfaces.
+2024-06-11T10:08:18.120+09:00  INFO 17122 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
+                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                                                                            (Tomcat Webサーバを起動)
+2024-06-11T10:08:18.126+09:00  INFO 17122 --- [    Test worker] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2024-06-11T10:08:18.126+09:00  INFO 17122 --- [    Test worker] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.24]
+2024-06-11T10:08:18.154+09:00  INFO 17122 --- [    Test worker] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2024-06-11T10:08:18.155+09:00  INFO 17122 --- [    Test worker] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 553 ms
+2024-06-11T10:08:18.265+09:00  INFO 17122 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-06-11T10:08:18.353+09:00  INFO 17122 --- [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@77c1e611
+                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                                                                            (<a target="_blank" href="https://github.com/brettwooldridge/HikariCP">Hikari Connection Pool</a> が PostgreSQLに接続)
+2024-06-11T10:08:18.354+09:00  INFO 17122 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-06-11T10:08:18.377+09:00  INFO 17122 --- [    Test worker] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost/tododb (PostgreSQL 14.12)
+2024-06-11T10:08:18.388+09:00  INFO 17122 --- [    Test worker] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "PUBLIC"."flyway_schema_history" does not exist yet
+2024-06-11T10:08:18.390+09:00  INFO 17122 --- [    Test worker] o.f.core.internal.command.DbValidate     : Successfully validated 1 migration (execution time 00:00.005s)
+2024-06-11T10:08:18.393+09:00  INFO 17122 --- [    Test worker] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "PUBLIC"."flyway_schema_history" ...
+2024-06-11T10:08:18.412+09:00  INFO 17122 --- [    Test worker] o.f.core.internal.command.DbMigrate      : Current version of schema "PUBLIC": << Empty Schema >>
+2024-06-11T10:08:18.414+09:00  INFO 17122 --- [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "1 - create todos table"
+2024-06-11T10:08:18.422+09:00  INFO 17122 --- [    Test worker] o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema "PUBLIC", now at version v1 (execution time 00:00.002s)
+                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                                                                            (Flyway がマイグレーションを version 1 まで完了)
+2024-06-11T10:08:18.482+09:00  INFO 17122 --- [    Test worker] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2024-06-11T10:08:18.511+09:00 DEBUG 17122 --- [    Test worker] s.w.s.m.m.a.RequestMappingHandlerMapping : 7 mappings in 'requestMappingHandlerMapping'
+2024-06-11T10:08:18.563+09:00 DEBUG 17122 --- [    Test worker] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                                                                            (各リクエストURLの登録が完了)
+2024-06-11T10:08:18.581+09:00 DEBUG 17122 --- [    Test worker] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2024-06-11T10:08:18.595+09:00 DEBUG 17122 --- [    Test worker] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2024-06-11T10:08:18.697+09:00  INFO 17122 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 58245 (http) with context path '/'
+2024-06-11T10:08:18.702+09:00  INFO 17122 --- [    Test worker] c.e.todoApp.TodoAppApplicationTests      : Started TodoAppApplicationTests in 1.221 seconds (process running for 1.786)
+2024-06-11T10:08:19.317+09:00  INFO 17122 --- [o-auto-1-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2024-06-11T10:08:19.317+09:00  INFO 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2024-06-11T10:08:19.317+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2024-06-11T10:08:19.317+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2024-06-11T10:08:19.317+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
+2024-06-11T10:08:19.317+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@563392e5
+2024-06-11T10:08:19.318+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@244f356
+2024-06-11T10:08:19.318+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2024-06-11T10:08:19.318+09:00  INFO 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2024-06-11T10:08:19.321+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/todos/2", parameters={}
+                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                                                                            (GETリクエストを受け取った)
+2024-06-11T10:08:19.326+09:00 DEBUG 17122 --- [o-auto-1-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.todoApp.TodoController#getTodo(long)
+2024-06-11T10:08:19.366+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2024-06-11T10:08:19.367+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id, text FROM todos WHERE id=?]
+                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                                                                            (SQL文を実行した)
+2024-06-11T10:08:19.386+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2024-06-11T10:08:19.387+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [Todo(id=2, text=bar)]
+2024-06-11T10:08:19.392+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+                                                                                                           ^^^^^^^^^^^^^^^^^
+                                                                                                            (ステータスコード200でレスポンスを返した)
+2024-06-11T10:08:19.403+09:00 DEBUG 17122 --- [    Test worker] o.s.web.client.DefaultRestClient         : Reading to [com.example.todoApp.Todo]
+</pre></blockquote>
 
 <h2 id="conclusion">6. おわりに</h2>
 
@@ -981,6 +1128,10 @@ src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt
 
   <dt> <a target="_blank" href="https://hamcrest.org/JavaHamcrest/tutorial">Hamcrestチュートリアル</a> (英語)
   <dd> テストで使う assertThat の書き方。
+
+  <dt> <a target="_blank" href="https://spring.academy/">Spring Academy</a> (英語)
+  <dd> Spring Boot を詳しく学びたい人向けのサイト。多数の動画・例題および実験用ラボが用意されている。
+
 </dl>
 
 <hr>
