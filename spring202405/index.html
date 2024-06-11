@@ -560,7 +560,7 @@ CREATE TABLE todos (
 </div>
 
 <div class=notice>
-<div class=title>マイグレーションファイルを書くときの注意</div>
+<div class=title>Flyway マイグレーションファイルを書くときの注意</div>
 <ul>
   <li> ファイル名は <code><strong>V</strong>xxx__yyy.sql</code> のような形式にすること (先頭の <code>V</code> は大文字)。
   <li> 一度使われたマイグレーションファイルは内容を書き換えたり、ファイル名を変更したり、削除しないこと。
@@ -1111,11 +1111,12 @@ logging.level.org.springframework.jdbc.core=DEBUG
 
 <h3 id="notice">今後の改良点</h3>
 <p>
-  このチュートリアルは簡単のため、本来であれば推奨されるいくつかのステップをとばしている。
+  このチュートリアルは簡単のため、本来であれば推奨されるいくつかの作業をしていない。
   この例を参考に本格的なアプリを作る場合は、以下の改良点を参考のこと:
 </p>
 <ul>
   <li> 統合テスト時に本物の PostgreSQL を使わず、<a target="_blank" href="https://www.baeldung.com/spring-boot-h2-database">H2 データベース</a>で代用する。
+  <li> Flywayマイグレーションに失敗した場合はデータベースを全削除せず、flyway_schema_history テーブルを修正してつじつまを合わせるほうがよい。
   <li> RestTemplate, JdbcTemplate はもう古いので、より新しいAPIである 
     <a target="_blank" href="https://spring.pleiades.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestClient.html">RestClient</a>, 
     <a target="_blank" href="https://spring.pleiades.io/spring-framework/docs/current/javadoc-api/org/springframework/jdbc/core/simple/JdbcClient.html">JdbcClient</a> 
