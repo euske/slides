@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="author" content="Yusuke Shinyama">
 <meta name="keywords" content="Spring Framework, Spring Boot, フレームワーク, 制御の反転, Inversion of Control, DI, 依存注入, Dependency Injection">
-<meta name="description" content="Spring Boot 基本的な概念の解説。">
+<meta name="description" content="Java/Kotlin/Spring/TDD のいずれにもなじみがない読者のために Spring Boot + Kotlin を使ったアプリ開発の基礎を紹介する。">
 <meta name="twitter:card" content="summary" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Spring Boot 入門" />
 <meta property="og:url" content="https://euske.github.io/slides/spring202501/index.html" />
-<meta property="og:description" content="Spring Boot 基本的な概念の解説。" />
+<meta property="og:description" content="Java/Kotlin/Spring/TDD のいずれにもなじみがない読者のために Spring Boot + Kotlin を使ったアプリ開発の基礎を紹介する。" />
 <title>Spring Boot 入門</title>
 <style><!--
 body { line-height: 1.5; }
@@ -52,8 +52,15 @@ pre.small { font-size: 75%; }
 .bgy { background: #ffff88; }
 .bgb { background: #88ffff; }
 
-.noinj { background: #ff88ff; }
-.depinj { background: #88ff88; }
+.col-ts { color: blue; }
+.col-info { color: orange; }
+.col-debug { color: red; }
+.col-pid { color: grey; }
+.col-thread { color: grey; }
+.col-module { color: green; }
+.col-msg { color: black; }
+.col-xxx { color: red; }
+
 --></style>
 </head>
 <body>
@@ -64,6 +71,13 @@ pre.small { font-size: 75%; }
 <h1>Spring Boot 入門</h1>
 <div class=author>
 Yusuke Shinyama, May. 2024
+</div>
+
+<div>
+<strong>概要:</strong>
+この記事では Java/Kotlin/Spring/TDD のいずれにもなじみがない読者のために 
+Spring Boot + Kotlin を使ったアプリ開発の基礎を紹介する。<br>
+前提知識: JavaScript を使ったプログラミング経験、および PostgreSQL の使用経験。
 </div>
 
 <ol>
@@ -81,7 +95,7 @@ Yusuke Shinyama, May. 2024
 <div class=exercise>
 <div class=header>今回作りたいもの:</div>
 <p>
-  PostgreSQL + Spring Boot を使った To Do (やること管理) アプリのバックエンド。
+  PostgreSQL + Spring Boot + Kotlin を使った To Do (やること管理) アプリのバックエンド。
   以下のAPIエンドポイントを提供する:
 <ol type=a>
   <li> <code>GET /todos</code> を実行すると、データベースにある Todo 項目すべてを JSON形式で返す。
@@ -1029,66 +1043,59 @@ logging.level.org.springframework.jdbc.core=DEBUG
 
  :: Spring Boot ::                (v3.3.0)
 
-2024-06-11T10:08:17.591+09:00  INFO 17122 --- [    Test worker] c.e.todoApp.TodoAppApplicationTests      : Starting TodoAppApplicationTests using Java 21.0.3 with PID 17122
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^ ^^^^^      ^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  タイムスタンプ                  ログ プロセス          スレッド名     モジュール名 (省略されている)                   メッセージ
-                              レベル   ID                          (c.e = com.example)
-2024-06-11T10:08:17.591+09:00  INFO 17122 --- [    Test worker] c.e.todoApp.TodoAppApplicationTests      : No active profile set, falling back to 1 default profile: "default"
-2024-06-11T10:08:17.868+09:00  INFO 17122 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JDBC repositories in DEFAULT mode.
-2024-06-11T10:08:17.879+09:00  INFO 17122 --- [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 8 ms. Found 0 JDBC repository interfaces.
-2024-06-11T10:08:18.120+09:00  INFO 17122 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 0 (http)
-                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                                                                                                            (Tomcat Webサーバを起動)
-2024-06-11T10:08:18.126+09:00  INFO 17122 --- [    Test worker] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2024-06-11T10:08:18.126+09:00  INFO 17122 --- [    Test worker] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.24]
-2024-06-11T10:08:18.154+09:00  INFO 17122 --- [    Test worker] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2024-06-11T10:08:18.155+09:00  INFO 17122 --- [    Test worker] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 553 ms
-2024-06-11T10:08:18.265+09:00  INFO 17122 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2024-06-11T10:08:18.353+09:00  INFO 17122 --- [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@77c1e611
-                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                                                                                                            (<a target="_blank" href="https://github.com/brettwooldridge/HikariCP">Hikari Connection Pool</a> が PostgreSQLに接続)
-2024-06-11T10:08:18.354+09:00  INFO 17122 --- [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2024-06-11T10:08:18.377+09:00  INFO 17122 --- [    Test worker] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost/tododb (PostgreSQL 14.12)
-2024-06-11T10:08:18.388+09:00  INFO 17122 --- [    Test worker] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "PUBLIC"."flyway_schema_history" does not exist yet
-2024-06-11T10:08:18.390+09:00  INFO 17122 --- [    Test worker] o.f.core.internal.command.DbValidate     : Successfully validated 1 migration (execution time 00:00.005s)
-2024-06-11T10:08:18.393+09:00  INFO 17122 --- [    Test worker] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "PUBLIC"."flyway_schema_history" ...
-2024-06-11T10:08:18.412+09:00  INFO 17122 --- [    Test worker] o.f.core.internal.command.DbMigrate      : Current version of schema "PUBLIC": << Empty Schema >>
-2024-06-11T10:08:18.414+09:00  INFO 17122 --- [    Test worker] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "1 - create todos table"
-2024-06-11T10:08:18.422+09:00  INFO 17122 --- [    Test worker] o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema "PUBLIC", now at version v1 (execution time 00:00.002s)
-                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                                                                                                            (Flyway がマイグレーションを version 1 まで完了)
-2024-06-11T10:08:18.482+09:00  INFO 17122 --- [    Test worker] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
-2024-06-11T10:08:18.511+09:00 DEBUG 17122 --- [    Test worker] s.w.s.m.m.a.RequestMappingHandlerMapping : 7 mappings in 'requestMappingHandlerMapping'
-2024-06-11T10:08:18.563+09:00 DEBUG 17122 --- [    Test worker] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
-                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                                                                                                            (各リクエストURLの登録が完了)
-2024-06-11T10:08:18.581+09:00 DEBUG 17122 --- [    Test worker] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2024-06-11T10:08:18.595+09:00 DEBUG 17122 --- [    Test worker] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
-2024-06-11T10:08:18.697+09:00  INFO 17122 --- [    Test worker] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 58245 (http) with context path '/'
-2024-06-11T10:08:18.702+09:00  INFO 17122 --- [    Test worker] c.e.todoApp.TodoAppApplicationTests      : Started TodoAppApplicationTests in 1.221 seconds (process running for 1.786)
-2024-06-11T10:08:19.317+09:00  INFO 17122 --- [o-auto-1-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2024-06-11T10:08:19.317+09:00  INFO 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2024-06-11T10:08:19.317+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
-2024-06-11T10:08:19.317+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
-2024-06-11T10:08:19.317+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
-2024-06-11T10:08:19.317+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@563392e5
-2024-06-11T10:08:19.318+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@244f356
-2024-06-11T10:08:19.318+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
-2024-06-11T10:08:19.318+09:00  INFO 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2024-06-11T10:08:19.321+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/todos/2", parameters={}
-                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                                                                                                            (GETリクエストを受け取った)
-2024-06-11T10:08:19.326+09:00 DEBUG 17122 --- [o-auto-1-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.todoApp.TodoController#getTodo(long)
-2024-06-11T10:08:19.366+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
-2024-06-11T10:08:19.367+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id, text FROM todos WHERE id=?]
-                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                                                                                                            (SQL文を実行した)
-2024-06-11T10:08:19.386+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
-2024-06-11T10:08:19.387+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [Todo(id=2, text=bar)]
-2024-06-11T10:08:19.392+09:00 DEBUG 17122 --- [o-auto-1-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-                                                                                                           ^^^^^^^^^^^^^^^^^
-                                                                                                            (ステータスコード200でレスポンスを返した)
-2024-06-11T10:08:19.403+09:00 DEBUG 17122 --- [    Test worker] o.s.web.client.DefaultRestClient         : Reading to [com.example.todoApp.Todo]
+<span class=col-ts>2024-06-11T10:08:17.591+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>c.e.todoApp.TodoAppApplicationTests     </span> : <span class=col-msg>Starting TodoAppApplicationTests using Java 21.0.3 with PID 17122</span>
+<span class=col-ts>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span> <span class=col-info > ^^^^</span> <span class=col-pid>^^^^^</span>      <span class=col-thread>^^^^^^^^^^^^^^^</span>  <span class=col-module>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>   <span class=col-msg>^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+<span class=col-ts>  タイムスタンプ               </span> <span class=col-info >  ログ</span> <span class=col-pid>プロセス</span>    <span class=col-thread>      スレッド名  </span>  <span class=col-module>モジュール名 (c.e = com.example)         </span>   <span class=col-msg>  メッセージ</span>
+<span class=col-ts>                             </span> <span class=col-info >レベル</span> <span class=col-pid>  ID </span>      <span class=col-thread>                </span>
+<span class=col-ts>2024-06-11T10:08:17.591+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>c.e.todoApp.TodoAppApplicationTests     </span> : <span class=col-msg>No active profile set, falling back to 1 default profile: "default"</span>
+<span class=col-ts>2024-06-11T10:08:17.868+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>.s.d.r.c.RepositoryConfigurationDelegate</span> : <span class=col-msg>Bootstrapping Spring Data JDBC repositories in DEFAULT mode.</span>
+<span class=col-ts>2024-06-11T10:08:17.879+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>.s.d.r.c.RepositoryConfigurationDelegate</span> : <span class=col-msg>Finished Spring Data repository scanning in 8 ms. Found 0 JDBC repository interfaces.</span>
+<span class=col-ts>2024-06-11T10:08:18.120+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.s.b.w.embedded.tomcat.TomcatWebServer </span> : <span class=col-msg>Tomcat initialized with port 0 (http)</span>
+<span class=col-ts>                             </span> <span class=col-info >     </span> <span class=col-pid>     </span>      <span class=col-thread>               </span>  <span class=col-module>                                        </span>   <span class=col-xxx> (Tomcat Webサーバを起動)</span>
+<span class=col-ts>2024-06-11T10:08:18.126+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.apache.catalina.core.StandardService  </span> : <span class=col-msg>Starting service [Tomcat]</span>
+<span class=col-ts>2024-06-11T10:08:18.126+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.apache.catalina.core.StandardEngine   </span> : <span class=col-msg>Starting Servlet engine: [Apache Tomcat/10.1.24]</span>
+<span class=col-ts>2024-06-11T10:08:18.154+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.a.c.c.C.[Tomcat].[localhost].[/]      </span> : <span class=col-msg>Initializing Spring embedded WebApplicationContext</span>
+<span class=col-ts>2024-06-11T10:08:18.155+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>w.s.c.ServletWebServerApplicationContext</span> : <span class=col-msg>Root WebApplicationContext: initialization completed in 553 ms</span>
+<span class=col-ts>2024-06-11T10:08:18.265+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>com.zaxxer.hikari.HikariDataSource      </span> : <span class=col-msg>HikariPool-1 - Starting...</span>
+<span class=col-ts>2024-06-11T10:08:18.353+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>com.zaxxer.hikari.pool.HikariPool       </span> : <span class=col-msg>HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@77c1e611</span>
+<span class=col-ts>                             </span> <span class=col-info >     </span> <span class=col-pid>     </span>      <span class=col-thread>               </span>  <span class=col-module>                                        </span>   <span class=col-xxx> (<a target="_blank" href="https://github.com/brettwooldridge/HikariCP">Hikari Connection Pool</a> が PostgreSQLに接続)</span>
+<span class=col-ts>2024-06-11T10:08:18.354+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>com.zaxxer.hikari.HikariDataSource      </span> : <span class=col-msg>HikariPool-1 - Start completed.</span>
+<span class=col-ts>2024-06-11T10:08:18.377+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>org.flywaydb.core.FlywayExecutor        </span> : <span class=col-msg>Database: jdbc:postgresql://localhost/tododb (PostgreSQL 14.12)</span>
+<span class=col-ts>2024-06-11T10:08:18.388+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.f.c.i.s.JdbcTableSchemaHistory        </span> : <span class=col-msg>Schema history table "PUBLIC"."flyway_schema_history" does not exist yet</span>
+<span class=col-ts>2024-06-11T10:08:18.390+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.f.core.internal.command.DbValidate    </span> : <span class=col-msg>Successfully validated 1 migration (execution time 00:00.005s)</span>
+<span class=col-ts>2024-06-11T10:08:18.393+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.f.c.i.s.JdbcTableSchemaHistory        </span> : <span class=col-msg>Creating Schema History table "PUBLIC"."flyway_schema_history" ...</span>
+<span class=col-ts>2024-06-11T10:08:18.412+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.f.core.internal.command.DbMigrate     </span> : <span class=col-msg>Current version of schema "PUBLIC": << Empty Schema >></span>
+<span class=col-ts>2024-06-11T10:08:18.414+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.f.core.internal.command.DbMigrate     </span> : <span class=col-msg>Migrating schema "PUBLIC" to version "1 - create todos table"</span>
+<span class=col-ts>2024-06-11T10:08:18.422+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.f.core.internal.command.DbMigrate     </span> : <span class=col-msg>Successfully applied 1 migration to schema "PUBLIC", now at version v1 (execution time 00:00.002s)</span>
+<span class=col-ts>                             </span> <span class=col-info >     </span> <span class=col-pid>     </span>      <span class=col-thread>               </span>  <span class=col-module>                                        </span>   <span class=col-xxx> (Flyway がマイグレーションを version 1 まで完了)</span>
+<span class=col-ts>2024-06-11T10:08:18.482+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.s.b.a.w.s.WelcomePageHandlerMapping   </span> : <span class=col-msg>Adding welcome page: class path resource [static/index.html]</span>
+<span class=col-ts>2024-06-11T10:08:18.511+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>s.w.s.m.m.a.RequestMappingHandlerMapping</span> : <span class=col-msg>7 mappings in 'requestMappingHandlerMapping'</span>
+<span class=col-ts>2024-06-11T10:08:18.563+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.s.w.s.handler.SimpleUrlHandlerMapping </span> : <span class=col-msg>Patterns [/webjars/**, /**] in 'resourceHandlerMapping'</span>
+<span class=col-ts>                             </span> <span class=col-info >     </span> <span class=col-pid>     </span>      <span class=col-thread>               </span>  <span class=col-module>                                        </span>   <span class=col-xxx> (各リクエストURLの登録が完了)</span>
+<span class=col-ts>2024-06-11T10:08:18.581+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>s.w.s.m.m.a.RequestMappingHandlerAdapter</span> : <span class=col-msg>ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice</span>
+<span class=col-ts>2024-06-11T10:08:18.595+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>.m.m.a.ExceptionHandlerExceptionResolver</span> : <span class=col-msg>ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice</span>
+<span class=col-ts>2024-06-11T10:08:18.697+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.s.b.w.embedded.tomcat.TomcatWebServer </span> : <span class=col-msg>Tomcat started on port 58245 (http) with context path '/'</span>
+<span class=col-ts>2024-06-11T10:08:18.702+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>c.e.todoApp.TodoAppApplicationTests     </span> : <span class=col-msg>Started TodoAppApplicationTests in 1.221 seconds (process running for 1.786)</span>
+<span class=col-ts>2024-06-11T10:08:19.317+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.a.c.c.C.[Tomcat].[localhost].[/]      </span> : <span class=col-msg>Initializing Spring DispatcherServlet 'dispatcherServlet'</span>
+<span class=col-ts>2024-06-11T10:08:19.317+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.web.servlet.DispatcherServlet       </span> : <span class=col-msg>Initializing Servlet 'dispatcherServlet'</span>
+<span class=col-ts>2024-06-11T10:08:19.317+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.web.servlet.DispatcherServlet       </span> : <span class=col-msg>Detected StandardServletMultipartResolver</span>
+<span class=col-ts>2024-06-11T10:08:19.317+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.web.servlet.DispatcherServlet       </span> : <span class=col-msg>Detected AcceptHeaderLocaleResolver</span>
+<span class=col-ts>2024-06-11T10:08:19.317+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.web.servlet.DispatcherServlet       </span> : <span class=col-msg>Detected FixedThemeResolver</span>
+<span class=col-ts>2024-06-11T10:08:19.317+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.web.servlet.DispatcherServlet       </span> : <span class=col-msg>Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@563392e5</span>
+<span class=col-ts>2024-06-11T10:08:19.318+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.web.servlet.DispatcherServlet       </span> : <span class=col-msg>Detected org.springframework.web.servlet.support.SessionFlashMapManager@244f356</span>
+<span class=col-ts>2024-06-11T10:08:19.318+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.web.servlet.DispatcherServlet       </span> : <span class=col-msg>enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data</span>
+<span class=col-ts>2024-06-11T10:08:19.318+09:00</span> <span class=col-info > INFO</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.web.servlet.DispatcherServlet       </span> : <span class=col-msg>Completed initialization in 1 ms</span>
+<span class=col-ts>2024-06-11T10:08:19.321+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.web.servlet.DispatcherServlet       </span> : <span class=col-msg>GET "/todos/2", parameters={}</span>
+<span class=col-ts>                             </span> <span class=col-info >     </span> <span class=col-pid>     </span>      <span class=col-thread>               </span>  <span class=col-module>                                        </span>   <span class=col-xxx> (GETリクエストを受け取った)</span>
+<span class=col-ts>2024-06-11T10:08:19.326+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>s.w.s.m.m.a.RequestMappingHandlerMapping</span> : <span class=col-msg>Mapped to com.example.todoApp.TodoController#getTodo(long)</span>
+<span class=col-ts>2024-06-11T10:08:19.366+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.jdbc.core.JdbcTemplate              </span> : <span class=col-msg>Executing prepared SQL query</span>
+<span class=col-ts>2024-06-11T10:08:19.367+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.jdbc.core.JdbcTemplate              </span> : <span class=col-msg>Executing prepared SQL statement [SELECT id, text FROM todos WHERE id=?]</span>
+<span class=col-ts>                             </span> <span class=col-info >     </span> <span class=col-pid>     </span>      <span class=col-thread>               </span>  <span class=col-module>                                        </span>   <span class=col-xxx> (SQL文を実行した)</span>
+<span class=col-ts>2024-06-11T10:08:19.386+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.w.s.m.m.a.HttpEntityMethodProcessor </span> : <span class=col-msg>Using 'application/json', given [*/*] and supported [application/json, application/*+json]</span>
+<span class=col-ts>2024-06-11T10:08:19.387+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.w.s.m.m.a.HttpEntityMethodProcessor </span> : <span class=col-msg>Writing [Todo(id=2, text=bar)]</span>
+<span class=col-ts>2024-06-11T10:08:19.392+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>o-auto-1-exec-1</span>] <span class=col-module>o.s.web.servlet.DispatcherServlet       </span> : <span class=col-msg>Completed 200 OK</span>
+<span class=col-ts>                             </span> <span class=col-info >     </span> <span class=col-pid>     </span>      <span class=col-thread>               </span>  <span class=col-module>                                        </span>   <span class=col-xxx> (ステータスコード200でレスポンスを返した)</span>
+<span class=col-ts>2024-06-11T10:08:19.403+09:00</span> <span class=col-debug>DEBUG</span> <span class=col-pid>17122</span> --- [<span class=col-thread>    Test worker</span>] <span class=col-module>o.s.web.client.DefaultRestClient        </span> : <span class=col-msg>Reading to [com.example.todoApp.Todo]</span>
 </pre></blockquote>
 
 <h2 id="conclusion">6. おわりに</h2>
