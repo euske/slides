@@ -27,7 +27,7 @@ img { max-width: 80vw; height: auto; }
 dt { text-decoration: underline; font-weight: bold; }
 u { color: #880000; font-weight: bold; }
 .author { text-align: right; }
-.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; background: white; }
 .figure .caption { font-size: 80%; font-weight: bold; }
 .note { background: #ccffcc; outline: 2px solid black; padding: 1em; margin: 1em 4em; }
 .formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
@@ -2538,6 +2538,15 @@ Arg2: bar          <em>(第2引数が表示される)</em>
 # showhome.sh
 ls -l "/home/$1"
 </pre>
+</div>
+
+<div class=caution>
+<strong>注意:</strong>
+UNIXではさまざまなシェルが使用可能だが、シェルスクリプトは一般に 
+Bourneシェル (<code>/bin/sh</code>) 向けに書く。
+これは BourneシェルがどのUNIXでもデフォルトで用意されているためである。
+ただし最近は Linuxのデフォルトである Bash (<code>/bin/bash</code>) 向けに
+書かれるスクリプトも多くなっている。
 </div>
 
 <h3 id="script-chmod">9.2. 通常のコマンドとして使う</h3>
