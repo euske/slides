@@ -491,6 +491,20 @@ class TodoController {
     </ul>
 </ul>
 
+<div class=notice>
+<div class=title>注意: ファイル先頭のパッケージ宣言を忘れるべからず</div>
+<p>
+Springのコードにおいては、ファイル先頭のパッケージ宣言
+<pre>
+package com.example.todoApp
+</pre>
+は<strong>非常に重要</strong>である。
+Springの依存注入は、同一パッケージ内のクラスをスキャンすることによって行うので、
+パッケージ宣言を忘れると「あるはずのコンポーネントが見つからない」
+「宣言したはずのメソッドが動作しない」という状況が発生する。
+</p>
+</div>
+
 <div class=formula>
 <div class=title>Spring における「依存注入 (DI)」の考え方 - その2</div>
 <p>
