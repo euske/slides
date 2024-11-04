@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Yusuke Shinyama">
+<meta name="keywords" content="IntelliJ IDEA">
+<meta name="description" content="IntelliJ IDEA の使い方基礎">
+<meta name="twitter:card" content="summary" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="IntelliJ IDEA の使い方基礎" />
+<meta property="og:url" content="https://euske.github.io/slides/intellij202411/index.html" />
+<meta property="og:description" content="IntelliJ IDEA の使い方基礎" />
+<title>IntelliJ IDEA の使い方基礎</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000088; }
+h2 { border-bottom: solid 2px #000088; }
+h3 { border-bottom: solid 1px #000088; }
+table { border-collapse: collapse; margin-left: auto; margin-right: auto; }
+td { padding: 4px; }
+kbd { outline: 1px solid black; padding: 2px; }
+pre { outline: 1px solid black; padding: 4px; overflow: auto; }
+mark { font-weight: bold; }
+pre, code { background: #ddd; font-size: 150%; font-family: courier; }
+img { max-width: 80vw; height: auto; }
+dt { text-decoration: underline; font-weight: bold; }
+u { color: #880000; font-weight: bold; }
+.author { text-align: right; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; background: white; }
+.figure .caption { font-size: 80%; font-weight: bold; }
+.note { background: #ccffcc; outline: 2px solid black; padding: 1em; margin: 1em 4em; }
+.formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+.caution { background: #ffff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+pre em { color: #008800; }
+code em { color: #000088; }
+.exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
+.exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.file { outline: 2px solid black; padding: 1em; margin: 1em; }
+.file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
+.file pre { margin: 0; }
+.bl { border: 1px solid black; padding: 2px; color: transparent; }
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+
+<h1>IntelliJ IDEA の使い方基礎</h1>
+
+<div class=author>
+Yusuke Shinyama, Nov. 2024
+</div>
+
+<p>
+<strong>はじめに:</strong>
+IntelliJ IDEA の使い方基礎。
+</p>
+
+<h4>目次</h4>
+<ol start="1">
+<li> <a href="#basics">画面説明</a>
+</ol>
+
+
+<h1 id="basics">1. 画面説明</h1>
+<ul>
+    <li> 
+</ul>
+
+<h1 id="editing">2. コードの編集</h1>
+<h2 id="editing-pc">2.1. Mac基本</h2>
+<ul>
+    <li> 行頭・行末: 
+    <ul>
+        <li> <kbd>Command &#x2318;</kbd> + <kbd>←</kbd>
+        <li> <kbd>Command &#x2318;</kbd> + <kbd>→</kbd>
+    </ul>
+    <li> １単語前・１単語後
+    <ul>
+        <li> <kbd>Option &#x2325;</kbd> + <kbd>←</kbd>
+        <li> <kbd>Option &#x2325;</kbd> + <kbd>→</kbd>
+    </ul>
+    <li> 文字選択
+    <ul>
+        <li> <kbd>Shift</kbd> + <kbd>←</kbd>
+        <li> <kbd>Shift</kbd> + <kbd>→</kbd>
+    </ul>
+    <li> 文字選択 + 行頭・行末
+    <ul>
+        <li> <kbd>Shift</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>←</kbd>
+        <li> <kbd>Shift</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>→</kbd>
+    </ul>
+    <li> 文字選択 + １単語前・１単語後
+    <ul>
+        <li> <kbd>Shift</kbd> + <kbd>Option &#x2325;</kbd> + <kbd>←</kbd>
+        <li> <kbd>Shift</kbd> + <kbd>Option &#x2325;</kbd> + <kbd>→</kbd>
+    </ul>
+    <li> 単語選択
+    <ul>
+        <li> <kbd>ダブルクリック</kbd>
+    </ul>
+    <li> 単語範囲選択
+    <ul>
+        <li> <kbd>ダブルクリック</kbd> + <kbd>ドラッグ</kbd>
+    </ul>
+    <li> 行選択
+    <ul>
+        <li> <kbd>トリプルクリック</kbd>
+    </ul>
+    <li> 行範囲選択
+    <ul>
+        <li> <kbd>トリプルクリック</kbd> + <kbd>ドラッグ</kbd>
+    </ul>
+</ul>
+
+<h2 id="editing-intellij">2.2. IntelliJの便利機能</h2>
+<ul>
+    <li> 補完
+    <ul>
+        <li> <kbd>Tab</kbd>
+    </ul>
+    <li> 1行コピー
+    <ul>
+        <li> (選択せずに) <kbd>Command &#x2318;</kbd> + <kbd>C</kbd>
+    </ul>
+    <li> 1行切り取り
+    <ul>
+        <li> (選択せずに) <kbd>Command &#x2318;</kbd> + <kbd>X</kbd>
+    </ul>
+    <li> 検索
+    <ul>
+        <li> <kbd>Command &#x2318;</kbd> + <kbd>F</kbd>
+    </ul>
+    <li> ファイル横断検索
+    <ul>
+        <li> <kbd>Shift</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>F</kbd>
+    </ul>
+    <li> なんでも検索
+    <ul>
+        <li> <kbd>Shift</kbd> <kbd>Shift</kbd>
+    </ul>
+    <li> 折りたたみ・展開
+    <ul>
+        <li> <kbd>Command &#x2318;</kbd> + <kbd>-</kbd>
+        <li> <kbd>Command &#x2318;</kbd> + <kbd>+</kbd>
+    </ul>
+    <li> 一斉折りたたみ
+    <ul>
+        <li> <kbd>Shift</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>-</kbd>
+    </ul>
+    <li> マルチカーソル
+    <ul>
+        <li> <kbd>Option &#x2325;</kbd> <kbd>Option &#x2325;</kbd> + <kbd>↓</kbd>
+    </ul>
+    <li> 検索 + マルチカーソル
+    <ul>
+        <li> <kbd>Control &#x2303;</kbd> + <kbd>G</kbd>
+    </ul>
+    <li> 定義にジャンプ
+    <ul>
+        <li> <kbd>Command &#x2318;</kbd> + <kbd>クリック</kbd>
+    </ul>
+    <li> 前の場所に戻る
+    <ul>
+        <li> <kbd>Option &#x2325;</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>←</kbd>
+    </ul>
+    <li> 一括整形
+    <ul>
+        <li> <kbd>Option &#x2325;</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>L</kbd>
+    </ul>
+    <li> なんでも問題解決
+    <ul>
+        <li> <kbd>Option &#x2325;</kbd> + <kbd>Return</kbd>
+    </ul>
+</ul>
+
+<p>
+    さらに極めたい方に:
+    <a href="https://blog.jetbrains.com/idea/2020/03/top-15-intellij-idea-shortcuts/">Top 15 IntelliJ IDEA Shortcuts</a>
+
+<h1 id="running">3. テストと実行</h1>
+
+<h2 id="running-test">3.1. テスト</h2>
+<h2 id="running-dev">3.2. 実行</h2>
+
+<h1 id="debugging">4. デバッガの使い方</h1>
+
+<h2 id="debugging-breakpoint">4.1. テスト</h2>
+<h2 id="debugging-step">4.2. 実行</h2>
+
+<h1 id="terminal">5. ターミナル</h1>
+
+<h1 id="git">6. Git</h1>
+
+<h1 id="database">7. データベース操作</h1>
+
+
+<hr>
+<address>Yusuke Shinyama</address>
