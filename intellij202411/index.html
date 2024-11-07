@@ -71,8 +71,8 @@ Yusuke Shinyama, Nov. 2024
     <li> ターミナルで、以下を実行する:
 <blockquote><pre>
 $ <strong>cd</strong>
-$ cd Documents
-$ git clone https://github.com/euske/intellij-hello.git
+$ <strong>cd Documents</strong>
+$ <strong>git clone <a href="https://github.com/euske/intellij-hello">https://github.com/euske/intellij-hello.git</a></strong>
 </pre></blockquote>
     <li> IntelliJ を起動し、クローンしたフォルダを開く。
 </ol>
@@ -146,126 +146,134 @@ $ git clone https://github.com/euske/intellij-hello.git
 
 <h1 id="editing">2. コードの編集</h1>
 <h2 id="editing-pc">2.1. Mac基本</h2>
-<ul>
-    <li> 行頭・行末: 
-    <ul>
+<dl>
+    <dt> 行頭・行末: 
+    <dd> <ul>
         <li> <kbd>Command &#x2318;</kbd> + <kbd>←</kbd>
         <li> <kbd>Command &#x2318;</kbd> + <kbd>→</kbd>
     </ul>
-    <li> １単語前・１単語後
-    <ul>
+    <dt> １単語前・１単語後
+    <dd> <ul>
         <li> <kbd>Option &#x2325;</kbd> + <kbd>←</kbd>
         <li> <kbd>Option &#x2325;</kbd> + <kbd>→</kbd>
     </ul>
-    <li> 文字選択
-    <ul>
+    <dt> 文字選択 (1文字ごと)
+    <dd> <ul>
         <li> <kbd>Shift</kbd> + <kbd>←</kbd>
         <li> <kbd>Shift</kbd> + <kbd>→</kbd>
     </ul>
-    <li> 文字選択 + 行頭・行末
-    <ul>
+    <dt> 文字選択 (行頭・行末まで)
+    <dd> <ul>
         <li> <kbd>Shift</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>←</kbd>
         <li> <kbd>Shift</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>→</kbd>
     </ul>
-    <li> 文字選択 + １単語前・１単語後
-    <ul>
+    <dt> 文字選択 (単語ごと)
+    <dd> <ul>
         <li> <kbd>Shift</kbd> + <kbd>Option &#x2325;</kbd> + <kbd>←</kbd>
         <li> <kbd>Shift</kbd> + <kbd>Option &#x2325;</kbd> + <kbd>→</kbd>
     </ul>
-    <li> 単語選択
-    <ul>
+    <dt> 文字選択 (範囲)
+    <dd> <ul>
+        <li> <kbd>Shift</kbd> + <kbd>クリック</kbd>
+    </ul>
+    <dt> 単語選択
+    <dd> <ul>
         <li> <kbd>ダブルクリック</kbd>
     </ul>
-    <li> 単語範囲選択
-    <ul>
+    <dt> 単語選択 (範囲)
+    <dd> <ul>
         <li> <kbd>ダブルクリック</kbd> + <kbd>ドラッグ</kbd>
     </ul>
-    <li> 行選択
-    <ul>
+    <dt> 行選択
+    <dd> <ul>
         <li> <kbd>トリプルクリック</kbd>
     </ul>
-    <li> 行範囲選択
-    <ul>
+    <dt> 行選択 (範囲)
+    <dd> <ul>
         <li> <kbd>トリプルクリック</kbd> + <kbd>ドラッグ</kbd>
     </ul>
-</ul>
+</dl>
 
 <h2 id="editing-intellij">2.2. IntelliJの便利機能</h2>
-<ul>
-    <li> 補完
-    <ul>
+<dl>
+    <dt> 補完
+    <dd> <ul>
         <li> <kbd>Tab</kbd>
     </ul>
-    <li> 1行コピー
-    <ul>
-        <li> (選択せずに) <kbd>Command &#x2318;</kbd> + <kbd>C</kbd>
+    <dt> 1行コピー
+    <dd> <ul>
+        <li> (文字選択なしで) <kbd>Command &#x2318;</kbd> + <kbd>C</kbd>
     </ul>
-    <li> 1行切り取り
-    <ul>
-        <li> (選択せずに) <kbd>Command &#x2318;</kbd> + <kbd>X</kbd>
+    <dt> 1行切り取り
+    <dd> <ul>
+        <li> (文字選択なしで) <kbd>Command &#x2318;</kbd> + <kbd>X</kbd>
     </ul>
-    <li> 検索
-    <ul>
+    <dt> 検索
+    <dd> <ul>
         <li> <kbd>Command &#x2318;</kbd> + <kbd>F</kbd>
     </ul>
-    <li> ファイル横断検索
-    <ul>
+    <dt> ファイル横断検索
+    <dd> <ul>
         <li> <kbd>Shift</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>F</kbd>
     </ul>
-    <li> なんでも検索
-    <ul>
+    <dt> なんでも検索
+    <dd> <ul>
         <li> <kbd>Shift</kbd> <kbd>Shift</kbd>
     </ul>
-    <li> 折りたたみ・展開
-    <ul>
+    <dt> 折りたたみ・展開
+    <dd> <ul>
         <li> <kbd>Command &#x2318;</kbd> + <kbd>-</kbd>
         <li> <kbd>Command &#x2318;</kbd> + <kbd>+</kbd>
     </ul>
-    <li> 一斉折りたたみ
-    <ul>
+    <dt> 一斉折りたたみ
+    <dd> <ul>
         <li> <kbd>Shift</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>-</kbd>
     </ul>
-    <li> マルチカーソル
-    <ul>
+    <dt> マルチカーソル
+    <dd> <ul>
         <li> <kbd>Option &#x2325;</kbd> <kbd>Option &#x2325;</kbd> + <kbd>↓</kbd>
     </ul>
-    <li> 検索 + マルチカーソル
-    <ul>
+    <dt> 検索 + マルチカーソル
+    <dd> <ul>
         <li> <kbd>Control &#x2303;</kbd> + <kbd>G</kbd>
     </ul>
-    <li> 定義にジャンプ
-    <ul>
+    <dt> 定義にジャンプ
+    <dd> <ul>
         <li> <kbd>Command &#x2318;</kbd> + <kbd>クリック</kbd>
     </ul>
-    <li> 前の場所に戻る
-    <ul>
+    <dt> 前の場所に戻る
+    <dd> <ul>
         <li> <kbd>Option &#x2325;</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>←</kbd>
     </ul>
-    <li> ファイル一覧に戻る
-    <ul>
+    <dt> ファイル一覧に戻る
+    <dd> <ul>
         <li> <kbd>Command &#x2318;</kbd> + <kbd>1</kbd>
     </ul>
-    <li> 最近使ったファイルを開く
-    <ul>
+    <dt> 最近使ったファイルを開く
+    <dd> <ul>
         <li> <kbd>Command &#x2318;</kbd> + <kbd>E</kbd>
     </ul>
-    <li> 編集画面に戻る
-    <ul>
+    <dt> 編集画面に戻る
+    <dd> <ul>
         <li> <kbd>Esc</kbd>
     </ul>
-    <li> コメント化・非コメント化
-    <ul>
+    <dt> コメント化・非コメント化
+    <dd> <ul>
         <li> <kbd>Command &#x2318;</kbd> + <kbd>/</kbd>
     </ul>
-    <li> 一括整形
-    <ul>
+    <dt> 一括整形
+    <dd> <ul>
         <li> <kbd>Option &#x2325;</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>L</kbd>
     </ul>
-    <li> なんでも問題解決
-    <ul>
+    <dt> 名前変更 (リファクタリング)
+    <dd> <ul>
+        <li> <kbd>Shift</kbd> + <kbd>F6</kbd>
+    </ul>
+    <dt> なんでも問題解決
+    <dd> <ul>
         <li> <kbd>Option &#x2325;</kbd> + <kbd>Return</kbd>
     </ul>
-</ul>
+</dl>
 
 <p>
     さらに極めたい方に:
@@ -274,29 +282,91 @@ $ git clone https://github.com/euske/intellij-hello.git
 <h1 id="running">3. テストと実行</h1>
 
 <h2 id="running-test">3.1. テスト</h2>
+<ul>
+    <li> ソースコード中の <kbd>▶️</kbd> を押してテストを実行する。
+    <li> 画面右上の <kbd>▶️</kbd> を押しても実行できる。
+    <li> 再度テストを実行するには <kbd>Control &#x2303;</kbd> + <kbd>R</kbd> を押す。
+</ul>
+
 <h2 id="running-dev">3.2. 実行</h2>
+<ul>
+    <li> package.json 中の <kbd>▶️</kbd> を押して実行する。
+    <li> 画面右上の <kbd>▶️</kbd> を押しても実行できる。
+</ul>
 
 <h1 id="debugging">4. デバッガの使い方</h1>
 
 <h2 id="debugging-breakpoint">4.1. ブレークポイントの設定</h2>
+<ul>
+    <li> ソースコードの左端にある <kbd>●</kbd>を押してブレークポイントを設定する。
+</ul>
+
 <h2 id="debugging-step">4.2. ステップ実行</h2>
+<ul>
+    <li> ソースコード中の <kbd>Debug</kbd> を押してテストをデバッグ実行する。
+    <li> 画面右上の <kbd>Debug</kbd> を押しても実行できる。
+    <li> Step Over: その１文を実行。
+    <li> Step In: 関数の中に入る。
+</ul>
+
 <h2 id="debugging-eval">4.3. 式の評価</h2>
+<ul>
+    <li> デバッグ中は、任意の式を入力して評価できる。
+</ul>
 
 <h1 id="terminal">5. ターミナル</h1>
+<ul>
+    <li> 画面左下のアイコンから、ターミナルを開ける。
+</ul>
 
 <h1 id="git">6. Git</h1>
 
 <h2 id="git-log">6.1. 履歴を見る</h2>
-<h2 id="git-branch">6.2. ブランチ切り替え</h2>
-<h2 id="git-merge">6.3. マージ</h2>
+<ul>
+    <li> 画面左下のアイコンから、Git履歴 (git log) を見る。
+</ul>
+
+<h2 id="git-blame">6.2. 変更者を見る</h2>
+<ul>
+    <li> ソースコードの左端を右クリックし、注釈を見る。
+</ul>
+
+<h2 id="git-branch">6.3. ブランチ切り替え</h2>
+<ul>
+    <li> Git履歴から、異なるブランチを見ることができる。
+    <li> 画面左上のメニューからブランチを切り替える。
+</ul>
+
+<h2 id="git-merge">6.4. マージ</h2>
+<ul>
+    <li> 衝突が起きた場合は、Gitパネルから <kbd>Resolve Conflict</kbd> を選択する。
+</ul>
 
 <h1 id="docker">7. Docker</h1>
+<ul>
+    <li> docker-compose.yml 中の <kbd>▶️</kbd> を押して実行する。
+    <li> Dockerパネルからログの確認・各コンテナの停止・再起動ができる。
+</ul>
 
 <h1 id="database">8. データベース操作</h1>
 
 <h2 id="database-connect">8.1. 接続</h2>
-<h2 id="database-view">8.2. テーブル閲覧</h2>
+<ol>
+    <li> 画面右のデータベースアイコンから、新しい <kbd>Data Source</kbd> → <kbd>PostgreSQL</kbd> を選択する。
+    <li> 各種情報を入力し、<kbd>Test Connection</kbd> を押して接続を確認する。
+</ol>
+
+<h2 id="database-view">8.2. テーブル閲覧・書き換え</h2>
+<ul>
+    <li> データベース操作パネルを開き、テーブルを確認する。
+    <li> テーブルを書き換えた場合は <kbd>⬆️</kbd> を押して変更を確定する。
+</ul>
+
 <h2 id="database-sql">8.3. SQL実行</h2>
+<ul>
+    <li> データベース操作パネルから Console を開き、SQL文を直接実行する。
+</ul>
+
 
 <hr>
 <address>Yusuke Shinyama</address>
