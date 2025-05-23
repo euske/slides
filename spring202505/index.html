@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Yusuke Shinyama">
+<meta name="keywords" content="Spring Framework, Spring Boot, フレームワーク, 制御の反転, Inversion of Control, DI, 依存注入, Dependency Injection">
+<meta name="description" content="Java/Kotlin/Spring/TDD になじみがない読者のために Spring Boot + Kotlin を使ったアプリ開発の基礎を紹介する。">
+<meta name="twitter:card" content="summary" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Spring Boot 入門 (2025年)" />
+<meta property="og:url" content="https://euske.github.io/slides/spring202505/index.html" />
+<meta property="og:description" content="Java/Kotlin/Spring/TDD になじみがない読者のために Spring Boot + Kotlin を使ったアプリ開発の基礎を紹介する。" />
+<title>Spring Boot 入門 (2025年)</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000088; }
+h2 { border-bottom: solid 2px #000088; }
+h3 { border-bottom: solid 1px #000088; }
+table { border-collapse: collapse; margin-left: auto; margin-right: auto; }
+td { padding: 4px; }
+kbd { outline: 1px solid black; padding: 2px; }
+var { font-family: courier; }
+pre { outline: 1px solid black; padding: 4px; overflow: auto; }
+mark { font-weight: bold; }
+pre, code { background: #ddd; font-size: 120%; font-family: courier; }
+img { max-width: 80vw; height: auto; }
+dt { text-decoration: underline; font-weight: bold; }
+u { color: #880000; font-weight: bold; }
+.spacy > li { margin-top: 2em; }
+.author { text-align: right; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; background: white; }
+.figure .caption { font-size: 80%; font-weight: bold; }
+.notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em; }
+.formula { background: #88ff88; outline: 2px solid black; padding: 1em; margin: 1em; }
+.formula dt { margin-top: 1em; }
+.spacy dt { margin-top: 1em; }
+.title { display: flex; justify-content: center; font-size: 120%; font-weight: bold; border-bottom: 1px solid black; }
+.note { background: #88ffff; outline: 2px solid black; padding: 1em; margin: 1em; }
+pre em { color: #008800; }
+code em { color: #000088; }
+pre.small { font-size: 75%; }
+.error { color: red; font-weight: bold; }
+.exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
+.exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.file { outline: 2px solid black; padding: 1em; margin: 1em; }
+.file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
+.file pre { margin: 0; }
+
+.g { background: #eeeeee; }
+.bgr { background: #ffbbff; }
+.bgg { background: #88ff88; }
+.bgy { background: #ffff88; }
+.bgb { background: #88ffff; }
+
+.col-ts { color: blue; }
+.col-info { color: orange; }
+.col-debug { color: red; }
+.col-pid { color: grey; }
+.col-thread { color: grey; }
+.col-module { color: green; }
+.col-msg { color: black; }
+.col-xxx { color: red; }
+
+--></style>
+</head>
+<body>
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+
+<h1>Spring Boot 入門 (2025年)</h1>
+<div class=author>
+Yusuke Shinyama, May. 2025
+</div>
+
+<div>
+<strong>概要:</strong>
+この記事では Java/Kotlin/Spring/TDD のいずれにもなじみがない読者のために 
+Spring Boot + Kotlin + JPA を使ったアプリ開発の基礎を紹介する。
+<p>
+<strong>必要なもの:</strong>
+簡単なWebアプリ制作経験。
+IntelliJ IDEA Ultimate。
+</div>
+
+<ol>
+  <li> <a href="#setup">はじめの準備</a>
+  <li> <a href="#idea">IntelliJ IDEA の基本</a>
+  <li> <a href="#initializr">Spring Initializr による雛形アプリ生成</a>
+  <li> <a href="#controller">最初のTDD - TodoControllerの作成</a>
+  <li> <a href="#repository">TodoRepositoryの作成</a>
+  <li> <a href="#post">POSTエンドポイントの作成</a>
+  <ul>
+    <li> <a href="#troubleshoot">うまく動かない場合は</a>
+  </ul>
+  <li> <a href="#conclusion">おわりに・参考資料</a>
+</ol>
+
+
+<h2 id="setup">1. はじめの準備</h2>
+
+<ol class=spacy>
+
+  <li> <a href="https://www.jetbrains.com/idea/download/">IntelliJ IDEA Ultimate</a> をインストールしておく。
+
+  <li> Java SDK をダウンロード・インストールする。
+  <ul>
+    <li> <kbd>File</kbd> → <kbd>Project Structure...</kbd> → <kbd>SDKs</kbd> で <kbd>+</kbd> をクリックし、<kbd>Download JDK...</kbd> を選択。
+    <li> Version: <kbd>21</kbd>, Vendor: <kbd>Amazon Corretto 21.0</kbd> を選択。
+    <li> Amazon Corretto を選ぶ理由は、OpenJDK などに比べてサポート期間が長いため。
+    <li> 最新バージョン (24) が必ずしもよいとは限らない。一般的にはやや「枯れた」バージョンのほうが問題が少ないため好まれる。
+    <li> 現在インストールされている Java SDKの一覧を確認するには、ターミナルで <code>/usr/libexec/java_home -V</code> を実行する。
+  </ul>
+
+</ol>
+
+<div class=exercise>
+<div class=header>今回作りたいもの:</div>
+<p>
+  Spring Boot + Kotlin を使った To Do (やること管理) アプリのバックエンド。
+  以下のAPIエンドポイントを提供する:
+<ol type=a>
+
+  <li> <code>POST /todos</code> を実行すると、JSONで与えられた項目をデータベースに追加する。
+    このとき、新しく追加された項目の ID を返す。
+<pre>
+<strong>$ curl -H 'Content-Type: application/json' -d '{"text": "Hello!"}' http://localhost:8080/todos</strong>
+1
+</pre>
+
+  <li> <code>GET /todos</code> を実行すると、データベースにある項目すべてを JSON形式で返す。
+<pre>
+<strong>$ curl http://localhost:8080/todos</strong>
+[{"id":1, "text":"Hello!"}]
+</pre>
+
+  <li> <code>GET /todos/<u>ID</u></code> を実行すると、与えられた IDをもつ項目ひとつをJSON形式で返す。
+<pre>
+<strong>$ curl http://localhost:8080/todos/1</strong>
+{"id":1, "text":"Hello!"}
+</pre>
+
+  <li> <code>DELETE /todos/<u>ID</u></code> を実行すると、与えられた IDをもつ項目をデータベースから削除する。
+<pre>
+<strong>$ curl http://localhost:8080/todos/1</strong>
+<strong>$ curl http://localhost:8080/todos</strong>
+[]
+</pre>
+  
+  <li> 存在しないIDに対して GET をおこなうと、ステータスコードとして 404 (Not Found) を返す。
+<pre>
+<strong>$ curl -i http://localhost:8080/todos/999</strong>
+HTTP/1.1 404 
+Content-Length: 0
+Date: Tue, 20 May 2025 02:57:31 GMT
+</pre>  
+  
+</ol>
+
+参考: <a target="_blank" href="https://developer.mozilla.org/ja/docs/Web/HTTP/Status">HTTP レスポンスステータスコード</a>
+</div>
+
+<h2 id="idea">2. IntelliJ IDEA の基本</h2>
+
+<h3 id="idea-screen">画面構成 (設定によっては異なる場合もある)</h3>
+<figure class=figure>
+    <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="920" height="524">
+    <g transform="translate(80,16)">
+        <image href="intellij.png" x="0" y="0" width="772" height="518" />
+        <g fill="rgba(0,0,0,0.3)" stroke="red" stroke-width="2">
+            <rect x="70" y="21" width="50" height="16" />
+            <path d="M90,21 l-20,-18" />
+            <rect x="130" y="21" width="40" height="16" />
+            <path d="M150,21 l-10,-18" />
+            <rect x="30" y="41" width="16" height="16" />
+            <path d="M30,50 l-20,-10" />
+            <rect x="30" y="61" width="16" height="16" />
+            <path d="M30,70 l-20,-4" />
+            <rect x="30" y="348" width="16" height="16" />
+            <path d="M30,355 l-20,-16" />
+            <rect x="30" y="368" width="16" height="16" />
+            <path d="M30,375 l-20,-12" />
+            <rect x="30" y="388" width="16" height="16" />
+            <path d="M30,395 l-20,-8" />
+            <rect x="30" y="408" width="16" height="16" />
+            <path d="M30,415 l-20,-4" />
+            <rect x="30" y="428" width="16" height="16" />
+            <path d="M30,435 l-20,0" />
+            <rect x="30" y="448" width="16" height="16" />
+            <path d="M30,455 l-20,8" />
+            <rect x="480" y="21" width="105" height="16" />
+            <path d="M530,21 l-20,-18" />
+            <rect x="590" y="21" width="45" height="16" />
+            <path d="M600,21 l-10,-18" />
+            <rect x="685" y="21" width="16" height="16" />
+            <path d="M690,21 l-10,-18" />
+            <rect x="705" y="21" width="16" height="16" />
+            <path d="M710,21 l4,-18" />
+            <rect x="725" y="21" width="16" height="16" />
+            <path d="M741,30 l20,-12" />
+            <rect x="725" y="41" width="16" height="16" />
+            <path d="M741,50 l20,-8" />
+            <rect x="725" y="61" width="16" height="16" />
+            <path d="M741,70 l20,-4" />
+            <rect x="51" y="43" width="190" height="260" />
+            <rect x="251" y="43" width="470" height="260" />
+        </g>
+        <g fill="red" stroke="none" style="font-size: 75%; font-family: sans-serif;">
+            <text x="70" y="0" text-anchor="middle">プロジェクト</text>
+            <text x="150" y="0" text-anchor="middle">Gitブランチ</text>
+            <text x="8" y="45" text-anchor="end">ファイル一覧</text>
+            <text x="8" y="70" text-anchor="end">Gitコミット</text>
+            <text x="8" y="340" text-anchor="end">テスト・実行</text>
+            <text x="8" y="365" text-anchor="end">ビルド</text>
+            <text x="8" y="390" text-anchor="end">Docker</text>
+            <text x="8" y="415" text-anchor="end">ターミナル</text>
+            <text x="8" y="440" text-anchor="end">問題</text>
+            <text x="8" y="470" text-anchor="end">Git履歴</text>
+            <text x="510" y="0" text-anchor="middle">タスク</text>
+            <text x="590" y="0" text-anchor="middle">実行</text>
+            <text x="660" y="0" style="font-size: 75%" text-anchor="middle">Code With Me</text>
+            <text x="715" y="0" text-anchor="middle">検索</text>
+            <text x="762" y="20" text-anchor="start">更新</text>
+            <text x="762" y="44" text-anchor="start">通知</text>
+            <text x="762" y="70" text-anchor="start">データベース</text>
+            <text x="150" y="185" style="font-size: 120%; font-weight: bold;" text-anchor="middle">ファイル一覧</text>
+            <text x="480" y="185" style="font-size: 120%; font-weight: bold;" text-anchor="middle">編集画面</text>
+        </g>
+    </g>
+    </svg>
+</figure>
+
+<h3 id="idea-shortcuts">覚えたいショートカット</h3>
+<table>
+<tr>
+<td>行頭・行末</td>
+<td>
+    <kbd>Command &#x2318;</kbd> + <kbd>←</kbd><br>
+    <kbd>Command &#x2318;</kbd> + <kbd>→</kbd><br>
+</td>
+</tr><tr>
+<td>１単語前・１単語後</td>
+<td>
+    <kbd>Option &#x2325;</kbd> + <kbd>←</kbd><br>
+    <kbd>Option &#x2325;</kbd> + <kbd>→</kbd><br>
+</td>
+</tr><tr>
+<td>文字選択 (1文字ごと)</td>
+<td>
+    <kbd>Shift</kbd> + <kbd>←</kbd><br>
+    <kbd>Shift</kbd> + <kbd>→</kbd><br>
+</td>
+</tr><tr>
+<td>文字選択 (行頭・行末まで)</td>
+<td>
+    <kbd>Shift</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>←</kbd><br>
+    <kbd>Shift</kbd> + <kbd>Command &#x2318;</kbd> + <kbd>→</kbd><br>
+</td>
+</tr><tr>
+<td>文字選択 (単語ごと)</td>
+<td>
+    <kbd>Shift</kbd> + <kbd>Option &#x2325;</kbd> + <kbd>←</kbd><br>
+    <kbd>Shift</kbd> + <kbd>Option &#x2325;</kbd> + <kbd>→</kbd><br>
+</td>
+</tr><tr>
+<td>文字選択 (範囲)</td>
+<td>
+    <kbd>Shift</kbd> + <kbd>クリック</kbd>
+</td>
+</tr><tr>
+<td>単語選択</td>
+<td>
+    <kbd>ダブルクリック</kbd>
+</td>
+</tr><tr>
+<td>単語選択 (範囲)</td>
+<td>
+    <kbd>ダブルクリック</kbd> + <kbd>ドラッグ</kbd>
+</td>
+</tr><tr>
+<td>行選択</td>
+<td>
+    <kbd>トリプルクリック</kbd>
+</td>
+</tr><tr>
+<td>行選択 (範囲)</td>
+<td>
+    <kbd>トリプルクリック</kbd> + <kbd>ドラッグ</kbd>
+</td>
+</tr>
+</table>
+
+<h2 id="initializr">3. Spring Initializr による雛形アプリ生成</h2>
+
+<ol class=spacy>
+
+  <li> <a target="_blank" href="https://start.spring.io/#!type=gradle-project-kotlin&language=kotlin&platformVersion=3.4.5&packaging=jar&jvmVersion=21&groupId=com.example&artifactId=todoApp&name=todoApp&description=Sample%20Spring%20Boot%20Todo%20app&packageName=com.example.todoApp&dependencies=web,data-jpa,h2">Spring Initializr</a> を使って雛形アプリを生成し、ダウンロードする。<br>
+    ここでは以下のプラグインを利用している:
+    <ul>
+      <li> Spring Web (Webアプリ)
+      <li> Spring Data JPA (データ管理)
+      <li> H2 Database (H2データベース)
+    </ul>
+
+  <li> 展開されたフォルダを IntelliJ IDEA で開く。
+
+  <li> <var>index.html</var> を新規作成する (staticフォルダで <kbd>Command &#x2318;</kbd> + <kbd>N</kbd>):
+<div class=file>
+<div>src/main/resources/static/index.html:</div>
+<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+Welcome!
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+</div>
+
+  <li> IntelliJ の画面右上のメニューから
+    <kbd>todoApp [bootRun]</kbd> を選択すると、アプリが起動する。
+<div class=figure>
+  <img width="651" height="267" src="bootrun.png">
+</div>
+
+  <li> <a target="_blank" href="http://localhost:8080/">http://localhost:8080/</a> にアクセスし、
+    "Welcome!" テキストが見えることを確認する。
+
+<div class=formula>
+<div class=title>Javaの基本概念</div>
+<dl>
+  <dt> Java言語、classファイル、jarファイル
+  <dd> Javaソースコード (<code>xxx.java</code>) をコンパイルすると、
+    classファイル (<code>xxx.class</code>) が生成される。
+    jarファイル (<code>xxx.jar</code>) は複数のclassファイルをまとめたもので、
+    JVM (Java Virtual Machine) と呼ばれる仮想マシンで実行する。
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="540" height="80">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="10" y="10" width="120" height="60" />
+      <rect x="210" y="10" width="120" height="60" />
+      <rect x="410" y="10" width="120" height="60" />
+    </g>
+    <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
+      <path d="M130,40 l75,0" />
+      <path d="M330,40 l75,0" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="70" y="40">Java</text>
+      <text x="70" y="55">ソースコード</text>
+      <text x="270" y="40">class</text>
+      <text x="270" y="55">ファイル</text>
+      <text x="470" y="40">jar</text>
+      <text x="470" y="55">ファイル</text>
+    </g>
+  </svg>
+</div>
+</div>
+
+  <dt> Kotlin言語
+  <dd> Javaを改良したもの。
+    Kotlinソースコード (<code>xxx.kt</code>) をclassファイルにコンパイルし、
+    Javaと同じく JVMで実行できる。
+    <div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="540" height="80">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="10" y="10" width="120" height="60" />
+      <rect x="210" y="10" width="120" height="60" />
+      <rect x="410" y="10" width="120" height="60" />
+    </g>
+    <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
+      <path d="M130,40 l75,0" />
+      <path d="M330,40 l75,0" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="70" y="40">Kotlin</text>
+      <text x="70" y="55">ソースコード</text>
+      <text x="270" y="40">class</text>
+      <text x="270" y="55">ファイル</text>
+      <text x="470" y="40">jar</text>
+      <text x="470" y="55">ファイル</text>
+    </g>
+  </svg>
+</div>
+</div>
+
+  <dt> アノテーション (annotation) 
+  <dd> JavaおよびKotlinのコードには、アノテーションをつけることができる。
+    アノテーションはコメントに似ているが、コメントは人間が読むのに対し、
+    アノテーションはプログラムによって解析される。
+    Java/Kotlin では、クラスや関数 (メソッド)、変数に対してアノテーションをつけることができる。
+    Spring Boot では、アノテーションを多用している。
+<pre>
+<mark>@ClassAnnotation</mark>
+class MyClass {
+  <mark>@MethodAnnotation</mark>
+  fun foo() {
+    <mark>@VariableAnnotation</mark>
+    val x = 123
+  }
+}
+</pre>
+
+</dl>
+</div>
+
+</ol>
+
+<h3 id="gradle">コマンドラインを使ったビルドと起動</h3>
+<p>
+  IntelliJ を使わず、コマンドラインからアプリのビルド・起動をする場合は、
+  以下のようにする:
+</p>
+<blockquote><pre>
+$ <strong>./gradlew build</strong>  <em>(アプリのビルドおよびテスト)</em>
+Starting a Gradle Daemon, 1 stopped Daemon could not be reused, use --status for details
+...
+
+BUILD SUCCESSFUL in 11s
+8 actionable tasks: 8 executed
+
+$ <strong>./gradlew bootrun</strong>  <em>(アプリの実行)</em>
+&gt; Task :bootRun
+  .   ____          _            __ _ _
+ /&Backslash;&Backslash; / ___'_ __ _ _(_)_ __  __ _ &Backslash; &Backslash; &Backslash; &Backslash;
+( ( )&Backslash;___ | '_ | '_| | '_ &Backslash;/ _` | &Backslash; &Backslash; &Backslash; &Backslash;
+ &Backslash;&Backslash;/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_&Backslash;__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.5)
+...
+</pre></blockquote>
+
+<h2 id="controller">4. 最初のテスト駆動開発 - TodoControllerの作成</h2>
+
+<ol class=spacy>
+<li> まず <var>TodoAppApplicationTests.kt</var> (最初から存在している) に、以下のように書く:
+<div class=file>
+<var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
+<pre>
+package com.example.todoApp
+
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.*
+import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
+
+@SpringBootTest
+class TodoAppApplicationTests {
+
+    @Test
+    fun contextLoads() {
+    }
+
+<div class=bgy>    @Test
+    fun `最初のテスト`() {
+        assertThat(1+2, equalTo(3))
+    }
+</div>}
+</pre>
+</div>
+
+<ul>
+  <li> <code>@Test</code> アノテーションがついているメソッドは、テストとして実行される。
+  <li> <code>fun `~`</code> の部分には、テスト名を書く。
+  <li> <code>assertThat(1+2, equalTo(3))</code> は「1+2 の結果が 3 に等しい」ことをチェックしている。
+  <li> <kbd><svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="10" height="10">
+       <polygon fill=green stroke=none points="0,0 10,5 0,10" />
+       </svg></kbd> ボタンを押してテストを実行し、成功していることを確認する。
+</ul>
+
+<div class=note>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その1</div>
+<p>
+コード中の<span class=error>赤色になっている部分</span>で
+<kbd>Option</kbd> + <kbd>Return</kbd> を押すと、
+その問題を解決するための手段を提案してくれる。
+たとえば上の例では「どのモジュールからインポートするか?」を訊かれるので
+<ul>
+  <li> <code>assertThat</code> では <code>org.hamcrest.MatcherAssert</code> を
+  <li> <code>equalTo</code> では <code>org.hamcrest.Matchers</code> を
+</ul>
+それぞれ選択する。
+</p>
+<figure>
+<img src="assertThat.png">
+</figure>
+</div>
+
+<li> <var>TodoAppApplicationTests</var> を以下のように変更する:
+<div class=file>
+<var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
+<pre>
+@SpringBootTest(<span class=bgy>webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT</span>)
+class TodoAppApplicationTests(
+<div class=bgy>    @Autowired val restTemplate: TestRestTemplate, 
+    @LocalServerPort val port: Int
+</div>) {
+    ...
+
+<div class=bgy>    @Test
+    fun `GETリクエストはOKステータスを返す`() {
+        <em>// localhost/todos に GETリクエストを発行する。</em>
+        val response = restTemplate.getForEntity("http://localhost:$port/todos", String::class.java)
+        <em>// レスポンスのステータスコードは OK である。</em>
+        assertThat(response.statusCode, equalTo(HttpStatus.OK))
+    }
+</div>
+    ...
+</pre>
+</div>
+
+<ul>
+  <li> <kbd><svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="10" height="10">
+       <polygon fill=green stroke=none points="0,0 10,5 0,10" />
+       </svg></kbd> ボタンを押してテストを実行し、失敗していることを確認する。
+</ul>
+
+<div class=formula>
+<div class=title>Spring における「依存注入 (DI)」の考え方 - その1</div>
+<p>
+Springでは
+<code>@Autowired</code> や <code>@LocalServerPort</code> のようなアノテーションを書くことによって、
+実行時に必要な値やオブジェクトをフレームワークが自動的に作成・注入してくれるようになっている。
+この機能を「<u>依存注入 (Dependency Injection, DI)</u>」と呼ぶ。
+Spring では、コントローラーやデータベース接続など、アプリの動作に関連するほとんどのオブジェクトは
+DI を使って作成させる (ビジネスロジックに関連するオブジェクトを除く)。
+</p>
+
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="340" height="220">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="10" y="10" width="320" height="200" stroke-width="2" />
+      <rect x="30" y="50" width="140" height="50" />
+      <rect x="35" y="55" width="130" height="40" />
+      <rect x="190" y="50" width="120" height="50" />
+      <rect x="195" y="55" width="110" height="40" />
+      <rect x="85" y="140" width="180" height="50" />
+      <rect x="90" y="145" width="170" height="40" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="170" y="30">Application Context</text>
+      <text x="100" y="80">TestRestTemplate</text>
+      <text x="250" y="80">LocalServerPort</text>
+      <text x="175" y="170">TodoAppApplicationTests</text>
+    </g>
+    <g stroke="black" fill="none" marker-end="url(#arrow)">
+      <path d="M110,140 q-20,-5,-20,-35" stroke-width="2" stroke-dasharray="4,4" />
+      <path d="M110,100 q20,5,20,35" stroke-width="4" />
+      <path d="M230,140 q-20,-5,-20,-35" stroke-width="2" stroke-dasharray="4,4" />
+      <path d="M230,100 q20,5,20,35" stroke-width="4" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="75" y="125">依存</text>
+      <text x="145" y="125">注入</text>
+      <text x="195" y="125">依存</text>
+      <text x="265" y="125">注入</text>
+    </g>
+  </svg>
+  <div class="caption">TestRestTemplate と LocalServerPort を TodoAppApplicationTests に注入する</div>
+</div>
+</div>
+
+</div>
+
+<li> 新しいファイル <var>TodoController.kt</var> を作成し、以下のように書く:
+<div class=file>
+<var>src/main/kotlin/com/example/todoApp/TodoController.kt</var>
+<pre>
+package com.example.todoApp
+...
+
+@RestController
+class TodoController {
+
+    @GetMapping("/todos")
+    fun getTodos(): String {
+        return "Hello"
+    }
+
+}
+</pre>
+</div>
+
+<ul>
+  <li> ふたたび <kbd><svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="10" height="10">
+       <polygon fill=green stroke=none points="0,0 10,5 0,10" />
+       </svg></kbd> ボタンを押してテストを実行し、成功していることを確認する。
+  <li> テスト駆動開発の3ステップ:
+    <ul>
+      <li> まず失敗するテストを書く (<strong>Red</strong>)。
+      <li> そのテストが成功するように、最小限のコードを書く (<strong>Green</strong>)。
+      <li> テストが成功したら、必要に応じてコードをリファクタリングする (<strong>Refactor</strong>)。
+    </ul>
+  <li> この段階で todoApp を実行してリクエストを送ると、上記の controller が応答していることがわかる:
+<pre>
+<strong>$ curl http://localhost:8080/todos</strong>
+Hello
+</pre>
+</ul>
+
+<div class=notice>
+<div class=title>注意: ファイル先頭のパッケージ宣言を忘れるべからず</div>
+<p>
+Springのコードにおいては、ファイル先頭のパッケージ宣言
+<pre>
+package com.example.todoApp
+</pre>
+は<strong>非常に重要</strong>である。
+Springの依存注入は、同一パッケージ内のクラスをスキャンすることによって行うので、
+パッケージ宣言を忘れると「あるはずのコンポーネントが見つからない」
+「宣言したはずのメソッドが動作しない」という状況が発生する。
+</p>
+</div>
+
+<div class=formula>
+<div class=title>Spring における「依存注入 (DI)」の考え方 - その2</div>
+<p>
+Springにおける
+<code>@RestController</code> や <code>@GetMapping</code> のようなアノテーションは、
+依存注入のもう一方の側面を表している。
+ここまでのコードでは明示的に <code>TodoController</code> を作成するロジックは存在していない。
+にもかかわらず、<code>TodoController</code> オブジェクトが作成され、動作しているように見える。
+</p>
+
+<p>
+ここでは、<code>@RestController</code> は、当該クラスが Spring Boot の DI候補として
+利用可能であることを示す。さらに <code>@GetMapping("/todos")</code> は、当該メソッドが
+<code>GET /todos</code> リクエストに対するハンドラとして利用可能であることを示す。
+この2つのアノテーションが存在することによって、
+Spring Boot は <code>getTodos()</code> メソッドの周囲に
+HTTP リクエスト・レスポンスを処理する機構をくっつけ全体を Webサーバとして動作させる。
+この仕組みを使って、数行で新しい Web API を作成することができる。
+</p>
+
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="320" height="200">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="70" y="10" width="240" height="180" stroke-width="2" />
+      <rect x="110" y="70" width="160" height="80" />
+      <rect x="115" y="75" width="150" height="70" />
+    </g>
+    <g stroke="black" stroke-width="4" fill="none" marker-end="url(#arrow)">
+      <path d="M40,60 l150,0 l0,25" />
+      <path d="M190,130 l0,30 l-145,0" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="190" y="30">Application Context</text>
+      <text x="130" y="55" style="font-family: monospace;">GET /todos</text>
+      <text x="190" y="105">TodoController</text>
+      <text x="190" y="125">getTodos()</text>
+      <text x="65" y="50" text-anchor="end">リクエスト</text>
+      <text x="65" y="150" text-anchor="end">レスポンス</text>
+    </g>
+  </svg>
+  <div class="caption">依存注入を使った APIエンドポイントの作成</div>
+</div>
+</div>
+
+</div>
+
+</ol>
+
+
+<h2 id="repository">5. TodoRepositoryの作成</h2>
+
+<ol class=spacy>
+
+<li> まずデータベースが格納するオブジェクト (Entity) である TodoEntity クラスを作成する。
+  <var>TodoEntity.kt</var> ファイルを作成し、以下のように書く (これはテストを書く必要はない):
+<div class=file>
+<var>src/main/kotlin/com/example/todoApp/Todo.kt</var>
+<pre>
+package com.example.todoApp
+
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.Id
+
+@Entity
+class TodoEntity(
+    @Id
+    @GeneratedValue
+    var id: Long? = null,
+    var text: String,
+)</pre>
+</div>
+
+<li> つぎに <var>TodoRepository.kt</var> ファイルを作成し、以下のように書く。これにもテストは必要ない:
+<div class=file>
+<var>src/main/kotlin/com/example/todoApp/TodoRepository.kt</var>
+<pre>
+package com.example.todoApp
+
+import org.springframework.data.repository.CrudRepository
+import org.springframework.stereotype.Repository
+
+@Repository
+interface TodoRepository : CrudRepository&lt;TodoEntity, Long&gt;
+</pre>
+</div>
+
+<div class=formula>
+<div class=title>JPA とは?</div>
+<p>
+JPA (Java Persistence API) とは、Java/Kotlin 言語における ORM (オブジェクト関係マッピング) の共通の枠組みである。
+JPA を使うと SQLを書かずに Java API を使ってオブジェクト ("エンティティ") をあたかも
+直接データベースに保存 (save)、読み込み (find) するような処理を書くことができる。
+Spring では、JPA は <a target="_blank" href="https://hibernate.org/orm/">Hibernate ORM</a> を使って実装されている。
+<code>@Entity</code> や <code>@Repository</code> などのアノテーションをつけることによって、指定した
+クラスを使った実装が自動的に生成される。
+</p>
+
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="180" height="200">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="10" y="10" width="160" height="40" />
+      <rect x="10" y="80" width="160" height="40" />
+      <rect x="10" y="150" width="160" height="40" />
+    </g>
+    <g stroke="black" stroke-width="2" fill="none" marker-end="url(#arrow)">
+      <path d="M50,50 l0,25" />
+      <path d="M130,80 l0,-25" />
+      <path d="M90,120 l0,25" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="90" y="35">アプリケーション</text>
+      <text x="90" y="105">JPA層</text>
+      <text x="90" y="175">データベース</text>
+      <text x="30" y="70" style="font-family: monospace;">save</text>
+      <text x="90" y="70">エンティティ</text>
+      <text x="150" y="70" style="font-family: monospace;">find</text>
+      <text x="95" y="140" text-anchor="start">SQL</text>
+    </g>
+  </svg>
+  <div class="caption">JPA層の機能</div>
+</div>
+</div>
+
+</div>
+
+
+<div class=note>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その2</div>
+<p>
+コード中のクラス名・関数名・変数名などを
+<kbd>Command &#x2318;</kbd> キーを押しながらクリックすると、
+そのクラスや関数の定義箇所に移動する。
+</p>
+</div>
+
+</ol>
+
+
+<h2 id="post">6. POSTエンドポイントの作成</h2>
+
+<ol class=spacy>
+  <li> POSTリクエストで受け取る JSONの型を定義する:
+<div class=file>
+<var>src/main/kotlin/com/example/todoApp/TodoRequest.kt</var>
+<pre>
+package com.example.todoApp
+
+data class TodoRequest(val text: String)
+</pre>
+</div>
+
+<div class=formula>
+<div class=title>Kotlin の data class とは?</div>
+<p>
+Kotlin における data class は、データの格納に使うクラスを定義するためのショートカットである。
+通常であれば、以下のようなクラス定義を書く必要があるが、data class の定義は自動でこれらを追加してくれる。
+<pre class=small>
+class TodoRequest {
+    val text: String
+
+    constructor(text: String) {
+        this.text = text
+    }
+
+    getText(): String {
+        return text
+    }
+
+    ...
+}
+</pre>
+</p>
+</div>
+
+<li> テストを書いて実装する:
+<div class=file>
+<var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
+<pre>
+    @Test
+    fun `POSTリクエストはOKステータスを返す`() {
+        <em>// localhost/todos に POSTリクエストを送る。このときのボディは {"text": "hello"}</em>
+        val request = TodoRequest("hello")
+        val response = restTemplate.postForEntity("http://localhost:$port/todos", request, String::class.java)
+        <em>// レスポンスのステータスコードは OK であること。</em>
+        assertThat(response.statusCode, equalTo(HttpStatus.OK))
+    }
+</pre>
+</div>
+<div class=note>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その3</div>
+<p>
+Kotlinファイル内で Java言語のコードをペーストすると、
+IntelliJ は自動的に Java → Kotlin に変換してくれる。
+これはJavaのサンプルコードをKotlinで使いたいときに役に立つ。
+たとえば、以下のJavaコードを上記のメソッド内にペーストしてみよう:
+</p>
+<blockquote><pre>
+TodoRequest request = new TodoRequest("hello");
+ResponseEntity&lt;String&gt; response = restTemplate.postForEntity("http://localhost:"+port+"/todos", request, String.class);
+</pre></blockquote>
+</div>
+<p>
+<strong>ヒント:</strong>
+POSTリクエストを処理するためには <code>@GetMapping</code> ではなく <code>@PostMapping</code> を使う。
+また、このとき <code>@RequestBody</code> を使って
+ボディとして受け取った JSON を TodoRequestオブジェクトに変換できる。
+</p>
+<pre>
+    @PostMapping("/todos")
+    fun saveTodo(@RequestBody todoRequest: TodoRequest): String {
+        ...
+    }
+</pre>
+
+<li> テストを書いて実装する。
+  このとき「正しくデータベースに追加できているか」をテストで確認するためには、以下のようにする:
+<ol>
+  <li> 最初に <code>GET /todos</code> を実行し、得られた Todoのリストを記憶しておく。
+  <li> <code>POST /todos</code> でなにか適当な Todoをひとつ追加する。
+  <li> ふたたび <code>GET /todos</code> を実行し、得られた Todoリストに
+    新しい Todo項目が追加されているかどうかをチェックする。
+</ol>
+
+<div class=file>
+<var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
+<pre>
+    @Test
+    fun `POSTリクエストはTodoオブジェクトを格納する`() {
+        <em>// localhost/todos に GETリクエストを送り、レスポンスを Todoオブジェクトの配列として解釈する。</em>
+        ...
+        <em>// このときのレスポンスを todos1 として記憶。</em>
+        ...
+
+        <em>// localhost/todos に POSTリクエストを送る。このときのボディは {"text": "hello"}</em>
+        ...
+
+        <em>// ふたたび localhost/todos に GETリクエストを送り、レスポンスを Todoオブジェクトの配列として解釈する。</em>
+        ...
+        <em>// このときのレスポンスを todos2 として記憶。</em>
+        ...
+
+        <em>// 配列 todos2 は、配列 todos1 よりも 1 要素だけ多い。</em>
+        assertThat(todos2.size, equalTo(todos1.size + 1))
+        <em>// 配列 todos2 には "hello" をもつTodoオブジェクトが含まれている。</em>
+        assertThat(todos2.map { todo: Todo -&gt; todo.text }, hasItem("hello"))
+    }
+</pre>
+</div>
+
+<div class=formula>
+<div class=title>Spring 用語解説</div>
+<dl>
+  <dt> Bean と POJO
+  <dd> Spring Bean は、Springによって作成・管理されるオブジェクト。
+    これに対してコード上で作成する (newする) オブジェクトは POJO (Plain Old Java Object) と呼ばれる。
+    一般に、アプリの動作に必要なオブジェクトには Bean を使い、ビジネスロジックで使うオブジェクトは POJO を使う。
+    <p>
+      <u>注意:</u>
+      "Java Bean" という用語もあるが、
+      これは特定の規則に従って作られた Javaオブジェクトのことをさし、
+      <strong>Spring Beanとは別物</strong>。
+    </p>
+
+  <dt> Spring IoC コンテナと Application Context
+  <dd> Spring IoC (Inversion of Control) コンテナには、
+    Spring によって作成・管理される Bean が入っている。
+    Spring は必要に応じて Beanを作成し、依存注入をおこなう。
+    "Application Context" もほぼ同義。
+<div class=figure><div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="340" height="130">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="10" y="10" width="320" height="110" stroke-width="2" />
+      <rect x="30" y="50" width="80" height="50" />
+      <rect x="35" y="55" width="70" height="40" />
+      <rect x="130" y="50" width="80" height="50" />
+      <rect x="135" y="55" width="70" height="40" />
+      <rect x="230" y="50" width="80" height="50" />
+      <rect x="235" y="55" width="70" height="40" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="170" y="30">Application Context</text>
+      <text x="70" y="80">Bean</text>
+      <text x="170" y="80">Bean</text>
+      <text x="270" y="80">...</text>
+    </g>
+  </svg>
+</div>
+</div>
+
+  <dt> @Controller, @Repository, @Service, @Component など
+  <dd> Spring Bean の候補となるクラスにつけられるアノテーション。
+    役割によって使い分ける。
+    Spring Boot では起動時にこれらのアノテーションが自動検出されるため、
+    何も設定もしなくても依存注入が可能になる。
+    <ul>
+      <li> <code>@Controller</code> (または <code>@RestController</code>) … Web APIのエンドポイントを提供する。
+      <li> <code>@Repository</code> … データの保存・変更・削除等の機能を提供する。
+      <li> <code>@Service</code> … ビジネスロジックに関連した機能を提供する。
+      <li> <code>@Component</code> … 上記以外の目的で使われる。
+    </ul>
+
+</dl>
+</div>
+
+</ol>
+
+<blockquote>
+<div class=formula>
+<div class=title>なぜ依存注入が必要なのか?</div>
+<p>
+なぜ Spring が「依存注入」「IoCコンテナ」などという概念を使っているのかというと、
+それは<strong>コードを変えずにシステムのふるまいを変更する</strong>ためである。
+たとえば、以下のようなコードを考えてみよう:
+</p>
+<pre>
+name = "tododb"
+db = PostgreSQL(name)
+db.query("SELECT * FROM todos")
+</pre>
+<p>
+このコードでは、ふるまいは完全に固定されている。
+データベース名を変更したり、PostgreSQL 以外のデータベースを使うためには
+コードを変更する必要がある。しかしテストの際には
+<strong>できるだけ本番コードそのものをテストしたほうがよい</strong>。
+上のようなコードではテストが面倒である。
+そこで Spring を使ったプログラミングでは、コードの各部分を分解し、
+フレームワークに「配管作業」を任せている。そしてこの接続を
+切り替えられるようにしておくことで、システムの柔軟性を実現している。
+この配管作業が依存注入に相当する。
+<div class=figure><div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="300" height="130">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="35" y="5" width="50" height="20" />
+      <rect x="10" y="55" width="110" height="20" />
+      <rect x="50" y="105" width="200" height="20" />
+      <g stroke="gray">
+      <rect x="125" y="5" width="50" height="20" />
+      <rect x="230" y="5" width="60" height="20" />
+      <rect x="210" y="55" width="80" height="20" />
+      </g>
+    </g>
+    <g stroke="black" stroke-width="2" fill="none" marker-end="url(#arrow)">
+      <path d="M60,25 l0,15 l30,0 l0,15" />
+      <path d="M65,75 l0,30" />
+      <g stroke="gray" stroke-dasharray="2,2">
+      <path d="M260,25 l0,30" />
+      <path d="M150,25 l0,15 l-50,0 l0,15" />
+      <path d="M250,75 l0,15 l-175,0 l0,15" />
+      </g>
+    </g>
+    <g text-anchor="middle" style="font-size: 75%; font-family: monospace;">
+      <text x="60" y="20">"tododb"</text>
+      <text x="65" y="70">PostgreSQL(name)</text>
+      <text x="150" y="120">db.query("SELECT * FROM todos")</text>
+      <g fill="gray">
+      <text x="150" y="20">"tododb2"</text>
+      <text x="260" y="20">"otherdb"</text>
+      <text x="250" y="70">MySQL(name)</text>
+      </g>
+    </g>
+  </svg>
+<div class=caption>依存注入のイメージ (実線は有効な接続)</div>
+</div>
+</div>
+</p>
+
+<p>
+Spring における依存注入や機能拡張は、基本的にアプリケーション
+ロジックの各箇所に Springのコードを挿入することによって行われる。
+このために、Springではアプリのロジックを細かく分割して書く必要がある。
+
+<div class=figure><div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="360" height="125">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="2" fill="#aaffaa" transform="translate(25,25)">
+      <rect x="0" y="0" width="80" height="30" />
+      <rect x="0" y="30" width="80" height="10" />
+      <rect x="0" y="40" width="80" height="50" />
+    </g>
+    <g stroke="black" stroke-width="2" fill="#aaffaa" transform="translate(175,5)">
+      <rect x="0" y="0" width="80" height="5" fill="#ff88ff" />
+      <rect x="0" y="5" width="80" height="30" />
+      <rect x="0" y="35" width="80" height="5" fill="#ff88ff" />
+      <rect x="0" y="40" width="80" height="5" fill="#ffcc44" />
+      <rect x="0" y="45" width="80" height="10" />
+      <rect x="0" y="55" width="80" height="5" fill="#ffcc44" />
+      <rect x="0" y="60" width="80" height="5" fill="#8844ff" />
+      <rect x="0" y="65" width="80" height="50" />
+      <rect x="0" y="115" width="80" height="5" fill="#8844ff" />
+    </g>
+    <g stroke="black" stroke-width="2" fill="none" marker-end="url(#arrow)">
+      <path d="M120,70 l40,0" />
+      <path d="M65,40 l0,40" stroke-dasharray="2,2" />
+      <path d="M215,30 l0,60" stroke-dasharray="2,2" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="63" y="20">アプリのロジック本体</text>
+      <text x="285" y="60" text-anchor="start">Springが</text>
+      <text x="285" y="80" text-anchor="start">挿入した部分</text>
+      <text x="65" y="100">実行</text>
+      <text x="215" y="110">実行</text>
+    </g>
+    <g stroke="black" stroke-width="1" fill="none" marker-end="url(#arrow)">
+      <path d="M280,60 L260,8" />
+      <path d="M280,62 L260,43" />
+      <path d="M280,64 L260,48" />
+      <path d="M280,66 L260,63" />
+      <path d="M280,68 L260,68" />
+      <path d="M280,70 L260,120" />
+    </g>
+  </svg>
+<div class=caption>Spring による機能拡張のイメージ</div>
+</div>
+</div>
+</p>
+</div>
+</blockquote>
+
+<h3 id="troubleshoot">うまく動かない場合は</h3>
+<p>
+コードがうまく動かない場合、以下の2つの方法で問題を特定する:
+</p>
+<ol type=a>
+  <li> ソースコード中で止めたい箇所にブレークポイントを設定し、デバッガで実行する。
+  <li> Spring Bootのログを調べる。
+    main あるいは test の <var>application.properties</var> に以下の行を追加して実行してみよう:
+<div class=file>
+application.properties:
+<pre>
+...
+spring.jpa.show-sql=true
+logging.level.org.springframework.web=DEBUG
+</pre>
+</div>
+</ol>
+
+<h4>Spring Bootのログの読み方</h4>
+<p>
+アプリの実行時にターミナルに現れる Spring Bootのログは、
+何かイベントが発生するたびに記録される。
+ログの各行は以下のような書式になっている。
+</p>
+<ol>
+  <li> タイムスタンプ: そのイベントが発生した日時。(+09:00 は日本時間を表す)
+  <li> ログレベル: イベントの種類。(上のものほど深刻)
+    <ol type=a>
+      <li> ERROR … 何らかのエラーが発生し、処理を完了できなかった場合。
+      <li> INFO … エラーではないが、ユーザに有用と思われる情報。
+      <li> DEBUG … 通常のユーザには必要ない、開発者がデバッグ用に使う情報。
+      <li> TRACE … 実行過程を詳細にトレースする場合の情報。<strong>(使用注意)</strong>
+    </ol>
+    <p>
+    <strong>注意:</strong> 通常は DEBUGレベルまたはTRACEレベルのログは出力すべきでない (出力量が膨大なため)。
+    </p>
+  <li> プロセスID: アプリが実行されているUNIXプロセスID。
+  <li> スレッド名: イベントが発生した JVMスレッドの名前。
+  <li> モジュール名: イベントが発生した Javaモジュール名。長い名前は省略される。<br>
+    例:
+    <ul>
+      <li> <code>c.e</code> = <code>com.example</code>
+      <li> <code>.s.d.r.c</code> = (org)<code>.spring.data.repository.config</code>
+      <li> <code>o.a.c.c</code> = <code>org.apache.catalina.core</code>
+      <li> ...
+    </ul>
+  <li> メッセージ: イベントの内容。
+</ol>
+
+<h4>ログ出力例 (上記の設定を有効にした場合):</h4>
+<blockquote><pre>
+/Users/euske/Library/Java/JavaVirtualMachines/corretto-21.0.7/Contents/Home/bin/java ...
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.5)
+
+2025-05-22T14:04:19.527+09:00  INFO 12389 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : Starting TodoAppApplicationKt using Java 21.0.7 with PID 12389 (/Users/euske/work/ws/spring-todoApp-2025/build/classes/kotlin/main started by euske in /Users/euske/work/ws/spring-todoApp-2025)
+2025-05-22T14:04:19.528+09:00  INFO 12389 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : No active profile set, falling back to 1 default profile: "default"
+2025-05-22T14:04:19.700+09:00  INFO 12389 --- [todoApp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-22T14:04:19.714+09:00  INFO 12389 --- [todoApp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 11 ms. Found 1 JPA repository interface.
+2025-05-22T14:04:19.828+09:00  INFO 12389 --- [todoApp] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-05-22T14:04:19.832+09:00  INFO 12389 --- [todoApp] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-22T14:04:19.832+09:00  INFO 12389 --- [todoApp] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+2025-05-22T14:04:19.845+09:00  INFO 12389 --- [todoApp] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-05-22T14:04:19.845+09:00  INFO 12389 --- [todoApp] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 302 ms
+2025-05-22T14:04:19.880+09:00  INFO 12389 --- [todoApp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-22T14:04:19.942+09:00  INFO 12389 --- [todoApp] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:f5f5a25c-05be-4b71-8b5e-248bf4365353 user=SA
+2025-05-22T14:04:19.943+09:00  INFO 12389 --- [todoApp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-22T14:04:19.958+09:00  INFO 12389 --- [todoApp] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-22T14:04:19.973+09:00  INFO 12389 --- [todoApp] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.13.Final
+2025-05-22T14:04:19.982+09:00  INFO 12389 --- [todoApp] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-05-22T14:04:20.058+09:00  INFO 12389 --- [todoApp] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-22T14:04:20.080+09:00  INFO 12389 --- [todoApp] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+Hibernate: create global temporary table HTE_todo_entity(rn_ integer not null, id bigint, text varchar(255), primary key (rn_)) TRANSACTIONAL
+2025-05-22T14:04:20.315+09:00  INFO 12389 --- [todoApp] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: drop table if exists todo_entity cascade 
+Hibernate: drop sequence if exists todo_entity_seq
+Hibernate: create sequence todo_entity_seq start with 1 increment by 50
+Hibernate: create table todo_entity (id bigint not null, text varchar(255), primary key (id))
+2025-05-22T14:04:20.323+09:00  INFO 12389 --- [todoApp] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-22T14:04:20.410+09:00  WARN 12389 --- [todoApp] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-22T14:04:20.417+09:00  INFO 12389 --- [todoApp] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2025-05-22T14:04:20.434+09:00 DEBUG 12389 --- [todoApp] [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : 6 mappings in 'requestMappingHandlerMapping'
+2025-05-22T14:04:20.460+09:00 DEBUG 12389 --- [todoApp] [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2025-05-22T14:04:20.470+09:00 DEBUG 12389 --- [todoApp] [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-05-22T14:04:20.483+09:00 DEBUG 12389 --- [todoApp] [           main] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-05-22T14:04:20.498+09:00  INFO 12389 --- [todoApp] [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:f5f5a25c-05be-4b71-8b5e-248bf4365353'
+2025-05-22T14:04:20.523+09:00  INFO 12389 --- [todoApp] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-05-22T14:04:20.527+09:00  INFO 12389 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : Started TodoAppApplicationKt in 1.102 seconds (process running for 1.269)
+2025-05-22T14:04:32.424+09:00  INFO 12389 --- [todoApp] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-22T14:04:32.425+09:00  INFO 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-05-22T14:04:32.425+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2025-05-22T14:04:32.425+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2025-05-22T14:04:32.425+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
+2025-05-22T14:04:32.426+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@31a80c88
+2025-05-22T14:04:32.426+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@2dd4a7a9
+2025-05-22T14:04:32.426+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-05-22T14:04:32.426+09:00  INFO 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-05-22T14:04:32.429+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/todos", parameters={}
+2025-05-22T14:04:32.432+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.todoApp.TodoController#getTodos()
+Hibernate: select te1_0.id,te1_0.text from todo_entity te1_0
+2025-05-22T14:04:32.592+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-05-22T14:04:32.592+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [[]]
+2025-05-22T14:04:32.597+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+</pre></blockquote>
+
+<h2 id="conclusion">7. おわりに</h2>
+
+<p>Spring Boot の長所:</p>
+<ul>
+  <li> 最小限のコードで信頼性のあるサービスを開発できる。
+  <li> データベースとの連携、クラウドサービスの利用、認証・認可の使用など、一般的なアプリで必要な機能がほぼ揃っている。
+  <li> テスト機能が充実しており、テスト駆動開発 (TDD) に向いている。
+  <li> 「エンタープライズ」アプリを設計・開発するためのノウハウが詰まっており、保守しやすいコードが書ける。
+</ul>
+
+<p>Spring Boot の短所:</p>
+<ul>
+  <li> アノテーションの使い方など、「Spring流」でやる方法を覚えるのに時間がかかる。
+  <li> 多くのオブジェクトが自動的に作成されるため、制御の流れがわかりにくい。
+  <li> エラー (データベース接続エラーなど) が発生した場合は「依存注入の失敗」として扱われるため、
+    原因を特定するまでに時間がかかる場合がある。
+</ul>
+
+<h3 id="notice">今後の改良点</h3>
+<p>
+  このチュートリアルは簡単のため、本来であれば推奨されるいくつかの作業をしていない。
+  この例を参考に本格的なアプリを作る場合は、以下の改良点を参考のこと:
+</p>
+<ul>
+  <li> アプリ実行時には H2データベースではなく、本物の PostgreSQL を利用する。
+  <li> 一般にアプリのビジネスロジックはデータベースの構造に依存する。この構造はアプリを開発するにつれて変化していく。
+  そのため、実際の開発ではデータベースの変更履歴を管理する
+  <a target="_blank" href="https://flywaydb.org/">Flyway</a>　などの
+  「マイグレーションツール」を使うのが一般的である。
+  <li> <a target="_blank" href="https://www.baeldung.com/security-spring">Spring Security</a> を導入する。
+</ul>
+
+<h3 id="references">参考資料</h3>
+
+<dl class=spacy>
+  <dt> <a target="_blank" href="https://www.tohoho-web.com/ex/kotlin.html">とほほのKotlin入門</a>
+  <dd> Kotlinの文法まとめ。
+
+  <dt> <a target="_blank" href="https://www.tohoho-web.com/ex/postgresql.html">とほほのPostgreSQL入門</a>
+  <dd> PostgreSQLの文法まとめ。
+
+  <dt> <a target="_blank" href="https://spring.pleiades.io/spring-boot/">Spring Boot リファレンスマニュアル</a><br>
+    <a target="_blank" href="https://spring.pleiades.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html">RestTemplate</a><br>
+  <dd> Spring Boot 各種クラス・メソッドのリファレンス文書。
+
+  <dt> <a target="_blank" href="https://learning-collection.com/spring-boot%E3%81%A7%E3%82%88%E3%81%8F%E4%BD%BF%E3%81%86%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%B8%80%E8%A6%A7/">Spring Bootでよく使うアノテーション一覧</a>
+  <dd> Spring Boot でよく使うアノテーションまとめ。
+
+  <dt> <a target="_blank" href="https://hamcrest.org/JavaHamcrest/tutorial">Hamcrestチュートリアル</a> (英語)
+  <dd> テストで使う assertThat の書き方。
+
+  <dt> <a target="_blank" href="https://spring.academy/">Spring Academy</a> (英語)
+  <dd> Spring Boot を詳しく学びたい人向けのサイト。多数の動画・例題および実験用ラボが用意されている。
+
+</dl>
+
+<hr>
+<address>Yusuke Shinyama</address>
