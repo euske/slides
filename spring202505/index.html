@@ -90,10 +90,7 @@ IntelliJ IDEA Ultimate。
   <li> <a href="#initializr">Spring Initializr による雛形アプリ生成</a>
   <li> <a href="#controller">最初のTDD - TodoControllerの作成</a>
   <li> <a href="#repository">TodoRepositoryの作成</a>
-  <li> <a href="#post">POSTエンドポイントの作成</a>
-  <ul>
-    <li> <a href="#troubleshoot">うまく動かない場合は</a>
-  </ul>
+  <li> <a href="#troubleshoot">うまく動かない場合は</a>
   <li> <a href="#conclusion">おわりに・参考資料</a>
 </ol>
 
@@ -302,7 +299,7 @@ Date: Tue, 20 May 2025 02:57:31 GMT
     <ul>
       <li> Spring Web (Webアプリ)
       <li> Spring Data JPA (データ管理)
-      <li> H2 Database (H2データベース)
+      <li> H2 Database (H2データベース、開発用に使える組み込みSQLデータベース)
     </ul>
 
   <li> 展開されたフォルダを IntelliJ IDEA で開く。
@@ -449,17 +446,15 @@ $ <strong>./gradlew bootrun</strong>  <em>(アプリの実行)</em>
 
 <h2 id="controller">4. 最初のテスト駆動開発 - TodoControllerの作成</h2>
 
+<h3 id="controller-get">GETエンドポイントの作成</h3>
+
 <ol class=spacy>
 <li> まず <var>TodoAppApplicationTests.kt</var> (最初から存在している) に、以下のように書く:
 <div class=file>
 <var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
 <pre>
 package com.example.todoApp
-
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.*
-import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+...
 
 @SpringBootTest
 class TodoAppApplicationTests {
@@ -695,8 +690,91 @@ HTTP リクエスト・レスポンスを処理する機構をくっつけ全体
 
 </ol>
 
+<h3 id="controller-post">POSTエンドポイントの作成</h3>
+
+<ol class=spacy start="4">
+  <li> POSTリクエストで受け取る JSONの型を定義する。
+  これはデータ型の定義だけなので、テストを書く必要はない:
+<div class=file>
+<var>src/main/kotlin/com/example/todoApp/TodoRequest.kt</var>
+<pre>
+package com.example.todoApp
+
+data class TodoRequest(val text: String)
+</pre>
+</div>
+
+<div class=formula>
+<div class=title>Kotlin の data class とは?</div>
+<p>
+Kotlin における data class は、データの格納に使うクラスを定義するためのショートカットである。
+通常であれば、以下のようなクラス定義を書く必要があるが、data class の定義は自動でこれらを追加してくれる。
+<pre class=small>
+class TodoRequest {
+    val text: String
+
+    constructor(text: String) {
+        this.text = text
+    }
+
+    getText(): String {
+        return text
+    }
+    ...
+}
+</pre>
+</p>
+</div>
+
+<li> テストを書く:
+<div class=file>
+<var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
+<pre>
+    @Test
+    fun `POSTリクエストはOKステータスを返す`() {
+        <em>// localhost/todos に POSTリクエストを送る。このときのボディは {"text": "hello"}</em>
+        val request = TodoRequest("hello")
+        val response = restTemplate.postForEntity("http://localhost:$port/todos", request, String::class.java)
+        <em>// レスポンスのステータスコードは OK であること。</em>
+        assertThat(response.statusCode, equalTo(HttpStatus.OK))
+    }
+</pre>
+</div>
+<div class=note>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その3</div>
+<p>
+Kotlinファイル内で Java言語のコードをペーストすると、
+IntelliJ は自動的に Java → Kotlin に変換してくれる。
+これはJavaのサンプルコードをKotlinで使いたいときに役に立つ。
+たとえば、以下のJavaコードを上記のメソッド内にペーストしてみよう:
+</p>
+<blockquote><pre>
+TodoRequest request = new TodoRequest("hello");
+ResponseEntity&lt;String&gt; response = restTemplate.postForEntity("http://localhost:"+port+"/todos", request, String.class);
+</pre></blockquote>
+</div>
+
+<li> 実装する。POSTリクエストを処理するためには <code>@GetMapping</code> ではなく <code>@PostMapping</code> を使う。
+また、このとき引数の前に <code>@RequestBody</code> を使うと
+ボディとして受け取った JSON を <var>TodoRequest</var>オブジェクトに変換できる。
+
+<div class=file>
+<var>src/main/kotlin/com/example/todoApp/TodoController.kt</var>
+<pre>
+    ...
+    @PostMapping("/todos")
+    fun postTodo(@RequestBody todoRequest: TodoRequest): String {
+        return "gotcha"
+    }
+    ...
+</pre>
+</div>
+
+</ol>
 
 <h2 id="repository">5. TodoRepositoryの作成</h2>
+
+<h3 id="repository-prep">データベースを扱う準備</h3>
 
 <ol class=spacy>
 
@@ -791,89 +869,14 @@ Spring では、JPA は <a target="_blank" href="https://hibernate.org/orm/">Hib
 
 </ol>
 
+<h3 id="repository-store">データの格納と読み出し</h3>
 
-<h2 id="post">6. POSTエンドポイントの作成</h2>
-
-<ol class=spacy>
-  <li> POSTリクエストで受け取る JSONの型を定義する:
-<div class=file>
-<var>src/main/kotlin/com/example/todoApp/TodoRequest.kt</var>
-<pre>
-package com.example.todoApp
-
-data class TodoRequest(val text: String)
-</pre>
-</div>
-
-<div class=formula>
-<div class=title>Kotlin の data class とは?</div>
-<p>
-Kotlin における data class は、データの格納に使うクラスを定義するためのショートカットである。
-通常であれば、以下のようなクラス定義を書く必要があるが、data class の定義は自動でこれらを追加してくれる。
-<pre class=small>
-class TodoRequest {
-    val text: String
-
-    constructor(text: String) {
-        this.text = text
-    }
-
-    getText(): String {
-        return text
-    }
-
-    ...
-}
-</pre>
-</p>
-</div>
-
-<li> テストを書いて実装する:
-<div class=file>
-<var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
-<pre>
-    @Test
-    fun `POSTリクエストはOKステータスを返す`() {
-        <em>// localhost/todos に POSTリクエストを送る。このときのボディは {"text": "hello"}</em>
-        val request = TodoRequest("hello")
-        val response = restTemplate.postForEntity("http://localhost:$port/todos", request, String::class.java)
-        <em>// レスポンスのステータスコードは OK であること。</em>
-        assertThat(response.statusCode, equalTo(HttpStatus.OK))
-    }
-</pre>
-</div>
-<div class=note>
-<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その3</div>
-<p>
-Kotlinファイル内で Java言語のコードをペーストすると、
-IntelliJ は自動的に Java → Kotlin に変換してくれる。
-これはJavaのサンプルコードをKotlinで使いたいときに役に立つ。
-たとえば、以下のJavaコードを上記のメソッド内にペーストしてみよう:
-</p>
-<blockquote><pre>
-TodoRequest request = new TodoRequest("hello");
-ResponseEntity&lt;String&gt; response = restTemplate.postForEntity("http://localhost:"+port+"/todos", request, String.class);
-</pre></blockquote>
-</div>
-<p>
-<strong>ヒント:</strong>
-POSTリクエストを処理するためには <code>@GetMapping</code> ではなく <code>@PostMapping</code> を使う。
-また、このとき <code>@RequestBody</code> を使って
-ボディとして受け取った JSON を TodoRequestオブジェクトに変換できる。
-</p>
-<pre>
-    @PostMapping("/todos")
-    fun saveTodo(@RequestBody todoRequest: TodoRequest): String {
-        ...
-    }
-</pre>
-
-<li> テストを書いて実装する。
+<ol start="3">
+<li> テストを書く。
   このとき「正しくデータベースに追加できているか」をテストで確認するためには、以下のようにする:
 <ol>
-  <li> 最初に <code>GET /todos</code> を実行し、得られた Todoのリストを記憶しておく。
   <li> <code>POST /todos</code> でなにか適当な Todoをひとつ追加する。
-  <li> ふたたび <code>GET /todos</code> を実行し、得られた Todoリストに
+  <li> <code>GET /todos</code> を実行し、得られた Todoリストに
     新しい Todo項目が追加されているかどうかをチェックする。
 </ol>
 
@@ -882,92 +885,36 @@ POSTリクエストを処理するためには <code>@GetMapping</code> では�
 <pre>
     @Test
     fun `POSTリクエストはTodoオブジェクトを格納する`() {
-        <em>// localhost/todos に GETリクエストを送り、レスポンスを Todoオブジェクトの配列として解釈する。</em>
-        ...
-        <em>// このときのレスポンスを todos1 として記憶。</em>
-        ...
-
         <em>// localhost/todos に POSTリクエストを送る。このときのボディは {"text": "hello"}</em>
         ...
 
-        <em>// ふたたび localhost/todos に GETリクエストを送り、レスポンスを Todoオブジェクトの配列として解釈する。</em>
-        ...
-        <em>// このときのレスポンスを todos2 として記憶。</em>
+        <em>// localhost/todos に GETリクエストを送り、レスポンスを Todoオブジェクトの配列として解釈する。</em>
+        <em>// このときのレスポンスを todos として記憶。</em>
         ...
 
-        <em>// 配列 todos2 は、配列 todos1 よりも 1 要素だけ多い。</em>
-        assertThat(todos2.size, equalTo(todos1.size + 1))
-        <em>// 配列 todos2 には "hello" をもつTodoオブジェクトが含まれている。</em>
-        assertThat(todos2.map { todo: Todo -&gt; todo.text }, hasItem("hello"))
+        <em>// 配列 todos の長さは 1。</em>
+        assertThat(todos.size, equalTo(1))
+        <em>// 配列 todos[0] には "hello" をもつTodoオブジェクトが含まれている。</em>
+        assertThat(todos[0].text, equalTo("hello"))
     }
 </pre>
 </div>
 
+<li> 実装する。このとき <var>TodoController</var> に対して <var>TodoRepository</var> を注入させる:
+<div class=file>
+<var>src/main/kotlin/com/example/todoApp/TodoController.kt</var>
+<pre>
+@RestController
+class TodoController<mark>(
+    @Autowired private val repository: TodoRepository
+)</mark> {
+    ...
+}
+</pre>
+</div>
+
 <div class=formula>
-<div class=title>Spring 用語解説</div>
-<dl>
-  <dt> Bean と POJO
-  <dd> Spring Bean は、Springによって作成・管理されるオブジェクト。
-    これに対してコード上で作成する (newする) オブジェクトは POJO (Plain Old Java Object) と呼ばれる。
-    一般に、アプリの動作に必要なオブジェクトには Bean を使い、ビジネスロジックで使うオブジェクトは POJO を使う。
-    <p>
-      <u>注意:</u>
-      "Java Bean" という用語もあるが、
-      これは特定の規則に従って作られた Javaオブジェクトのことをさし、
-      <strong>Spring Beanとは別物</strong>。
-    </p>
-
-  <dt> Spring IoC コンテナと Application Context
-  <dd> Spring IoC (Inversion of Control) コンテナには、
-    Spring によって作成・管理される Bean が入っている。
-    Spring は必要に応じて Beanを作成し、依存注入をおこなう。
-    "Application Context" もほぼ同義。
-<div class=figure><div>
-  <svg xmlns="http://www.w3.org/2000/svg"
-       xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="340" height="130">
-    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
-      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
-    </marker>
-    <g stroke="black" stroke-width="1" fill="none">
-      <rect x="10" y="10" width="320" height="110" stroke-width="2" />
-      <rect x="30" y="50" width="80" height="50" />
-      <rect x="35" y="55" width="70" height="40" />
-      <rect x="130" y="50" width="80" height="50" />
-      <rect x="135" y="55" width="70" height="40" />
-      <rect x="230" y="50" width="80" height="50" />
-      <rect x="235" y="55" width="70" height="40" />
-    </g>
-    <g text-anchor="middle" style="font-size: 75%;">
-      <text x="170" y="30">Application Context</text>
-      <text x="70" y="80">Bean</text>
-      <text x="170" y="80">Bean</text>
-      <text x="270" y="80">...</text>
-    </g>
-  </svg>
-</div>
-</div>
-
-  <dt> @Controller, @Repository, @Service, @Component など
-  <dd> Spring Bean の候補となるクラスにつけられるアノテーション。
-    役割によって使い分ける。
-    Spring Boot では起動時にこれらのアノテーションが自動検出されるため、
-    何も設定もしなくても依存注入が可能になる。
-    <ul>
-      <li> <code>@Controller</code> (または <code>@RestController</code>) … Web APIのエンドポイントを提供する。
-      <li> <code>@Repository</code> … データの保存・変更・削除等の機能を提供する。
-      <li> <code>@Service</code> … ビジネスロジックに関連した機能を提供する。
-      <li> <code>@Component</code> … 上記以外の目的で使われる。
-    </ul>
-
-</dl>
-</div>
-
-</ol>
-
-<blockquote>
-<div class=formula>
-<div class=title>なぜ依存注入が必要なのか?</div>
+<div class=title>なぜ依存注入が重要なのか?</div>
 <p>
 なぜ Spring が「依存注入」「IoCコンテナ」などという概念を使っているのかというと、
 それは<strong>コードを変えずにシステムのふるまいを変更する</strong>ためである。
@@ -1084,9 +1031,72 @@ Spring における依存注入や機能拡張は、基本的にアプリケー�
 </div>
 </p>
 </div>
-</blockquote>
 
-<h3 id="troubleshoot">うまく動かない場合は</h3>
+
+<div class=formula>
+<div class=title>Spring 用語解説</div>
+<dl>
+  <dt> Bean と POJO
+  <dd> Spring Bean は、Springによって作成・管理されるオブジェクト。
+    これに対してコード上で作成する (newする) オブジェクトは POJO (Plain Old Java Object) と呼ばれる。
+    一般に、アプリの動作に必要なオブジェクトには Bean を使い、ビジネスロジックで使うオブジェクトは POJO を使う。
+    <p>
+      <u>注意:</u>
+      "Java Bean" という用語もあるが、
+      これは特定の規則に従って作られた Javaオブジェクトのことをさし、
+      <strong>Spring Beanとは別物</strong>。
+    </p>
+
+  <dt> Spring IoC コンテナと Application Context
+  <dd> Spring IoC (Inversion of Control) コンテナには、
+    Spring によって作成・管理される Bean が入っている。
+    Spring は必要に応じて Beanを作成し、依存注入をおこなう。
+    "Application Context" もほぼ同義。
+<div class=figure><div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="340" height="130">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="black" stroke-width="1" fill="none">
+      <rect x="10" y="10" width="320" height="110" stroke-width="2" />
+      <rect x="30" y="50" width="80" height="50" />
+      <rect x="35" y="55" width="70" height="40" />
+      <rect x="130" y="50" width="80" height="50" />
+      <rect x="135" y="55" width="70" height="40" />
+      <rect x="230" y="50" width="80" height="50" />
+      <rect x="235" y="55" width="70" height="40" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="170" y="30">Application Context</text>
+      <text x="70" y="80">Bean</text>
+      <text x="170" y="80">Bean</text>
+      <text x="270" y="80">...</text>
+    </g>
+  </svg>
+</div>
+</div>
+
+  <dt> @Controller, @Repository, @Service, @Component など
+  <dd> Spring Bean の候補となるクラスにつけられるアノテーション。
+    役割によって使い分ける。
+    Spring Boot では起動時にこれらのアノテーションが自動検出されるため、
+    何も設定もしなくても依存注入が可能になる。
+    <ul>
+      <li> <code>@Controller</code> (または <code>@RestController</code>) … Web APIのエンドポイントを提供する。
+      <li> <code>@Repository</code> … データの保存・変更・削除等の機能を提供する。
+      <li> <code>@Service</code> … ビジネスロジックに関連した機能を提供する。
+      <li> <code>@Component</code> … 上記以外の目的で使われる。
+    </ul>
+
+</dl>
+</div>
+
+</ol>
+
+
+<h2 id="troubleshoot">6. うまく動かない場合は</h2>
 <p>
 コードがうまく動かない場合、以下の2つの方法で問題を特定する:
 </p>
@@ -1204,6 +1214,7 @@ Hibernate: select te1_0.id,te1_0.text from todo_entity te1_0
 2025-05-22T14:04:32.592+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [[]]
 2025-05-22T14:04:32.597+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
 </pre></blockquote>
+
 
 <h2 id="conclusion">7. おわりに</h2>
 
