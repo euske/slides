@@ -871,9 +871,51 @@ Spring では、JPA は <a target="_blank" href="https://hibernate.org/orm/">Hib
 
 <h3 id="repository-store">データの格納と読み出し</h3>
 
-<ol start="3">
+<ol class=spacy start="3">
 <li> テストを書く。
-  このとき「正しくデータベースに追加できているか」をテストで確認するためには、以下のようにする:
+  まず、アプリ起動直後にはデータベースが空であるはずなので「Todoには何も入っていない」というテストを書いてみる:
+
+<div class=file>
+<var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
+<pre>
+    @Test
+    fun `GETリクエストは空のTodoリストを返す`() {
+        <em>// localhost/todos に GETリクエストを送り、レスポンスを TodoEntity の配列として解釈する。</em>
+        val response = restTemplate.getForEntity("http://localhost:$port/todos", Array&lt;TodoEntity&gt;::class.java)
+        val todos = response.body!!
+
+        <em>// 配列は0個の要素をもつこと。</em>
+        assertThat(todos.size, equalTo(0))
+    }
+</pre>
+</div>
+
+<li> 実装する。この段階ではまだ空のリストを返すだけでよいので、データベースを参照する必要はない。
+<div class=file>
+<var>src/main/kotlin/com/example/todoApp/TodoController.kt</var>
+<pre>
+    ...
+    @GetMapping("/todos")
+    fun getTodos(): List&lt;TodoEntity&gt; {
+        <em>// 空のリストを返すだけ。</em>
+        return emptyList()
+    }
+    ...
+</pre>
+</div>
+
+<div class=note>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その3</div>
+<p>
+IntelliJ では、(Javaではなく) Kotlin言語の独自機能で書かれている部分は
+<code>emptyList()</code> ではなく
+<code><i>emptyList()</i></code> のように斜体で表示される。
+</p>
+</div>
+
+<li> 次のテストを書く。
+  ここで初めて「正しくデータベースに追加できているか」をテストすることにしよう。
+  そのためには、以下のようにする:
 <ol>
   <li> <code>POST /todos</code> でなにか適当な Todoをひとつ追加する。
   <li> <code>GET /todos</code> を実行し、得られた Todoリストに
@@ -888,19 +930,58 @@ Spring では、JPA は <a target="_blank" href="https://hibernate.org/orm/">Hib
         <em>// localhost/todos に POSTリクエストを送る。このときのボディは {"text": "hello"}</em>
         ...
 
-        <em>// localhost/todos に GETリクエストを送り、レスポンスを Todoオブジェクトの配列として解釈する。</em>
+        <em>// localhost/todos に GETリクエストを送り、レスポンスを TodoEntity の配列として解釈する。</em>
         <em>// このときのレスポンスを todos として記憶。</em>
         ...
 
         <em>// 配列 todos の長さは 1。</em>
         assertThat(todos.size, equalTo(1))
-        <em>// 配列 todos[0] には "hello" をもつTodoオブジェクトが含まれている。</em>
+        <em>// 配列 todos[0] には "hello" をもつTodoEntity が含まれている。</em>
         assertThat(todos[0].text, equalTo("hello"))
     }
 </pre>
 </div>
 
-<li> 実装する。このとき <var>TodoController</var> に対して <var>TodoRepository</var> を注入させる:
+<div class=formula>
+<div class=title>ブラックボックス・テストの考え方</div>
+<p>
+テストするときは、基本的にテスト対象は「ブラックボックス」であると考える。
+つまり、テスト対象の内部は未知であり、ふるまいを外からテストする唯一の手段は
+その入力を変化させ、その出力を観察することしかできない。
+したがって、テストする場合には
+「どういう入力→出力の変化を確認すれば、期待通りのふるまいであると確信できるのか?」
+を考えることになる。
+</p>
+<div class=figure>
+<div>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="240" height="100">
+    <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+      <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+    </marker>
+    <g stroke="none" fill="black">
+      <rect x="80" y="10" width="80" height="80" />
+    </g>
+    <g stroke="black" stroke-width="3" fill="none" marker-end="url(#arrow)">
+      <path d="M40,50 l30,0" />
+      <path d="M170,50 l30,0" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="20" y="55">入力</text>
+      <text x="220" y="55">出力</text>
+      <g fill="white" style="font-weight: bold;">
+      <text x="120" y="45">テスト</text>
+      <text x="120" y="65">対象</text>
+      </g>
+    </g>
+  </svg>
+  <div class="caption">ブラックボックス・テスト</div>
+</div>
+</div>
+</div>
+
+<li> 実装する。まず <var>TodoController</var> に対して <var>TodoRepository</var> を注入させる:
 <div class=file>
 <var>src/main/kotlin/com/example/todoApp/TodoController.kt</var>
 <pre>
@@ -910,6 +991,27 @@ class TodoController<mark>(
 )</mark> {
     ...
 }
+</pre>
+</div>
+<p>
+つぎに <code>getTodos()</code>, <code>postTodo()</code> の両方を書き換えてテストが通るようにする:
+</p>
+<div class=file>
+<var>src/main/kotlin/com/example/todoApp/TodoController.kt</var>
+<pre>
+    ...
+    @GetMapping("/todos")
+    fun getTodos(): List&lt;TodoEntity&gt; {
+        val todos = repository.findAll()
+        return todos.toList()
+    }
+
+    @PostMapping("/todos")
+    fun postTodo(@RequestBody todo: TodoRequest) {
+        val entity = TodoEntity(text=todo.text)
+        repository.save(entity)
+    }
+    ...
 </pre>
 </div>
 
@@ -922,12 +1024,12 @@ class TodoController<mark>(
 </p>
 <pre>
 name = "tododb"
-db = PostgreSQL(name)
-db.query("SELECT * FROM todos")
+repository = H2TodoRepository(name)
+repository.save(entity)
 </pre>
 <p>
 このコードでは、ふるまいは完全に固定されている。
-データベース名を変更したり、PostgreSQL 以外のデータベースを使うためには
+データベース名を変更したり、H2 以外のデータベースを使うためには
 コードを変更する必要がある。しかしテストの際には
 <strong>できるだけ本番コードそのものをテストしたほうがよい</strong>。
 上のようなコードではテストが面倒である。
@@ -963,12 +1065,12 @@ db.query("SELECT * FROM todos")
     </g>
     <g text-anchor="middle" style="font-size: 75%; font-family: monospace;">
       <text x="60" y="20">"tododb"</text>
-      <text x="65" y="70">PostgreSQL(name)</text>
-      <text x="150" y="120">db.query("SELECT * FROM todos")</text>
+      <text x="65" y="70">H2TodoRepository(name)</text>
+      <text x="150" y="120">repository.save(entity)</text>
       <g fill="gray">
       <text x="150" y="20">"tododb2"</text>
       <text x="260" y="20">"otherdb"</text>
-      <text x="250" y="70">MySQL(name)</text>
+      <text x="250" y="70">PostgreSQLTodoRepository(name)</text>
       </g>
     </g>
   </svg>
@@ -1032,6 +1134,89 @@ Spring における依存注入や機能拡張は、基本的にアプリケー�
 </p>
 </div>
 
+</ol>
+
+<h3 id="repository-reset">テストごとのデータのリセット</h3>
+
+<ol class=spacy start="7">
+
+<li> 上のテストは単体で走らせると成功するが、<var>TodoAppApplicationTests</var> 全体を
+走らせると失敗することがある。それはテスト時に、前のテストで格納したTodoEntityがデータベース中に残っている
+場合があるためである ("テスト汚染")。このような事態を避けるために、テストごとにデータベースを空にする
+ロジックを書いておく。
+
+<div class=file>
+<var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
+<pre>
+    @BeforeEach
+    fun setup() {
+        <em>// 各テストは項目が空の状態で始める。</em>
+        repository.deleteAll()
+    }
+</pre>
+</div>
+<p>
+これですべてのテストがうまく動く状態になるはずである。
+</p>
+
+</ol>
+
+<h3 id="repository-rest">その他のテスト</h3>
+
+<ol class=spacy start="8">
+
+<li> アプリを完成させるためには、さらにいくつかのテストを加える必要がある。
+参考例は以下のとおり。
+
+<div class=file>
+<var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
+<pre>
+    @Test
+    fun `POSTリクエストは新規作成した項目のIDを返す`() {
+        <em>// 項目を新規作成し、返されたIDを取得する。</em>
+        ...
+
+        <em>// TodoEntity の配列を取得する。</em>
+        ...
+
+        <em>// 配列中に返されたIDをもつ要素があること。</em>
+        ...
+    }
+
+    @Test
+    fun `特定の項目をIDを指定してGETできる`() {
+        <em>// 項目を新規作成する。</em>
+        ...
+        
+        <em>// localhost/todos/$id に GETリクエストを送り、レスポンスを1個の TodoEntity として解釈する。</em>
+        ...
+
+        <em>// 新規作成したものと内容が一致している。</em>
+        ...
+    }
+
+    @Test
+    fun `存在しないIDでGETするとステータス404を返す`() {
+        <em>// id=999 を指定して GETリクエストを送る。</em>
+        ...
+
+        <em>// レスポンスのステータスコードは NOT_FOUND である。</em>
+        ...
+    }
+
+    @Test
+    fun `DELETEでIDを指定して削除できる`() {
+        <em>// 項目を新規作成する。</em>
+        ...
+
+        <em>// localhost/todos/$id に DELETEリクエストを送る。</em>
+        ...
+
+        <em>// 再度GETすると、その項目は存在しない (削除されている)。</em>
+        ...
+    }
+</pre>
+</div>
 
 <div class=formula>
 <div class=title>Spring 用語解説</div>
@@ -1175,13 +1360,13 @@ logging.level.org.springframework.web=DEBUG
 2025-05-22T14:04:19.982+09:00  INFO 12389 --- [todoApp] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
 2025-05-22T14:04:20.058+09:00  INFO 12389 --- [todoApp] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
 2025-05-22T14:04:20.080+09:00  INFO 12389 --- [todoApp] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
-	Database driver: undefined/unknown
-	Database version: 2.3.232
-	Autocommit mode: undefined/unknown
-	Isolation level: undefined/unknown
-	Minimum pool size: undefined/unknown
-	Maximum pool size: undefined/unknown
+    Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+    Database driver: undefined/unknown
+    Database version: 2.3.232
+    Autocommit mode: undefined/unknown
+    Isolation level: undefined/unknown
+    Minimum pool size: undefined/unknown
+    Maximum pool size: undefined/unknown
 Hibernate: create global temporary table HTE_todo_entity(rn_ integer not null, id bigint, text varchar(255), primary key (rn_)) TRANSACTIONAL
 2025-05-22T14:04:20.315+09:00  INFO 12389 --- [todoApp] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
 Hibernate: drop table if exists todo_entity cascade 
@@ -1251,18 +1436,15 @@ Hibernate: select te1_0.id,te1_0.text from todo_entity te1_0
 <h3 id="references">参考資料</h3>
 
 <dl class=spacy>
-  <dt> <a target="_blank" href="https://www.tohoho-web.com/ex/kotlin.html">とほほのKotlin入門</a>
-  <dd> Kotlinの文法まとめ。
-
-  <dt> <a target="_blank" href="https://www.tohoho-web.com/ex/postgresql.html">とほほのPostgreSQL入門</a>
-  <dd> PostgreSQLの文法まとめ。
-
   <dt> <a target="_blank" href="https://spring.pleiades.io/spring-boot/">Spring Boot リファレンスマニュアル</a><br>
     <a target="_blank" href="https://spring.pleiades.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html">RestTemplate</a><br>
   <dd> Spring Boot 各種クラス・メソッドのリファレンス文書。
 
   <dt> <a target="_blank" href="https://learning-collection.com/spring-boot%E3%81%A7%E3%82%88%E3%81%8F%E4%BD%BF%E3%81%86%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%B8%80%E8%A6%A7/">Spring Bootでよく使うアノテーション一覧</a>
   <dd> Spring Boot でよく使うアノテーションまとめ。
+
+  <dt> <a target="_blank" href="https://www.tohoho-web.com/ex/kotlin.html">とほほのKotlin入門</a>
+  <dd> Kotlinの文法まとめ。
 
   <dt> <a target="_blank" href="https://hamcrest.org/JavaHamcrest/tutorial">Hamcrestチュートリアル</a> (英語)
   <dd> テストで使う assertThat の書き方。
