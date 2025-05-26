@@ -166,7 +166,7 @@ Date: Tue, 20 May 2025 02:57:31 GMT
        xmlns:xlink="http://www.w3.org/1999/xlink"
        version="1.1" width="920" height="524">
     <g transform="translate(80,16)">
-        <image href="intellij.png" x="0" y="0" width="772" height="518" />
+        <image href="idea.png" x="0" y="0" width="772" height="518" />
         <g fill="rgba(0,0,0,0.3)" stroke="red" stroke-width="2">
             <rect x="70" y="21" width="50" height="16" />
             <path d="M90,21 l-20,-18" />
@@ -1031,8 +1031,8 @@ repository.save(entity)
 このコードでは、ふるまいは完全に固定されている。
 データベース名を変更したり、H2 以外のデータベースを使うためには
 コードを変更する必要がある。しかしテストの際には
-<strong>できるだけ本番コードそのものをテストしたほうがよい</strong>。
-上のようなコードではテストが面倒である。
+<strong>できるだけコードを変えずに、本番コードそのものをテストしたい</strong>。
+上のようなコードでは本番・テスト時にあわせてリポジトリを切り替えることができない。
 そこで Spring を使ったプログラミングでは、コードの各部分を分解し、
 フレームワークに「配管作業」を任せている。そしてこの接続を
 切り替えられるようにしておくことで、システムの柔軟性を実現している。
@@ -1040,18 +1040,19 @@ repository.save(entity)
 <div class=figure><div>
   <svg xmlns="http://www.w3.org/2000/svg"
        xmlns:xlink="http://www.w3.org/1999/xlink"
-       version="1.1" width="300" height="130">
+       version="1.1" width="400" height="130">
     <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
       <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
     </marker>
+    <g transform="translate(50,0)">
     <g stroke="black" stroke-width="1" fill="none">
       <rect x="35" y="5" width="50" height="20" />
-      <rect x="10" y="55" width="110" height="20" />
+      <rect x="-10" y="55" width="150" height="20" />
       <rect x="50" y="105" width="200" height="20" />
       <g stroke="gray">
       <rect x="125" y="5" width="50" height="20" />
       <rect x="230" y="5" width="60" height="20" />
-      <rect x="210" y="55" width="80" height="20" />
+      <rect x="155" y="55" width="190" height="20" />
       </g>
     </g>
     <g stroke="black" stroke-width="2" fill="none" marker-end="url(#arrow)">
@@ -1072,6 +1073,7 @@ repository.save(entity)
       <text x="260" y="20">"otherdb"</text>
       <text x="250" y="70">PostgreSQLTodoRepository(name)</text>
       </g>
+    </g>
     </g>
   </svg>
 <div class=caption>依存注入のイメージ (実線は有効な接続)</div>
@@ -1161,9 +1163,51 @@ Spring における依存注入や機能拡張は、基本的にアプリケー�
 
 </ol>
 
-<h3 id="repository-rest">その他のテスト</h3>
+<h3 id="repository-h2">アプリを実際に走らせる</h3>
 
 <ol class=spacy start="8">
+<li> ここまできたら、実際にアプリを走らせてリクエストを送り、データの格納・取得をおこなうことができるはずである。
+まず準備として、<var>application.properties</var> に以下の一行を追加しておく。
+<div class=file>
+<var>src/main/resources/application.properties</var>
+<pre>
+spring.application.name=todoApp
+<mark>spring.h2.console.enabled=true</mark>
+</pre>
+</div>
+つぎに todoApp を実行し、リクエストを送ってみよう:
+<pre>
+<strong>$ curl -H 'Content-Type: application/json' -d '{"text": "Hello!"}' http://localhost:8080/todos</strong>
+1
+<strong>$ curl -H 'Content-Type: application/json' -d '{"text": "Goodbye!"}' http://localhost:8080/todos</strong>
+2
+<strong>$ curl http://localhost:8080/todos</strong>
+[{"id":1, "text":"Hello!"}, {"id":2, "text":"Goodbye!"}]
+</pre>
+<p>
+ここでH2データベースに接続して、実際にデータが格納されているかどうか確認する。
+まず todoApp のログの中から以下のような行を探す:
+</p>
+<pre>
+...
+H2 console available at '/h2-console'. Database available at '<mark>jdbc:h2:mem:f5f5a25c-05be-4b71-8b5e-248bf4365353</mark>'
+...
+</pre>
+<p>
+そして <a target="_blank" href="http://localhost:8080/h2-console">http://localhost:8080/h2-console</a> にアクセスし、
+"JDBC URL" の欄に上記の文字列を入力してデータベースに接続する。
+ここで SQL クエリを発行すると格納された Todo 項目が確認できるはずである。
+</p>
+<div class=figure>
+<img src="h2console.png" width="228" height="181">
+<img src="h2query.png" width="390" height="194">
+</div>
+
+</ol>
+
+<h3 id="repository-rest">その他のテスト</h3>
+
+<ol class=spacy start="9">
 
 <li> アプリを完成させるためには、さらにいくつかのテストを加える必要がある。
 参考例は以下のとおり。
@@ -1290,7 +1334,7 @@ Spring における依存注入や機能拡張は、基本的にアプリケー�
   <li> Spring Bootのログを調べる。
     main あるいは test の <var>application.properties</var> に以下の行を追加して実行してみよう:
 <div class=file>
-application.properties:
+<var>application.properties</var>
 <pre>
 ...
 spring.jpa.show-sql=true
