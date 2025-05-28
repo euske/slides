@@ -294,7 +294,7 @@ Date: Tue, 20 May 2025 02:57:31 GMT
 
 <ol class=spacy>
 
-  <li> <a target="_blank" href="https://start.spring.io/#!type=gradle-project-kotlin&language=kotlin&platformVersion=3.4.5&packaging=jar&jvmVersion=21&groupId=com.example&artifactId=todoApp&name=todoApp&description=Sample%20Spring%20Boot%20Todo%20app&packageName=com.example.todoApp&dependencies=web,data-jpa,h2">Spring Initializr</a> を使って雛形アプリを生成し、ダウンロードする。<br>
+  <li> <a target="_blank" href="https://start.spring.io/#!type=gradle-project-kotlin&language=kotlin&platformVersion=3.4.6&packaging=jar&jvmVersion=21&groupId=com.example&artifactId=todoApp&name=todoApp&description=Sample%20Spring%20Boot%20Todo%20app&packageName=com.example.todoApp&dependencies=web,data-jpa,h2">Spring Initializr</a> を使って雛形アプリを生成し、ダウンロードする。<br>
     ここでは以下のプラグインを利用している:
     <ul>
       <li> Spring Web (Webアプリ)
@@ -440,7 +440,7 @@ $ <strong>./gradlew bootrun</strong>  <em>(アプリの実行)</em>
   '  |____| .__|_| |_|_| |_&Backslash;__, | / / / /
  =========|_|==============|___/=/_/_/_/
 
- :: Spring Boot ::                (v3.4.5)
+ :: Spring Boot ::                (v3.4.6)
 ...
 </pre></blockquote>
 
@@ -741,7 +741,7 @@ class TodoRequest {
 </pre>
 </div>
 <div class=note>
-<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その3</div>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その2</div>
 <p>
 Kotlinファイル内で Java言語のコードをペーストすると、
 IntelliJ は自動的に Java → Kotlin に変換してくれる。
@@ -781,7 +781,7 @@ ResponseEntity&lt;String&gt; response = restTemplate.postForEntity("http://local
 <li> まずデータベースが格納するオブジェクト (Entity) である TodoEntity クラスを作成する。
   <var>TodoEntity.kt</var> ファイルを作成し、以下のように書く (これはテストを書く必要はない):
 <div class=file>
-<var>src/main/kotlin/com/example/todoApp/Todo.kt</var>
+<var>src/main/kotlin/com/example/todoApp/TodoEntity.kt</var>
 <pre>
 package com.example.todoApp
 
@@ -859,7 +859,7 @@ Spring では、JPA は <a target="_blank" href="https://hibernate.org/orm/">Hib
 
 
 <div class=note>
-<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その2</div>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その3</div>
 <p>
 コード中のクラス名・関数名・変数名などを
 <kbd>Command &#x2318;</kbd> キーを押しながらクリックすると、
@@ -905,7 +905,7 @@ Spring では、JPA は <a target="_blank" href="https://hibernate.org/orm/">Hib
 </div>
 
 <div class=note>
-<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その3</div>
+<div class=title>ぜひとも覚えたい IntelliJ IDEA の機能 その4</div>
 <p>
 IntelliJ では、(Javaではなく) Kotlin言語の独自機能で書かれている部分は
 <code>emptyList()</code> ではなく
@@ -1385,7 +1385,7 @@ logging.level.org.springframework.web=DEBUG
   '  |____| .__|_| |_|_| |_\__, | / / / /
  =========|_|==============|___/=/_/_/_/
 
- :: Spring Boot ::                (v3.4.5)
+ :: Spring Boot ::                (v3.4.6)
 
 2025-05-22T14:04:19.527+09:00  INFO 12389 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : Starting TodoAppApplicationKt using Java 21.0.7 with PID 12389 (/Users/euske/work/ws/spring-todoApp-2025/build/classes/kotlin/main started by euske in /Users/euske/work/ws/spring-todoApp-2025)
 2025-05-22T14:04:19.528+09:00  INFO 12389 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : No active profile set, falling back to 1 default profile: "default"
