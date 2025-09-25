@@ -39,7 +39,7 @@ code em { color: #000088; }
 .file { outline: 2px solid black; padding: 1em; margin: 1em; }
 .file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
 .file pre { margin: 0; }
-.bl { border: 1px solid black; padding: 2px; color: transparent; }
+.blank { border: 1px solid black; padding: 2px; color: transparent; }
 --></style>
 </head>
 <body>
@@ -1285,7 +1285,7 @@ UNIX は無愛想な OS なので、
 <code>&gt;</code> の出力先として
 うっかり存在するファイル名を指定してしまうと、
 そのファイルは<strong>何の警告もなく</strong>上書きされ、
-空のファイルされる。
+空のファイルにされる。
 </div>
 
 <p>
@@ -1524,12 +1524,12 @@ PCの場合、これはデフォルトでは端末エミュレータアプリだ
 <ol>
   <li> 以下の穴埋め問題の中には透明なテキストが書かれており、コピー・ペーストすれば正解が見れるようになっている:
   <ul>
-    <li> Linux および macOS は、どちらも <nobr><span class=bl>UNIX</span></nobr>系の OSであり、共通点がある。
-    <li> UNIXでは、ディスク上の各ファイルの位置は<nobr><span class=bl>パス名</span></nobr>によって指定できる。
-    <li> <nobr><span class=bl>プロセス</span></nobr>はUNIXにおける処理の基本単位であり、PC上のアプリやサーバ上の Node, Spring などもその一種である。
-    <li> プロセスには、<nobr><span class=bl>シグナル</span></nobr>を送ることによって停止・強制終了することができる。
-    <li> 各プロセスには文字情報の入出力をおこなう「<nobr><span class=bl>標準入力</span></nobr>」「<nobr><span class=bl>標準出力</span></nobr>」「<nobr><span class=bl>標準エラー出力</span></nobr>」の3つが付属している。
-    <li> 標準入出力は、端末だけでなく<nobr><span class=bl>ファイル</span></nobr>や<nobr><span class=bl>ネットワーク</span></nobr>などに切り替え可能である。
+    <li> Linux および macOS は、どちらも <nobr><span class=blank>UNIX</span></nobr>系の OSであり、共通点がある。
+    <li> UNIXでは、ディスク上の各ファイルの位置は<nobr><span class=blank>パス名</span></nobr>によって指定できる。
+    <li> <nobr><span class=blank>プロセス</span></nobr>はUNIXにおける処理の基本単位であり、PC上のアプリやサーバ上の Node, Spring などもその一種である。
+    <li> プロセスには、<nobr><span class=blank>シグナル</span></nobr>を送ることによって停止・強制終了することができる。
+    <li> 各プロセスには文字情報の入出力をおこなう「<nobr><span class=blank>標準入力</span></nobr>」「<nobr><span class=blank>標準出力</span></nobr>」「<nobr><span class=blank>標準エラー出力</span></nobr>」の3つが付属している。
+    <li> 標準入出力は、端末だけでなく<nobr><span class=blank>ファイル</span></nobr>や<nobr><span class=blank>ネットワーク</span></nobr>などに切り替え可能である。
   </ul>
   <li> ターミナルを開いて <code>ls | sort</code> を実行したとき...
   <ul>
@@ -1782,6 +1782,7 @@ $ <strong>cat a bb ccc</strong>
 ワイルドカードには、パターンを指定することもできる。
 たとえば <code>/etc</code> 内に多くの「<code>.conf</code>」で終わるファイルがあるとき…
 <blockquote><pre>
+$ <strong>cd /etc</strong>
 $ <strong>ls -l | grep .conf</strong>
 -rw-r--r--   1 root  wheel    1051 Mar 21 15:13 asl.conf
 -rw-r--r--   1 root  wheel    1935 Mar 21 15:13 autofs.conf
