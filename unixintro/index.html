@@ -2165,8 +2165,8 @@ $ <strong>ps axeww</strong>
 
 <div class=caution>
 <strong>注意:</strong>
-Windowsの環境変数と違い (実際にはWindowsもそうなのだが)、
 <strong>UNIXにおける環境変数は各プロセスごとに独立している</strong>。
+(実はWindowsでも同じだが、Windowsではプロセスごとに環境変数を変える習慣がないため気づきにくい。)
 あるプロセスの環境変数を別のプロセスの環境変数にすることはできない。
 ただし、<strong>親プロセスの環境変数は、子プロセスに引きつがれる</strong>ため、
 最初に共通の環境変数を設定しておけば、以後すべての子プロセスで
