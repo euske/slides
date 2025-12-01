@@ -294,7 +294,7 @@ Date: Tue, 20 May 2025 02:57:31 GMT
 
 <ol class=spacy>
 
-  <li> <a target="_blank" href="https://start.spring.io/#!type=gradle-project-kotlin&language=kotlin&platformVersion=3.4.6&packaging=jar&jvmVersion=21&groupId=com.example&artifactId=todoApp&name=todoApp&description=Sample%20Spring%20Boot%20Todo%20app&packageName=com.example.todoApp&dependencies=web,data-jpa,h2">Spring Initializr</a> を使って雛形アプリを生成し、ダウンロードする。<br>
+  <li> <a target="_blank" href="https://start.spring.io/#!type=gradle-project-kotlin&language=kotlin&platformVersion=4.0.0&packaging=jar&configurationFileFormat=yaml&jvmVersion=21&groupId=com.example&artifactId=todoApp&name=todoApp&description=Sample%20Todo%20App&packageName=com.example.todoApp&dependencies=web,data-jpa,h2,spring-restclient">Spring Initializr</a> を使って雛形アプリを生成し、ダウンロードする。<br>
     ここでは以下のプラグインを利用している:
     <ul>
       <li> Spring Web (Webアプリ)
@@ -320,7 +320,7 @@ Welcome!
   <li> IntelliJ の画面右上のメニューから
     <kbd>todoApp [bootRun]</kbd> を選択すると、アプリが起動する。
 <div class=figure>
-  <img width="651" height="267" src="bootrun.png">
+  <img width="728" height="336" src="bootrun.png">
 </div>
 
   <li> <a target="_blank" href="http://localhost:8080/">http://localhost:8080/</a> にアクセスし、
@@ -440,7 +440,7 @@ $ <strong>./gradlew bootrun</strong>  <em>(アプリの実行)</em>
   '  |____| .__|_| |_|_| |_&Backslash;__, | / / / /
  =========|_|==============|___/=/_/_/_/
 
- :: Spring Boot ::                (v3.4.6)
+ :: Spring Boot ::                (v4.0.0)
 ...
 </pre></blockquote>
 
@@ -504,12 +504,13 @@ class TodoAppApplicationTests {
 <div class=file>
 <var>src/test/kotlin/com/example/todoApp/TodoAppApplicationTests.kt</var>
 <pre>
-@SpringBootTest(<span class=bgy>webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT</span>)
+@SpringBootTest<span class=bgy>(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)</span>
 class TodoAppApplicationTests(
-<div class=bgy>    @Autowired val restTemplate: TestRestTemplate, 
+<div class=bgy>    @Autowired val restTemplateBuilder: RestTemplateBuilder, 
     @LocalServerPort val port: Int
 </div>) {
-    ...
+<div class=bgy>    val restTemplate = restTemplateBuilder.build()
+</div>    ...
 
 <div class=bgy>    @Test
     fun `GETリクエストはOKステータスを返す`() {
@@ -561,7 +562,7 @@ DI を使って作成させる (ビジネスロジックに関連するオブジ
     </g>
     <g text-anchor="middle" style="font-size: 75%;">
       <text x="170" y="30">Application Context</text>
-      <text x="100" y="80">TestRestTemplate</text>
+      <text x="100" y="80">RestTemplateBuilder</text>
       <text x="250" y="80">LocalServerPort</text>
       <text x="175" y="170">TodoAppApplicationTests</text>
     </g>
@@ -578,7 +579,7 @@ DI を使って作成させる (ビジネスロジックに関連するオブジ
       <text x="265" y="125">注入</text>
     </g>
   </svg>
-  <div class="caption">TestRestTemplate と LocalServerPort を TodoAppApplicationTests に注入する</div>
+  <div class="caption">RestTemplateBuilder と LocalServerPort を TodoAppApplicationTests に注入する</div>
 </div>
 </div>
 
@@ -763,8 +764,9 @@ ResponseEntity&lt;String&gt; response = restTemplate.postForEntity("http://local
 <pre>
     ...
     @PostMapping("/todos")
-    fun postTodo(@RequestBody todoRequest: TodoRequest): String {
-        return "gotcha"
+    fun postTodo(@RequestBody todoRequest: TodoRequest) {
+        <em>// リクエストを表示するだけで何もしない (200レスポンスは返る)。</em>
+        println(todoRequest)
     }
     ...
 </pre>
@@ -1007,8 +1009,8 @@ class TodoController<mark>(
     }
 
     @PostMapping("/todos")
-    fun postTodo(@RequestBody todo: TodoRequest) {
-        val entity = TodoEntity(text=todo.text)
+    fun postTodo(@RequestBody todoRequest: TodoRequest) {
+        val entity = TodoEntity(text=todoRequest.text)
         repository.save(entity)
     }
     ...
@@ -1167,9 +1169,9 @@ Spring における依存注入や機能拡張は、基本的にアプリケー�
 
 <ol class=spacy start="8">
 <li> ここまできたら、実際にアプリを走らせてリクエストを送り、データの格納・取得をおこなうことができるはずである。
-まず準備として、<var>application.properties</var> に以下の一行を追加しておく。
+まず準備として、<var>application.yaml</var> に以下の行を追加しておく。
 <div class=file>
-<var>src/main/resources/application.properties</var>
+<var>src/main/resources/application.yaml</var>
 <pre>
 spring.application.name=todoApp
 <mark>spring.h2.console.enabled=true</mark>
