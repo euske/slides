@@ -61,7 +61,6 @@ pre.small { font-size: 75%; }
 .col-module { color: green; }
 .col-msg { color: black; }
 .col-xxx { color: red; }
-
 --></style>
 </head>
 <body>
@@ -71,7 +70,7 @@ pre.small { font-size: 75%; }
 
 <h1>Spring Boot 入門 (2025年)</h1>
 <div class=author>
-Yusuke Shinyama, May. 2025
+Yusuke Shinyama, 2025/12
 </div>
 
 <div>
@@ -1169,12 +1168,28 @@ Spring における依存注入や機能拡張は、基本的にアプリケー�
 
 <ol class=spacy start="8">
 <li> ここまできたら、実際にアプリを走らせてリクエストを送り、データの格納・取得をおこなうことができるはずである。
-まず準備として、<var>application.yaml</var> に以下の行を追加しておく。
+まず準備として、<var>build.gradle.kts</var> に以下の行を追加しておく。
+<div class=file>
+<var>build.gradle.kts</var>
+<pre>
+dependencies {
+    ...
+    runtimeOnly("com.h2database:h2")
+    <mark>runtimeOnly("org.springframework.boot:spring-boot-h2console")</mark>
+    ...
+}
+</pre>
+</div>
+<p> 次に<var>application.yaml</var> を以下のように変更する。
 <div class=file>
 <var>src/main/resources/application.yaml</var>
 <pre>
-spring.application.name=todoApp
-<mark>spring.h2.console.enabled=true</mark>
+spring:
+  application:
+    name: todoApp
+<mark>  h2:
+    console:
+      enabled: true</mark>
 </pre>
 </div>
 つぎに todoApp を実行し、リクエストを送ってみよう:
@@ -1334,13 +1349,20 @@ H2 console available at '/h2-console'. Database available at '<mark>jdbc:h2:mem:
 <ol type=a>
   <li> ソースコード中で止めたい箇所にブレークポイントを設定し、デバッガで実行する。
   <li> Spring Bootのログを調べる。
-    main あるいは test の <var>application.properties</var> に以下の行を追加して実行してみよう:
+    main あるいは test の <var>application.yaml</var> に以下の行を追加してみよう:
 <div class=file>
-<var>application.properties</var>
+<var>src/main/resources/application.yaml</var>
 <pre>
+spring:
+  application:
+    name: todoApp
+<mark>  jpa:
+    show-sql: true</mark>
 ...
-spring.jpa.show-sql=true
-logging.level.org.springframework.web=DEBUG
+
+<mark>logging:
+  level:
+    org.springframework.web: DEBUG</mark>
 </pre>
 </div>
 </ol>
@@ -1378,7 +1400,7 @@ logging.level.org.springframework.web=DEBUG
 
 <h4>ログ出力例 (上記の設定を有効にした場合):</h4>
 <blockquote><pre>
-/Users/euske/Library/Java/JavaVirtualMachines/corretto-21.0.7/Contents/Home/bin/java ...
+/Users/euske/Library/Java/JavaVirtualMachines/corretto-21.0.9/Contents/Home/bin/java ...
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -1387,63 +1409,65 @@ logging.level.org.springframework.web=DEBUG
   '  |____| .__|_| |_|_| |_\__, | / / / /
  =========|_|==============|___/=/_/_/_/
 
- :: Spring Boot ::                (v3.4.6)
+ :: Spring Boot ::                (v4.0.0)
 
-2025-05-22T14:04:19.527+09:00  INFO 12389 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : Starting TodoAppApplicationKt using Java 21.0.7 with PID 12389 (/Users/euske/work/ws/spring-todoApp-2025/build/classes/kotlin/main started by euske in /Users/euske/work/ws/spring-todoApp-2025)
-2025-05-22T14:04:19.528+09:00  INFO 12389 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : No active profile set, falling back to 1 default profile: "default"
-2025-05-22T14:04:19.700+09:00  INFO 12389 --- [todoApp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-05-22T14:04:19.714+09:00  INFO 12389 --- [todoApp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 11 ms. Found 1 JPA repository interface.
-2025-05-22T14:04:19.828+09:00  INFO 12389 --- [todoApp] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-05-22T14:04:19.832+09:00  INFO 12389 --- [todoApp] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-05-22T14:04:19.832+09:00  INFO 12389 --- [todoApp] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
-2025-05-22T14:04:19.845+09:00  INFO 12389 --- [todoApp] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-05-22T14:04:19.845+09:00  INFO 12389 --- [todoApp] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 302 ms
-2025-05-22T14:04:19.880+09:00  INFO 12389 --- [todoApp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-05-22T14:04:19.942+09:00  INFO 12389 --- [todoApp] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:f5f5a25c-05be-4b71-8b5e-248bf4365353 user=SA
-2025-05-22T14:04:19.943+09:00  INFO 12389 --- [todoApp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-05-22T14:04:19.958+09:00  INFO 12389 --- [todoApp] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2025-05-22T14:04:19.973+09:00  INFO 12389 --- [todoApp] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.13.Final
-2025-05-22T14:04:19.982+09:00  INFO 12389 --- [todoApp] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2025-05-22T14:04:20.058+09:00  INFO 12389 --- [todoApp] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-05-22T14:04:20.080+09:00  INFO 12389 --- [todoApp] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
-    Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
-    Database driver: undefined/unknown
-    Database version: 2.3.232
-    Autocommit mode: undefined/unknown
-    Isolation level: undefined/unknown
-    Minimum pool size: undefined/unknown
-    Maximum pool size: undefined/unknown
-Hibernate: create global temporary table HTE_todo_entity(rn_ integer not null, id bigint, text varchar(255), primary key (rn_)) TRANSACTIONAL
-2025-05-22T14:04:20.315+09:00  INFO 12389 --- [todoApp] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-04T11:03:00.185+09:00  INFO 55844 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : Starting TodoAppApplicationKt using Java 21.0.9 with PID 55844 (/Users/euske/Downloads/todoApp/build/classes/kotlin/main started by euske in /Users/euske/Downloads/todoApp)
+2025-12-04T11:03:00.186+09:00  INFO 55844 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : No active profile set, falling back to 1 default profile: "default"
+2025-12-04T11:03:00.419+09:00  INFO 55844 --- [todoApp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-04T11:03:00.440+09:00  INFO 55844 --- [todoApp] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 16 ms. Found 1 JPA repository interface.
+2025-12-04T11:03:00.596+09:00  INFO 55844 --- [todoApp] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2025-12-04T11:03:00.602+09:00  INFO 55844 --- [todoApp] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-12-04T11:03:00.602+09:00  INFO 55844 --- [todoApp] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.14]
+2025-12-04T11:03:00.618+09:00  INFO 55844 --- [todoApp] [           main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 411 ms
+2025-12-04T11:03:00.681+09:00  INFO 55844 --- [todoApp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-12-04T11:03:00.801+09:00  INFO 55844 --- [todoApp] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:731cc988-fbc8-4692-8d9e-8ffb405f6997 user=SA
+2025-12-04T11:03:00.802+09:00  INFO 55844 --- [todoApp] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-12-04T11:03:00.817+09:00  INFO 55844 --- [todoApp] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-04T11:03:00.846+09:00  INFO 55844 --- [todoApp] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 7.1.8.Final
+2025-12-04T11:03:01.040+09:00  INFO 55844 --- [todoApp] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-04T11:03:01.076+09:00  INFO 55844 --- [todoApp] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:h2:mem:731cc988-fbc8-4692-8d9e-8ffb405f6997]
+	Database driver: H2 JDBC Driver
+	Database dialect: H2Dialect
+	Database version: 2.4.240
+	Default catalog/schema: 731CC988-FBC8-4692-8D9E-8FFB405F6997/PUBLIC
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: 100
+	Pool: DatasourceConnectionProviderImpl
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+Hibernate: create global temporary table HTE_todo_entity(rn_ integer not null, id bigint, text varchar(255), primary key (rn_)) transactional
+2025-12-04T11:03:01.473+09:00  INFO 55844 --- [todoApp] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
 Hibernate: drop table if exists todo_entity cascade 
 Hibernate: drop sequence if exists todo_entity_seq
 Hibernate: create sequence todo_entity_seq start with 1 increment by 50
 Hibernate: create table todo_entity (id bigint not null, text varchar(255), primary key (id))
-2025-05-22T14:04:20.323+09:00  INFO 12389 --- [todoApp] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-05-22T14:04:20.410+09:00  WARN 12389 --- [todoApp] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2025-05-22T14:04:20.417+09:00  INFO 12389 --- [todoApp] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
-2025-05-22T14:04:20.434+09:00 DEBUG 12389 --- [todoApp] [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : 6 mappings in 'requestMappingHandlerMapping'
-2025-05-22T14:04:20.460+09:00 DEBUG 12389 --- [todoApp] [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
-2025-05-22T14:04:20.470+09:00 DEBUG 12389 --- [todoApp] [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2025-05-22T14:04:20.483+09:00 DEBUG 12389 --- [todoApp] [           main] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
-2025-05-22T14:04:20.498+09:00  INFO 12389 --- [todoApp] [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:f5f5a25c-05be-4b71-8b5e-248bf4365353'
-2025-05-22T14:04:20.523+09:00  INFO 12389 --- [todoApp] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-05-22T14:04:20.527+09:00  INFO 12389 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : Started TodoAppApplicationKt in 1.102 seconds (process running for 1.269)
-2025-05-22T14:04:32.424+09:00  INFO 12389 --- [todoApp] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-05-22T14:04:32.425+09:00  INFO 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-05-22T14:04:32.425+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
-2025-05-22T14:04:32.425+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
-2025-05-22T14:04:32.425+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
-2025-05-22T14:04:32.426+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@31a80c88
-2025-05-22T14:04:32.426+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@2dd4a7a9
-2025-05-22T14:04:32.426+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
-2025-05-22T14:04:32.426+09:00  INFO 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2025-05-22T14:04:32.429+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/todos", parameters={}
-2025-05-22T14:04:32.432+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.todoApp.TodoController#getTodos()
+2025-12-04T11:03:01.484+09:00  INFO 55844 --- [todoApp] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-04T11:03:01.617+09:00  INFO 55844 --- [todoApp] [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-12-04T11:03:01.706+09:00  WARN 55844 --- [todoApp] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-04T11:03:01.714+09:00  INFO 55844 --- [todoApp] [           main] o.s.b.w.a.WelcomePageHandlerMapping      : Adding welcome page: class path resource [static/index.html]
+2025-12-04T11:03:01.756+09:00 DEBUG 55844 --- [todoApp] [           main] s.w.s.m.m.a.RequestMappingHandlerMapping : 4 mappings in 'requestMappingHandlerMapping'
+2025-12-04T11:03:01.767+09:00 DEBUG 55844 --- [todoApp] [           main] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2025-12-04T11:03:01.775+09:00 DEBUG 55844 --- [todoApp] [           main] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-12-04T11:03:01.792+09:00 DEBUG 55844 --- [todoApp] [           main] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 0 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-12-04T11:03:01.815+09:00  INFO 55844 --- [todoApp] [           main] o.s.b.h.a.H2ConsoleAutoConfiguration     : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:731cc988-fbc8-4692-8d9e-8ffb405f6997'
+2025-12-04T11:03:01.838+09:00  INFO 55844 --- [todoApp] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2025-12-04T11:03:01.840+09:00  INFO 55844 --- [todoApp] [           main] c.example.todoApp.TodoAppApplicationKt   : Started TodoAppApplicationKt in 1.804 seconds (process running for 2.127)
+2025-12-04T11:04:41.829+09:00  INFO 55844 --- [todoApp] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-12-04T11:04:41.830+09:00  INFO 55844 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-12-04T11:04:41.830+09:00 DEBUG 55844 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2025-12-04T11:04:41.830+09:00 DEBUG 55844 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2025-12-04T11:04:41.832+09:00 DEBUG 55844 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@50508ed3
+2025-12-04T11:04:41.832+09:00 DEBUG 55844 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@1efa258e
+2025-12-04T11:04:41.833+09:00 DEBUG 55844 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-12-04T11:04:41.833+09:00  INFO 55844 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2025-12-04T11:04:41.837+09:00 DEBUG 55844 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/todos", parameters={}
+2025-12-04T11:04:41.845+09:00 DEBUG 55844 --- [todoApp] [nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.todoApp.TodoController#getTodos()
 Hibernate: select te1_0.id,te1_0.text from todo_entity te1_0
-2025-05-22T14:04:32.592+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
-2025-05-22T14:04:32.592+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [[]]
-2025-05-22T14:04:32.597+09:00 DEBUG 12389 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-12-04T11:04:41.967+09:00 DEBUG 55844 --- [todoApp] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json, application/*+json]
+2025-12-04T11:04:41.968+09:00 DEBUG 55844 --- [todoApp] [nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Writing [[]]
+2025-12-04T11:04:41.981+09:00 DEBUG 55844 --- [todoApp] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
 </pre></blockquote>
 
 
