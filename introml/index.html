@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Yusuke Shinyama">
+<meta name="keywords" content="機械学習,人工知能,ML,AI,ニューラルネットワーク">
+<meta name="description" content="この記事では「なぜニューラルネットワークなどというものが動くのか」を腹オチしてもらえるように説明します。ニューラルネットワークとは、最近の人工知能や機械学習の基礎となっている技術です。ここでの目標は「なーんだ、AIなんてこんなもんか」と思って安心してもらうことです。この講演を聞いたからといって、すぐにAIシステムが設計できたり、LLMがうまく使えるようになるわけではありませんのでご注意ください。">
+<meta name="twitter:card" content="summary" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="機械学習の原理なんか誰でもわかるという話" />
+<meta property="og:url" content="https://euske.github.io/slides/introml/index.html" />
+<meta property="og:description" content="この記事では「なぜニューラルネットワークなどというものが動くのか」を腹オチしてもらえるように説明します。ニューラルネットワークとは、最近の人工知能や機械学習の基礎となっている技術です。ここでの目標は「なーんだ、AIなんてこんなもんか」と思って安心してもらうことです。この講演を聞いたからといって、すぐにAIシステムが設計できたり、LLMがうまく使えるようになるわけではありませんのでご注意ください。" />
+<title>機械学習の原理なんか誰でもわかるという話</title>
+<style><!--
+body { line-height: 1.5; }
+h1 { border-bottom: solid 4px #000088; }
+h2 { border-bottom: solid 2px #000088; }
+h3 { border-bottom: solid 1px #000088; }
+table { border-collapse: collapse; margin-left: auto; margin-right: auto; }
+td { padding: 4px; }
+kbd { outline: 1px solid black; padding: 2px; }
+var { font-family: courier; }
+pre { outline: 1px solid black; padding: 4px; overflow: auto; }
+mark { font-weight: bold; }
+pre, code { background: #ddd; font-size: 120%; font-family: courier; }
+img { max-width: 80vw; height: auto; }
+dt { text-decoration: underline; font-weight: bold; }
+u { color: #880000; font-weight: bold; }
+.spacy > li { margin-top: 2em; }
+.author { text-align: right; }
+.figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; background: white; }
+.figure .caption { font-size: 80%; font-weight: bold; }
+.notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em; }
+.formula { padding: 0.5em; font-size: 125%; }
+.formula dt { margin-top: 1em; }
+.spacy dt { margin-top: 1em; }
+.title { display: flex; justify-content: center; font-size: 120%; font-weight: bold; border-bottom: 1px solid black; }
+.note { background: #88ffff; outline: 2px solid black; padding: 1em; margin: 1em; }
+pre em { color: #008800; }
+code em { color: #000088; }
+pre.small { font-size: 75%; }
+.error { color: red; font-weight: bold; }
+.exercise { outline: 2px solid black; padding: 1em; margin: 1em; }
+.exercise > .header { font-size: 120%; font-weight: bold; border-bottom: solid 1px red; border-left: 4px solid red; padding-left: 8px; }
+.file { outline: 2px solid black; padding: 1em; margin: 1em; }
+.file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
+.file pre { margin: 0; }
+
+.param { font-weight: bold; color: #080; }
+
+.g { background: #eeeeee; }
+.bgr { background: #ffbbff; }
+.bgg { background: #88ff88; }
+.bgy { background: #ffff88; }
+.bgb { background: #88ffff; }
+
+.col-ts { color: blue; }
+.col-info { color: orange; }
+.col-debug { color: red; }
+.col-pid { color: grey; }
+.col-thread { color: grey; }
+.col-module { color: green; }
+.col-msg { color: black; }
+.col-xxx { color: red; }
+
+.delta { text-decoration: underline; }
+.data1 { background: #ffccff; }
+.data2 { background: #ccffff; }
+.data3 { background: #ffffcc; }
+input[type=range][orient=vertical] {
+    writing-mode: bt-lr; /* IE */
+    -webkit-appearance: slider-vertical; /* WebKit */
+    width: 8px;
+    height: 175px;
+    padding: 0 5px;
+--></style>
+</head>
+<script src="weights.js"></script>
+<script src="minist.js"></script>
+<script src="optim.js"></script>
+<body onload="minist_setup('canvas', 'result'); optim_setup('sliders1', 'sliders2');">
+<div class=nav>
+<a href="../index.html">&lt; もどる</a>
+</div>
+
+<h1>機械学習の原理なんか誰でもわかるという話</h1>
+<div class=author>
+Yusuke Shinyama, 2026/04
+</div>
+
+<h2>1. そもそも人工知能とか機械学習って何か</h2>
+
+<p>
+人工知能 (AI) と機械学習 (ML)、ニューラルネットワークの関係は
+以下のようになっている:
+<div class=figure>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       xmlns:xlink="http://www.w3.org/1999/xlink"
+       version="1.1" width="300" height="200">
+    <g stroke-width="2" stroke="black" fill="none">
+      <rect x="5" y="5" width="290" height="190" />
+      <ellipse cx="150" cy="100" rx="140" ry="90" />
+      <ellipse cx="160" cy="110" rx="120" ry="75" />
+      <ellipse cx="165" cy="120" rx="110" ry="60" />
+      <ellipse cx="195" cy="130" rx="70" ry="40" />
+    </g>
+    <g text-anchor="middle" style="font-size: 75%;">
+      <text x="40" y="15" dy="0.5em">IT技術全般</text>
+      <text x="125" y="25" dy="0.5em">人工知能 (AI)</text>
+      <text x="150" y="50" dy="0.5em">機械学習 (ML)</text>
+      <text x="110" y="85" dy="0.5em">ニューラル</text>
+      <text x="110" y="85" dy="1.5em">ネットワーク</text>
+      <text x="110" y="85" dy="2.5em">(NN)</text>
+      <g style="font-size:75%">
+      <text x="195" y="100" dy="0.5em">ディープ</text>
+      <text x="195" y="100" dy="1.5em">ニューラル</text>
+      <text x="195" y="100" dy="2.5em">ネットワーク (DNN) =</text>
+      <text x="195" y="140" dy="0.5em">ディープ</text>
+      <text x="195" y="140" dy="1.5em">ラーニング (DL)</text>
+      </g>
+    </g>
+  </svg>
+</div>
+
+<h3>人工知能</h3>
+
+<ul>
+<li> 通常のコンピュータの処理...
+あらかじめ定められた手順に従って答えを計算する。
+<li> <u>人工知能</u>...
+「定められた手順」が存在しないので、しらみつぶしに「一番よさそうな答え」を探す (探索問題)。
+<ul>
+<li> <strong>物体認識</strong>:
+  画像をすべての物体の画像と比較し、もっとも近そうなものを探す。
+<li> <strong>将棋・チェス・囲碁</strong>:
+  可能なすべての手を調べ、もっとも良さそうな手を探す。
+<li> <strong>英日翻訳</strong>:
+  すべての単語の並び方を比較し、もっとも「日本語らしい」テキストを探す。
+<li> ...
+</ul>
+</ul>
+
+<p>
+この処理を非常に大規模かつ高速にやると、人間にとっては
+「賢そう」に見える。
+
+<div class=exercise id="ex2-1">
+<div class=header>練習問題</div>
+<p>
+次のうち「探索問題」として定義可能なものはどれでしょう?
+<ol>
+<li> 行列の積を計算する。
+<li> 迷路の解法を発見する。
+<li> 売れる小説を書く。
+<li> 予定表をカレンダーで管理する。
+</ol>
+</div>
+
+<h3>機械学習</h3>
+
+<p>
+たとえば、以下のような処理を考える。
+100×100ピクセルの画像が与えられたとき、
+それが「人間の顔か否か」を判定するプログラムを作りたい:
+
+<div class=figure>
+<table align=center border>
+<tr><th>画像</th><th>顔らしさ</th></tr>
+<tr><td>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="100" height="100">
+  <g fill="none" stroke="black" stroke-width="2">
+    <circle cx="50" cy="50" r="40" />
+    <circle cx="30" cy="40" r="5" />
+    <circle cx="60" cy="40" r="5" />
+    <line x1="40" y1="70" x2="60" y2="70" />
+  </g>
+</svg>
+</td><td class=bigscore>0.95</td></tr>
+<tr><td>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="100" height="100">
+  <g fill="none" stroke="black" stroke-width="2">
+    <ellipse cx="50" cy="50" rx="40" ry="30" />
+    <line x1="30" y1="45" x2="50" y2="40" />
+    <line x1="60" y1="40" x2="80" y2="45" />
+    <line x1="40" y1="65" x2="60" y2="70" />
+    <polyline points="20,30 30,10 40,20" />
+    <polyline points="80,30 70,15 60,20" />
+  </g>
+</svg>
+</td><td class=bigscore>0.87</td></tr>
+<tr><td>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     version="1.1" width="100" height="100">
+  <g fill="none" stroke="black" stroke-width="2">
+    <circle cx="40" cy="60" r="30" />
+    <rect x="10" y="10" width="30" height="35" fill="white" />
+    <polygon points="80,80 60,50 20,70" fill="white" />
+  </g>
+</svg>
+</td><td class=bigscore>0.02</td></tr>
+</table>
+</div>
+
+<p>
+このようなプログラムは頑張れば人間にも作れるかもしれない。が、非常に難しい。
+そこで...
+<ol>
+<li> あらかじめ「顔らしい画像」と「顔らしくない画像」を大量に用意しておく。
+<li> コンピュータを使ってこのようなプログラムを自動的に発見 (探索) させよう。
+</ol>
+
+<p>
+つまり、
+<div class=formula>
+<u>機械学習</u> = 「プログラムを自動的に作成(探索)するプログラム」
+</div>
+
+<p>
+機械学習では、答えの「よさそう度」は比較的簡単にわかる:
+<ul>
+<li> 顔の画像を、「顔」として判定したら +1 点。
+<li> 顔でない画像を、「顔」として判定したら -1 点。
+</ul>
+ちなみにこれは「<u>教師つき</u>機械学習」と呼ばれる。
+
+<div class=exercise id="ex2-2">
+<div class=header>練習問題</div>
+<p>
+教師つき学習で以下のものを学習させたい。
+学習用データとして何が必要?
+<ol>
+<li> 画像にネコが写っているかどうか判定したい。
+<li> ある地点の24時間後の天気・気温を、過去の気象記録のみから推測したい。
+<li> ある人の年齢・性別・出身学校から、年収を予想したい。
+<li> 血液型から平均寿命を推測したい。(??)
+</ol>
+</div>
+
+<p>
+機械学習の前提条件:
+<div class=formula>
+そもそも、相関がないものは学習できない。
+</div>
+
+<h2>2. 実際にどうやって学習させるか</h2>
+
+<p>
+<b>機械学習における大きな問題:</b>
+「ありうるプログラム」は無限に存在する中で、どうやって絞り込むか?
+
+<p>
+<b>答え:</b>
+機械学習で探索するプログラムは
+JavaScriptやPythonのコードではなく、
+限定された形の「プログラムもどき」を使う。
+
+<h3>a. ニューラルネットワーク</h3>
+<p>
+<u>ニューラルネットワーク</u> とは、
+以下のような人間の神経回路を模した架空の装置を「プログラムもどき」として使うものである。
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="300" height="190">
+<defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+</defs>
+<g fill="none" stroke="black" stroke-width="2">
+  <circle cx="80" cy="20" r="15" />
+  <circle cx="80" cy="60" r="15" />
+  <circle cx="80" cy="100" r="15" />
+  <circle cx="80" cy="140" r="15" />
+  <circle cx="140" cy="40" r="15" />
+  <circle cx="140" cy="80" r="15" />
+  <circle cx="140" cy="120" r="15" />
+  <circle cx="200" cy="60" r="15" />
+  <circle cx="200" cy="100" r="15" />
+  <g marker-end="url(#arrow)">
+    <line x1="45" x2="60" y1="20" y2="20" />
+    <line x1="45" x2="60" y1="60" y2="60" />
+    <line x1="45" x2="60" y1="100" y2="100" />
+    <line x1="45" x2="60" y1="140" y2="140" />
+    <line x1="215" x2="230" y1="60" y2="60" />
+    <line x1="215" x2="230" y1="100" y2="100" />
+    <line x1="95" x2="125" y1="20" y2="30" />
+    <line x1="95" x2="125" y1="20" y2="65" />
+    <line x1="95" x2="125" y1="20" y2="105" />
+    <line x1="95" x2="125" y1="60" y2="40" />
+    <line x1="95" x2="125" y1="60" y2="75" />
+    <line x1="95" x2="125" y1="60" y2="110" />
+    <line x1="95" x2="125" y1="100" y2="45" />
+    <line x1="95" x2="125" y1="100" y2="80" />
+    <line x1="95" x2="125" y1="100" y2="115" />
+    <line x1="95" x2="125" y1="140" y2="55" />
+    <line x1="95" x2="125" y1="140" y2="85" />
+    <line x1="95" x2="125" y1="140" y2="120" />
+    <line x1="155" x2="185" y1="40" y2="55" />
+    <line x1="155" x2="185" y1="40" y2="90" />
+    <line x1="155" x2="185" y1="80" y2="60" />
+    <line x1="155" x2="185" y1="80" y2="95" />
+    <line x1="155" x2="185" y1="120" y2="65" />
+    <line x1="155" x2="185" y1="120" y2="100" />
+  </g>
+</g>
+<g text-anchor="middle">
+<text x="140" y="180">ニューロン (ノード)</text>
+<text x="40" y="20" dy="0.4em" text-anchor="end">入力1</text>
+<text x="40" y="60" dy="0.4em" text-anchor="end">入力2</text>
+<text x="40" y="100" dy="0.4em" text-anchor="end">入力3</text>
+<text x="40" y="140" dy="0.4em" text-anchor="end">入力4</text>
+<text x="260" y="60" dy="0.4em">出力1</text>
+<text x="260" y="100" dy="0.4em">出力2</text>
+</g>
+</svg>
+</div>
+
+<p>
+しかし、まず機械学習の概念をよりよく理解するために、
+もっと簡単な教師つき学習方式である
+<u>決定木</u>を見てみよう。
+
+<h3 id="ai-dtree">b. 決定木</h3>
+<p>
+<u>決定木</u>とは、
+<code>if</code>文の集合だけからなるプログラムのことである:
+<blockquote><pre>
+if 変数 == 値1:
+    return 答えA
+if 変数 == 値2:
+    return 答えB
+...
+</pre></blockquote>
+
+<p>
+たとえば「ある年・月の日数」を推定する決定木を考えてみる。
+(人間は完全な規則を知っているが、ここではデータだけをもとに推測させる)
+
+<div class=figure>
+<table align=center border>
+<caption>訓練データ</caption>
+<tr><th>年 (<code>y</code>)</th><th>月 (<code>m</code>)</th><th class=ndays>日数 (<code>n</code>)</th></tr>
+<tr><td>2016</td><td class=month> 1</td><td class=ndays>31</td></tr>
+<tr><td>2016</td><td class=month> 2</td><td class=ndays>29</td></tr>
+<tr><td>2016</td><td class=month> 4</td><td class=ndays>30</td></tr>
+<tr><td>2016</td><td class=month> 7</td><td class=ndays>31</td></tr>
+<tr><td>2016</td><td class=month> 8</td><td class=ndays>31</td></tr>
+<tr><td>2017</td><td class=month> 2</td><td class=ndays>28</td></tr>
+<tr><td>2017</td><td class=month> 4</td><td class=ndays>30</td></tr>
+<tr><td>2017</td><td class=month> 6</td><td class=ndays>30</td></tr>
+<tr><td>2017</td><td class=month> 9</td><td class=ndays>30</td></tr>
+<tr><td>2017</td><td class=month>11</td><td class=ndays>30</td></tr>
+<tr><td>2018</td><td class=month> 1</td><td class=ndays>31</td></tr>
+<tr><td>2018</td><td class=month> 2</td><td class=ndays>28</td></tr>
+<tr><td>2018</td><td class=month> 3</td><td class=ndays>31</td></tr>
+<tr><td>2018</td><td class=month>10</td><td class=ndays>31</td></tr>
+<tr><td>2020</td><td class=month> 5</td><td class=ndays>31</td></tr>
+<tr><td>2020</td><td class=month>12</td><td class=ndays>31</td></tr>
+</table>
+</div>
+
+<p>
+まず、重要な仮定:
+<div class=formula>
+「日数 <code>n</code> は、与えられた変数 <code>y</code> と <code>m</code> だけから推測可能である」
+</div>
+この仮定が成り立たなければ、そもそも学習は不可能。
+<p>
+ここで、推測のヒントとなる <code>y</code> や <code>m</code> のような変数を
+<u>特徴量</u> または <u>素性</u> とよぶ。
+
+<p>
+これらの特徴量を使って、以下の2通りの決定木を作ることができる:
+<ul>
+<li class=model>
+<strong>決定木A (特徴量yを使う)</strong>
+<ul>
+<li> <code>y</code> = 2017 → 30
+<li> <code>y</code> = 2016, 2018, 2020 → 31
+</ul>
+<li class=model>
+<strong>決定木B (特徴量mを使う)</strong>
+<ul>
+<li> <code>m</code> = 2 → 28
+<li> <code>m</code> = 4,6,9,11 → 30
+<li> <code>m</code> = 1,3,5,7,8,10,12 → 31
+</ul>
+</ul>
+
+<div class=exercise id="ex2-3">
+<div class=header>練習問題</div>
+<p>
+上の 16件のデータに対して、決定木 A と 決定木 B はどれくらい「よい」か、測定してみよう。
+<table align=center border>
+<tr><th>年 (<code>y</code>)</th><th>月 (<code>m</code>)</th><th></th>
+<th>決定木A</th><th>決定木B</th><th></th><th class=ndays>日数 (<code>n</code>)</th></tr>
+<tr><td>2016</td><td class=month> 1</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>31</td></tr>
+<tr><td>2016</td><td class=month> 2</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>29</td></tr>
+<tr><td>2016</td><td class=month> 4</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>30</td></tr>
+<tr><td>2016</td><td class=month> 7</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>31</td></tr>
+<tr><td>2016</td><td class=month> 8</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>31</td></tr>
+<tr><td>2017</td><td class=month> 2</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>28</td></tr>
+<tr><td>2017</td><td class=month> 4</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>30</td></tr>
+<tr><td>2017</td><td class=month> 6</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>30</td></tr>
+<tr><td>2017</td><td class=month> 9</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>30</td></tr>
+<tr><td>2017</td><td class=month>11</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>30</td></tr>
+<tr><td>2018</td><td class=month> 1</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>31</td></tr>
+<tr><td>2018</td><td class=month> 2</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>28</td></tr>
+<tr><td>2018</td><td class=month> 3</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>31</td></tr>
+<tr><td>2018</td><td class=month>10</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>31</td></tr>
+<tr><td>2020</td><td class=month> 5</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>31</td></tr>
+<tr><td>2020</td><td class=month>12</td><td></td><td><input size="3em"></td><td><input size="3em"></td><td></td><td class=ndays>31</td></tr>
+</table>
+</div>
+
+<ul>
+<li> 決定木 A を使った場合 … 正解は12 (正答率 75%)。
+<li> 決定木 B を使った場合 … 正解は15 (正答率 94%)。
+</ul>
+
+<p>
+すべての教師つき機械学習には 2つのフェーズが存在する:
+<ul>
+<li> <u>訓練</u>フェーズ … まず、データから決定木を作成 (学習) する段階。
+<ul>
+<li> 学習された決定木のことを、<u>モデル</u> とよぶ。
+</ul>
+<li> <u>推論</u>フェーズ … できた決定木を実際に使う段階。
+</ul>
+
+<p>
+重要なこと:
+<div class=formula>
+「機械学習モデルの「賢さ」は与えるデータによって決まる」
+</div>
+偏ったデータを与えれば、機械学習は偏った規則を学習してしまう。
+
+<h2>3. ニューラルネットワークはなぜ動くのか</h2>
+
+<h3>原理</h3>
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="300" height="190">
+<defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+</defs>
+<g fill="none" stroke="black" stroke-width="2">
+  <circle cx="80" cy="20" r="15" />
+  <circle cx="80" cy="60" r="15" />
+  <circle cx="80" cy="100" r="15" />
+  <circle cx="80" cy="140" r="15" />
+  <circle cx="140" cy="40" r="15" />
+  <circle cx="140" cy="80" r="15" />
+  <circle cx="140" cy="120" r="15" />
+  <circle cx="200" cy="60" r="15" />
+  <circle cx="200" cy="100" r="15" />
+  <g marker-end="url(#arrow)">
+    <line x1="45" x2="60" y1="20" y2="20" />
+    <line x1="45" x2="60" y1="60" y2="60" />
+    <line x1="45" x2="60" y1="100" y2="100" />
+    <line x1="45" x2="60" y1="140" y2="140" />
+    <line x1="215" x2="230" y1="60" y2="60" />
+    <line x1="215" x2="230" y1="100" y2="100" />
+    <line x1="95" x2="125" y1="20" y2="30" />
+    <line x1="95" x2="125" y1="20" y2="65" />
+    <line x1="95" x2="125" y1="20" y2="105" />
+    <line x1="95" x2="125" y1="60" y2="40" />
+    <line x1="95" x2="125" y1="60" y2="75" />
+    <line x1="95" x2="125" y1="60" y2="110" />
+    <line x1="95" x2="125" y1="100" y2="45" />
+    <line x1="95" x2="125" y1="100" y2="80" />
+    <line x1="95" x2="125" y1="100" y2="115" />
+    <line x1="95" x2="125" y1="140" y2="55" />
+    <line x1="95" x2="125" y1="140" y2="85" />
+    <line x1="95" x2="125" y1="140" y2="120" />
+    <line x1="155" x2="185" y1="40" y2="55" />
+    <line x1="155" x2="185" y1="40" y2="90" />
+    <line x1="155" x2="185" y1="80" y2="60" />
+    <line x1="155" x2="185" y1="80" y2="95" />
+    <line x1="155" x2="185" y1="120" y2="65" />
+    <line x1="155" x2="185" y1="120" y2="100" />
+  </g>
+</g>
+<g style="font-size:75%;">
+<text x="140" y="180" text-anchor="middle">ニューロン (ノード)</text>
+<text x="40" y="20" dy="0.4em" text-anchor="end">入力1</text>
+<text x="40" y="60" dy="0.4em" text-anchor="end">入力2</text>
+<text x="40" y="100" dy="0.4em" text-anchor="end">入力3</text>
+<text x="40" y="140" dy="0.4em" text-anchor="end">入力4</text>
+<text x="240" y="60" dy="0.4em">出力1</text>
+<text x="240" y="100" dy="0.4em">出力2</text>
+</g>
+</svg>
+</div>
+
+<p>
+ニューラルネットワークの入力と出力は、以下のように定義される:
+<ul>
+<li> 入力: 決められた個数の 0〜1 の範囲の実数 (上の例では 4個)
+<li> 出力: 決められた個数の 0〜1 の範囲の実数 (上の例では 2個)
+</ul>
+
+<p>
+入力と出力は、0〜1 の範囲で数値化できるものであればなんでもよい。
+したがって、画像のようなものも「各ピクセルの RGB値」を個別の入力と考えれば、
+入力として使える。
+
+<p>
+各ノードは、非常に単純な仕組みである:
+<ul>
+<li> <span class=param>入力1</span>×a + <span class=param>入力2</span>×b + <span class=param>入力3</span>×c + <span class=param>入力4</span>×d の合計が特定のしきい値を超えたら、1。
+<li> そうでなければ、0。
+</ul>
+
+<p>
+例. 
+3層のニューラルネットワーク (576ノード  + 100ノード + 10ノード) を使って、手書き数字認識をおこなう。
+<div class=figure>
+<div style="display: flex; align-items: center; justify-content: center;">
+<canvas id="canvas" width="420" height="504"></canvas>
+<span style="width: 2em;">&nbsp;</span>
+Answer: <input id="result" size="2" disabled="true">
+&nbsp;
+<button onclick="minist_clear();">Clear</button>
+</div>
+</div>
+
+<div class=exercise id="ex3-1">
+<div class=header>練習問題</div>
+<p>
+ニューラルネットワークを使って以下の関数を学習したい。
+「入力」と「出力」はどのような量を使えばよい?
+<ol type=a>
+<li> 過去10日間の気温を入力し、明日の気温を予想する関数。
+<li> 決められた大きさの画像を入力し、そこにネコが写っているかどうかを判定する関数。
+<li> 決められた大きさの画像を入力し、そこに写っている動物の種類が
+「ネコ」「イヌ」「ウシ」「ウマ」のどれかを判定する関数。
+</ol>
+</div>
+
+<p>
+今日ニューラルネットワークがこれほど流行している理由は:
+<ul>
+<li> 入力と出力の数を好きに決められるので、あらゆる問題に応用できる。(決定木では出力は1つだった)
+<li> 入力と出力の数が数万個になっても、現実的な時間内で学習可能である。(決定木ではせいぜい数十個)
+</ul>
+
+<h3>どうやって学習させる?</h3>
+
+<p>
+じつはニューラルネットワークには、以下のような特徴がある:
+<ol>
+<li> ニューラルネットワーク全体が、一個の<u>微分可能な関数</u> として表される。
+<li> 学習したモデルのよさを「<u>損失</u>」として数値化できる。
+</ol>
+
+<p>
+どういうこと?
+
+<p>
+ニューラルネットワークの各出力は、以下のような関数として表現できる。
+<div class=formula>
+出力1 = σ(σ(<span class=param>入力1</span>×a + <span class=param>入力2</span>×b + <span class=param>入力3</span>×c + <span class=param>入力4</span>×d) ×e + ...) + ...
+</div>
+
+<p>
+<div class=formula>
+損失 = 「現在のモデルの<strong>悪さ</strong>」を表す数値。
+</div>
+損失 0 が最小 (完璧な状態)。
+
+<div class=exercise id="ex3-2">
+<div class=header>練習問題</div>
+<p>
+以下の学習タスクで、損失が 0 の状態とはどんな状態か?
+損失が大きい (悪い) 状態とは、どんな状態か?
+<ol type=a>
+<li> 過去10日間の気温を入力し、明日の気温を予想するタスク。
+<li> 画像にネコが<strong>何匹</strong>含まれているかどうかを判定するタスク。
+<li> 画像に含まれるネコの<strong>大きさ</strong>を判定するタスク。
+</ol>
+</div>
+
+<h2 id="summary">まとめ</h2>
+<ul>
+<li> <u>人工知能</u>技術の多くは、<nobr><span class=bl>探索</span></nobr>問題である。
+<li> <u>機械学習</u>は「与えられたデータをもとに<nobr><span class=bl>プログラム</span></nobr>を探索する」人工知能の一種である。
+<li> 機械学習において、正解を予測するために使う情報を<nobr><span class=bl>特徴</span></nobr>量とよぶ。
+<li> 機械学習の賢さは与える<nobr><span class=bl>データ</span></nobr>によって決まる。
+</ul>
+
+<hr>
+<address>Yusuke Shinyama</address>
