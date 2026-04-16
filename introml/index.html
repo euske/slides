@@ -32,7 +32,7 @@ u { color: #880000; font-weight: bold; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; background: white; }
 .figure .caption { font-size: 80%; font-weight: bold; }
 .notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em; }
-.formula { padding: 0.5em; font-size: 125%; }
+.formula { padding: 0.5em 0; font-size: 125%; }
 .formula dt { margin-top: 1em; }
 .spacy dt { margin-top: 1em; }
 .title { display: flex; justify-content: center; font-size: 120%; font-weight: bold; border-bottom: 1px solid black; }
@@ -47,6 +47,7 @@ pre.small { font-size: 75%; }
 .file > .header { font-weight: bold; color: white; background: #000088; margin-bottom: 4px; padding-left: 1em; }
 .file pre { margin: 0; }
 
+.func { font-weight: bold; }
 .param { font-weight: bold; color: #080; }
 
 .g { background: #eeeeee; }
@@ -427,7 +428,7 @@ if 変数 == 値2:
 <p>
 すべての教師つき機械学習には 2つのフェーズが存在する:
 <ul>
-<li> <u>訓練</u>フェーズ … まず、データから決定木を作成 (学習) する段階。
+<li> <u>訓練 (学習)</u>フェーズ … まず、データから決定木を作成する段階。
 <ul>
 <li> 学習された決定木のことを、<u>モデル</u> とよぶ。
 </ul>
@@ -516,9 +517,48 @@ if 変数 == 値2:
 <p>
 各ノードは、非常に単純な仕組みである:
 <ul>
-<li> <span class=param>入力1</span>×a + <span class=param>入力2</span>×b + <span class=param>入力3</span>×c + <span class=param>入力4</span>×d の合計が特定のしきい値を超えたら、1。
-<li> そうでなければ、0。
+    <li> <span class=param>入力1</span>×w<sub>1</sub> + <span class=param>入力2</span>×w<sub>2</sub> + <span class=param>入力3</span>×w<sub>3</sub>  の合計が特定のしきい値を超えたら、1。
+    <li> そうでなければ、0。
 </ul>
+
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="230" height="100">
+<defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+</defs>
+<g fill="none" stroke="black" stroke-width="2">
+  <circle cx="120" cy="50" r="20" />
+  <g marker-end="url(#arrow)">
+    <line x1="35" y1="10" x2="100" y2="43" />
+    <line x1="35" y1="40" x2="100" y2="47" />
+    <line x1="35" y1="70" x2="100" y2="53" />
+    <line x1="75" y1="80" x2="100" y2="57" />
+    <line x1="140" y1="50" x2="190" y2="50" />
+  </g>
+</g>
+<g style="font-size:75%;" text-anchor="middle">
+<text x="120" y="80" dy="0.5em">ノード</text>
+<text x="30" y="5" dy="0.5em" text-anchor="end">x1</text>
+<text x="30" y="35" dy="0.5em" text-anchor="end">x2</text>
+<text x="30" y="65" dy="0.5em" text-anchor="end">x3</text>
+<text x="65" y="15" dy="0.5em">w1</text>
+<text x="65" y="40" dy="0.5em">w2</text>
+<text x="65" y="60" dy="0.5em">w3</text>
+<text x="70" y="80" dy="0.5em" text-anchor="end">b</text>
+<text x="190" y="30" dy="0.5em">y</text>
+</g>
+</svg>
+</div>
+
+<p>
+ニューラルネットワークの最終的な出力は、以下のような関数として表現できる。
+<div class=formula>
+出力1 = <span class=func>σ</span>(<span class=func>σ</span>(<span class=param>入力1</span>×w<sub>1</sub> + <span class=param>入力2</span>×w<sub>2</sub> + <span class=param>入力3</span>×w<sub>3</sub> + ...) × w<sub>4</sub> + ...)
+</div>
+ここでの各ノード間の「重み」w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... を
+うまく調節すれば、非常に複雑な計算ができる。
 
 <p>
 例. 
@@ -556,24 +596,17 @@ Answer: <input id="result" size="2" disabled="true">
 <h3>どうやって学習させる?</h3>
 
 <p>
-じつはニューラルネットワークには、以下のような特徴がある:
+ニューラルネットワークには、以下のような特徴がある:
 <ol>
-<li> ニューラルネットワーク全体が、一個の<u>微分可能な関数</u> として表される。
 <li> 学習したモデルのよさを「<u>損失</u>」として数値化できる。
+<li> ニューラルネットワーク全体の損失が、一個の<u>微分可能な関数</u> になっている。
 </ol>
 
 <p>
 どういうこと?
 
-<p>
-ニューラルネットワークの各出力は、以下のような関数として表現できる。
 <div class=formula>
-出力1 = σ(σ(<span class=param>入力1</span>×a + <span class=param>入力2</span>×b + <span class=param>入力3</span>×c + <span class=param>入力4</span>×d) ×e + ...) + ...
-</div>
-
-<p>
-<div class=formula>
-損失 = 「現在のモデルの<strong>悪さ</strong>」を表す数値。
+損失 = 「現在のモデルの<strong>悪さ</strong>」を表す数値 = (出力値 - 正解値)<sup>2</sup>
 </div>
 損失 0 が最小 (完璧な状態)。
 
@@ -588,6 +621,151 @@ Answer: <input id="result" size="2" disabled="true">
 <li> 画像に含まれるネコの<strong>大きさ</strong>を判定するタスク。
 </ol>
 </div>
+
+<p>
+ニューラルネットワークの出力はひとつの関数として表せるため、
+その損失もひとつの関数として表せる。
+<div class=formula>
+損失 = (出力値 - 正解値)<sup>2</sup> = (<span class=func>f</span>(<span class=param>入力1</span>, <span class=param>入力2</span>, <span class=param>入力3</span>, <span class=param>入力4</span>) - 正解値)<sup>2</sup>
+</div>
+
+<p>
+ここで、数学的なトリックを使う:<br>
+ax + by は、xとyを変数とした関数<br>
+f(x,y)<br>
+とみなすこともできるし、aとbを変数とした関数<br>
+f(a,b)<br>
+とみなすこともできる。
+
+<p>
+同様に、ニューラルネットワークの「損失」は、<br>
+推論のとき: 入力と正解値を変数とした関数<br>
+とみなすこともできるし、<br>
+訓練 (学習)のとき: 重み w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... を変数とした関数<br>
+とみなすことができる。
+
+<p>
+すると
+<div class=formula>
+ニューラルネットワークの訓練(学習) =
+損失を最小限にするような 
+w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... の値を見つける。
+</div>
+
+
+<h3>最適化問題と勾配降下法</h3>
+<p>
+さて、実際の探索に入るまえに、
+<u>最適化問題</u> (optimization problem) というものを説明する。
+これは機械学習 (およびその他の探索問題) でよく使われるアイデアなので
+ぜひとも覚えてほしい。最適化問題を一言でいうと:
+<div class=formula>
+ある与えられた関数に対して、その出力値が最小 (または最大) になるような入力値を見つけること。
+</div>
+例として、以下の簡単な最適化問題をやってみよう。
+下の10個のスライダーを動かして、損失 (loss) がなるべく小さくなるように
+してほしい。最適な解を見つければ、損失は 0 になるはずである:
+<div>
+<table id="sliders1" align=center border><tr>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+</tr><tr>
+<td colspan="8">損失 (ゼロが目標)</td><td colspan="2" align=center><span class="result"></span></td>
+</table>
+</div>
+<p>
+上の例を実際にやってみると、なかなか一筋縄ではいかないことがわかる。
+各スライダーは相互に影響しあっているため、あるスライダーを
+動かしたときの変化が、別のスライダーによって変わることがあるためだ。
+<p>
+では、まったく同じ問題の「ヒントつきのバージョン」を紹介する。
+これは各スライダーの下に、それをどちらの方向に動かせば損失が下がるかという
+ヒントが矢印「↓」「↑」で表示される (矢印が表示されない場合は、
+スライダーをどちらに動かしても損失が増えてしまうことを示す)。
+<div>
+<table id="sliders2" align=center border><tr>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+<td><input orient="vertical" type="range" min="0" max="10"></td>
+</tr><tr>
+<td class="grad"></td><td class="grad"></td><td class="grad"></td><td class="grad"></td><td class="grad"></td>
+<td class="grad"></td><td class="grad"></td><td class="grad"></td><td class="grad"></td><td class="grad"></td>
+</tr><tr>
+<td colspan="8">損失 (ゼロが目標)</td><td colspan="2" align=center><span class="result"></span></td>
+</table>
+</div>
+<p>
+ヒントを使うと、損失をかなり簡単に下げることができる。
+(コツは、矢印をたよりに「複数のスライダーを少しずつ動かす」ことである。)
+人によっては、完全に 0 にできるポイントを見つけられたかもしれない。
+各スライダーは 11段階 (0〜10) あるので、
+もしヒントがなければ、最適な解を見つけるのに
+11<sup>10</sup> = 25,937,424,601通りの組み合せを試す必要があった。
+このように、ヒントを使って入力値を少しずつ変化させ、
+最適解を見つける方法を <u>勾配降下法</u> (gradient descent) という。
+<p>
+もうすこし抽象的に考えると、最適化問題とは、たとえば以下のような
+曲線で表された関数に対して、もっとも低い (あるいは高い) 点を
+見つけることに相当する。このとき、関数の全体像はわからないが、
+現在いる地点 x<sub>0</sub> の近傍が見えており、この地点の微分が計算できたとする。
+現在の入力に対する微分を計算したものを <u>勾配</u> (gradient) という。
+実際には、入力は 10個の値から成り立つ「10要素のベクトル」とみなせるため、
+その勾配も 10要素のベクトルとなる。
+上でヒントとして表示された矢印「↑」「↓」は各パラメータの勾配の向きを表しており、
+これに従ってスライダーを動かせば最適解に近づけるわけである。
+<div class=figure>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="200" height="150">
+<defs>
+  <marker id="arrow" viewBox="-5 -5 10 10" orient="auto">
+    <polygon points="-5,-5 5,0 -5,5" fill="black" stroke="none" />
+  </marker>
+</defs>
+<g fill="none" stroke="black" stroke-width="1">
+  <line x1="20" y1="150" x2="20" y2="1" marker-end="url(#arrow)" />
+  <line x1="0" y1="125" x2="199" y2="125" marker-end="url(#arrow)" />
+  <path d="M10,5 c10,50,20,80,50,60 c15,-10,30,0,50,30 c20,30,40,20,50,0 c10,-20,20,-50,30,-100"
+        stroke-dasharray="1,3" />
+  <path d="M85,65 l10,8" marker-end="url(#arrow)" stroke-width="2" />
+  <rect x="79" y="57" width="20" height="20" />
+  <line x1="85" y1="65" x2="85" y2="125" stroke-dasharray="4,2" />
+</g>
+<circle cx="85" cy="65" r="4" fill="black" stroke="none" />
+<g style="font-size:75%;">
+<text x="100" y="20" dy="0.5em">全体像は不明</text>
+<text x="105" y="65" dy="0.5em">勾配</text>
+<text x="30" y="92" dy="0.0em">近傍だけ</text>
+<text x="30" y="92" dy="1.1em">が見える</text>
+<text x="25" y="135" dy="0.5em">0</text>
+<text x="80" y="132" dy="0.5em">x0</text>
+</g>
+</svg>
+</div>
+<p>
+<strong>ニューラルネットワークの学習における根本的な戦略は、
+この勾配降下法を使うこと</strong>である。
+これがニューラルネットワークの「究極の原理」といってもよい。
+最初にニューラルネットワークの出力 (および損失関数) が
+「微分可能でなければならない」としたのは、このためである。
+勾配降下法では、入力を少しずつ変化させながら解に近づいていく。
+勾配降下法は必ずしも完璧な解に到達できる保証があるわけではないが、
+「十分に実用的な結果」が得られるまで処理を繰り返せばよく、
+この点ではコンピュータで実行させるのに向いている処理であるといえる。
+
 
 <h2 id="summary">まとめ</h2>
 <ul>
