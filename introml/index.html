@@ -32,7 +32,7 @@ u { color: #880000; font-weight: bold; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; background: white; }
 .figure .caption { font-size: 80%; font-weight: bold; }
 .notice { background: #ffcc00; outline: 2px solid black; padding: 1em; margin: 1em; }
-.formula { padding: 0.5em 0; font-size: 125%; }
+.formula { font-size: 125%; }
 .formula dt { margin-top: 1em; }
 .spacy dt { margin-top: 1em; }
 .title { display: flex; justify-content: center; font-size: 120%; font-weight: bold; border-bottom: 1px solid black; }
@@ -48,7 +48,8 @@ pre.small { font-size: 75%; }
 .file pre { margin: 0; }
 
 .func { font-weight: bold; }
-.param { font-weight: bold; color: #080; }
+.param { font-weight: bold; color: #0a0; }
+.param2 { font-weight: bold; color: #a08; }
 
 .g { background: #eeeeee; }
 .bgr { background: #ffbbff; }
@@ -597,16 +598,17 @@ Answer: <input id="result" size="2" disabled="true">
 
 <p>
 ニューラルネットワークには、以下のような特徴がある:
-<ol>
+<ul>
 <li> 学習したモデルのよさを「<u>損失</u>」として数値化できる。
-<li> ニューラルネットワーク全体の損失が、一個の<u>微分可能な関数</u> になっている。
-</ol>
-
-<p>
-どういうこと?
+<li> ニューラルネットワークの出力はひとつの関数として表せるため、その損失もひとつの関数として表せる。
+</ul>
 
 <div class=formula>
-損失 = 「現在のモデルの<strong>悪さ</strong>」を表す数値 = (出力値 - 正解値)<sup>2</sup>
+<table>
+<tr><td>損失</td><td>=</td><td>「現在のモデルの<strong>悪さ</strong>」を表す数値</td></tr>
+<tr><td>   </td><td>=</td><td>(出力値 - 正解値)<sup>2</sup></td></tr>
+<tr><td>   </td><td>=</td><td>(<span class=func>σ</span>(<span class=func>σ</span>(入力1×w<sub>1</sub> + 入力2×w<sub>2</sub> + 入力3×w<sub>3</sub> + ...) × w<sub>4</sub> + ...) - 正解値)<sup>2</sup></td></tr>
+</table>
 </div>
 損失 0 が最小 (完璧な状態)。
 
@@ -623,48 +625,61 @@ Answer: <input id="result" size="2" disabled="true">
 </div>
 
 <p>
-ニューラルネットワークの出力はひとつの関数として表せるため、
-その損失もひとつの関数として表せる。
-<div class=formula>
-損失 = (出力値 - 正解値)<sup>2</sup> = (<span class=func>f</span>(<span class=param>入力1</span>, <span class=param>入力2</span>, <span class=param>入力3</span>, <span class=param>入力4</span>) - 正解値)<sup>2</sup>
-</div>
-
-<p>
-ここで、数学的なトリックを使う:<br>
-ax + by は、xとyを変数とした関数<br>
-f(x,y)<br>
+ここで、数学的なトリック:<br>
+式 ax + by<br>
+は、xとyを変数とした関数<br>
+f(x, y)<br>
 とみなすこともできるし、aとbを変数とした関数<br>
-f(a,b)<br>
+f(a, b)<br>
 とみなすこともできる。
 
 <p>
-同様に、ニューラルネットワークの「損失」は、<br>
-推論のとき: 入力と正解値を変数とした関数<br>
+同様に、ニューラルネットワークの損失
+<div class=formula>
+(<span class=func>σ</span>(<span class=func>σ</span>(入力1×w<sub>1</sub> + 入力2×w<sub>2</sub> + 入力3×w<sub>3</sub> + ...) × w<sub>4</sub> + ...) - 正解値)<sup>2</sup>
+</div>
+は、入力と正解値を変数とした関数<br>
+<div class=formula>
+(<span class=func>σ</span>(<span class=func>σ</span>(<span class=param>入力1</span>×w<sub>1</sub> + <span class=param>入力2</span>×w<sub>2</sub> + <span class=param>入力3</span>×w<sub>3</sub> + ...) × w<sub>4</sub> + ...) - <span class=param>正解値</span>)<sup>2</sup>
+</div>
 とみなすこともできるし、<br>
-訓練 (学習)のとき: 重み w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... を変数とした関数<br>
+重み w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... を変数とした関数<br>
+<div class=formula>
+(<span class=func>σ</span>(<span class=func>σ</span>(入力1×<span class=param2>w<sub>1</sub></span> + 入力2×<span class=param2>w<sub>2</sub></span> + 入力3×<span class=param2>w<sub>3</sub></span> + ...) × <span class=param2>w<sub>4</sub></span> + ...) - 正解値)<sup>2</sup>
+</div>
 とみなすことができる。
 
 <p>
 すると
 <div class=formula>
+ニューラルネットワークの推論 =
+w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, w<sub>4</sub>, ... が決まっている状態で、
+入力から出力を計算する。<br>
 ニューラルネットワークの訓練(学習) =
+入力と出力 (正解値) が決まっている状態で、
 損失を最小限にするような 
-w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... の値を見つける。
+w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, w<sub>4</sub>, ... の値を見つける。<br>
 </div>
+と言い換えることができる。
 
-
-<h3>最適化問題と勾配降下法</h3>
 <p>
-さて、実際の探索に入るまえに、
-<u>最適化問題</u> (optimization problem) というものを説明する。
-これは機械学習 (およびその他の探索問題) でよく使われるアイデアなので
-ぜひとも覚えてほしい。最適化問題を一言でいうと:
-<div class=formula>
-ある与えられた関数に対して、その出力値が最小 (または最大) になるような入力値を見つけること。
-</div>
-例として、以下の簡単な最適化問題をやってみよう。
-下の10個のスライダーを動かして、損失 (loss) がなるべく小さくなるように
-してほしい。最適な解を見つければ、損失は 0 になるはずである:
+でも、これってただ言い換えただけじゃないの?
+
+
+<h3>勾配降下法</h3>
+<p>
+ニューラルネットワークには、さらに以下のような特徴がある:
+<ul>
+<li> ニューラルネットワークの損失に対しては、<u>勾配</u>が計算できる。(= 微分可能)
+</ul>
+
+<p>
+勾配とは?
+
+<div class=exercise>
+<div class=header>練習問題</div>
+<p>
+10個のスライダーを動かして、損失がなるべく小さくなるようにしよう。
 <div>
 <table id="sliders1" align=center border><tr>
 <td><input orient="vertical" type="range" min="0" max="10"></td>
@@ -681,15 +696,17 @@ w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... の値を見つける。
 <td colspan="8">損失 (ゼロが目標)</td><td colspan="2" align=center><span class="result"></span></td>
 </table>
 </div>
+</div>
+
 <p>
-上の例を実際にやってみると、なかなか一筋縄ではいかないことがわかる。
-各スライダーは相互に影響しあっているため、あるスライダーを
-動かしたときの変化が、別のスライダーによって変わることがあるためだ。
+上の例を実際にやってみると、なかなか一筋縄ではいかない。
 <p>
 では、まったく同じ問題の「ヒントつきのバージョン」を紹介する。
-これは各スライダーの下に、それをどちらの方向に動かせば損失が下がるかという
-ヒントが矢印「↓」「↑」で表示される (矢印が表示されない場合は、
-スライダーをどちらに動かしても損失が増えてしまうことを示す)。
+<div class=exercise>
+<div class=header>練習問題</div>
+<p>
+10個のスライダーを動かして、損失がなるべく小さくなるようにしよう。
+各スライダーの下に、ヒント「↓」「↑」で表示される。
 <div>
 <table id="sliders2" align=center border><tr>
 <td><input orient="vertical" type="range" min="0" max="10"></td>
@@ -709,25 +726,16 @@ w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... の値を見つける。
 <td colspan="8">損失 (ゼロが目標)</td><td colspan="2" align=center><span class="result"></span></td>
 </table>
 </div>
+</div>
+
 <p>
-ヒントを使うと、損失をかなり簡単に下げることができる。
-(コツは、矢印をたよりに「複数のスライダーを少しずつ動かす」ことである。)
-人によっては、完全に 0 にできるポイントを見つけられたかもしれない。
-各スライダーは 11段階 (0〜10) あるので、
-もしヒントがなければ、最適な解を見つけるのに
-11<sup>10</sup> = 25,937,424,601通りの組み合せを試す必要があった。
-このように、ヒントを使って入力値を少しずつ変化させ、
-最適解を見つける方法を <u>勾配降下法</u> (gradient descent) という。
+ここでのヒントが「勾配」に相当する。
+ヒントとして表示された矢印「↑」「↓」は各パラメータの勾配の向きを表している。
+
 <p>
-もうすこし抽象的に考えると、最適化問題とは、たとえば以下のような
-曲線で表された関数に対して、もっとも低い (あるいは高い) 点を
-見つけることに相当する。このとき、関数の全体像はわからないが、
-現在いる地点 x<sub>0</sub> の近傍が見えており、この地点の微分が計算できたとする。
-現在の入力に対する微分を計算したものを <u>勾配</u> (gradient) という。
-実際には、入力は 10個の値から成り立つ「10要素のベクトル」とみなせるため、
-その勾配も 10要素のベクトルとなる。
-上でヒントとして表示された矢印「↑」「↓」は各パラメータの勾配の向きを表しており、
-これに従ってスライダーを動かせば最適解に近づけるわけである。
+この問題は、曲線で表された関数に対して、もっとも低い点を見つけることに相当する。
+このように、勾配を使って最適解を見つける方法を 
+<u>勾配降下法</u> (gradient descent) という。
 <div class=figure>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="200" height="150">
 <defs>
@@ -755,16 +763,12 @@ w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... の値を見つける。
 </g>
 </svg>
 </div>
-<p>
-<strong>ニューラルネットワークの学習における根本的な戦略は、
-この勾配降下法を使うこと</strong>である。
-これがニューラルネットワークの「究極の原理」といってもよい。
-最初にニューラルネットワークの出力 (および損失関数) が
-「微分可能でなければならない」としたのは、このためである。
-勾配降下法では、入力を少しずつ変化させながら解に近づいていく。
-勾配降下法は必ずしも完璧な解に到達できる保証があるわけではないが、
-「十分に実用的な結果」が得られるまで処理を繰り返せばよく、
-この点ではコンピュータで実行させるのに向いている処理であるといえる。
+
+<div class=formula>
+結論:
+なぜニューラルネットワークは学習できるのか?
+勾配降下法が使えるから。
+</div>
 
 
 <h2 id="summary">まとめ</h2>
