@@ -27,6 +27,7 @@ pre, code { background: #ddd; font-size: 120%; font-family: courier; }
 img { max-width: 80vw; height: auto; }
 dt { text-decoration: underline; font-weight: bold; }
 u { color: #880000; font-weight: bold; }
+.bl { border: 1px solid black; padding: 2px; font-size: 120%; color: transparent; }
 .spacy > li { margin-top: 2em; }
 .author { text-align: right; }
 .figure { outline: 1px solid black; padding: 0.5em; margin: 1em; display: flex; justify-content: center; align-items: flex-end; text-align: center; gap: 2em; background: white; }
@@ -558,8 +559,9 @@ if 変数 == 値2:
 <div class=formula>
 出力1 = <span class=func>σ</span>(<span class=func>σ</span>(<span class=param>入力1</span>×w<sub>1</sub> + <span class=param>入力2</span>×w<sub>2</sub> + <span class=param>入力3</span>×w<sub>3</sub> + ...) × w<sub>4</sub> + ...)
 </div>
-ここでの各ノード間の「重み」w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... を
-うまく調節すれば、非常に複雑な計算ができる。
+<p>
+ニューラルネットワークは、各ノード間の「重み」w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, ... さえ
+うまく調整すれば、非常に複雑な計算や判断ができる。
 
 <p>
 例. 
@@ -768,22 +770,36 @@ w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, w<sub>4</sub>, ...
 </svg>
 </div>
 
-<div class=formula>
+<p>
 結論:
-なぜニューラルネットワークの学習は可能なのか?
-勾配降下法が使えるから。
+<div class=formula>
+勾配降下法が使えるおかげで、
+「損失を最小限にするような」ニューラルネットワークを
+現実的な時間で学習できる。
 </div>
+
+<p>
+ニューラルネットワークを決定するもの:
+<ul>
+<li> 各ノード間の重み
+<li> ネットワークの形
+</ul>
+
+<p>
+以前のニューラルネットワークは、固定長のデータのみを得意とし、
+テキストや言語などの可変超データの扱いは苦手だったが、
+transformer の発明により、言語を扱えるようになった。
 
 
 <h2 id="summary">まとめ</h2>
 <ul>
-<li> <u>人工知能</u>技術の多くは、<nobr><span class=bl>探索</span></nobr>問題である。
-<li> <u>機械学習</u>は「与えられたデータをもとに<nobr><span class=bl>プログラム</span></nobr>を探索する」人工知能の一種である。
+<li> 人工知能技術の多くは、<nobr><span class=bl>探索</span></nobr>問題である。
+<li> 機械学習は「与えられたデータをもとに<nobr><span class=bl>プログラム</span></nobr>を探索する」人工知能の一種である。
 <li> 機械学習の賢さは与える<nobr><span class=bl>データ</span></nobr>によって決まる。
-<li> 機械学習で学習するモデルにはいろいろなタイプがある。
-<li> ニューラルネットワークは、出力を入力値に対する関数として表すことができる。
-<li> ニューラルネットワークは、損失の勾配を計算することができる。
-<li> ニューラルネットワークでは、勾配降下法を使って、損失を最小限にするような重みを発見できる。
+<li> 機械学習で学習できるモデルには、<nobr><span class=bl>決定木</span></nobr>や<nobr><span class=bl>ニューラルネットワーク</span></nobr>など、いろいろな種類がある。
+<li> ニューラルネットワークは、モデルの「悪さ」を<nobr><span class=bl>損失</span></nobr>として関数で表すことができる。
+<li> ニューラルネットワークは、損失の<nobr><span class=bl>勾配</span></nobr>を計算することができる。
+<li> <nobr><span class=bl>勾配降下法</span></nobr>のおかげで、役にたつニューラルネットワークを現実的な時間で学習することができる。
 </ul>
 
 <hr>
